@@ -17,7 +17,7 @@ e.mail..: jnastarot@yandex.ru
   * erasing
 
 * **import directory**
-  * bound import
+  * **bound import**
     * reading
 
   * **delay import**
@@ -63,7 +63,8 @@ e.mail..: jnastarot@yandex.ru
   * string finder
 
 ---
-> references
-> **export\resources** [pe bliss kaimi](http://kaimi.ru/)
-> **tds parser**       [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp)
+> helps references to **export\resources**
+>> [pe bliss kaimi](http://kaimi.ru/)
+> helps references to **tds parser**
+>> [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp)
 ---
