@@ -173,6 +173,7 @@
     <ClCompile Include="pe_tds_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\LICENSE" />
     <None Include="..\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -187,5 +187,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />
+    <None Include="..\LICENSE" />
   </ItemGroup>
 </Project>
