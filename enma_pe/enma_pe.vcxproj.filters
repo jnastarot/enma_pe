@@ -185,4 +185,7 @@
       <Filter>Заголовочные файлы\pe_helpers</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\readme.md" />
+  </ItemGroup>
 </Project>
