@@ -65,6 +65,7 @@ e.mail..: jnastarot@yandex.ru
 ---
 > helps references to **export\resources**
 >> [pe bliss kaimi](http://kaimi.ru/)
+
 > helps references to **tds parser**
 >> [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp)
 ---
