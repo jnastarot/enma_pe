@@ -13,6 +13,7 @@ struct erased_zone {
 #include "pe_import.h"
 #include "pe_resources.h"
 #include "pe_exceptions.h"
+#include "pe_security.h"
 #include "pe_relocations.h"
 #include "pe_debug.h"
 #include "pe_tls.h"
@@ -37,7 +38,7 @@ struct pe_image_expanded {
 };
 
 
-void do_collapsed_pe_image(_Inout_ pe_image_expanded& collapsed_image, _In_ const pe_image &image);
+void do_expanded_pe_image(_Inout_ pe_image_expanded& expanded_image, _In_ const pe_image &image);
 void erase_directories_pe_image(_Inout_ pe_image &image, _Out_ std::vector<erased_zone>& zones,
     _Inout_opt_ relocation_table* relocs = 0,
     _In_opt_ bool delete_empty_sections = false);

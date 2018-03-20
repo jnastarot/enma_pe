@@ -69,6 +69,9 @@
     <Filter Include="Заголовочные файлы\pe_image\pe_directories\pe_dotnet">
       <UniqueIdentifier>{a5f75f2c-5735-4069-b55a-74466f9caf71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_image\pe_directories\pe_security">
+      <UniqueIdentifier>{bf4fe633-1378-4023-ba7d-dada3986621e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -128,6 +131,9 @@
     <ClInclude Include="enma_pe.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="pe_security.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -183,6 +189,9 @@
     </ClCompile>
     <ClCompile Include="pe_helper.cpp">
       <Filter>Заголовочные файлы\pe_helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_security.cpp">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

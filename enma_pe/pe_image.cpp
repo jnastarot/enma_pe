@@ -767,18 +767,18 @@ bool		pe_image::is_has_directory(unsigned int directory_idx) const {
 
 
 
-void do_collapsed_pe_image(pe_image_expanded& collapsed_image,const pe_image &image) {
-	collapsed_image.image = image;
-	get_export_table(collapsed_image.image, collapsed_image.exports);
-	get_import_table(collapsed_image.image, collapsed_image.imports);
-	get_resources_table(collapsed_image.image, collapsed_image.resources);
-	get_exception_table(collapsed_image.image, collapsed_image.exceptions);
-	get_relocation_table(collapsed_image.image, collapsed_image.relocations);
-	get_debug_table(collapsed_image.image, collapsed_image.debug);
-	get_tls_table(collapsed_image.image, collapsed_image.tls);
-    get_load_config_table(collapsed_image.image, collapsed_image.load_config);
-    get_bound_import_table(collapsed_image.image, collapsed_image.bound_imports);
-	get_delay_import_table(collapsed_image.image, collapsed_image.delay_imports);
+void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &image) {
+    expanded_image.image = image;
+	get_export_table(expanded_image.image, expanded_image.exports);
+	get_import_table(expanded_image.image, expanded_image.imports);
+	get_resources_table(expanded_image.image, expanded_image.resources);
+	get_exception_table(expanded_image.image, expanded_image.exceptions);
+	get_relocation_table(expanded_image.image, expanded_image.relocations);
+	get_debug_table(expanded_image.image, expanded_image.debug);
+	get_tls_table(expanded_image.image, expanded_image.tls);
+    get_load_config_table(expanded_image.image, expanded_image.load_config);
+    get_bound_import_table(expanded_image.image, expanded_image.bound_imports);
+	get_delay_import_table(expanded_image.image, expanded_image.delay_imports);
 }
 
 void erase_directories_pe_image(pe_image &image, std::vector<erased_zone>& zones, relocation_table* relocs, bool delete_empty_sections) {
