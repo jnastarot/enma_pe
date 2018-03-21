@@ -443,15 +443,12 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                 }
             }
 
+
             for (unsigned int ordinal = 0; ordinal < export_desc->NumberOfFunctions; ordinal++) {
 
                 DWORD func_rva = *(DWORD*)&image.get_section_by_rva((export_desc->AddressOfFunctions + ordinal * sizeof(DWORD)))->get_section_data().data()[
                     (export_desc->AddressOfFunctions + ordinal * sizeof(DWORD))
                         - image.get_section_by_rva((export_desc->AddressOfFunctions + ordinal * sizeof(DWORD)))->get_virtual_address()];
-
-                ZeroMemory(&image.get_section_by_rva((export_desc->AddressOfFunctions + ordinal * sizeof(DWORD)))->get_section_data().data()[
-                    (export_desc->AddressOfFunctions + ordinal * sizeof(DWORD))
-                        - image.get_section_by_rva((export_desc->AddressOfFunctions + ordinal * sizeof(DWORD)))->get_virtual_address()], sizeof(DWORD));
 
                 if (!func_rva) { continue; }
 
@@ -462,19 +459,11 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                         (export_desc->AddressOfNameOrdinals + i * sizeof(WORD))
                             - image.get_section_by_rva((export_desc->AddressOfNameOrdinals + i * sizeof(WORD)))->get_virtual_address()];
 
-                    ZeroMemory(&image.get_section_by_rva((export_desc->AddressOfNameOrdinals + i * sizeof(WORD)))->get_section_data().data()[
-                        (export_desc->AddressOfNameOrdinals + i * sizeof(WORD))
-                            - image.get_section_by_rva((export_desc->AddressOfNameOrdinals + i * sizeof(WORD)))->get_virtual_address()], sizeof(WORD));
-
                     if (ordinal == ordinal2) {
 
                         DWORD function_name_rva = *(DWORD*)&image.get_section_by_rva((export_desc->AddressOfNames + i * sizeof(DWORD)))->get_section_data().data()[
                             (export_desc->AddressOfNames + i * sizeof(DWORD))
                                 - image.get_section_by_rva((export_desc->AddressOfNames + i * sizeof(DWORD)))->get_virtual_address()];
-
-                        ZeroMemory(&image.get_section_by_rva((export_desc->AddressOfNames + i * sizeof(DWORD)))->get_section_data().data()[
-                            (export_desc->AddressOfNames + i * sizeof(DWORD))
-                                - image.get_section_by_rva((export_desc->AddressOfNames + i * sizeof(DWORD)))->get_virtual_address()], sizeof(WORD));
 
                         char* func_name = (char*)&image.get_section_by_rva(function_name_rva)->get_section_data().data()[
                             function_name_rva
@@ -495,6 +484,27 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                         break;
                     }
                 }
+            }
+
+            if (export_desc->AddressOfFunctions) {
+                ZeroMemory(&image.get_section_by_rva((export_desc->AddressOfFunctions))->get_section_data().data()[
+                    (export_desc->AddressOfFunctions)
+                        - image.get_section_by_rva((export_desc->AddressOfFunctions))->get_virtual_address()],
+                    export_desc->NumberOfFunctions * sizeof(DWORD));
+            }
+
+            if (export_desc->AddressOfNames) {
+                ZeroMemory(&image.get_section_by_rva((export_desc->AddressOfNames))->get_section_data().data()[
+                    (export_desc->AddressOfFunctions)
+                        - image.get_section_by_rva((export_desc->AddressOfNames))->get_virtual_address()],
+                    export_desc->NumberOfNames * sizeof(DWORD));
+            }
+
+            if (export_desc->AddressOfNameOrdinals) {
+                ZeroMemory(&image.get_section_by_rva((export_desc->AddressOfNameOrdinals))->get_section_data().data()[
+                    (export_desc->AddressOfFunctions)
+                        - image.get_section_by_rva((export_desc->AddressOfNameOrdinals))->get_virtual_address()],
+                    export_desc->NumberOfFunctions * sizeof(WORD));
             }
 
             ZeroMemory(&export_section->get_section_data().data()[virtual_address - export_section->get_virtual_address()],sizeof(IMAGE_EXPORT_DIRECTORY));

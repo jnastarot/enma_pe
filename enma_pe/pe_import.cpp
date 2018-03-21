@@ -404,22 +404,24 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
 
 	if (virtual_address && virtual_size) {
 		
-
 		pe_section * imp_section = image.get_section_by_rva(virtual_address);
 		if (imp_section) {
+            unsigned int imp_size;
 			BYTE * raw_import = &imp_section->get_section_data().data()[virtual_address - imp_section->get_virtual_address()];
-			for (unsigned int imp_size = 0; imp_size < virtual_size; imp_size += sizeof(IMAGE_IMPORT_DESCRIPTOR)) {
+			for (imp_size = 0; imp_size < virtual_size; imp_size += sizeof(IMAGE_IMPORT_DESCRIPTOR)) {
 				PIMAGE_IMPORT_DESCRIPTOR imp_description = (PIMAGE_IMPORT_DESCRIPTOR)(&raw_import[imp_size]);
 				if (imp_description->FirstThunk && imp_description->Name) {
 					pe_section * imp_name_section = image.get_section_by_rva(imp_description->Name);
-					pe_section * imp_iat_section  = image.get_section_by_rva(imp_description->FirstThunk);
+					pe_section * imp_ft_section  = image.get_section_by_rva(imp_description->FirstThunk);
 					pe_section * imp_oft_section  = image.get_section_by_rva(imp_description->OriginalFirstThunk);
 
 
-					if (zones) {
+					if (zones) {    
 						zones->push_back({
 							imp_description->Name ,
-							(unsigned int)lstrlenA((char*)&imp_name_section->get_section_data().data()[(imp_description->Name - imp_name_section->get_virtual_address())]) + 1
+							(unsigned int)lstrlenA((char*)&imp_name_section->get_section_data().data()[
+                                (imp_description->Name - imp_name_section->get_virtual_address())
+                            ]) + 1
 						});
 					}
 
@@ -427,146 +429,114 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
 						lstrlenA((char*)&imp_name_section->get_section_data().data()[(imp_description->Name - imp_name_section->get_virtual_address())]));
 
 
+                    unsigned int thunk_items_count = 0;
+                    BYTE * thunk_table = 0;
+                                            
+                    if (imp_description->OriginalFirstThunk && imp_oft_section) {
+                        thunk_table = &imp_oft_section->get_section_data().data()[
+                            (imp_description->OriginalFirstThunk - imp_oft_section->get_virtual_address())
+                        ];
+                    }
+                    else {
+                        thunk_table = &imp_ft_section->get_section_data().data()[
+                            (imp_description->FirstThunk - imp_ft_section->get_virtual_address())
+                        ];
+                    }
 
-					void* lib_oft = 0;
-					void* lib_iat = &imp_iat_section->get_section_data().data()[(imp_description->FirstThunk - imp_iat_section->get_virtual_address())];
-
-					if (imp_oft_section) {
-						lib_oft = &imp_oft_section->get_section_data().data()[(imp_description->OriginalFirstThunk - imp_oft_section->get_virtual_address())];
-					}
-					DWORD iat_ft_rva = imp_description->FirstThunk;
-					DWORD iat_oft_rva = imp_description->OriginalFirstThunk;
 
 					if (image.is_x32_image()) {
-						while (*(DWORD*)lib_iat) {
-							DWORD lib_iat_in = *(DWORD*)lib_iat;
+                        for (thunk_items_count = 0; *(DWORD*)thunk_table; thunk_table+=sizeof(DWORD), thunk_items_count++) {
+                            if ( !(*(DWORD*)thunk_table&IMAGE_ORDINAL_FLAG32) ) {
+                                pe_section * section_func_name = image.get_section_by_rva(*(DWORD*)thunk_table);
+                                if (section_func_name) {
+                                    if (zones) {
+                                        zones->push_back({
+                                            *(DWORD*)thunk_table ,
+                                            (unsigned int)lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                                (*(DWORD*)thunk_table - section_func_name->get_virtual_address()) + sizeof(WORD)
+                                            ]) + 2 + 2
+                                        });
+                                    }
 
-							if ((DWORD)lib_iat_in&IMAGE_ORDINAL_FLAG32) {
-								ZeroMemory(lib_iat, sizeof(DWORD));
-							}
-							else {
-								pe_section * imp_func = image.get_section_by_rva((DWORD)lib_iat_in);
-								if (imp_func) {
+                                    ZeroMemory(
+                                        (char*)&section_func_name->get_section_data().data()[
+                                            (*(DWORD*)thunk_table - section_func_name->get_virtual_address())
+                                        ],
+                                        lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                            (*(DWORD*)thunk_table - section_func_name->get_virtual_address()) + sizeof(WORD)
+                                        ]) + 2
+                                    );
+                                }
+                            }
+                        }
 
-									if (zones) {
-										zones->push_back({
-											lib_iat_in ,
-											(unsigned int)lstrlenA((char*)&imp_func->get_section_data().data()[((DWORD)lib_iat_in - imp_func->get_virtual_address()) + sizeof(WORD)]) + 2 + 2
-										});
-									}
+                        if (imp_description->OriginalFirstThunk && imp_oft_section) {
+                            if (zones) {
+                                zones->push_back({ imp_description->OriginalFirstThunk , (thunk_items_count+1)  * sizeof(DWORD)});
+                            }
 
-									ZeroMemory((char*)&imp_func->get_section_data().data()[((DWORD)lib_iat_in - imp_func->get_virtual_address())],
-										lstrlenA((char*)&imp_func->get_section_data().data()[((DWORD)lib_iat_in - imp_func->get_virtual_address()) + sizeof(WORD)]) + 2);
-								}
-							}
+                            ZeroMemory(&imp_oft_section->get_section_data().data()[
+                                (imp_description->OriginalFirstThunk - imp_oft_section->get_virtual_address())
+                            ], (thunk_items_count + 1) * sizeof(DWORD));
+                        }
 
+                        if (zones) {
+                            zones->push_back({ imp_description->FirstThunk , (thunk_items_count + 1) * sizeof(DWORD) });
+                        }
 
-
-							if (lib_oft) {
-								if (zones) {
-									zones->push_back({
-										iat_oft_rva ,
-										sizeof(DWORD)
-									});
-								}
-
-								((DWORD*)lib_oft)[0] = 0;
-								lib_oft = (void*)(&((DWORD*)lib_oft)[1]);
-								iat_oft_rva += sizeof(DWORD);
-							}
-
-
-							if (zones) {
-								zones->push_back({
-									iat_ft_rva ,
-									sizeof(DWORD)
-								});
-							}
-							((DWORD*)lib_iat)[0] = 0;
-							lib_iat = (void*)(&((DWORD*)lib_iat)[1]);
-							iat_ft_rva += sizeof(DWORD);
-						}
-						if (zones) {
-							zones->push_back({
-								iat_ft_rva ,
-								sizeof(DWORD)
-							});
-						}
-						if (lib_oft && zones) {
-							zones->push_back({
-								iat_oft_rva ,
-								sizeof(DWORD)
-							});
-						}
+                        ZeroMemory(&imp_ft_section->get_section_data().data()[
+                            (imp_description->FirstThunk - imp_ft_section->get_virtual_address())
+                        ], (thunk_items_count + 1) * sizeof(DWORD));
 					}
 					else {
-						while (*(DWORD64*)lib_iat) {
-							DWORD64 lib_iat_in = *(DWORD64*)lib_iat;
+                        for (thunk_items_count = 0; *(DWORD64*)thunk_table; thunk_table += sizeof(DWORD64), thunk_items_count++) {
+                            if (!(*(DWORD64*)thunk_table&IMAGE_ORDINAL_FLAG64)) {
+                                pe_section * section_func_name = image.get_section_by_rva(*(DWORD64*)thunk_table);
+                                if (section_func_name) {
+                                    if (zones) {
+                                        zones->push_back({
+                                            (DWORD)(*(DWORD64*)thunk_table) ,
+                                            (unsigned int)lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                                (*(DWORD64*)thunk_table - section_func_name->get_virtual_address()) + sizeof(WORD)
+                                            ]) + 2 + 2
+                                        });
+                                    }
 
-							if ((DWORD64)lib_iat_in&IMAGE_ORDINAL_FLAG64) {
-								ZeroMemory(lib_iat, sizeof(DWORD64));
-							}
-							else {
-								pe_section * imp_func = image.get_section_by_rva((DWORD)lib_iat_in);
-								if (imp_func) {
+                                    ZeroMemory(
+                                        (char*)&section_func_name->get_section_data().data()[
+                                            (*(DWORD64*)thunk_table - section_func_name->get_virtual_address())
+                                        ],
+                                        lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                            (*(DWORD64*)thunk_table - section_func_name->get_virtual_address()) + sizeof(WORD)
+                                        ]) + 2
+                                     );
+                                }
+                            }
+                        }
 
-									if (zones) {
-										zones->push_back({
-											(DWORD)lib_iat_in ,
-											(unsigned int)lstrlenA((char*)&imp_func->get_section_data().data()[((DWORD)lib_iat_in - imp_func->get_virtual_address()) + sizeof(WORD)]) + 2 + 2
-										});
-									}
+                        if (imp_description->OriginalFirstThunk && imp_oft_section) {
+                            if (zones) {
+                                zones->push_back({ imp_description->OriginalFirstThunk , (thunk_items_count + 1) * sizeof(DWORD64) });
+                            }
 
-									ZeroMemory((char*)&imp_func->get_section_data().data()[((DWORD)lib_iat_in - imp_func->get_virtual_address())],
-										lstrlenA((char*)&imp_func->get_section_data().data()[((DWORD)lib_iat_in - imp_func->get_virtual_address()) + sizeof(WORD)]) + 2);
-								}
-							}
+                            ZeroMemory(&imp_oft_section->get_section_data().data()[
+                                (imp_description->OriginalFirstThunk - imp_oft_section->get_virtual_address())
+                            ], (thunk_items_count + 1) * sizeof(DWORD64));
+                        }
 
+                        if (zones) {
+                            zones->push_back({ imp_description->FirstThunk , (thunk_items_count + 1) * sizeof(DWORD64) });
+                        }
 
-							
-							if (lib_oft) {
-								if (zones) {
-									zones->push_back({
-										iat_oft_rva ,
-										sizeof(DWORD64)
-									});
-								}
-
-								((DWORD64*)lib_oft)[0] = 0;
-								lib_oft = (void*)(&((DWORD64*)lib_oft)[1]);
-								iat_oft_rva += sizeof(DWORD64);
-							}
-
-							if (zones) {
-								zones->push_back({
-									iat_ft_rva ,
-									sizeof(DWORD64)
-								});
-							}
-
-							((DWORD64*)lib_iat)[0] = 0;
-							lib_iat = (void*)(&((DWORD64*)lib_iat)[1]);
-							iat_ft_rva += sizeof(DWORD64);
-						}
-
-						if (zones) {
-							zones->push_back({
-								iat_ft_rva ,
-								sizeof(DWORD64)
-							});
-						}
-						if (lib_oft && zones) {
-							zones->push_back({
-								iat_oft_rva ,
-								sizeof(DWORD64)
-							});
-						}
+                        ZeroMemory(&imp_ft_section->get_section_data().data()[
+                            (imp_description->FirstThunk - imp_ft_section->get_virtual_address())
+                        ], (thunk_items_count + 1) * sizeof(DWORD64));
 					}
-
+                    
 					ZeroMemory(imp_description, sizeof(IMAGE_IMPORT_DESCRIPTOR));
 				}
 				else {
-					if (zones) { zones->push_back({ virtual_address ,virtual_size }); }
+					if (zones) { zones->push_back({ virtual_address ,imp_size }); }
 					image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT, 0);
 					image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, 0);
                     image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IAT, 0);
@@ -574,7 +544,7 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
 					return true;
 				}
 			}
-			if (zones) { zones->push_back({ virtual_address ,virtual_size }); }
+			if (zones) { zones->push_back({ virtual_address ,imp_size }); }
 			image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT, 0);
 			image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, 0);
             image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IAT, 0);
