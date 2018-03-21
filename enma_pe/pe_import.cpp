@@ -9,21 +9,24 @@ imported_func::imported_func() {
 	iat_rva				= 0;
 	name.clear();
 }
-imported_func::imported_func(DWORD iat_rva, std::string name, WORD ordinal, WORD hint) {
-	this->iat_rva = iat_rva;
-	this->hint = hint;
-	this->name = name;
-	this->ordinal = ordinal;
 
-	if (this->name.length()) {
-		b_import_by_name = true;
-	}
-	else {
-		b_import_by_name = false;
-	}
-
+imported_func::imported_func(DWORD iat_rva, std::string name, WORD hint) {
+    this->iat_rva = iat_rva;
+    this->hint = hint;
+    this->name = name;
+    this->ordinal = 0;
+    b_import_by_name = true;
 }
 
+imported_func::imported_func(DWORD iat_rva, WORD ordinal) {
+    this->iat_rva = iat_rva;
+    this->hint = 0;
+    this->name.clear();
+
+    this->ordinal = ordinal;
+
+    b_import_by_name = false;
+}
 
 imported_func::~imported_func() {
 
@@ -222,7 +225,7 @@ bool get_import_table(const pe_image &image, import_table& imports) {
                         for (; *(DWORD*)lib_iat; lib_iat = (void*)(&((DWORD*)lib_iat)[1]) ) {
 
 							if (*(DWORD*)lib_iat&IMAGE_ORDINAL_FLAG32) {
-								lib.add_item(imported_func(iat_ft_rva,0, *(DWORD*)lib_iat & 0xFFFF, 0));
+								lib.add_item(imported_func(iat_ft_rva,*(DWORD*)lib_iat & 0xFFFF));
 							}
 							else {
 								pe_section * imp_func = image.get_section_by_rva(*(DWORD*)lib_iat);
@@ -230,7 +233,6 @@ bool get_import_table(const pe_image &image, import_table& imports) {
 									lib.add_item(imported_func(
                                         iat_ft_rva,
 										(char*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address()) + sizeof(WORD)],
-										0,
 										*(WORD*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address())]
 									));
 								}
@@ -242,7 +244,7 @@ bool get_import_table(const pe_image &image, import_table& imports) {
                         for (; *(DWORD64*)lib_iat; lib_iat = (void*)(&((DWORD64*)lib_iat)[1])) {
 
 							if (*(DWORD64*)lib_iat&IMAGE_ORDINAL_FLAG64) {
-								lib.add_item(imported_func(iat_ft_rva, 0, *(DWORD64*)lib_iat & 0xFFFF, 0));
+								lib.add_item(imported_func(iat_ft_rva, *(DWORD64*)lib_iat & 0xFFFF));
 							}
 							else {
 								pe_section * imp_func = image.get_section_by_rva(*(DWORD*)lib_iat);
@@ -250,7 +252,6 @@ bool get_import_table(const pe_image &image, import_table& imports) {
 									lib.add_item(imported_func(
                                         iat_ft_rva,
 										(char*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address()) + sizeof(WORD)],
-										0,
 										*(WORD*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address())]
 									));
 								}

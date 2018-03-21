@@ -146,7 +146,7 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 					if (image.is_x32_image()) {
 						while (*(DWORD*)lib_iat) {
 							if (*(DWORD*)lib_iat&IMAGE_ORDINAL_FLAG32) {
-								lib.add_item(imported_func(func_iat_rva, 0, *(DWORD*)lib_iat & 0xFFFF, 0));
+								lib.add_item(imported_func(func_iat_rva, *(DWORD*)lib_iat & 0xFFFF));
 							}
 							else {
 								pe_section * imp_func = image.get_section_by_rva(*(DWORD*)lib_iat);
@@ -154,7 +154,6 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 									lib.add_item(imported_func(
 										func_iat_rva,
 										(char*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address()) + sizeof(WORD)],
-										0,
 										*(WORD*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address())]
 									));
 								}
@@ -166,7 +165,7 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 					else {
 						while (*(DWORD64*)lib_iat) {
 							if (*(DWORD64*)lib_iat&IMAGE_ORDINAL_FLAG64) {
-								lib.add_item(imported_func(func_iat_rva, 0, *(DWORD64*)lib_iat & 0xFFFF, 0));
+								lib.add_item(imported_func(func_iat_rva, *(DWORD64*)lib_iat & 0xFFFF));
 							}
 							else {
 								pe_section * imp_func = image.get_section_by_rva(*(DWORD*)lib_iat);
@@ -174,7 +173,6 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 									lib.add_item(imported_func(
 										func_iat_rva,
 										(char*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address()) + sizeof(WORD)],
-										0,
 										*(WORD*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address())]
 									));
 								}

@@ -9,7 +9,9 @@ class imported_func {
 	DWORD iat_rva;
 public:
 	imported_func::imported_func();
-	imported_func::imported_func(DWORD iat_rva,std::string name, WORD ordinal, WORD hint);
+    imported_func::imported_func(DWORD iat_rva, std::string name, WORD hint);
+    imported_func::imported_func(DWORD iat_rva, WORD ordinal);
+
 	imported_func::~imported_func();
 
 	imported_func& imported_func::operator=(const imported_func& func);

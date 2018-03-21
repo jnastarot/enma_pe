@@ -13,18 +13,18 @@ e.mail..: jnastarot@yandex.ru
 
 | directory name | read | build | erase |
 | -------------- | ------- | ------- | ------- |
-| `export` | + | + | + |
-| `import(default)` | + | + | + |
-| `bound import` | + | - | + |
-| `delay import` | + | - | + |
-| `resources` | + | + | + |
-| `exceptions` | + | + | + |
-| `security` | - | - | - |
-| `relocations` | + | + | + |
-| `debug` | + | - | + |
-| `tls` | + | + | + |
-| `load config` | + | + | + |
-| `.NET meta data` | - | - | - |
+| `export` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `import(default)` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `bound import` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
+| `delay import` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
+| `resources` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `exceptions` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `security` | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |
+| `relocations` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `debug` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
+| `tls` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `load config` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `.NET meta data` | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |
 
 ---
 | helper | description |
@@ -33,7 +33,7 @@ e.mail..: jnastarot@yandex.ru
 | `tds parser` | parsing tds-styled debug info |
 | `string finder` | finding ansi and unicode strings in pe file |
 ---
-| references |
+| credits |
 | ---------- |
 | reading\building of export and resources taken from [pe bliss kaimi](http://kaimi.io/) |
 | tds parser taken from [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
