@@ -18,15 +18,15 @@ map_parser::map_parser(std::string filepath, pe_image& image, map_root& map, e_m
 	raw_mapfile mapfile;
 	std::string content;
 
-	HANDLE hfile = (HANDLE)OpenFile(filepath.c_str(), &ofs, OF_READ);
+	HFILE hfile = OpenFile(filepath.c_str(), &ofs, OF_READ);
 
-	if (hfile && hfile != INVALID_HANDLE_VALUE) {
+	if (hfile && hfile != (HFILE)INVALID_HANDLE_VALUE) {
 		DWORD bytesread;
-		unsigned int file_size = GetFileSize(hfile, 0);
+		unsigned int file_size = GetFileSize((HANDLE)hfile, 0);
 		content.reserve(file_size);
 		content.resize(file_size);
 
-		if (ReadFile(hfile, (LPVOID)content.data(), file_size, &bytesread, 0) &&
+		if (ReadFile((HANDLE)hfile, (LPVOID)content.data(), file_size, &bytesread, 0) &&
 			file_size == bytesread) {
 			get_raw_map_file(content, mapfile);
 
@@ -53,13 +53,13 @@ map_parser::map_parser(std::string filepath, pe_image& image, map_root& map, e_m
 				line_idx++;
 			}
 
-			CloseHandle(hfile);
+			CloseHandle((HANDLE)hfile);
 
 			map_finalize_items(image, segments, items_raw, map);
 			result = e_map_result::map_error_ok;
 			return;
 		}
-		CloseHandle(hfile);
+		CloseHandle((HANDLE)hfile);
 		result = e_map_result::map_error_readfile;
 		return;
 	}
@@ -145,7 +145,7 @@ void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::stri
 			return;
 		}
 		else if ((line.size() >= 4 && line[0] == "Address" && line[1] == "Publics" && line[2] == "by" && line[3] == "Value") ||
-			line.size() >= 2 && line[0] == "Static" && line[1] == "symbols"
+			(line.size() >= 2 && line[0] == "Static" && line[1] == "symbols")
 			) {
 			this->parse_context = map_parse_mod_address;
 			return;
@@ -242,7 +242,7 @@ void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::stri
 					}
 				}
 
-				unsigned int is_section_mark = false;
+				bool is_section_mark = false;
 				for (unsigned int i = 0; i < path_step.length(); i++) {
 					if (!is_section_mark) {
 						if (path_step[i] == '$') {
@@ -254,7 +254,7 @@ void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::stri
 						}
 					}
 					else {
-						if (path_step[i] == '$' && is_section_mark) {
+						if (path_step[i] == '$') {
 							is_section_mark = false;
 						}
 
@@ -306,7 +306,7 @@ void map_parser::parse_line_visualstudio(unsigned int line_idx, std::vector<std:
 
 			return;
 		} else if ( (line.size() >= 4 && line[0] == "Address" && line[1] == "Publics" && line[2] == "by" && line[3] == "Value") ||
-			line.size() >= 2 && line[0] == "Static" && line[1] == "symbols"
+			(line.size() >= 2 && line[0] == "Static" && line[1] == "symbols")
 			) {
 			this->parse_context = map_parse_mod_address;
 			return;

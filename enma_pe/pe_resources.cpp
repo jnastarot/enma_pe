@@ -265,10 +265,10 @@ bool resource_directory::name_entry_finder::operator()(resource_directory_entry&
 	return entry.is_named() && entry.get_name() == name_;
 }
 resource_directory::entry_finder::entry_finder(const std::wstring& name)
-	:name_(name), named_(true)
+	:name_(name), named_(true), id_(0)
 {}
 resource_directory::entry_finder::entry_finder(unsigned int id)
-	: id_(id), named_(false)
+	: id_(id), named_(false), name_(L"")
 {}
 bool resource_directory::entry_finder::operator()(resource_directory_entry& entry) {
 	if (named_) {

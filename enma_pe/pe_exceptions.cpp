@@ -9,10 +9,10 @@ exceptions_item::~exceptions_item() {
 }
 
 void exceptions_item::set_begin_address(DWORD rva_address) {
-    this->address_begin = address_begin;
+    this->address_begin = rva_address;
 }
 void exceptions_item::set_end_address(DWORD rva_address) {
-    this->address_end = address_end;
+    this->address_end = rva_address;
 }
 void exceptions_item::set_unwind_data_address(DWORD rva_address) {
     this->address_unwind_data = rva_address;

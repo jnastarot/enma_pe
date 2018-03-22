@@ -112,8 +112,8 @@ bool erase_bound_import_table(pe_image &image,std::vector<erased_zone>* zones) {
                     char * name = (char*)&name_section->get_section_data().data()[
                         (virtual_address + imp_description->OffsetModuleName) - name_section->get_virtual_address()
                     ];
-                    if (zones) { zones->push_back({ DWORD(virtual_address + imp_description->OffsetModuleName) ,DWORD(lstrlen(name)) }); }
-                    ZeroMemory(name, lstrlen(name));
+                    if (zones) { zones->push_back({ DWORD(virtual_address + imp_description->OffsetModuleName) ,DWORD(lstrlenA(name)) }); }
+                    ZeroMemory(name, lstrlenA(name));
                 }
                 if (zones) { zones->push_back({ (virtual_address + imp_size) ,sizeof(PIMAGE_BOUND_IMPORT_DESCRIPTOR) }); }
                 ZeroMemory(&raw_decs[imp_size], sizeof(PIMAGE_BOUND_IMPORT_DESCRIPTOR));

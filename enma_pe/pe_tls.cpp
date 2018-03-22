@@ -7,6 +7,8 @@ tls_table::tls_table() {
 	end_address_of_raw_data = 0;
 	address_of_index		= 0;
 	address_of_callbacks	= 0;
+    size_of_zero_fill       = 0;
+    characteristics         = 0;
 	raw_data.clear();
 	callbacks.clear();
 }
@@ -369,7 +371,7 @@ bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation
 	DWORD virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS);
 	DWORD virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS);
 
-	if (virtual_address && virtual_size) {
+	if (virtual_address) {
 		pe_section * tls_section = image.get_section_by_rva(virtual_address);
 		
 		if (tls_section) {
@@ -389,7 +391,7 @@ bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation
 							if (zones) {
 								zones->push_back({
 									image.va_to_rva(tls_desc->StartAddressOfRawData) ,
-									max(tls_desc->EndAddressOfRawData - tls_desc->StartAddressOfRawData, raw_data_section->get_section_data().size())
+									(DWORD)max(tls_desc->EndAddressOfRawData - tls_desc->StartAddressOfRawData, raw_data_section->get_section_data().size())
 								});
 							}
 						}

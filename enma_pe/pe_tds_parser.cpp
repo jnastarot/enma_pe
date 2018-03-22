@@ -167,17 +167,17 @@ tds_parser::tds_parser(std::string filepath, pe_image& image, map_root& map, e_m
     OFSTRUCT ofs = { 0 };
     DWORD readed;
 
-    HANDLE hfile = (HANDLE)OpenFile(filepath.c_str(), &ofs, OF_READ);
-    if (hfile != INVALID_HANDLE_VALUE) {
-        unsigned int file_size = GetFileSize(hfile, 0);
+    HFILE hfile = OpenFile(filepath.c_str(), &ofs, OF_READ);
+    if (hfile != (HFILE)INVALID_HANDLE_VALUE) {
+        unsigned int file_size = GetFileSize((HANDLE)hfile, 0);
         tds_file.resize(file_size);
 
-        if (!ReadFile(hfile, tds_file.data(), file_size, &readed, 0) || readed != file_size) {
+        if (!ReadFile((HANDLE)hfile, tds_file.data(), file_size, &readed, 0) || readed != file_size) {
             result = e_map_result::map_error_readfile;
             return;
         }
 
-        CloseHandle(hfile);
+        CloseHandle((HANDLE)hfile);
 
         result = parse(image, map);
     }

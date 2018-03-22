@@ -25,8 +25,8 @@ debug_item::debug_item(DWORD   characteristics, DWORD   timestamp, WORD    major
     this->address_of_raw_data = address_of_raw_data;
     this->pointer_to_raw_data = pointer_to_raw_data;
 
-    item_data.resize(size_of_data);
-    memcpy(item_data.data(), data, size_of_data);
+    item_data.resize(this->size_of_data);
+    memcpy(item_data.data(), data, this->size_of_data);
 }
 
 

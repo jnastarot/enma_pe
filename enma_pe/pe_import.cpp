@@ -329,7 +329,7 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
         import_descs->ForwarderChain = 0;
         import_descs->TimeDateStamp = lib.get_timestamp();
         import_descs->Name = section.get_virtual_address() + (lib_names - section.get_section_data().data());
-        lstrcpy((char*)lib_names, lib.get_name().c_str());
+        lstrcpyA((char*)lib_names, lib.get_name().c_str());
         lib_names += lib.get_name().length() + 1;
         
 
@@ -340,7 +340,7 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
                 iat_thunks_table.push_back(section.get_virtual_address() + (func_names - section.get_section_data().data()));
 
                 pimport_by_name->Hint = func.get_hint();
-                lstrcpy(pimport_by_name->Name, func.get_name().c_str());
+                lstrcpyA(pimport_by_name->Name, func.get_name().c_str());
 
                 func_names += sizeof(WORD) + func.get_name().length() + 1;
             }
@@ -491,7 +491,7 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
 					else {
                         for (thunk_items_count = 0; *(DWORD64*)thunk_table; thunk_table += sizeof(DWORD64), thunk_items_count++) {
                             if (!(*(DWORD64*)thunk_table&IMAGE_ORDINAL_FLAG64)) {
-                                pe_section * section_func_name = image.get_section_by_rva(*(DWORD64*)thunk_table);
+                                pe_section * section_func_name = image.get_section_by_rva((DWORD)*(DWORD64*)thunk_table);
                                 if (section_func_name) {
                                     if (zones) {
                                         zones->push_back({

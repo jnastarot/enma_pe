@@ -360,25 +360,25 @@ void build_load_config_table(pe_image &image, pe_section& section, load_config_t
         image_load_config->GlobalFlagsClear              = load_config.get_global_flagsclear();
         image_load_config->GlobalFlagsSet                = load_config.get_global_flagsset();
         image_load_config->CriticalSectionDefaultTimeout = load_config.get_criticalsection_default_timeout();
-        image_load_config->DeCommitFreeBlockThreshold    = load_config.get_decommit_freeblock_threshold();
-        image_load_config->DeCommitTotalFreeThreshold    = load_config.get_decommit_totalfree_threshold();
-        image_load_config->MaximumAllocationSize         = load_config.get_maximum_allocation_size();
-        image_load_config->VirtualMemoryThreshold        = load_config.get_virtual_memory_threshold();
+        image_load_config->DeCommitFreeBlockThreshold    = (DWORD)load_config.get_decommit_freeblock_threshold();
+        image_load_config->DeCommitTotalFreeThreshold    = (DWORD)load_config.get_decommit_totalfree_threshold();
+        image_load_config->MaximumAllocationSize         = (DWORD)load_config.get_maximum_allocation_size();
+        image_load_config->VirtualMemoryThreshold        = (DWORD)load_config.get_virtual_memory_threshold();
         image_load_config->ProcessHeapFlags              = load_config.get_process_heap_flags();
-        image_load_config->ProcessAffinityMask           = load_config.get_process_affinity_mask();
+        image_load_config->ProcessAffinityMask           = (DWORD)load_config.get_process_affinity_mask();
         image_load_config->CSDVersion                    = load_config.get_csd_version();
         image_load_config->Reserved1 = 0;
 
         if (load_config.get_editlist()) {
-            image_load_config->EditList = image.rva_to_va(load_config.get_editlist());
+            image_load_config->EditList = (DWORD)image.rva_to_va(load_config.get_editlist());
             relocs.add_item(section.get_virtual_address() + load_config_offset + offsetof(IMAGE_LOAD_CONFIG_DIRECTORY32, EditList), 0);
         }
         if (load_config.get_security_cookie()) {
-            image_load_config->SecurityCookie = image.rva_to_va(load_config.get_security_cookie());
+            image_load_config->SecurityCookie = (DWORD)image.rva_to_va(load_config.get_security_cookie());
             relocs.add_item(section.get_virtual_address() + load_config_offset + offsetof(IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 0);
         }
         if (load_config.get_guard_cf_check_function_pointer()) {
-            image_load_config->GuardCFCheckFunctionPointer = image.rva_to_va(load_config.get_guard_cf_check_function_pointer());
+            image_load_config->GuardCFCheckFunctionPointer = (DWORD)image.rva_to_va(load_config.get_guard_cf_check_function_pointer());
             relocs.add_item(section.get_virtual_address() + load_config_offset + offsetof(IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFCheckFunctionPointer), 0);
         }
 
@@ -407,7 +407,7 @@ void build_load_config_table(pe_image &image, pe_section& section, load_config_t
             for (unsigned int item_idx = 0; item_idx < load_config.get_lock_prefixes().size(); item_idx++) {
                 *(DWORD*)&section.get_section_data().data()[
                     load_config_offset + sizeof(IMAGE_LOAD_CONFIG_DIRECTORY32) + item_idx * sizeof(DWORD)
-                ] = image.rva_to_va(load_config.get_lock_prefixes()[item_idx]);
+                ] = (DWORD)image.rva_to_va(load_config.get_lock_prefixes()[item_idx]);
 
                 relocs.add_item(section.get_virtual_address() + load_config_offset + sizeof(IMAGE_LOAD_CONFIG_DIRECTORY32) +
                     (load_config.get_se_handlers().size() ? load_config.get_se_handlers().size() * sizeof(DWORD) : 0) +
@@ -431,7 +431,7 @@ void build_load_config_table(pe_image &image, pe_section& section, load_config_t
             for (unsigned int item_idx = 0; item_idx < load_config.get_guard_cf_functions().size(); item_idx++) {
                 *(DWORD*)&section.get_section_data().data()[
                     load_config_offset + sizeof(IMAGE_LOAD_CONFIG_DIRECTORY32) + item_idx * sizeof(DWORD)
-                ] = image.rva_to_va(load_config.get_guard_cf_functions()[item_idx]);
+                ] = (DWORD)image.rva_to_va(load_config.get_guard_cf_functions()[item_idx]);
 
                 relocs.add_item(section.get_virtual_address() + load_config_offset + sizeof(IMAGE_LOAD_CONFIG_DIRECTORY32) +
                     (load_config.get_se_handlers().size() ? load_config.get_se_handlers().size() * sizeof(DWORD) : 0) +

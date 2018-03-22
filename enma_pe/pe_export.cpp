@@ -193,7 +193,7 @@ bool get_export_table(const pe_image &image, export_table& exports) {
 	exports.set_ordinal_base(0);
 	exports.set_number_of_functions(0);
 	exports.set_number_of_names(0);
-	exports.set_name(std::string(""));
+	exports.set_name("");
 	exports.get_items().clear();
 
 
@@ -439,7 +439,7 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                 pe_section * name_export_section = image.get_section_by_rva(export_desc->Name);
                 if (name_export_section) {
                     ZeroMemory((char*)(&export_section->get_section_data().data()[export_desc->Name - export_section->get_virtual_address()]),
-                        lstrlen((char*)(&export_section->get_section_data().data()[export_desc->Name - export_section->get_virtual_address()])));
+                        lstrlenA((char*)(&export_section->get_section_data().data()[export_desc->Name - export_section->get_virtual_address()])));
                 }
             }
 
@@ -469,7 +469,7 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                             function_name_rva
                                 - image.get_section_by_rva(function_name_rva)->get_virtual_address()];
 
-                        ZeroMemory(func_name, lstrlen(func_name));
+                        ZeroMemory(func_name, lstrlenA(func_name));
 ;
 
                         if (func_rva >= virtual_address + sizeof(IMAGE_EXPORT_DIRECTORY) &&
@@ -478,7 +478,7 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                             char* forwarded_func_name = (char*)&image.get_section_by_rva(func_rva)->get_section_data().data()[
                                 func_rva - image.get_section_by_rva(func_rva)->get_virtual_address()];
 
-                            ZeroMemory(forwarded_func_name, lstrlen(forwarded_func_name));
+                            ZeroMemory(forwarded_func_name, lstrlenA(forwarded_func_name));
                         }
 
                         break;
