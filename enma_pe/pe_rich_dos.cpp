@@ -45,8 +45,8 @@ DWORD pe_rich_data::get_times() const {
 
 
 struct rich_data_item {
-    WORD version;
     WORD number;
+    WORD version;
     DWORD times;
 };
 
