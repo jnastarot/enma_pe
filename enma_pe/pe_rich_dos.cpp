@@ -51,7 +51,7 @@ struct rich_data_item {
 };
 
 bool has_rich_data(const void * pimage,unsigned int * rich_data_offset,
-    unsigned int * rich_data_size, DWORD * rich_xor_key = 0) {
+    unsigned int * rich_data_size, DWORD * rich_xor_key) {
 
     PIMAGE_DOS_HEADER dos_header = PIMAGE_DOS_HEADER(pimage);
     unsigned int rich_offset = 0;

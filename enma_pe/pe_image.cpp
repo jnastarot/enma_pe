@@ -55,6 +55,8 @@ pe_image::~pe_image() {
 pe_image& pe_image::operator=(const pe_image& image) {
 	clear_image();
 
+    dos_stub.set_dos_stub(image.dos_stub.get_dos_stub());
+    rich_data = image.rich_data;
 
 	image_status		= image.image_status;
 	machine				= image.machine;
