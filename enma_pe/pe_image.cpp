@@ -137,7 +137,10 @@ void pe_image::init_from_file(void * image, unsigned int size) {
 	if (dos_header->e_magic == IMAGE_DOS_SIGNATURE) { //check MZ sign
 
         get_image_dos_stub(image,dos_stub);
-        get_image_rich_data(image, rich_data);
+
+        if (has_image_rich_data(image) && checksum_rich(image)) {
+            get_image_rich_data(image, rich_data);
+        }
 
 		if (*(DWORD*)(&((BYTE*)image)[dos_header->e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
 			unsigned int section_offset = dos_header->e_lfanew;

@@ -35,5 +35,6 @@ public:
 bool get_image_dos_stub(_In_ const void * pimage, _Out_ pe_dos_stub& dos_stub);
 bool get_image_rich_data(_In_ const void * pimage, _Out_ std::vector<pe_rich_data>& rich_data);
 
-bool has_rich_data(_In_ const void * pimage ,
-    _Out_opt_ unsigned int * rich_data_offset = 0, _Out_opt_ unsigned int * rich_data_size = 0,DWORD * rich_xor_key = 0);
+bool has_image_rich_data(_In_ const void * pimage ,
+    _Out_opt_ unsigned int * rich_data_offset = 0, _Out_opt_ unsigned int * rich_data_size = 0, _Out_opt_ DWORD * rich_xor_key = 0);
+bool checksum_rich(_In_ const void * pimage, _Out_opt_ DWORD * correct_rich_xor_key = 0);

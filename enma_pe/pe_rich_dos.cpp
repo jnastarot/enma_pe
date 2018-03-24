@@ -50,7 +50,7 @@ struct rich_data_item {
     DWORD times;
 };
 
-bool has_rich_data(const void * pimage,unsigned int * rich_data_offset,
+bool has_image_rich_data(const void * pimage,unsigned int * rich_data_offset,
     unsigned int * rich_data_size, DWORD * rich_xor_key) {
 
     PIMAGE_DOS_HEADER dos_header = PIMAGE_DOS_HEADER(pimage);
@@ -90,7 +90,7 @@ bool get_image_dos_stub(const void * pimage,pe_dos_stub& dos_stub) {
     unsigned int dos_stub_size = 0;
     unsigned int rich_offset = 0;
 
-    if (has_rich_data(pimage, &rich_offset)) {
+    if (has_image_rich_data(pimage, &rich_offset)) {
        dos_stub_size = rich_offset;
     }else {
        dos_stub_size = dos_header->e_lfanew;
@@ -115,7 +115,7 @@ bool get_image_rich_data(const void * pimage, std::vector<pe_rich_data>& rich_da
     unsigned int rich_size = 0;
     DWORD rich_xor_key = 0;
 
-    if (has_rich_data(pimage, &rich_offset,&rich_size,&rich_xor_key)) {
+    if (has_image_rich_data(pimage, &rich_offset,&rich_size,&rich_xor_key)) {
 
         rich_data_item* rich_items = (rich_data_item*)((BYTE*)pimage + rich_offset);
 
@@ -134,5 +134,42 @@ bool get_image_rich_data(const void * pimage, std::vector<pe_rich_data>& rich_da
 
     }
 
+    return false;
+}
+
+#define GET_RICH_HASH(x,i) (((x) << (i)) | ((x) >> (32 - (i))))
+bool checksum_rich(const void * pimage,DWORD * correct_rich_xor_key) {
+
+    unsigned int rich_offset = 0;
+    unsigned int rich_size = 0;
+    DWORD rich_xor_key = 0;
+
+    if (has_image_rich_data(pimage, &rich_offset,&rich_size,&rich_xor_key)) {
+        rich_data_item* rich_items = (rich_data_item*)((BYTE*)pimage + rich_offset);
+
+        DWORD calc_hash = rich_offset;
+
+        for (unsigned int i = 0; i < rich_offset; i++) { //dos header + stub
+            if (i >= 0x3C && i < 0x40) { continue; }//skip e_lfanew
+
+            calc_hash += GET_RICH_HASH(DWORD(((BYTE*)pimage)[i]), i);
+        }
+
+        for (int item_idx = 1; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
+            rich_data_item rich_item = rich_items[item_idx];
+            *(DWORD*)(&rich_item) ^= rich_xor_key;
+            *(DWORD*)((BYTE*)&rich_item + 4) ^= rich_xor_key;
+
+            calc_hash += GET_RICH_HASH(*(DWORD*)(&rich_item), *(DWORD*)((BYTE*)&rich_item + 4));
+        }
+
+        if (correct_rich_xor_key) {
+            *correct_rich_xor_key = calc_hash;
+        }
+
+        if (rich_xor_key == calc_hash) {
+            return true;
+        }
+    }
     return false;
 }
