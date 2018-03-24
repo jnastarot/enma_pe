@@ -45,8 +45,8 @@ DWORD pe_rich_data::get_times() const {
 
 
 struct rich_data_item {
-    WORD number;
     WORD version;
+    WORD number;
     DWORD times;
 };
 
@@ -91,15 +91,15 @@ bool get_image_dos_stub(const void * pimage,pe_dos_stub& dos_stub) {
     unsigned int rich_offset = 0;
 
     if (has_rich_data(pimage, &rich_offset)) {
-       dos_stub_size = rich_offset - sizeof(IMAGE_DOS_HEADER);
+       dos_stub_size = rich_offset;
     }else {
-       dos_stub_size = dos_header->e_lfanew - sizeof(IMAGE_DOS_HEADER);
+       dos_stub_size = dos_header->e_lfanew;
     }
 
     if (dos_stub_size) {
         std::vector<BYTE> dos_stub_holder;
         dos_stub_holder.resize(dos_stub_size);
-        memcpy(dos_stub_holder.data(), (BYTE*)pimage + sizeof(IMAGE_DOS_HEADER), dos_stub_size);
+        memcpy(dos_stub_holder.data(), (BYTE*)pimage, dos_stub_size);
         dos_stub.set_dos_stub(dos_stub_holder);
         return true;
     }
