@@ -35,6 +35,7 @@ e.mail..: jnastarot@yandex.ru
 ---
 | credits |
 | ---------- |
-| reading\building of export and resources taken from [pe bliss kaimi](http://kaimi.io/) |
-| tds parser taken from [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
+| pe rich data [vxlab](https://vxlab.info/wasm/print.php-article=sdf.htm) |
+| reading\building of export and resources [pe bliss kaimi](http://kaimi.io/) |
+| tds parser [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
 

@@ -141,6 +141,7 @@
     <ClInclude Include="pe_map_parser.h" />
     <ClInclude Include="pe_relocations.h" />
     <ClInclude Include="pe_resources.h" />
+    <ClInclude Include="pe_rich_dos.h" />
     <ClInclude Include="pe_section.h" />
     <ClInclude Include="pe_security.h" />
     <ClInclude Include="pe_string_finder.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="pe_map_parser.cpp" />
     <ClCompile Include="pe_relocations.cpp" />
     <ClCompile Include="pe_resources.cpp" />
+    <ClCompile Include="pe_rich_dos.cpp" />
     <ClCompile Include="pe_section.cpp" />
     <ClCompile Include="pe_security.cpp" />
     <ClCompile Include="pe_string_finder.cpp" />

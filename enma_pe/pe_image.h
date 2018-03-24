@@ -1,5 +1,6 @@
 #pragma once
 
+#include "pe_rich_dos.h"
 #include "pe_section.h"
 
 enum pe_image_status {
@@ -41,6 +42,9 @@ class pe_image{
 	ULONGLONG   heap_reserve_size;
 	ULONGLONG   heap_commit_size;
 	IMAGE_DATA_DIRECTORY directories[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+
+    pe_dos_stub dos_stub;
+    std::vector<pe_rich_data> rich_data;
 
 	std::vector<pe_section*> sections;
 
@@ -92,6 +96,8 @@ public:
 	bool		pe_image::get_data_by_raw(pe_section * section, DWORD raw, void* data, unsigned int data_size) const;
 public:
 	void		pe_image::set_image_status(pe_image_status status);
+    void        pe_image::set_dos_stub(pe_dos_stub& dos_stub);
+    void        pe_image::set_rich_data(std::vector<pe_rich_data>& rich_data);
 	void		pe_image::set_machine(WORD machine);
 	void		pe_image::set_timestamp(DWORD timestamp);
 	void		pe_image::set_characteristics(WORD characteristics);
@@ -126,7 +132,9 @@ public:
 	void		pe_image::set_directory_virtual_address(unsigned int directory_idx,DWORD virtual_address);
 	void		pe_image::set_directory_virtual_size(unsigned int directory_idx, DWORD virtual_size);
 public://getter
-	pe_image_status		pe_image::get_image_status() const;
+	pe_image_status		       pe_image::get_image_status() const;
+    bool        pe_image::has_dos_stub() const;
+    bool        pe_image::has_rich_data() const;
 	WORD		pe_image::get_machine() const;
 	DWORD		pe_image::get_timestamp() const;
 	WORD		pe_image::get_characteristics() const;
@@ -160,7 +168,10 @@ public://getter
 	//directories
 	DWORD		pe_image::get_directory_virtual_address(unsigned int directory_idx) const;
 	DWORD		pe_image::get_directory_virtual_size(unsigned int directory_idx) const;
-	bool		pe_image::is_has_directory(unsigned int directory_idx) const;
+	bool		pe_image::has_directory(unsigned int directory_idx) const;
+
+    pe_dos_stub&               pe_image::get_dos_stub();
+    std::vector<pe_rich_data>& pe_image::get_rich_data();
 public://util
 	void				pe_image::clear_image();
 };

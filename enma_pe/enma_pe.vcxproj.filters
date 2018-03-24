@@ -72,6 +72,9 @@
     <Filter Include="Заголовочные файлы\pe_image\pe_directories\pe_security">
       <UniqueIdentifier>{bf4fe633-1378-4023-ba7d-dada3986621e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_image\pe_rich_dos">
+      <UniqueIdentifier>{a30b2f81-5af2-470d-8619-0e6737a000bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -134,6 +137,9 @@
     <ClInclude Include="pe_security.h">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
     </ClInclude>
+    <ClInclude Include="pe_rich_dos.h">
+      <Filter>Заголовочные файлы\pe_image\pe_rich_dos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -192,6 +198,9 @@
     </ClCompile>
     <ClCompile Include="pe_security.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_rich_dos.cpp">
+      <Filter>Заголовочные файлы\pe_image\pe_rich_dos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

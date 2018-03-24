@@ -134,6 +134,9 @@ void pe_image::init_from_file(void * image, unsigned int size) {
 
 	if (dos_header->e_magic == IMAGE_DOS_SIGNATURE) { //check MZ sign
 
+        get_image_dos_stub(image,dos_stub);
+        get_image_rich_data(image, rich_data);
+
 		if (*(DWORD*)(&((BYTE*)image)[dos_header->e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
 			unsigned int section_offset = dos_header->e_lfanew;
 			unsigned int number_of_sections = 0;
@@ -547,6 +550,12 @@ bool		pe_image::get_data_by_raw(pe_section * section, DWORD raw, void* data, uns
 void		pe_image::set_image_status(pe_image_status status) {
 	this->image_status = status;
 }
+void        pe_image::set_dos_stub(pe_dos_stub& dos_stub) {
+    this->dos_stub.set_dos_stub(dos_stub.get_dos_stub());
+}
+void        pe_image::set_rich_data(std::vector<pe_rich_data>& rich_data) {
+    this->rich_data = rich_data;
+}
 void		pe_image::set_machine(WORD machine) {
 	this->machine = machine;
 }
@@ -651,6 +660,12 @@ void		pe_image::set_directory_virtual_size(unsigned int directory_idx, DWORD vir
 
 pe_image_status		pe_image::get_image_status() const {
 	return image_status;
+}
+bool        pe_image::has_dos_stub() const {
+    return dos_stub.get_dos_stub().size() != 0;
+}
+bool        pe_image::has_rich_data() const {
+    return rich_data.size() != 0;
 }
 WORD		pe_image::get_machine() const {
 	return machine;
@@ -758,14 +773,19 @@ DWORD		pe_image::get_directory_virtual_size(unsigned int directory_idx) const {
 	return 0;
 }
 
-bool		pe_image::is_has_directory(unsigned int directory_idx) const {
+bool		pe_image::has_directory(unsigned int directory_idx) const {
 	if (directory_idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES) {
 		return (this->directories[directory_idx].VirtualAddress != 0 || this->directories[directory_idx].Size != 0);
 	}
 	return false;
 }
 
-
+pe_dos_stub& pe_image::get_dos_stub() {
+    return dos_stub;
+}
+std::vector<pe_rich_data>& pe_image::get_rich_data() {
+    return rich_data;
+}
 
 void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &image) {
     expanded_image.image = image;

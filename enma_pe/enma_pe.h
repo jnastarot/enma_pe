@@ -3,11 +3,7 @@
 
 #include "pe_image.h"
 
-struct erased_zone {
-    DWORD rva;
-    unsigned int size;
-};
-
+struct erased_zone { DWORD rva; unsigned int size; };
 
 #include "pe_export.h"
 #include "pe_import.h"
@@ -23,14 +19,14 @@ struct erased_zone {
 #include "pe_dotnet.h"
 
 struct pe_image_expanded {
-    export_table		exports;
-    import_table		imports;
-    resource_directory	resources;
-    exceptions_table	exceptions;
-    relocation_table	relocations;
-    debug_table			debug;
-    tls_table			tls;
-    load_config_table	load_config;
+    export_table        exports;
+    import_table        imports;
+    resource_directory  resources;
+    exceptions_table    exceptions;
+    relocation_table    relocations;
+    debug_table         debug;
+    tls_table           tls;
+    load_config_table   load_config;
     delay_import_table  delay_imports;
     bound_import_table  bound_imports;
 
