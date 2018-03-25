@@ -31,6 +31,21 @@ struct pe_image_expanded {
     bound_import_table  bound_imports;
 
     pe_image image;
+
+    pe_image_expanded& pe_image_expanded::operator=(const pe_image_expanded& image_ex) {
+        this->exports       = image_ex.exports;
+        this->imports       = image_ex.imports;
+        this->resources     = image_ex.resources;
+        this->exceptions    = image_ex.exceptions;
+        this->relocations   = image_ex.relocations;
+        this->debug         = image_ex.debug;
+        this->tls           = image_ex.tls;
+        this->load_config   = image_ex.load_config;
+        this->delay_imports = image_ex.delay_imports;
+        this->bound_imports = image_ex.bound_imports;
+        this->image         = image_ex.image;
+        return *this;
+    }
 };
 
 

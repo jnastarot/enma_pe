@@ -106,6 +106,12 @@ debug_table::debug_table() {
 debug_table::~debug_table() {
 
 }
+
+debug_table& debug_table::operator=(const debug_table& debug) {
+    this->items = debug.items;
+    return *this;
+}
+
 void debug_table::add_item(const debug_item& item) {
     items.push_back(item);
 }

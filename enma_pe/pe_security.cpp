@@ -10,8 +10,8 @@
 
 bool erase_security_table(pe_image &image,std::vector<erased_zone>* zones){
 
-    DWORD raw_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS);
-    DWORD virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS);
+    DWORD raw_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_SECURITY);
+    DWORD virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_SECURITY);
 
     if (raw_address && virtual_size) {
 
@@ -28,8 +28,8 @@ bool erase_security_table(pe_image &image,std::vector<erased_zone>* zones){
                 raw_address - security_section->get_pointer_to_raw()], virtual_size);
         }
 
-        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, 0);
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS, 0);
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_SECURITY, 0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_SECURITY, 0);
         return true;
     }
 

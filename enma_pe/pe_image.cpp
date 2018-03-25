@@ -792,6 +792,33 @@ std::vector<pe_rich_data>& pe_image::get_rich_data() {
     return rich_data;
 }
 
+DWORD calculate_checksum(const std::vector<BYTE> &file) {
+    PIMAGE_DOS_HEADER p_dos_header = (PIMAGE_DOS_HEADER)file.data();
+    if (p_dos_header->e_magic != IMAGE_DOS_SIGNATURE) { return 0; }
+
+    unsigned int checksum_field_offset = p_dos_header->e_lfanew +
+        offsetof(IMAGE_NT_HEADERS32, OptionalHeader.CheckSum);
+
+    DWORD64 checksum = 0;
+
+    for (unsigned int i = 0; i < file.size(); i += sizeof(DWORD)) {
+        if (i == checksum_field_offset) { continue; }
+
+        checksum = (checksum & 0xffffffff) + *(DWORD*)&file.data()[i] + (checksum >> 32);
+
+        if (checksum > 0xffffffff) {
+            checksum = (checksum & 0xffffffff) + (checksum >> 32);
+        }
+    }
+
+    checksum = (checksum & 0xffff) + (checksum >> 16);
+    checksum = (checksum)+(checksum >> 16);
+    checksum = checksum & 0xffff;
+    checksum += file.size();
+
+    return DWORD(checksum & 0xffffffff);
+}
+
 void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &image) {
     expanded_image.image = image;
 	get_export_table(expanded_image.image, expanded_image.exports);

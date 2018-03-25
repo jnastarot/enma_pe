@@ -11,6 +11,9 @@ enum pe_image_status {
 
 class pe_image{
 	pe_image_status image_status;
+    pe_dos_stub               dos_stub;
+    std::vector<pe_rich_data> rich_data;
+
 	WORD		machine;
 	DWORD		timestamp;
 	WORD		characteristics;
@@ -42,9 +45,6 @@ class pe_image{
 	ULONGLONG   heap_reserve_size;
 	ULONGLONG   heap_commit_size;
 	IMAGE_DATA_DIRECTORY directories[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-
-    pe_dos_stub dos_stub;
-    std::vector<pe_rich_data> rich_data;
 
 	std::vector<pe_section*> sections;
 
@@ -175,6 +175,8 @@ public://getter
 public://util
 	void				pe_image::clear_image();
 };
+
+DWORD calculate_checksum(const std::vector<BYTE> &file);
 
 //void save_pe_image(_In_ const pe_image &image, _Out_ std::vector<BYTE>& image_out);
 //void load_pe_image(_In_ std::vector<BYTE>& image_out , _Out_ pe_image &image);

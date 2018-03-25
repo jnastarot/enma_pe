@@ -70,7 +70,7 @@ public:
     debug_table::debug_table();
     debug_table::~debug_table();
 
-
+    debug_table& debug_table::operator=(const debug_table& debug);
 public:
     void debug_table::add_item(const debug_item& item);
 public:
