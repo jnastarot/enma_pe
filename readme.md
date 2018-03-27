@@ -19,12 +19,12 @@ e.mail..: jnastarot@yandex.ru
 | `delay import` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `resources` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `exceptions` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| `security` | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |
+| `security` | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `relocations` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `debug` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `tls` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `load config` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| `.NET meta data` | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |
+| `.NET meta data` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_multiplication_x: |
 
 ---
 | helper | description |
