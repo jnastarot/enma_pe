@@ -36,6 +36,7 @@ e.mail..: jnastarot@yandex.ru
 | credits |
 | ---------- |
 | pe rich data [vxlab](https://vxlab.info/wasm/print.php-article=sdf.htm) |
+| pe rich comp id [richprint](https://github.com/dishather/richprint/) |
 | reading\building of export and resources [pe bliss kaimi](http://kaimi.io/) |
 | tds parser [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
 

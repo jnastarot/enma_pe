@@ -13,41 +13,41 @@ std::vector<BYTE> pe_dos_stub::get_dos_stub() const {
 }
 
 pe_rich_data::pe_rich_data() :
-    number(0), version(0), times(0){
+    type((e_rich_type)0), compiler_build(0), count(0){
 }
 
-pe_rich_data::pe_rich_data(DWORD number, DWORD version, DWORD times) :
-    number(number), version(version), times(times) {
+pe_rich_data::pe_rich_data(e_rich_type type, unsigned short compiler_build, unsigned int count) :
+    type(type), compiler_build(compiler_build), count(count) {
 
 }
 
 pe_rich_data::~pe_rich_data(){ }
 
-void pe_rich_data::set_number(DWORD number) {
-    this->number = number;
+void pe_rich_data::set_type(e_rich_type type) {
+    this->type = type;
 }
-void pe_rich_data::set_version(DWORD version) {
-    this->version = version;
+void pe_rich_data::set_compiler_build(unsigned short compiler_build) {
+    this->compiler_build = compiler_build;
 }
-void pe_rich_data::set_times(DWORD times) {
-    this->times = times;
+void pe_rich_data::set_count(unsigned int count) {
+    this->count = count;
 }
 
-DWORD pe_rich_data::get_number() const {
-    return number;
+e_rich_type pe_rich_data::get_type() const {
+    return type;
 }
-DWORD pe_rich_data::get_version() const {
-    return version;
+unsigned short pe_rich_data::get_compiler_build() const {
+    return compiler_build;
 }
-DWORD pe_rich_data::get_times() const {
-    return times;
+unsigned int pe_rich_data::get_count() const {
+    return count;
 }
 
 
 struct rich_data_item {
-    WORD version;
-    WORD number;
-    DWORD times;
+    unsigned short compiler_build;
+    unsigned short type;
+    unsigned int count;
 };
 
 bool has_image_rich_data(const void * pimage,unsigned int * rich_data_offset,
@@ -125,7 +125,7 @@ bool get_image_rich_data(const void * pimage, std::vector<pe_rich_data>& rich_da
             *(DWORD*)((BYTE*)&rich_item + 4) ^= rich_xor_key;
 
             rich_data.push_back(
-                pe_rich_data(rich_item.number, rich_item.version, rich_item.times)
+                pe_rich_data((e_rich_type)rich_item.type, rich_item.compiler_build, rich_item.count)
             );
 
         }
