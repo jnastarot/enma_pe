@@ -4,7 +4,7 @@
 
 tls_table::tls_table() {
 	start_address_raw_data	= 0;
-	end_address_of_raw_data = 0;
+	end_address_raw_data = 0;
 	address_of_index		= 0;
 	address_of_callbacks	= 0;
     size_of_zero_fill       = 0;
@@ -18,7 +18,7 @@ tls_table::~tls_table(){}
 tls_table& tls_table::operator=(const tls_table& tls) {
 
 	start_address_raw_data	= tls.start_address_raw_data;
-	end_address_of_raw_data = tls.end_address_of_raw_data;
+	end_address_raw_data = tls.end_address_raw_data;
 	address_of_index		= tls.address_of_index;
 	address_of_callbacks	= tls.address_of_callbacks;
 
@@ -32,8 +32,8 @@ tls_table& tls_table::operator=(const tls_table& tls) {
 void tls_table::set_start_address_raw_data(DWORD   start_address_raw_data) {
 	this->start_address_raw_data = start_address_raw_data;
 }
-void tls_table::set_end_address_of_raw_data(DWORD   end_address_of_raw_data) {
-	this->end_address_of_raw_data = end_address_of_raw_data;
+void tls_table::set_end_address_raw_data(DWORD   end_address_raw_data) {
+	this->end_address_raw_data = end_address_raw_data;
 }
 void tls_table::set_address_of_index(DWORD   address_of_index) {
 	this->address_of_index = address_of_index;
@@ -51,8 +51,8 @@ void tls_table::set_characteristics(DWORD   characteristics) {
 DWORD tls_table::get_start_address_raw_data() const {
 	return this->start_address_raw_data;
 }
-DWORD tls_table::get_end_address_of_raw_data() const {
-	return this->end_address_of_raw_data;
+DWORD tls_table::get_end_address_raw_data() const {
+	return this->end_address_raw_data;
 }
 DWORD tls_table::get_address_of_index() const {
 	return this->address_of_index;
@@ -76,7 +76,7 @@ std::vector<tls_table::tls_callback>& tls_table::get_callbacks() {
 bool get_tls_table(const pe_image &image, tls_table& tls) {
 
     tls.set_start_address_raw_data(0);
-    tls.set_end_address_of_raw_data(0);
+    tls.set_end_address_raw_data(0);
     tls.set_address_of_index(0);
     tls.set_address_of_callbacks(0);
     tls.set_characteristics(0);
@@ -96,7 +96,7 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
 					IMAGE_TLS_DIRECTORY32 * tls_desc = (IMAGE_TLS_DIRECTORY32 *)tls_raw;
 					if (tls_desc->StartAddressOfRawData) {
 						tls.set_start_address_raw_data(image.va_to_rva(tls_desc->StartAddressOfRawData));
-						tls.set_end_address_of_raw_data(image.va_to_rva(tls_desc->EndAddressOfRawData));
+						tls.set_end_address_raw_data(image.va_to_rva(tls_desc->EndAddressOfRawData));
 
 						pe_section * raw_data_section = image.get_section_by_va(tls_desc->StartAddressOfRawData);
 
@@ -118,7 +118,7 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
 					}
 					else {
 						tls.set_start_address_raw_data(0);
-						tls.set_end_address_of_raw_data(0);
+						tls.set_end_address_raw_data(0);
 						tls.get_raw_data().clear();
 					}
 
@@ -158,7 +158,7 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
 					IMAGE_TLS_DIRECTORY64 * tls_desc = (IMAGE_TLS_DIRECTORY64 *)tls_raw;
 					if (tls_desc->StartAddressOfRawData) {
 						tls.set_start_address_raw_data(image.va_to_rva(tls_desc->StartAddressOfRawData));
-						tls.set_end_address_of_raw_data(image.va_to_rva(tls_desc->EndAddressOfRawData));
+						tls.set_end_address_raw_data(image.va_to_rva(tls_desc->EndAddressOfRawData));
 
 						pe_section * raw_data_section = image.get_section_by_va(tls_desc->StartAddressOfRawData);
 
@@ -180,7 +180,7 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
 					}
 					else {
 						tls.set_start_address_raw_data(0);
-						tls.set_end_address_of_raw_data(0);
+						tls.set_end_address_raw_data(0);
 						tls.get_raw_data().clear();
 					}
 
@@ -224,7 +224,76 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
 	return false;
 }
 
-void build_tls_table(pe_image &image, pe_section& section, tls_table& tls, relocation_table& relocs) {
+
+
+void build_internal_tls_data(const pe_image &image,pe_section& section,
+    tls_table& tls, relocation_table& relocs, DWORD build_items_ids/*tls_table_build_id*/) {
+
+    if (build_items_ids&tls_table_build_raw_data) {
+
+        if (tls.get_raw_data().size()) {
+
+            if (section.get_size_of_raw_data() & 0xF) {
+                section.get_section_data().resize(
+                    section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
+                );
+            }
+
+            tls.set_start_address_raw_data(section.get_virtual_address() + section.get_section_data().size());
+            tls.set_end_address_raw_data(
+                section.get_virtual_address() + section.get_section_data().size() + tls.get_raw_data().size());
+
+            section.add_data(tls.get_raw_data().data(), tls.get_raw_data().size());
+        }
+        else {
+            tls.set_start_address_raw_data(0);
+            tls.set_end_address_raw_data(0);
+        }
+    }
+
+    if (build_items_ids&tls_table_build_address_of_index) {
+        if (section.get_size_of_raw_data() & 0x4 != 0x4) {
+            section.get_section_data().resize(
+                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x4))
+            );
+        }
+        
+        tls.set_address_of_index(section.get_virtual_address() + section.get_section_data().size());
+
+        DWORD index__ = 0;
+        section.add_data(&index__, sizeof(index__));
+    }
+
+    if (build_items_ids&tls_table_build_callbacks) {
+        if (section.get_size_of_raw_data() & 0x4 != 0x4) {
+            section.get_section_data().resize(
+                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x4))
+            );
+        }
+
+        for (auto& callback_item : tls.get_callbacks()) {
+           
+            if (image.is_x32_image()) {
+                DWORD call_back_va = callback_item.rva_callback;
+                if (callback_item.use_relocation) {
+                    call_back_va = (DWORD)image.rva_to_va(call_back_va);
+                    relocs.add_item(section.get_virtual_address() + section.get_size_of_raw_data(), 0);
+                }
+                section.add_data((BYTE*)&call_back_va, sizeof(call_back_va));
+            }
+            else {
+                DWORD64 call_back_va = callback_item.rva_callback;
+                if (callback_item.use_relocation) {
+                    call_back_va = (DWORD)image.rva_to_va(call_back_va);
+                    relocs.add_item(section.get_virtual_address() + section.get_size_of_raw_data(), 0);
+                }
+                section.add_data((BYTE*)&call_back_va, sizeof(call_back_va));
+            }
+        }
+    }
+}
+
+void build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, relocation_table& relocs) {
 
     if (section.get_size_of_raw_data() & 0xF) {
         section.get_section_data().resize(
@@ -233,138 +302,76 @@ void build_tls_table(pe_image &image, pe_section& section, tls_table& tls, reloc
     }
 
     if (image.is_x32_image()) {
-        IMAGE_TLS_DIRECTORY32 tls_desc;
-        ZeroMemory(&tls_desc, sizeof(tls_desc));
+        DWORD tls_rva = section.get_virtual_address() + section.get_section_data().size();
+        section.get_section_data().resize(section.get_section_data().size() + sizeof(IMAGE_TLS_DIRECTORY32));
 
-        DWORD tls_directory_rva = section.get_virtual_address() + section.get_size_of_raw_data();
-        DWORD rva_tls_index = tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY32);
-        DWORD rva_tls_callbacks = 0;
-        DWORD nulldata = 0;
+        PIMAGE_TLS_DIRECTORY32 tls_desc = (PIMAGE_TLS_DIRECTORY32)&section.get_section_data().data()[
+            tls_rva - section.get_virtual_address()
+        ];
 
-        tls_desc.AddressOfIndex = (DWORD)image.rva_to_va(tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY32));
-        relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY32, AddressOfIndex),0);
+        ZeroMemory(tls_desc, sizeof(IMAGE_TLS_DIRECTORY32));
 
-        if (tls.get_raw_data().size()) {
-            tls_desc.StartAddressOfRawData = (DWORD)image.rva_to_va(tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY32) + sizeof(DWORD));
+        
+        tls_desc->StartAddressOfRawData = image.rva_to_va(tls.get_start_address_raw_data());
+        tls_desc->EndAddressOfRawData   = image.rva_to_va(tls.get_end_address_raw_data());
+        tls_desc->AddressOfIndex        = image.rva_to_va(tls.get_end_address_raw_data());
 
-            tls_desc.EndAddressOfRawData =
-                tls_desc.StartAddressOfRawData + tls.get_raw_data().size();
+        relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY32, StartAddressOfRawData), 0);
+        relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY32, EndAddressOfRawData), 0);
+        relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY32, AddressOfIndex), 0);
 
-            relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY32, StartAddressOfRawData),0);
-            relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY32, EndAddressOfRawData),0);
+        if (tls.get_address_of_callbacks()) {
+            tls_desc->AddressOfCallBacks = image.rva_to_va(tls.get_end_address_raw_data());
+            relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY32, AddressOfCallBacks), 0);
         }
-        else {
-            tls_desc.StartAddressOfRawData = 0;
-            tls_desc.EndAddressOfRawData = 0;
-        }
+        tls_desc->SizeOfZeroFill = tls.get_size_of_zero_fill();
+        tls_desc->Characteristics = tls.get_characteristics();
 
-        if (tls.get_callbacks().size()) {
-            tls_desc.AddressOfCallBacks = (DWORD)image.rva_to_va(tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY32) + sizeof(DWORD));
-            if (tls.get_raw_data().size()) {
-                tls_desc.AddressOfCallBacks += tls.get_raw_data().size();
-            }
-            rva_tls_callbacks = image.va_to_rva(tls_desc.AddressOfCallBacks);
-
-            relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY32, AddressOfCallBacks),0);
-        }
-
-        tls_desc.SizeOfZeroFill = tls.get_size_of_zero_fill();
-        tls_desc.Characteristics = tls.get_characteristics();
-
-
-        section.add_data((BYTE*)&tls_desc, sizeof(tls_desc));//desc
-        section.add_data((BYTE*)&nulldata, sizeof(nulldata));
-
-        if (tls.get_raw_data().size()) {
-            section.add_data(tls.get_raw_data().data(), tls.get_raw_data().size());
-        }
-
-        if (tls.get_callbacks().size()) {
-            
-            for (auto& callback_item : tls.get_callbacks()) {
-                DWORD call_back_va =  callback_item.rva_callback;
-                if (callback_item.use_relocation) {
-                    call_back_va = (DWORD)image.rva_to_va(call_back_va);
-                    relocs.add_item(section.get_virtual_address() + section.get_size_of_raw_data(),0);//fixup
-                }
-
-                section.add_data((BYTE*)&call_back_va, sizeof(call_back_va));
-            }
-        }
-
-        section.add_data((BYTE*)&nulldata, sizeof(nulldata));
-
-
-        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, tls_directory_rva);
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS, 
-            (section.get_virtual_address() + section.get_size_of_raw_data()) - tls_directory_rva);
+      
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, tls_rva);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS,sizeof(IMAGE_TLS_DIRECTORY32));
     }
     else {
-        IMAGE_TLS_DIRECTORY64 tls_desc;
-        ZeroMemory(&tls_desc, sizeof(tls_desc));
+        DWORD tls_rva = section.get_virtual_address() + section.get_section_data().size();
+        section.get_section_data().resize(section.get_section_data().size() + sizeof(IMAGE_TLS_DIRECTORY64));
 
-        DWORD tls_directory_rva = section.get_virtual_address() + section.get_size_of_raw_data();
-        DWORD rva_tls_index = tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY64);
-        DWORD rva_tls_callbacks = 0;
-        DWORD nulldata = 0;
+        PIMAGE_TLS_DIRECTORY64 tls_desc = (PIMAGE_TLS_DIRECTORY64)&section.get_section_data().data()[
+            tls_rva - section.get_virtual_address()
+        ];
 
-        tls_desc.AddressOfIndex = image.rva_to_va(tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY64));
-        relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY64, AddressOfIndex),0);
+        ZeroMemory(tls_desc, sizeof(IMAGE_TLS_DIRECTORY64));
 
 
-        if (tls.get_raw_data().size()) {
-            tls_desc.StartAddressOfRawData = image.rva_to_va(tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY64) + sizeof(DWORD));
-            tls_desc.EndAddressOfRawData = tls_desc.StartAddressOfRawData + tls.get_raw_data().size();
-            relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY64, StartAddressOfRawData),0);
-            relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY64, EndAddressOfRawData),0);
+        tls_desc->StartAddressOfRawData = image.rva_to_va(tls.get_start_address_raw_data());
+        tls_desc->EndAddressOfRawData = image.rva_to_va(tls.get_end_address_raw_data());
+        tls_desc->AddressOfIndex = image.rva_to_va(tls.get_end_address_raw_data());
+
+        relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY64, StartAddressOfRawData), 0);
+        relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY64, EndAddressOfRawData), 0);
+        relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY64, AddressOfIndex), 0);
+
+        if (tls.get_address_of_callbacks()) {
+            tls_desc->AddressOfCallBacks = image.rva_to_va(tls.get_end_address_raw_data());
+            relocs.add_item(tls_rva + offsetof(IMAGE_TLS_DIRECTORY64, AddressOfCallBacks), 0);
         }
-        else {
-            tls_desc.StartAddressOfRawData = 0;
-            tls_desc.EndAddressOfRawData = 0;
-        }
-
-        if (tls.get_callbacks().size()) {
-            tls_desc.AddressOfCallBacks = image.rva_to_va(tls_directory_rva + sizeof(IMAGE_TLS_DIRECTORY64) + sizeof(DWORD));
-            if (tls.get_raw_data().size()) {
-                tls_desc.AddressOfCallBacks += tls.get_raw_data().size();
-            }
-            rva_tls_callbacks = image.va_to_rva(tls_desc.AddressOfCallBacks);
-            relocs.add_item(tls_directory_rva + offsetof(IMAGE_TLS_DIRECTORY64, AddressOfCallBacks),0);
-        }
-
-        tls_desc.SizeOfZeroFill = tls.get_size_of_zero_fill();
-        tls_desc.Characteristics = tls.get_characteristics();
+        tls_desc->SizeOfZeroFill = tls.get_size_of_zero_fill();
+        tls_desc->Characteristics = tls.get_characteristics();
 
 
-        section.add_data((BYTE*)&tls_desc, sizeof(tls_desc));//desc
-        section.add_data((BYTE*)&nulldata, sizeof(DWORD));
-
-        if (tls.get_raw_data().size()) {
-            section.add_data(tls.get_raw_data().data(), tls.get_raw_data().size());
-        }
-
-        if (tls.get_callbacks().size()) {
-
-            for (auto& callback_item : tls.get_callbacks()) {
-                DWORD64 call_back_va = callback_item.rva_callback;
-                if (callback_item.use_relocation) {
-                    call_back_va = image.rva_to_va(callback_item.rva_callback);
-                    relocs.add_item(section.get_virtual_address() + section.get_size_of_raw_data(),0);//fixup
-                }
-
-                section.add_data((BYTE*)&call_back_va, sizeof(call_back_va));
-            }
-        }
-
-        section.add_data((BYTE*)&nulldata, sizeof(nulldata));
-
-        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, tls_directory_rva);
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS,
-            (section.get_virtual_address() + section.get_size_of_raw_data()) - tls_directory_rva);
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, tls_rva);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS, sizeof(IMAGE_TLS_DIRECTORY64));
     }
-
-
 }
+
+void build_tls_full(pe_image &image,pe_section& section,
+    tls_table& tls,relocation_table& relocs) {
+
+    build_internal_tls_data(image, section, tls, relocs,
+        tls_table_build_raw_data | tls_table_build_address_of_index | tls_table_build_callbacks);
+
+    build_tls_table_only(image, section, tls, relocs);
+}
+
 
 bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation_table* relocs) {
 
