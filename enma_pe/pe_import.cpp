@@ -50,7 +50,7 @@ void imported_func::set_ordinal(WORD ordinal) {
 	this->b_import_by_name = false;
 	this->ordinal = ordinal;
 }
-void imported_func::get_name(std::string name) {
+void imported_func::set_name(std::string name) {
 	this->b_import_by_name = true;
 	this->name = name;
 }
@@ -77,8 +77,9 @@ DWORD imported_func::get_iat_rva() const {
 }
 
 imported_library::imported_library() {
-	timestamp				            = 0;
-    rva_to_iat = 0;
+	timestamp		= 0;
+    rva_to_iat		= 0;
+    rva_to_oft      = 0;
 	name.clear();
 	imported_items.clear();
 }
@@ -87,10 +88,11 @@ imported_library::~imported_library() {
 }
 imported_library& imported_library::operator=(const imported_library& library) {
 
-	this->timestamp       = library.timestamp;
-	this->rva_to_iat      = library.rva_to_iat;
-	this->name            = library.name;
-	this->imported_items  = library.imported_items;
+	this->timestamp      = library.timestamp;
+	this->rva_to_iat     = library.rva_to_iat;
+    this->rva_to_oft     = library.rva_to_oft;
+	this->name           = library.name;
+	this->imported_items = library.imported_items;
 
     return *this;
 }
@@ -102,9 +104,13 @@ void imported_library::set_name(std::string name){
 void imported_library::set_timestamp(DWORD timestamp) {
 	this->timestamp = timestamp;
 }
-void imported_library::set_rva_iat(DWORD relative_virtual_address) {
-	this->rva_to_iat = relative_virtual_address;
+void imported_library::set_rva_iat(DWORD rva) {
+	this->rva_to_iat = rva;
 }
+void imported_library::set_rva_oft(DWORD rva) {
+    this->rva_to_oft = rva;
+}
+
 void imported_library::add_item(const imported_func& item) {
 	this->imported_items.push_back(item);
 }
@@ -118,6 +124,10 @@ DWORD imported_library::get_timestamp() const {
 DWORD imported_library::get_rva_iat() const {
 	return this->rva_to_iat;
 }
+DWORD imported_library::get_rva_oft() const {
+    return this->rva_to_oft;
+}
+
 std::vector<imported_func>& imported_library::get_items() {
 	return this->imported_items;
 }
@@ -208,10 +218,13 @@ bool get_import_table(const pe_image &image, import_table& imports) {
 					pe_section * imp_iat_section = image.get_section_by_rva(imp_description->FirstThunk);
                     pe_section * imp_oft_section = image.get_section_by_rva(imp_description->OriginalFirstThunk);
 
-					imported_library lib;
-					lib.set_name(std::string(((char*)&imp_name_section->get_section_data().data()[imp_description->Name - imp_name_section->get_virtual_address()])));
-					lib.set_rva_iat(imp_description->FirstThunk);
-                    lib.set_timestamp(imp_description->TimeDateStamp);
+					imported_library import_lib;
+                    import_lib.set_name(std::string(((char*)&imp_name_section->get_section_data().data()[
+                        imp_description->Name - imp_name_section->get_virtual_address()
+                    ])));
+                    import_lib.set_rva_iat(imp_description->FirstThunk);
+                    import_lib.set_rva_oft(imp_description->OriginalFirstThunk);
+                    import_lib.set_timestamp(imp_description->TimeDateStamp);
 
 					void* lib_iat = &imp_name_section->get_section_data().data()[(imp_description->FirstThunk - imp_iat_section->get_virtual_address())];
 
@@ -225,12 +238,12 @@ bool get_import_table(const pe_image &image, import_table& imports) {
                         for (; *(DWORD*)lib_iat; lib_iat = (void*)(&((DWORD*)lib_iat)[1]) ) {
 
 							if (*(DWORD*)lib_iat&IMAGE_ORDINAL_FLAG32) {
-								lib.add_item(imported_func(iat_ft_rva,*(DWORD*)lib_iat & 0xFFFF));
+                                import_lib.add_item(imported_func(iat_ft_rva,*(DWORD*)lib_iat & 0xFFFF));
 							}
 							else {
 								pe_section * imp_func = image.get_section_by_rva(*(DWORD*)lib_iat);
 								if (imp_func) {
-									lib.add_item(imported_func(
+                                    import_lib.add_item(imported_func(
                                         iat_ft_rva,
 										(char*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address()) + sizeof(WORD)],
 										*(WORD*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address())]
@@ -244,12 +257,12 @@ bool get_import_table(const pe_image &image, import_table& imports) {
                         for (; *(DWORD64*)lib_iat; lib_iat = (void*)(&((DWORD64*)lib_iat)[1])) {
 
 							if (*(DWORD64*)lib_iat&IMAGE_ORDINAL_FLAG64) {
-								lib.add_item(imported_func(iat_ft_rva, *(DWORD64*)lib_iat & 0xFFFF));
+                                import_lib.add_item(imported_func(iat_ft_rva, *(DWORD64*)lib_iat & 0xFFFF));
 							}
 							else {
 								pe_section * imp_func = image.get_section_by_rva(*(DWORD*)lib_iat);
 								if (imp_func) {
-									lib.add_item(imported_func(
+                                    import_lib.add_item(imported_func(
                                         iat_ft_rva,
 										(char*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address()) + sizeof(WORD)],
 										*(WORD*)&imp_func->get_section_data().data()[(*(DWORD*)lib_iat - imp_func->get_virtual_address())]
@@ -261,7 +274,7 @@ bool get_import_table(const pe_image &image, import_table& imports) {
 						}
 					}
 
-					imports.add_lib(lib);
+					imports.add_lib(import_lib);
 				}
 				else {
 					return true;
@@ -273,7 +286,8 @@ bool get_import_table(const pe_image &image, import_table& imports) {
 
 	return false;
 }
-void build_import_table(pe_image &image, pe_section& section, import_table& imports) {
+
+void build_import_table(pe_image &image, pe_section& section, import_table& imports, bool use_original_table) {
 
     if (!imports.get_libs().size()) { return; }
 
@@ -289,9 +303,12 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
     unsigned int lib_names_size = 0;
     unsigned int func_names_size = 0;
     unsigned int thunk_size = 0;
+    unsigned int original_thunk_size = 0;
 
     for (auto& lib : imports.get_libs()) {
         if (!lib.get_items().size()) { continue; }
+
+        unsigned int current_lib_thunk_size = 0;
 
         for (auto& func : lib.get_items()) {
             if (func.is_import_by_name()) {
@@ -299,12 +316,18 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
                 if ((func.get_name().length() + 1) & 1) { func_names_size += 1; }//+1 byte for aligned func name
             }
 
-            if (image.is_x32_image()) { thunk_size += sizeof(DWORD); }
-            else { thunk_size += sizeof(DWORD64); }
+            if (image.is_x32_image()) { current_lib_thunk_size += sizeof(DWORD); }
+            else { current_lib_thunk_size += sizeof(DWORD64); }
         }
 
-        if (image.is_x32_image()) { thunk_size += sizeof(DWORD); }
-        else { thunk_size += sizeof(DWORD64); }
+        if (image.is_x32_image()) { current_lib_thunk_size += sizeof(DWORD); }
+        else { current_lib_thunk_size += sizeof(DWORD64); }
+
+        thunk_size += current_lib_thunk_size;
+
+        if (use_original_table) {
+            original_thunk_size += current_lib_thunk_size;
+        }
 
         lib_names_size += lib.get_name().length() + 1;
         if ((lib.get_name().length() + 1) & 1) { func_names_size += 1; }//+1 byte for aligned lib name
@@ -320,13 +343,14 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
         desc_table_size +
         lib_names_size +
         func_names_size + 
-        thunk_size*2);//oft and ft
+        thunk_size +
+        original_thunk_size);
 
-    PIMAGE_IMPORT_DESCRIPTOR import_descs = (PIMAGE_IMPORT_DESCRIPTOR)&section.get_section_data().data()[p_import_offset + thunk_size];
 
-    BYTE * import_names = &section.get_section_data().data()[p_import_offset + desc_table_size + thunk_size * 2];
     BYTE * import_thunks = &section.get_section_data().data()[p_import_offset];
-    BYTE * import_original_thunks = &section.get_section_data().data()[p_import_offset + desc_table_size + thunk_size];
+    PIMAGE_IMPORT_DESCRIPTOR import_descs = (PIMAGE_IMPORT_DESCRIPTOR)&section.get_section_data().data()[p_import_offset + thunk_size];
+    BYTE * import_original_thunks = &section.get_section_data().data()[p_import_offset + thunk_size + desc_table_size];
+    BYTE * import_names = &section.get_section_data().data()[p_import_offset + thunk_size + desc_table_size + original_thunk_size];
 
 
     for (auto& lib : imports.get_libs()) {
@@ -337,7 +361,13 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
         import_descs->TimeDateStamp = lib.get_timestamp();
         import_descs->Name = section.get_virtual_address() + (import_names - section.get_section_data().data());
         import_descs->FirstThunk = section.get_virtual_address() + (import_thunks - section.get_section_data().data());
-        import_descs->OriginalFirstThunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
+
+        if (use_original_table) {
+            import_descs->OriginalFirstThunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
+        }
+        else {
+            import_descs->OriginalFirstThunk = 0;      
+        }
 
         lstrcpyA((char*)import_names, lib.get_name().c_str());
         import_names += lib.get_name().length() + 1 + (((lib.get_name().length() + 1) & 1) ? 1 : 0);
@@ -355,11 +385,15 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
 
                 if (image.is_x32_image()) {
                     *(DWORD*)import_thunks = thunk_rva;          import_thunks += sizeof(DWORD);
-                    *(DWORD*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD);     
+                    if (use_original_table) {
+                        *(DWORD*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD);
+                    }
                 }
                 else {
                     *(DWORD64*)import_thunks = thunk_rva;          import_thunks += sizeof(DWORD64);
-                    *(DWORD64*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD64);           
+                    if (use_original_table) {
+                        *(DWORD64*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD64);
+                    }
                 }
             }
             else {
@@ -367,24 +401,34 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
 
                 if (image.is_x32_image()) {
                     *(DWORD*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32;          import_thunks += sizeof(DWORD);
-                    *(DWORD*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32; import_original_thunks += sizeof(DWORD);            
+                    if (use_original_table) {
+                        *(DWORD*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32; import_original_thunks += sizeof(DWORD);
+                    }
                 }
                 else {
                     *(DWORD64*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64;          import_thunks += sizeof(DWORD64);
-                    *(DWORD64*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64; import_original_thunks += sizeof(DWORD64);           
+                    if (use_original_table) {
+                        *(DWORD64*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64; import_original_thunks += sizeof(DWORD64);
+                    }
                 }
             }
         }
         if (image.is_x32_image()) {
             import_thunks += sizeof(DWORD);
-            import_original_thunks += sizeof(DWORD);
+            if (use_original_table) {
+                import_original_thunks += sizeof(DWORD);
+            }
         }
         else {
             import_thunks += sizeof(DWORD64);
-            import_original_thunks += sizeof(DWORD64);
+            if (use_original_table) {
+                import_original_thunks += sizeof(DWORD64);
+            }
         }
 
         lib.set_rva_iat(import_descs->FirstThunk);
+        lib.set_rva_oft(import_descs->OriginalFirstThunk);
+
         import_descs++;
     }
   

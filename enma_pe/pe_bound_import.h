@@ -19,7 +19,6 @@ public:
     DWORD bound_imported_ref::get_timestamp() const;
 };
 
-
 class bound_imported_library {
     std::string name;
     DWORD timestamp;

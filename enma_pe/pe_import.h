@@ -18,7 +18,7 @@ public:
 public:
 	void imported_func::set_hint(WORD hint);
 	void imported_func::set_ordinal(WORD ordinal);
-	void imported_func::get_name(std::string name);
+	void imported_func::set_name(std::string name);
 	void imported_func::set_import_by_name(bool b);
 	void imported_func::set_iat_rva(DWORD rva);
 public:
@@ -33,6 +33,7 @@ class imported_library {
 	std::string name;
 	DWORD timestamp;
 	DWORD rva_to_iat;
+    DWORD rva_to_oft;
 
 	std::vector<imported_func> imported_items;
 public:
@@ -43,12 +44,14 @@ public:
 public:
 	void imported_library::set_name(std::string name);
 	void imported_library::set_timestamp(DWORD timestamp);
-	void imported_library::set_rva_iat(DWORD relative_virtual_address);
+	void imported_library::set_rva_iat(DWORD rva);
+    void imported_library::set_rva_oft(DWORD rva);
 	void imported_library::add_item(const imported_func& item);
 public:
 	std::string imported_library::get_name() const;
 	DWORD imported_library::get_timestamp() const;
 	DWORD imported_library::get_rva_iat() const;
+    DWORD imported_library::get_rva_oft() const;
 
 	std::vector<imported_func>& imported_library::get_items();
 };
@@ -69,21 +72,12 @@ public:
 	bool import_table::get_imported_func(std::string lib_name, WORD ordinal, imported_library * &lib, imported_func * &func);
 };
 
-/*
-enum import_table_build_id {
-    import_table_build_iat                  = 1 << 1,
-    import_table_build_original_first_thunk = 1 << 2,
-};
-*/
 
 bool get_import_table(_In_ const pe_image &image,	
     _Out_ import_table& imports);
-
-
 void build_import_table(_Inout_ pe_image &image,
-	_Inout_ pe_section& section, _Inout_ import_table& imports);
-
-
+	_Inout_ pe_section& section, _Inout_ import_table& imports, 
+    _In_opt_ bool use_original_table = false);
 bool erase_import_table(_Inout_ pe_image &image, 
 	_Inout_opt_ std::vector<erased_zone>* zones = 0);
 

@@ -6,6 +6,7 @@
 struct erased_zone { DWORD rva; unsigned int size; };
 
 #include "pe_export.h"
+#include "pe_bound_import.h"
 #include "pe_import.h"
 #include "pe_resources.h"
 #include "pe_exceptions.h"
@@ -14,7 +15,6 @@ struct erased_zone { DWORD rva; unsigned int size; };
 #include "pe_debug.h"
 #include "pe_tls.h"
 #include "pe_loadconfig.h"
-#include "pe_bound_import.h"
 #include "pe_delay_import.h"
 #include "pe_dotnet.h"
 
