@@ -287,7 +287,8 @@ bool get_import_table(const pe_image &image, import_table& imports) {
 	return false;
 }
 
-void build_import_table(pe_image &image, pe_section& section, import_table& imports, bool use_original_table) {
+void build_import_table(pe_image &image, pe_section& section, import_table& imports,
+    bool use_original_table, bool rebuild_tables) {
 
     if (!imports.get_libs().size()) { return; }
 
@@ -296,8 +297,6 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
             section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
         );
     }
-
-
 
     unsigned int desc_table_size = sizeof(IMAGE_IMPORT_DESCRIPTOR);
     unsigned int lib_names_size = 0;
@@ -323,10 +322,14 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
         if (image.is_x32_image()) { current_lib_thunk_size += sizeof(DWORD); }
         else { current_lib_thunk_size += sizeof(DWORD64); }
 
-        thunk_size += current_lib_thunk_size;
+        if (rebuild_tables || (!lib.get_rva_iat() && !rebuild_tables)) {
+            thunk_size += current_lib_thunk_size;
+        }
 
         if (use_original_table) {
-            original_thunk_size += current_lib_thunk_size;
+            if (rebuild_tables || (!lib.get_rva_oft() && !rebuild_tables)) {
+                original_thunk_size += current_lib_thunk_size;
+            }
         }
 
         lib_names_size += lib.get_name().length() + 1;
@@ -360,69 +363,104 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
         import_descs->ForwarderChain = 0;
         import_descs->TimeDateStamp = lib.get_timestamp();
         import_descs->Name = section.get_virtual_address() + (import_names - section.get_section_data().data());
-        import_descs->FirstThunk = section.get_virtual_address() + (import_thunks - section.get_section_data().data());
+        
+        bool need_build_iat_table = false;
+        bool need_build_oft_table = false;
+       
 
-        if (use_original_table) {
-            import_descs->OriginalFirstThunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
+        if (rebuild_tables) {
+            need_build_iat_table = true;
+            import_descs->FirstThunk = section.get_virtual_address() + (import_thunks - section.get_section_data().data());
+
+            if (use_original_table) {
+                need_build_oft_table = true;
+                import_descs->OriginalFirstThunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
+            }
+            else {
+                import_descs->OriginalFirstThunk = 0;
+            }
         }
         else {
-            import_descs->OriginalFirstThunk = 0;      
+            if (!lib.get_rva_iat()) {
+                need_build_iat_table = true;
+                import_descs->FirstThunk = section.get_virtual_address() + (import_thunks - section.get_section_data().data());
+            }
+            else {
+                import_descs->FirstThunk = lib.get_rva_iat();
+            }
+
+            if (use_original_table) {
+                if (!lib.get_rva_oft()) {
+                    need_build_oft_table = true;
+                    import_descs->OriginalFirstThunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
+                }
+                else {
+                    import_descs->OriginalFirstThunk = lib.get_rva_oft();
+                }
+            }
         }
 
         lstrcpyA((char*)import_names, lib.get_name().c_str());
         import_names += lib.get_name().length() + 1 + (((lib.get_name().length() + 1) & 1) ? 1 : 0);
 
-        for (auto& func : lib.get_items()) {
-            if (func.is_import_by_name()) {
-                PIMAGE_IMPORT_BY_NAME pimport_by_name = (PIMAGE_IMPORT_BY_NAME)import_names;
-                DWORD thunk_rva = (section.get_virtual_address() + (import_names - section.get_section_data().data()));
+        if (need_build_iat_table || need_build_oft_table) {
 
-                func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
-                pimport_by_name->Hint = func.get_hint();
-                lstrcpyA(pimport_by_name->Name, func.get_name().c_str());
+            for (auto& func : lib.get_items()) {
+                if (func.is_import_by_name()) {
+                    PIMAGE_IMPORT_BY_NAME pimport_by_name = (PIMAGE_IMPORT_BY_NAME)import_names;
+                    DWORD thunk_rva = (section.get_virtual_address() + (import_names - section.get_section_data().data()));
 
-                import_names += sizeof(WORD) + func.get_name().length() + 1 + (((func.get_name().length() + 1) & 1) ? 1 : 0);
+                    func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
+                    pimport_by_name->Hint = func.get_hint();
+                    lstrcpyA(pimport_by_name->Name, func.get_name().c_str());
 
-                if (image.is_x32_image()) {
-                    *(DWORD*)import_thunks = thunk_rva;          import_thunks += sizeof(DWORD);
-                    if (use_original_table) {
-                        *(DWORD*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD);
+                    import_names += sizeof(WORD) + func.get_name().length() + 1 + (((func.get_name().length() + 1) & 1) ? 1 : 0);
+
+                    if (image.is_x32_image()) {
+                        if (need_build_iat_table) {
+                            *(DWORD*)import_thunks = thunk_rva;          import_thunks += sizeof(DWORD);
+                        }
+                        if (need_build_oft_table) {
+                            *(DWORD*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD);
+                        }
+                    }
+                    else {
+                        if (need_build_iat_table) {
+                            *(DWORD64*)import_thunks = thunk_rva;          import_thunks += sizeof(DWORD64);
+                        }
+                        if (need_build_oft_table) {
+                            *(DWORD64*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD64);
+                        }
                     }
                 }
                 else {
-                    *(DWORD64*)import_thunks = thunk_rva;          import_thunks += sizeof(DWORD64);
-                    if (use_original_table) {
-                        *(DWORD64*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(DWORD64);
+                    func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
+
+                    if (image.is_x32_image()) {
+                        if (need_build_iat_table) {
+                            *(DWORD*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32;          import_thunks += sizeof(DWORD);
+                        }
+                        if (need_build_oft_table) {
+                            *(DWORD*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32; import_original_thunks += sizeof(DWORD);
+                        }
+                    }
+                    else {
+                        if (need_build_iat_table) {
+                            *(DWORD64*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64;          import_thunks += sizeof(DWORD64);
+                        }
+                        if (need_build_oft_table) {
+                            *(DWORD64*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64; import_original_thunks += sizeof(DWORD64);
+                        }
                     }
                 }
+            }
+            if (image.is_x32_image()) {
+                if (need_build_iat_table) { import_thunks += sizeof(DWORD); }
+                if (need_build_oft_table) { import_original_thunks += sizeof(DWORD); }
             }
             else {
-                func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
-
-                if (image.is_x32_image()) {
-                    *(DWORD*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32;          import_thunks += sizeof(DWORD);
-                    if (use_original_table) {
-                        *(DWORD*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32; import_original_thunks += sizeof(DWORD);
-                    }
-                }
-                else {
-                    *(DWORD64*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64;          import_thunks += sizeof(DWORD64);
-                    if (use_original_table) {
-                        *(DWORD64*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64; import_original_thunks += sizeof(DWORD64);
-                    }
-                }
-            }
-        }
-        if (image.is_x32_image()) {
-            import_thunks += sizeof(DWORD);
-            if (use_original_table) {
-                import_original_thunks += sizeof(DWORD);
-            }
-        }
-        else {
-            import_thunks += sizeof(DWORD64);
-            if (use_original_table) {
-                import_original_thunks += sizeof(DWORD64);
+                if (need_build_iat_table) { import_thunks += sizeof(DWORD64); }
+                if (need_build_oft_table) { import_original_thunks += sizeof(DWORD64); }
             }
         }
 

@@ -77,7 +77,8 @@ bool get_import_table(_In_ const pe_image &image,
     _Out_ import_table& imports);
 void build_import_table(_Inout_ pe_image &image,
 	_Inout_ pe_section& section, _Inout_ import_table& imports, 
-    _In_opt_ bool use_original_table = false);
+    _In_opt_ bool use_original_table = false,
+    _In_opt_ bool rebuild_tables = true);
 bool erase_import_table(_Inout_ pe_image &image, 
 	_Inout_opt_ std::vector<erased_zone>* zones = 0);
 
