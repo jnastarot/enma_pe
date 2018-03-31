@@ -5,9 +5,9 @@ delay_imported_library::delay_imported_library() {
     attributes = 0;
     timestamp = 0;
     module_handle_rva = 0;
-    relative_virtual_address_to_iat = 0;
-    relative_virtual_address_to_bound_iat = 0;
-    relative_virtual_address_to_unload_info_table = 0;
+    rva_to_iat = 0;
+    rva_to_bound_iat = 0;
+    rva_to_unload_info_table = 0;
 }
 delay_imported_library::~delay_imported_library() {
 
@@ -18,9 +18,9 @@ delay_imported_library& delay_imported_library::operator=(const delay_imported_l
     this->attributes        = lib.attributes;
     this->timestamp         = lib.timestamp;
     this->module_handle_rva = lib.module_handle_rva;
-    this->relative_virtual_address_to_iat               = lib.relative_virtual_address_to_iat;
-    this->relative_virtual_address_to_bound_iat         = lib.relative_virtual_address_to_bound_iat;
-    this->relative_virtual_address_to_unload_info_table = lib.relative_virtual_address_to_unload_info_table;
+    this->rva_to_iat               = lib.rva_to_iat;
+    this->rva_to_bound_iat         = lib.rva_to_bound_iat;
+    this->rva_to_unload_info_table = lib.rva_to_unload_info_table;
 
     this->imported_items = lib.imported_items;
 
@@ -36,17 +36,17 @@ void delay_imported_library::set_attributes(DWORD attributes) {
 void delay_imported_library::set_timestamp(DWORD timestamp) {
     this->timestamp = timestamp;
 }
-void delay_imported_library::set_rva_module_handle(DWORD relative_virtual_address) {
-    this->module_handle_rva = relative_virtual_address;
+void delay_imported_library::set_rva_module_handle(DWORD rva) {
+    this->module_handle_rva = rva;
 }
-void delay_imported_library::set_rva_iat(DWORD relative_virtual_address) {
-    this->relative_virtual_address_to_iat = relative_virtual_address;
+void delay_imported_library::set_rva_iat(DWORD rva) {
+    this->rva_to_iat = rva;
 }
-void delay_imported_library::set_rva_bound_iat(DWORD relative_virtual_address) {
-    this->relative_virtual_address_to_bound_iat = relative_virtual_address;
+void delay_imported_library::set_rva_bound_iat(DWORD rva) {
+    this->rva_to_bound_iat = rva;
 }
-void delay_imported_library::set_rva_unload_info_table(DWORD relative_virtual_address) {
-    this->relative_virtual_address_to_unload_info_table = relative_virtual_address;
+void delay_imported_library::set_rva_unload_info_table(DWORD rva) {
+    this->rva_to_unload_info_table = rva;
 }
 void delay_imported_library::add_item(imported_func& item) {
     imported_items.push_back(item);
@@ -64,19 +64,19 @@ DWORD delay_imported_library::get_rva_module_handle() const {
     return this->module_handle_rva;
 }
 DWORD delay_imported_library::get_rva_iat() const {
-    return this->relative_virtual_address_to_iat;
+    return this->rva_to_iat;
 }
 DWORD delay_imported_library::get_rva_bound_iat() const {
-    return this->relative_virtual_address_to_bound_iat;
+    return this->rva_to_bound_iat;
 }
 DWORD delay_imported_library::get_rva_unload_info_table() const {
-    return this->relative_virtual_address_to_unload_info_table;
+    return this->rva_to_unload_info_table;
 }
 imported_library delay_imported_library::convert_to_imported_library() const {
     imported_library lib;
     lib.set_name(this->name);
     lib.set_timestamp(this->timestamp);
-    lib.set_rva_iat(this->relative_virtual_address_to_iat);
+    lib.set_rva_iat(this->rva_to_iat);
 
     for (auto& item : imported_items) {
         lib.add_item(item);

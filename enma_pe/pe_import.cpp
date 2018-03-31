@@ -78,7 +78,7 @@ DWORD imported_func::get_iat_rva() const {
 
 imported_library::imported_library() {
 	timestamp				            = 0;
-    relative_virtual_address_to_iat		= 0;
+    rva_to_iat = 0;
 	name.clear();
 	imported_items.clear();
 }
@@ -87,10 +87,10 @@ imported_library::~imported_library() {
 }
 imported_library& imported_library::operator=(const imported_library& library) {
 
-	this->timestamp                       = library.timestamp;
-	this->relative_virtual_address_to_iat = library.relative_virtual_address_to_iat;
-	this->name                            = library.name;
-	this->imported_items                  = library.imported_items;
+	this->timestamp       = library.timestamp;
+	this->rva_to_iat      = library.rva_to_iat;
+	this->name            = library.name;
+	this->imported_items  = library.imported_items;
 
     return *this;
 }
@@ -103,7 +103,7 @@ void imported_library::set_timestamp(DWORD timestamp) {
 	this->timestamp = timestamp;
 }
 void imported_library::set_rva_iat(DWORD relative_virtual_address) {
-	this->relative_virtual_address_to_iat = relative_virtual_address;
+	this->rva_to_iat = relative_virtual_address;
 }
 void imported_library::add_item(const imported_func& item) {
 	this->imported_items.push_back(item);
@@ -116,7 +116,7 @@ DWORD imported_library::get_timestamp() const {
 	return this->timestamp;
 }
 DWORD imported_library::get_rva_iat() const {
-	return this->relative_virtual_address_to_iat;
+	return this->rva_to_iat;
 }
 std::vector<imported_func>& imported_library::get_items() {
 	return this->imported_items;

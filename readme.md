@@ -15,7 +15,7 @@ e.mail..: jnastarot@yandex.ru
 | -------------- | ------- | ------- | ------- |
 | `export` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `import(default)` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| `bound import` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
+| `bound import` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `delay import` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `resources` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `exceptions` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |

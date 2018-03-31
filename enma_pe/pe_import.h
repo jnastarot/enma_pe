@@ -32,7 +32,7 @@ public:
 class imported_library {
 	std::string name;
 	DWORD timestamp;
-	DWORD relative_virtual_address_to_iat;
+	DWORD rva_to_iat;
 
 	std::vector<imported_func> imported_items;
 public:
@@ -69,11 +69,21 @@ public:
 	bool import_table::get_imported_func(std::string lib_name, WORD ordinal, imported_library * &lib, imported_func * &func);
 };
 
+/*
+enum import_table_build_id {
+    import_table_build_iat                  = 1 << 1,
+    import_table_build_original_first_thunk = 1 << 2,
+};
+*/
 
 bool get_import_table(_In_ const pe_image &image,	
     _Out_ import_table& imports);
+
+
 void build_import_table(_Inout_ pe_image &image,
 	_Inout_ pe_section& section, _Inout_ import_table& imports);
+
+
 bool erase_import_table(_Inout_ pe_image &image, 
 	_Inout_opt_ std::vector<erased_zone>* zones = 0);
 

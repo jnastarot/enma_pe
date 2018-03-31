@@ -5,9 +5,9 @@ class delay_imported_library {
     DWORD attributes;
     DWORD timestamp;
     DWORD module_handle_rva;
-    DWORD relative_virtual_address_to_iat;
-    DWORD relative_virtual_address_to_bound_iat;
-    DWORD relative_virtual_address_to_unload_info_table;
+    DWORD rva_to_iat;
+    DWORD rva_to_bound_iat;
+    DWORD rva_to_unload_info_table;
     
     std::vector<imported_func> imported_items;
 public:
@@ -19,10 +19,10 @@ public:
     void delay_imported_library::set_name(std::string name);
     void delay_imported_library::set_attributes(DWORD attributes);
     void delay_imported_library::set_timestamp(DWORD timestamp);
-    void delay_imported_library::set_rva_module_handle(DWORD relative_virtual_address);
-    void delay_imported_library::set_rva_iat(DWORD relative_virtual_address);
-    void delay_imported_library::set_rva_bound_iat(DWORD relative_virtual_address);
-    void delay_imported_library::set_rva_unload_info_table(DWORD relative_virtual_address);
+    void delay_imported_library::set_rva_module_handle(DWORD rva);
+    void delay_imported_library::set_rva_iat(DWORD rva);
+    void delay_imported_library::set_rva_bound_iat(DWORD rva);
+    void delay_imported_library::set_rva_unload_info_table(DWORD rva);
     void delay_imported_library::add_item(imported_func& item);
 public:
     std::string delay_imported_library::get_name() const;
