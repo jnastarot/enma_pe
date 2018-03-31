@@ -1,7 +1,7 @@
 #pragma once
 
 class delay_imported_library {
-    std::string name;
+    std::string library_name;
     DWORD attributes;
     DWORD timestamp;
     DWORD module_handle_rva;
@@ -12,20 +12,21 @@ class delay_imported_library {
     std::vector<imported_func> imported_items;
 public:
     delay_imported_library::delay_imported_library();
+    delay_imported_library::delay_imported_library(const delay_imported_library& lib);
     delay_imported_library::~delay_imported_library();
 
     delay_imported_library& delay_imported_library::operator=(const delay_imported_library& lib);
 public:
-    void delay_imported_library::set_name(std::string name);
+    void delay_imported_library::set_library_name(const std::string& library_name);
     void delay_imported_library::set_attributes(DWORD attributes);
     void delay_imported_library::set_timestamp(DWORD timestamp);
     void delay_imported_library::set_rva_module_handle(DWORD rva);
     void delay_imported_library::set_rva_iat(DWORD rva);
     void delay_imported_library::set_rva_bound_iat(DWORD rva);
     void delay_imported_library::set_rva_unload_info_table(DWORD rva);
-    void delay_imported_library::add_item(imported_func& item);
+    void delay_imported_library::add_item(const imported_func& item);
 public:
-    std::string delay_imported_library::get_name() const;
+    std::string delay_imported_library::get_library_name() const;
     DWORD delay_imported_library::set_attributes() const;
     DWORD delay_imported_library::get_timestamp() const;
     DWORD delay_imported_library::get_rva_module_handle() const;
@@ -39,11 +40,12 @@ class delay_import_table {
     std::vector<delay_imported_library> libs;
 public:
     delay_import_table::delay_import_table();
+    delay_import_table::delay_import_table(const delay_import_table& imports);
     delay_import_table::~delay_import_table();
 
     delay_import_table& delay_import_table::operator=(const delay_import_table& imports);
 public:
-    void delay_import_table::add_lib(delay_imported_library& lib);
+    void delay_import_table::add_lib(const delay_imported_library& lib);
 public:
     import_table delay_import_table::convert_to_import_table() const;
     std::vector<delay_imported_library>& delay_import_table::get_libs();

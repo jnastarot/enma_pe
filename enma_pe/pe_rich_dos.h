@@ -146,8 +146,11 @@ class pe_rich_data {
 
 public:
     pe_rich_data::pe_rich_data();
+    pe_rich_data::pe_rich_data(const pe_rich_data& data);
     pe_rich_data::pe_rich_data(e_rich_type type,unsigned short compiler_build,unsigned int count);
     pe_rich_data::~pe_rich_data();
+
+    pe_rich_data& pe_rich_data::operator=(const pe_rich_data& data);
 public:
     void pe_rich_data::set_type(e_rich_type type);
     void pe_rich_data::set_compiler_build(unsigned short compiler_build);

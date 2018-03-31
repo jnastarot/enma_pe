@@ -51,9 +51,10 @@ class pe_image{
 	void pe_image::init_from_file(void * image,unsigned int size);
 public:
 	pe_image::pe_image();
+    pe_image::pe_image(const pe_image& image);
 	pe_image::pe_image(bool _pe32);
 	pe_image::pe_image(void* pe_image,unsigned int size);
-	pe_image::pe_image(std::string file_path);
+	pe_image::pe_image(std::string& file_path);
 
 	pe_image::~pe_image();
 

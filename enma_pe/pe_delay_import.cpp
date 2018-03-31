@@ -9,12 +9,15 @@ delay_imported_library::delay_imported_library() {
     rva_to_bound_iat = 0;
     rva_to_unload_info_table = 0;
 }
+delay_imported_library::delay_imported_library(const delay_imported_library& lib) {
+    this->operator=(lib);
+}
 delay_imported_library::~delay_imported_library() {
 
 }
 delay_imported_library& delay_imported_library::operator=(const delay_imported_library& lib) {
     
-    this->name              = lib.name;
+    this->library_name      = lib.library_name;
     this->attributes        = lib.attributes;
     this->timestamp         = lib.timestamp;
     this->module_handle_rva = lib.module_handle_rva;
@@ -27,8 +30,8 @@ delay_imported_library& delay_imported_library::operator=(const delay_imported_l
     return *this;
 }
 
-void delay_imported_library::set_name(std::string name) {
-    this->name = name;
+void delay_imported_library::set_library_name(const std::string& library_name) {
+    this->library_name = library_name;
 }
 void delay_imported_library::set_attributes(DWORD attributes) {
     this->attributes = attributes;
@@ -48,11 +51,11 @@ void delay_imported_library::set_rva_bound_iat(DWORD rva) {
 void delay_imported_library::set_rva_unload_info_table(DWORD rva) {
     this->rva_to_unload_info_table = rva;
 }
-void delay_imported_library::add_item(imported_func& item) {
+void delay_imported_library::add_item(const imported_func& item) {
     imported_items.push_back(item);
 }
-std::string delay_imported_library::get_name() const {
-    return this->name;
+std::string delay_imported_library::get_library_name() const {
+    return this->library_name;
 }
 DWORD delay_imported_library::set_attributes() const {
     return this->attributes;
@@ -74,7 +77,7 @@ DWORD delay_imported_library::get_rva_unload_info_table() const {
 }
 imported_library delay_imported_library::convert_to_imported_library() const {
     imported_library lib;
-    lib.set_name(this->name);
+    lib.set_library_name(this->library_name);
     lib.set_timestamp(this->timestamp);
     lib.set_rva_iat(this->rva_to_iat);
 
@@ -88,6 +91,9 @@ imported_library delay_imported_library::convert_to_imported_library() const {
 delay_import_table::delay_import_table() {
 
 }
+delay_import_table::delay_import_table(const delay_import_table& imports) {
+    this->operator=(imports);
+}
 delay_import_table::~delay_import_table(){
 
 }
@@ -97,7 +103,7 @@ delay_import_table& delay_import_table::operator=(const delay_import_table& impo
 
     return *this;
 }
-void delay_import_table::add_lib(delay_imported_library& lib) {
+void delay_import_table::add_lib(const delay_imported_library& lib) {
     this->libs.push_back(lib);
 }
 import_table delay_import_table::convert_to_import_table() const {
@@ -131,7 +137,7 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 					pe_section * imp_dll_name_section = image.get_section_by_rva(imp_description->DllNameRVA);
 					pe_section * imp_name_section = image.get_section_by_rva(imp_description->ImportNameTableRVA);
 					
-					lib.set_name(std::string(((char*)&imp_dll_name_section->get_section_data().data()[imp_description->DllNameRVA - imp_dll_name_section->get_virtual_address()])));
+					lib.set_library_name(std::string(((char*)&imp_dll_name_section->get_section_data().data()[imp_description->DllNameRVA - imp_dll_name_section->get_virtual_address()])));
 					lib.set_rva_iat(imp_description->ImportAddressTableRVA);
                     lib.set_rva_bound_iat(imp_description->BoundImportAddressTableRVA);
                     lib.set_rva_unload_info_table(imp_description->UnloadInformationTableRVA);

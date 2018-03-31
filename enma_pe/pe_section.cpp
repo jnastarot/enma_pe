@@ -3,7 +3,7 @@
 
 
 pe_section::pe_section() {
-	name.clear();
+    section_name.clear();
 	virtual_size		= 0;
 	virtual_address		= 0;
 	pointer_to_raw		= 0;
@@ -12,7 +12,7 @@ pe_section::pe_section() {
 	section_data.clear();
 }
 pe_section::pe_section(const pe_section& section) {
-	this->name				= section.name;
+	this->section_name = section.section_name;
 	this->virtual_size		= section.virtual_size;
 	this->virtual_address	= section.virtual_address;
 	this->pointer_to_raw	= section.pointer_to_raw;
@@ -21,9 +21,9 @@ pe_section::pe_section(const pe_section& section) {
 }
 
 pe_section::pe_section(const IMAGE_SECTION_HEADER& header) {
-	this->name.reserve(8);
-	this->name.resize(lstrlenA((char*)header.Name));
-	memcpy((void*)this->name.data(), header.Name,8);
+	this->section_name.reserve(8);
+	this->section_name.resize(lstrlenA((char*)header.Name));
+	memcpy((void*)this->section_name.data(), header.Name,8);
 
 	this->virtual_size		= header.Misc.VirtualSize;
 	this->virtual_address	= header.VirtualAddress;
@@ -33,9 +33,9 @@ pe_section::pe_section(const IMAGE_SECTION_HEADER& header) {
 	this->section_data.clear();
 }
 pe_section::pe_section(const IMAGE_SECTION_HEADER& header, const std::vector<BYTE>& data) {
-	this->name.reserve(8);
-	this->name.resize(lstrlenA((char*)header.Name));
-	memcpy((void*)this->name.data(), header.Name, 8);
+	this->section_name.reserve(8);
+	this->section_name.resize(lstrlenA((char*)header.Name));
+	memcpy((void*)this->section_name.data(), header.Name, 8);
 
 	this->virtual_size		= header.Misc.VirtualSize;
 	this->virtual_address	= header.VirtualAddress;
@@ -49,7 +49,7 @@ pe_section::~pe_section() {
 }
 
 pe_section& pe_section::operator=(const pe_section& section) {
-	this->name = section.name;
+	this->section_name = section.section_name;
 	this->virtual_size		= section.virtual_size;
 	this->virtual_address	= section.virtual_address;
 	this->pointer_to_raw	= section.pointer_to_raw;
@@ -58,8 +58,8 @@ pe_section& pe_section::operator=(const pe_section& section) {
 	return *this;
 }
 
-pe_section& pe_section::set_name(std::string name) {
-	this->name = name;
+pe_section& pe_section::set_section_name(const std::string& section_name) {
+	this->section_name = section_name;
 	return *this;
 }
 pe_section& pe_section::set_virtual_size(DWORD virtual_size) {
@@ -116,8 +116,8 @@ void pe_section::add_data(void * data, unsigned int data_size) {
 	memcpy(section_data.data() + section_data.size() - data_size, data, data_size);
 }
 
-std::string pe_section::get_name() const {
-	return name;
+std::string pe_section::get_section_name() const {
+	return section_name;
 }
 DWORD pe_section::get_virtual_size() const {
 	return virtual_size;

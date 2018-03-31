@@ -12,6 +12,11 @@ tls_table::tls_table() {
 	raw_data.clear();
 	callbacks.clear();
 }
+
+tls_table::tls_table(const tls_table& tls) {
+    this->operator=(tls);
+}
+
 tls_table::~tls_table(){}
 
 
@@ -252,9 +257,9 @@ void build_internal_tls_data(const pe_image &image,pe_section& section,
     }
 
     if (build_items_ids&tls_table_build_address_of_index) {
-        if (section.get_size_of_raw_data() & 0x4 != 0x4) {
+        if (section.get_size_of_raw_data() & 0x3) {
             section.get_section_data().resize(
-                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x4))
+                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x3))
             );
         }
         
@@ -265,9 +270,9 @@ void build_internal_tls_data(const pe_image &image,pe_section& section,
     }
 
     if (build_items_ids&tls_table_build_callbacks) {
-        if (section.get_size_of_raw_data() & 0x4 != 0x4) {
+        if (section.get_size_of_raw_data() & 0x3) {
             section.get_section_data().resize(
-                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x4))
+                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x3))
             );
         }
 

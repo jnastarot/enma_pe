@@ -5,6 +5,10 @@
 pe_image::pe_image() {
 	clear_image();
 }
+pe_image::pe_image(const pe_image& image) {
+    this->operator=(image);
+}
+
 pe_image::pe_image(bool _pe32) {
 	clear_image();
 
@@ -23,7 +27,7 @@ pe_image::pe_image(void* pe_image, unsigned int size) {
 	init_from_file(pe_image, size);
 }
 
-pe_image::pe_image(std::string file_path) {
+pe_image::pe_image(std::string& file_path) {
 	clear_image();
     OFSTRUCT of_struct = { 0 };
 	HANDLE hfile = (HANDLE)OpenFile(file_path.c_str(), &of_struct, OF_READ);
@@ -32,15 +36,18 @@ pe_image::pe_image(std::string file_path) {
 		unsigned int file_size = GetFileSize(hfile, 0);
 		unsigned int read_size = 0;
 		void * file_buffer = new BYTE[file_size];
-		if (ReadFile(hfile, file_buffer, file_size, (DWORD*)&read_size, 0) &&
-			file_size == read_size) {
-			init_from_file(file_buffer, file_size);
-		}
-		else {
-			image_status = pe_image_status_bad_format;
-		}
 
-		delete[] file_buffer;
+        if (file_buffer) {
+            if (ReadFile(hfile, file_buffer, file_size, (DWORD*)&read_size, 0) &&
+                file_size == read_size) {
+                init_from_file(file_buffer, file_size);
+            }
+            else {
+                image_status = pe_image_status_bad_format;
+            }
+
+            delete[] file_buffer;
+        }
 		CloseHandle(hfile);
 	}
 	else {

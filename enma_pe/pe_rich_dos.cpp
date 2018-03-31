@@ -15,6 +15,9 @@ std::vector<BYTE> pe_dos_stub::get_dos_stub() const {
 pe_rich_data::pe_rich_data() :
     type((e_rich_type)0), compiler_build(0), count(0){
 }
+pe_rich_data::pe_rich_data(const pe_rich_data& data) {
+    this->operator=(data);
+}
 
 pe_rich_data::pe_rich_data(e_rich_type type, unsigned short compiler_build, unsigned int count) :
     type(type), compiler_build(compiler_build), count(count) {
@@ -22,6 +25,16 @@ pe_rich_data::pe_rich_data(e_rich_type type, unsigned short compiler_build, unsi
 }
 
 pe_rich_data::~pe_rich_data(){ }
+
+
+pe_rich_data& pe_rich_data::operator=(const pe_rich_data& data) {
+    
+    this->type = data.type;
+    this->compiler_build = data.compiler_build;
+    this->count = data.count;
+
+    return *this;
+}
 
 void pe_rich_data::set_type(e_rich_type type) {
     this->type = type;

@@ -2,7 +2,7 @@
 #include "pe_map_parser.h"
 
 
-map_parser::map_parser(std::string filepath, pe_image& image, map_root& map, e_map_result &result) {
+map_parser::map_parser(std::string& filepath, pe_image& image, map_root& map, e_map_result &result) {
 	map.timestamp = 0;
 	map.dirs.clear();
 
@@ -72,7 +72,7 @@ map_parser::~map_parser() {
 }
 
 
-std::vector<std::string> map_parser::get_line_items(std::string line) {
+std::vector<std::string> map_parser::get_line_items(std::string& line) {
 	std::vector<std::string> items;
 	std::istringstream str_stream(line);
 
@@ -83,7 +83,7 @@ std::vector<std::string> map_parser::get_line_items(std::string line) {
 	return items;
 }
 
-void map_parser::get_raw_map_file(std::string map_text, raw_mapfile &mapfile) {
+void map_parser::get_raw_map_file(std::string& map_text, raw_mapfile &mapfile) {
 	mapfile.clear();
 
 	std::istringstream i(map_text);
@@ -101,7 +101,7 @@ void map_parser::get_raw_map_file(std::string map_text, raw_mapfile &mapfile) {
 
 }
 
-bool map_parser::hexstring_to_value(std::string hex_string, DWORD64& value) {
+bool map_parser::hexstring_to_value(std::string& hex_string, DWORD64& value) {
 	bool was_init_first = false;
 	value = 0;
 	for (unsigned int i = 0; i < hex_string.length(); i++) {
@@ -128,7 +128,7 @@ bool map_parser::hexstring_to_value(std::string hex_string, DWORD64& value) {
 	return was_init_first;
 }
 
-bool map_parser::address_string_to_values(std::string address_string, DWORD64& section_num, DWORD64& offset) {
+bool map_parser::address_string_to_values(std::string& address_string, DWORD64& section_num, DWORD64& offset) {
 
 	if (hexstring_to_value(address_string.substr(0, 4), section_num) && hexstring_to_value(address_string.substr(5), offset)) {
 		return true;

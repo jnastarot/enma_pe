@@ -1,6 +1,6 @@
 #pragma once
 class pe_section{
-	std::string name;
+	std::string section_name;
 	DWORD virtual_size;
 	DWORD virtual_address;
 	DWORD pointer_to_raw;
@@ -16,7 +16,7 @@ public:
 
 	pe_section& pe_section::operator=(const pe_section& section);
 public:
-	pe_section& pe_section::set_name(std::string name);
+	pe_section& pe_section::set_section_name(const std::string& name);
 	pe_section& pe_section::set_virtual_size(DWORD virtual_size);
 	pe_section& pe_section::set_virtual_address(DWORD virtual_address);
 	pe_section& pe_section::set_size_of_raw_data(DWORD size_of_raw_data);
@@ -29,7 +29,7 @@ public:
 
 	void pe_section::add_data(void * data,unsigned int data_size);
 public:
-	std::string pe_section::get_name() const;
+	std::string pe_section::get_section_name() const;
 	DWORD pe_section::get_virtual_size() const;
 	DWORD pe_section::get_virtual_address() const;
 	DWORD pe_section::get_size_of_raw_data() const;

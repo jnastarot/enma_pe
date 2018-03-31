@@ -7,13 +7,15 @@ imported_func::imported_func() {
 	ordinal				= 0;
 	b_import_by_name	= 0;
 	iat_rva				= 0;
-	name.clear();
+    func_name.clear();
 }
-
-imported_func::imported_func(DWORD iat_rva, std::string name, WORD hint) {
+imported_func::imported_func(const imported_func& func) {
+    this->operator=(func);
+}
+imported_func::imported_func(DWORD iat_rva, const std::string& func_name, WORD hint) {
     this->iat_rva = iat_rva;
     this->hint = hint;
-    this->name = name;
+    this->func_name = func_name;
     this->ordinal = 0;
     b_import_by_name = true;
 }
@@ -21,7 +23,7 @@ imported_func::imported_func(DWORD iat_rva, std::string name, WORD hint) {
 imported_func::imported_func(DWORD iat_rva, WORD ordinal) {
     this->iat_rva = iat_rva;
     this->hint = 0;
-    this->name.clear();
+    this->func_name.clear();
 
     this->ordinal = ordinal;
 
@@ -36,7 +38,7 @@ imported_func& imported_func::operator=(const imported_func& func) {
 
 	this->iat_rva = func.iat_rva;
 	this->hint = func.hint;
-	this->name = func.name;
+	this->func_name = func.func_name;
 	this->ordinal = func.ordinal;
 	this->b_import_by_name = func.b_import_by_name;
 
@@ -50,9 +52,9 @@ void imported_func::set_ordinal(WORD ordinal) {
 	this->b_import_by_name = false;
 	this->ordinal = ordinal;
 }
-void imported_func::set_name(std::string name) {
+void imported_func::set_func_name(const std::string& func_name) {
 	this->b_import_by_name = true;
-	this->name = name;
+	this->func_name = func_name;
 }
 void imported_func::set_import_by_name(bool b) {
 	this->b_import_by_name = b;
@@ -66,8 +68,8 @@ WORD imported_func::get_hint() const {
 WORD imported_func::get_ordinal() const {
 	return this->ordinal;
 }
-std::string imported_func::get_name() const {
-	return this->name;
+std::string imported_func::get_func_name() const {
+	return this->func_name;
 }
 bool  imported_func::is_import_by_name() const {
 	return this->b_import_by_name;
@@ -80,8 +82,11 @@ imported_library::imported_library() {
 	timestamp		= 0;
     rva_to_iat		= 0;
     rva_to_oft      = 0;
-	name.clear();
+    library_name.clear();
 	imported_items.clear();
+}
+imported_library::imported_library(const imported_library& library) {
+    this->operator=(library);
 }
 imported_library::~imported_library() {
 	imported_items.clear();
@@ -91,15 +96,15 @@ imported_library& imported_library::operator=(const imported_library& library) {
 	this->timestamp      = library.timestamp;
 	this->rva_to_iat     = library.rva_to_iat;
     this->rva_to_oft     = library.rva_to_oft;
-	this->name           = library.name;
+	this->library_name   = library.library_name;
 	this->imported_items = library.imported_items;
 
     return *this;
 }
 
 
-void imported_library::set_name(std::string name){
-	this->name = name;
+void imported_library::set_library_name(const std::string& library_name){
+	this->library_name = library_name;
 }
 void imported_library::set_timestamp(DWORD timestamp) {
 	this->timestamp = timestamp;
@@ -115,8 +120,8 @@ void imported_library::add_item(const imported_func& item) {
 	this->imported_items.push_back(item);
 }
 
-std::string imported_library::get_name() const {
-	return this->name;
+std::string imported_library::get_library_name() const {
+	return this->library_name;
 }
 DWORD imported_library::get_timestamp() const {
 	return this->timestamp;
@@ -136,6 +141,9 @@ std::vector<imported_func>& imported_library::get_items() {
 import_table::import_table() {
 
 }
+import_table::import_table(const import_table& imports) {
+    this->operator=(imports);
+}
 import_table::~import_table() {
 
 }
@@ -147,7 +155,7 @@ import_table& import_table::operator=(const import_table& imports) {
     return *this;
 }
 
-void import_table::add_lib(imported_library& lib) {
+void import_table::add_lib(const imported_library& lib) {
 	this->libs.push_back(lib);
 }
 
@@ -155,10 +163,10 @@ std::vector<imported_library>& import_table::get_libs() {
 	return this->libs;
 }
 
-bool import_table::get_imported_lib(std::string lib_name, imported_library * &lib) {
+bool import_table::get_imported_lib(const std::string& lib_name, imported_library * &lib) {
 
 	for (unsigned int i = 0; i < libs.size(); i++) {
-		if (libs[i].get_name() == lib_name) {
+		if (libs[i].get_library_name() == lib_name) {
 			lib = &libs[i];
 			return true;
 		}
@@ -166,12 +174,12 @@ bool import_table::get_imported_lib(std::string lib_name, imported_library * &li
 
 	return false;
 }
-bool import_table::get_imported_func(std::string lib_name, std::string func_name, imported_library * &lib, imported_func * &func) {
+bool import_table::get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, imported_func * &func) {
 
 	for (unsigned int i = 0; i < libs.size(); i++) {
-		if (libs[i].get_name() == lib_name) {
+		if (libs[i].get_library_name() == lib_name) {
 			for (unsigned int j = 0; j < libs[i].get_items().size(); j++) {
-				if (libs[i].get_items()[j].is_import_by_name() && libs[i].get_items()[j].get_name() == func_name) {
+				if (libs[i].get_items()[j].is_import_by_name() && libs[i].get_items()[j].get_func_name() == func_name) {
 					lib = &libs[i];
 					func = &libs[i].get_items()[j];
 					return true;
@@ -182,10 +190,10 @@ bool import_table::get_imported_func(std::string lib_name, std::string func_name
 
 	return false;
 }
-bool import_table::get_imported_func(std::string lib_name, WORD ordinal, imported_library * &lib, imported_func * &func) {
+bool import_table::get_imported_func(const std::string& lib_name, WORD ordinal, imported_library * &lib, imported_func * &func) {
 
 	for (unsigned int i = 0; i < libs.size(); i++) {
-		if (libs[i].get_name() == lib_name) {
+		if (libs[i].get_library_name() == lib_name) {
 			for (unsigned int j = 0; j < libs[i].get_items().size(); j++) {
 				if (!libs[i].get_items()[j].is_import_by_name() && libs[i].get_items()[j].get_ordinal() == ordinal) {
 					lib = &libs[i];
@@ -219,7 +227,7 @@ bool get_import_table(const pe_image &image, import_table& imports) {
                     pe_section * imp_oft_section = image.get_section_by_rva(imp_description->OriginalFirstThunk);
 
 					imported_library import_lib;
-                    import_lib.set_name(std::string(((char*)&imp_name_section->get_section_data().data()[
+                    import_lib.set_library_name(std::string(((char*)&imp_name_section->get_section_data().data()[
                         imp_description->Name - imp_name_section->get_virtual_address()
                     ])));
                     import_lib.set_rva_iat(imp_description->FirstThunk);
@@ -311,8 +319,8 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
 
         for (auto& func : lib.get_items()) {
             if (func.is_import_by_name()) {
-                func_names_size += func.get_name().length() + 1 + sizeof(WORD);//hint
-                if ((func.get_name().length() + 1) & 1) { func_names_size += 1; }//+1 byte for aligned func name
+                func_names_size += func.get_func_name().length() + 1 + sizeof(WORD);//hint
+                if ((func.get_func_name().length() + 1) & 1) { func_names_size += 1; }//+1 byte for aligned func name
             }
 
             if (image.is_x32_image()) { current_lib_thunk_size += sizeof(DWORD); }
@@ -332,8 +340,8 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
             }
         }
 
-        lib_names_size += lib.get_name().length() + 1;
-        if ((lib.get_name().length() + 1) & 1) { func_names_size += 1; }//+1 byte for aligned lib name
+        lib_names_size += lib.get_library_name().length() + 1;
+        if ((lib.get_library_name().length() + 1) & 1) { func_names_size += 1; }//+1 byte for aligned lib name
         desc_table_size += sizeof(IMAGE_IMPORT_DESCRIPTOR);
     }
 
@@ -400,8 +408,8 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
             }
         }
 
-        lstrcpyA((char*)import_names, lib.get_name().c_str());
-        import_names += lib.get_name().length() + 1 + (((lib.get_name().length() + 1) & 1) ? 1 : 0);
+        lstrcpyA((char*)import_names, lib.get_library_name().c_str());
+        import_names += lib.get_library_name().length() + 1 + (((lib.get_library_name().length() + 1) & 1) ? 1 : 0);
 
         if (need_build_iat_table || need_build_oft_table) {
 
@@ -412,9 +420,9 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
 
                     func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
                     pimport_by_name->Hint = func.get_hint();
-                    lstrcpyA(pimport_by_name->Name, func.get_name().c_str());
+                    lstrcpyA(pimport_by_name->Name, func.get_func_name().c_str());
 
-                    import_names += sizeof(WORD) + func.get_name().length() + 1 + (((func.get_name().length() + 1) & 1) ? 1 : 0);
+                    import_names += sizeof(WORD) + func.get_func_name().length() + 1 + (((func.get_func_name().length() + 1) & 1) ? 1 : 0);
 
                     if (image.is_x32_image()) {
                         if (need_build_iat_table) {

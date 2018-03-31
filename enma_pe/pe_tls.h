@@ -17,7 +17,9 @@ class tls_table {
 	std::vector<tls_table::tls_callback> callbacks;
 public:
 	tls_table::tls_table();
+    tls_table::tls_table(const tls_table& tls);
 	tls_table::~tls_table();
+
 	tls_table& tls_table::operator=(const tls_table& tls);
 public:
 	void tls_table::set_start_address_raw_data(DWORD   start_address_raw_data);

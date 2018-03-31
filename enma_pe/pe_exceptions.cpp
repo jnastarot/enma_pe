@@ -2,10 +2,26 @@
 #include "stdafx.h"
 #include "pe_exceptions.h"
 
+
+exceptions_item::exceptions_item() :
+    address_begin(0), address_end(0), address_unwind_data(0) {}
+
+exceptions_item::exceptions_item(const exceptions_item& item) {
+    this->operator=(item);
+}
 exceptions_item::exceptions_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data):
     address_begin(address_begin), address_end(address_end), address_unwind_data(address_unwind_data){}
 
 exceptions_item::~exceptions_item() {
+}
+
+exceptions_item& exceptions_item::operator=(const exceptions_item& item) {
+
+    this->address_begin = item.address_begin;
+    this->address_end = item.address_end;
+    this->address_unwind_data = item.address_unwind_data;
+
+    return *this;
 }
 
 void exceptions_item::set_begin_address(DWORD rva_address) {
@@ -33,13 +49,23 @@ DWORD exceptions_item::get_unwind_data_address() const {
 exceptions_table::exceptions_table() {
 
 }
+exceptions_table::exceptions_table(const exceptions_table& exceptions) {
+    this->operator=(exceptions);
+}
 exceptions_table::~exceptions_table() {
 
 }
+
+exceptions_table& exceptions_table::operator=(const exceptions_table& exceptions) {
+    this->items = exceptions.items;
+
+    return *this;
+}
+
 void exceptions_table::add_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data) {
     items.push_back(exceptions_item(address_begin, address_end, address_unwind_data));
 }
-void exceptions_table::add_item(exceptions_item& item) {
+void exceptions_table::add_item(const exceptions_item& item) {
     items.push_back(item);
 }
 std::vector<exceptions_item>& exceptions_table::get_items() {

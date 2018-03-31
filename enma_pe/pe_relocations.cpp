@@ -5,23 +5,26 @@
 relocation_table::relocation_table() {
 
 }
+relocation_table::relocation_table(const relocation_table& relocations) {
+    this->operator=(relocations);
+}
 relocation_table::~relocation_table() {
 
 }
-relocation_table& relocation_table::operator=(const relocation_table& _relocation_table) {
-    this->items = _relocation_table.items;
+relocation_table& relocation_table::operator=(const relocation_table& relocations) {
+    this->items = relocations.items;
     return *this;
 }
 
-void relocation_table::add_item(DWORD relative_virtual_address, DWORD relocation_id) {
-   items.push_back({ relative_virtual_address , relocation_id,0});
+void relocation_table::add_item(DWORD rva, DWORD relocation_id) {
+   items.push_back({ rva , relocation_id,0});
 }
 
-bool relocation_table::erase_item(DWORD relative_virtual_address) {
+bool relocation_table::erase_item(DWORD rva) {
 
     for (unsigned int item_idx = 0; item_idx < items.size(); item_idx++) {
         
-        if (items[item_idx].relative_virtual_address == relative_virtual_address) {
+        if (items[item_idx].relative_virtual_address == rva) {
             items.erase(items.begin() + item_idx);
             return true;
         }
@@ -77,15 +80,15 @@ void relocation_table::sort() {
         return lhs.relative_virtual_address < rhs.relative_virtual_address;
     });
 }
-unsigned int relocation_table::size() {
+unsigned int relocation_table::size() const {
     return items.size();
 }
 
-bool relocation_table::has_item(DWORD relative_virtual_address) const {
+bool relocation_table::has_item(DWORD rva) const {
 
     for (unsigned int item_idx = 0; item_idx < items.size(); item_idx++) {
 
-        if (items[item_idx].relative_virtual_address == relative_virtual_address) {
+        if (items[item_idx].relative_virtual_address == rva) {
             return true;
         }
     }
@@ -105,11 +108,11 @@ bool relocation_table::has_item_id(DWORD relocation_id) const {
     return false;
 }
 
-bool relocation_table::get_item_id(DWORD relative_virtual_address, DWORD& relocation_id) const {
+bool relocation_table::get_item_id(DWORD rva, DWORD& relocation_id) const {
 
     for (unsigned int item_idx = 0; item_idx < items.size(); item_idx++) {
 
-        if (items[item_idx].relative_virtual_address == relative_virtual_address) {
+        if (items[item_idx].relative_virtual_address == rva) {
             relocation_id = items[item_idx].relocation_id;
             return true;
         }

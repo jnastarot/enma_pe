@@ -11,24 +11,25 @@ class relocation_table {
     std::vector<relocation_item> items;
 public:
     relocation_table::relocation_table();
+    relocation_table::relocation_table(const relocation_table& relocations);
     relocation_table::~relocation_table();
-    relocation_table& relocation_table::operator=(const relocation_table& _relocation_table);
 
+    relocation_table& relocation_table::operator=(const relocation_table& relocations);
 public:
-    void relocation_table::add_item(DWORD relative_virtual_address, DWORD relocation_id);
-    bool relocation_table::erase_item(DWORD relative_virtual_address);
+    void relocation_table::add_item(DWORD rva, DWORD relocation_id);
+    bool relocation_table::erase_item(DWORD rva);
     bool relocation_table::erase_first_item_by_id(DWORD relocation_id);
     bool relocation_table::erase_all_items_by_id(DWORD relocation_id);
 
     void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>& found_relocs,DWORD relocation_id);
 
     void relocation_table::clear();
-    void relocation_table::sort();
-    unsigned int relocation_table::size();
+    void relocation_table::sort();  
 public:
-    bool relocation_table::has_item(DWORD relative_virtual_address) const;
+    unsigned int relocation_table::size() const;
+    bool relocation_table::has_item(DWORD rva) const;
     bool relocation_table::has_item_id(DWORD relocation_id) const;
-    bool relocation_table::get_item_id(DWORD relative_virtual_address, DWORD& relocation_id) const;
+    bool relocation_table::get_item_id(DWORD rva, DWORD& relocation_id) const;
 
     std::vector<relocation_item>& relocation_table::get_items();
 };

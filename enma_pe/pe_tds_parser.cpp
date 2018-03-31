@@ -163,7 +163,7 @@ inline int EatInt(const char *& pos)
 }
 
 
-tds_parser::tds_parser(std::string filepath, pe_image& image, map_root& map, e_map_result &result) {
+tds_parser::tds_parser(std::string& filepath, pe_image& image, map_root& map, e_map_result &result) {
     OFSTRUCT ofs = { 0 };
     DWORD readed;
 
@@ -235,7 +235,7 @@ e_map_result tds_parser::parse(pe_image& image, map_root& map) {
             seg.offset = 0;
             seg.section_number = segments.size() + 1;
             seg.length = section->get_virtual_size();
-            seg.segment_name = section->get_name();
+            seg.segment_name = section->get_section_name();
             segments.push_back(seg);
         }
 
@@ -257,7 +257,7 @@ std::string tds_parser::get_name_by_id(int name_id){
     return std::string(pos + 1);
 }
 
-void tds_parser::parse_item_path(map_item_raw& item, std::string name) {
+void tds_parser::parse_item_path(map_item_raw& item, std::string& name) {
 
     std::string path_step;
     for (unsigned int i = 0; i < name.length(); i++) {

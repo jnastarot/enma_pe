@@ -35,7 +35,7 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
 	
 		pe_section * p_section = tide_image.get_section_by_idx(section_idx);
 
-		if (p_section && (!p_section->is_executable() || (p_section->is_executable() && find_in_execute_sections))) {
+		if (p_section && (!p_section->is_executable() || find_in_execute_sections)) {
 
 			BYTE * section_raw = p_section->get_section_data().data();
 			unsigned int raw_size = p_section->get_size_of_raw_data();

@@ -5,10 +5,12 @@ class exceptions_item {
     DWORD address_end;
     DWORD address_unwind_data;
 public:
+    exceptions_item::exceptions_item();
+    exceptions_item::exceptions_item(const exceptions_item& item);
     exceptions_item::exceptions_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data);
     exceptions_item::~exceptions_item();
 
-
+    exceptions_item& exceptions_item::operator=(const exceptions_item& item);
 public:
     void exceptions_item::set_begin_address(DWORD rva_address);
     void exceptions_item::set_end_address(DWORD rva_address);
@@ -27,12 +29,13 @@ class exceptions_table {
     std::vector<exceptions_item> items;
 public:
     exceptions_table::exceptions_table();
+    exceptions_table::exceptions_table(const exceptions_table& exceptions);
     exceptions_table::~exceptions_table();
 
-
+    exceptions_table& exceptions_table::operator=(const exceptions_table& exceptions);
 public:
     void exceptions_table::add_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data);
-    void exceptions_table::add_item(exceptions_item& item);
+    void exceptions_table::add_item(const exceptions_item& item);
 public:
 
     std::vector<exceptions_item>& exceptions_table::get_items();

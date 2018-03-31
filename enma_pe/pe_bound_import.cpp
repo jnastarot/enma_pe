@@ -5,8 +5,11 @@
 bound_imported_ref::bound_imported_ref() {
     timestamp = 0;
 }
-bound_imported_ref::bound_imported_ref(std::string name, DWORD timestamp) {
-    this->name = name;
+bound_imported_ref::bound_imported_ref(const bound_imported_ref& ref) {
+    this->operator=(ref);
+}
+bound_imported_ref::bound_imported_ref(const std::string& ref_name, DWORD timestamp) {
+    this->ref_name = ref_name;
     this->timestamp = timestamp;
 }
 bound_imported_ref::~bound_imported_ref() {
@@ -15,20 +18,20 @@ bound_imported_ref::~bound_imported_ref() {
 
 bound_imported_ref& bound_imported_ref::operator=(const bound_imported_ref& ref) {
     this->timestamp = ref.timestamp;
-    this->name = ref.name;
+    this->ref_name = ref.ref_name;
 
     return *this;
 }
 
-void bound_imported_ref::set_name(std::string name) {
-    this->name = name;
+void bound_imported_ref::set_ref_name(const std::string& ref_name) {
+    this->ref_name = ref_name;
 }
 void bound_imported_ref::set_timestamp(DWORD timestamp) {
     this->timestamp = timestamp;
 }
 
-std::string bound_imported_ref::get_name() const {
-    return this->name;
+std::string bound_imported_ref::get_ref_name() const {
+    return this->ref_name;
 }
 DWORD bound_imported_ref::get_timestamp() const {
     return this->timestamp;
@@ -38,6 +41,9 @@ DWORD bound_imported_ref::get_timestamp() const {
 bound_imported_library::bound_imported_library() {
     timestamp = 0;
 }
+bound_imported_library::bound_imported_library(const bound_imported_library& lib) {
+    this->operator=(lib);
+}
 bound_imported_library::~bound_imported_library() {
 
 }
@@ -45,24 +51,24 @@ bound_imported_library::~bound_imported_library() {
 bound_imported_library& bound_imported_library::operator=(const bound_imported_library& lib) {
     this->timestamp = lib.timestamp;
     this->refs = lib.refs;
-    this->name = lib.name;
+    this->library_name = lib.library_name;
 
     return *this;
 }
 
-void bound_imported_library::set_name(std::string name) {
-    this->name = name;
+void bound_imported_library::set_library_name(const std::string& library_name) {
+    this->library_name = library_name;
 }
 void bound_imported_library::set_timestamp(DWORD timestamp) {
     this->timestamp = timestamp;
 }
 
-void bound_imported_library::add_ref(bound_imported_ref& ref) {
+void bound_imported_library::add_ref(const bound_imported_ref& ref) {
     this->refs.push_back(ref);
 }
 
-std::string bound_imported_library::get_name() const{
-    return this->name;
+std::string bound_imported_library::get_library_name() const{
+    return this->library_name;
 }
 DWORD bound_imported_library::get_timestamp() const {
     return this->timestamp;
@@ -77,6 +83,9 @@ std::vector<bound_imported_ref>& bound_imported_library::get_refs() {
 bound_import_table::bound_import_table() {
 
 }
+bound_import_table::bound_import_table(const bound_import_table& imports) {
+    this->operator=(imports);
+}
 bound_import_table::~bound_import_table() {
 
 }
@@ -86,7 +95,7 @@ bound_import_table& bound_import_table::operator=(const bound_import_table& impo
 
     return *this;
 }
-void bound_import_table::add_lib(bound_imported_library& lib) {
+void bound_import_table::add_lib(const bound_imported_library& lib) {
     libs.push_back(lib);
 }
 std::vector<bound_imported_library>& bound_import_table::get_libs() {
@@ -140,7 +149,7 @@ bool get_bound_import_table(const pe_image &image, bound_import_table& imports) 
 
                 pe_section * bound_name_section = image.get_section_by_rva(virtual_address + bound_imp_description->OffsetModuleName);
                 if (bound_name_section) {
-                    bound_lib.set_name((char*)&bound_name_section->get_section_data().data()[
+                    bound_lib.set_library_name((char*)&bound_name_section->get_section_data().data()[
                         (virtual_address + bound_imp_description->OffsetModuleName) - bound_name_section->get_virtual_address()
                     ]);          
                 }
@@ -171,11 +180,11 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
 
     for (auto& bound_desc : imports.get_libs()) {
         descs_size += sizeof(IMAGE_BOUND_IMPORT_DESCRIPTOR);
-        names_size += bound_desc.get_name().length() + 1;
+        names_size += bound_desc.get_library_name().length() + 1;
 
         for (auto& bound_ref : bound_desc.get_refs()){
             descs_size += sizeof(IMAGE_BOUND_FORWARDER_REF);
-            names_size += bound_ref.get_name().length() + 1; 
+            names_size += bound_ref.get_ref_name().length() + 1;
         }
     }
     descs_size += sizeof(IMAGE_BOUND_IMPORT_DESCRIPTOR);
@@ -202,9 +211,9 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
 
         lstrcpyA((char*)&section.get_section_data().data()[
             bound_import_offset + descs_size + names_offset
-        ], bound_desc.get_name().c_str());
+        ], bound_desc.get_library_name().c_str());
 
-        names_offset+= bound_desc.get_name().length() + 1;
+        names_offset+= bound_desc.get_library_name().length() + 1;
 
         desc_data += sizeof(IMAGE_BOUND_IMPORT_DESCRIPTOR);
         for (auto& bound_ref : bound_desc.get_refs()) {
@@ -214,9 +223,9 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
 
             lstrcpyA((char*)&section.get_section_data().data()[
                 bound_import_offset + descs_size + names_offset
-            ], bound_ref.get_name().c_str());
+            ], bound_ref.get_ref_name().c_str());
 
-            names_offset += bound_ref.get_name().length() + 1;
+            names_offset += bound_ref.get_ref_name().length() + 1;
 
             desc_data += sizeof(IMAGE_BOUND_FORWARDER_REF);
         }

@@ -7,9 +7,10 @@ class export_table_item {
 	bool b_name;
 	bool b_forward; 
 	std::string forward_name;
-	std::string name;
+	std::string func_name;
 public:
 	export_table_item::export_table_item();
+    export_table_item::export_table_item(const export_table_item& item);
 	export_table_item::~export_table_item();
 
 	export_table_item& export_table_item::operator=(const export_table_item& item);
@@ -20,8 +21,8 @@ public:
 	void  export_table_item::set_name_ordinal(WORD ordinal);
 	void  export_table_item::set_has_name(bool b);
 	void  export_table_item::set_forward(bool b);
-	void  export_table_item::set_forward_name(std::string forward_name);
-	void  export_table_item::set_name(std::string name);
+	void  export_table_item::set_forward_name(const std::string& forward_name);
+	void  export_table_item::set_func_name(const std::string& func_name);
 public:
 	DWORD export_table_item::get_rva() const;
 	WORD  export_table_item::get_ordinal() const;
@@ -29,7 +30,7 @@ public:
 	bool  export_table_item::has_name() const;
 	bool  export_table_item::is_forward() const;
 	std::string  export_table_item::get_forward_name() const;
-	std::string  export_table_item::get_name() const;
+	std::string  export_table_item::get_func_name() const;
 
 };
 
@@ -42,10 +43,11 @@ class export_table {
 	unsigned int  number_of_functions;
 	unsigned int  number_of_names;
 
-	std::string name;
+	std::string library_name;
 	std::vector<export_table_item> export_items;
 public:
 	export_table::export_table();
+    export_table::export_table(const export_table& exports);
 	export_table::~export_table();
     export_table& export_table::operator=(const export_table& exports);
 public:
@@ -56,8 +58,8 @@ public:
 	void			export_table::set_ordinal_base(unsigned int  ordinal_base);
 	void			export_table::set_number_of_functions(unsigned int  number_of_functions);
 	void			export_table::set_number_of_names(unsigned int  number_of_names);
-	void			export_table::set_name(std::string name);
-	void			export_table::add_item(export_table_item& item);
+	void			export_table::set_library_name(const std::string& library_name);
+	void			export_table::add_item(const export_table_item& item);
 
 public:
 	DWORD			export_table::get_characteristics() const;
@@ -67,10 +69,10 @@ public:
 	unsigned int	export_table::get_ordinal_base() const;
 	unsigned int	export_table::get_number_of_functions() const;
 	unsigned int	export_table::get_number_of_names() const;
-	std::string		export_table::get_name() const;
+	std::string		export_table::get_library_name() const;
 	std::vector<export_table_item>& export_table::get_items();
 
-	bool export_table::get_exported_function(std::string name, export_table_item * &item);
+	bool export_table::get_exported_function(const std::string& func_name, export_table_item * &item);
 	bool export_table::get_exported_function(WORD ordinal, export_table_item * &item);
 };
 
