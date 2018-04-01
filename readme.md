@@ -1,7 +1,6 @@
 # ENMA PE #
 
-
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/jnastarot/enma_pe?svg=true)](https://ci.appveyor.com/project/jnastarot/enma_pe/branch/master)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/jnastarot/enma_pe?branch=master&svg=true)](https://ci.appveyor.com/project/jnastarot/enma_pe/branch/master)
 
 ```
 --------------------------------------------------------------------------------
