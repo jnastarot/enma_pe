@@ -1,4 +1,23 @@
 #pragma once
+
+enum section_io_mode {
+    section_io_mode_default,
+    section_io_mode_dont_break_border,
+};
+
+enum section_io_addressing_type {
+    section_address_raw,
+    section_address_rva,
+};
+
+enum section_io_code {
+    section_io_success,
+    section_io_Incomplete,
+    section_io_border_break,//for section_io_mode_dont_break_border
+};
+
+
+
 class pe_section{
 	std::string section_name;
 	DWORD virtual_size;
@@ -13,8 +32,9 @@ public:
 	pe_section::pe_section(const IMAGE_SECTION_HEADER& header);
 	pe_section::pe_section(const IMAGE_SECTION_HEADER& header, const std::vector<BYTE>& data);
 	pe_section::~pe_section();
-
+    
 	pe_section& pe_section::operator=(const pe_section& section);
+
 public:
 	pe_section& pe_section::set_section_name(const std::string& name);
 	pe_section& pe_section::set_virtual_size(DWORD virtual_size);
@@ -40,6 +60,46 @@ public:
 	bool pe_section::is_writeable() const;
 	bool pe_section::is_executable() const;
 
-	std::vector<BYTE>& pe_section::get_section_data();
+    const std::vector<BYTE>& pe_section::get_section_data() const;
+    std::vector<BYTE>& pe_section::get_section_data();
 };
 
+class pe_section_io {
+    pe_section*  section;
+    unsigned int section_offset;
+
+    section_io_code last_code;
+    section_io_mode mode;
+    section_io_addressing_type addressing_type;
+public:
+    pe_section_io::pe_section_io(
+        pe_section & _section,
+        section_io_mode mode = section_io_mode_default,
+        section_io_addressing_type type = section_address_rva
+    );
+
+    pe_section_io::pe_section_io(const pe_section_io& io_section);
+    pe_section_io::~pe_section_io();
+
+    pe_section_io& pe_section_io::operator=(const pe_section_io& io_section);
+public:
+    template <class T> section_io_code pe_section_io::operator >> (T& data); //read from section
+    template <class T> section_io_code pe_section_io::operator<<(T& data); //write to section
+
+    section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size, int offset = -1);
+    section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size, int offset = -1);
+public:
+    pe_section_io& pe_section_io::align_up(unsigned int factor, bool offset_to_end = true);
+    pe_section_io& pe_section_io::add_size(unsigned int size, bool offset_to_end = true);
+
+    pe_section_io& pe_section_io::set_mode(section_io_mode mode);
+    pe_section_io& pe_section_io::set_addressing_type(section_io_addressing_type type);
+    pe_section_io& pe_section_io::set_section_offset(unsigned int offset);
+public:
+    section_io_mode            pe_section_io::get_mode() const;
+    section_io_code            pe_section_io::get_last_code() const;
+    section_io_addressing_type pe_section_io::get_addressing_type() const;
+    unsigned int               pe_section_io::get_section_offset() const;
+
+    pe_section* pe_section_io::get_section();
+};

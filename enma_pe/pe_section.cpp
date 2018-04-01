@@ -12,12 +12,7 @@ pe_section::pe_section() {
 	section_data.clear();
 }
 pe_section::pe_section(const pe_section& section) {
-	this->section_name = section.section_name;
-	this->virtual_size		= section.virtual_size;
-	this->virtual_address	= section.virtual_address;
-	this->pointer_to_raw	= section.pointer_to_raw;
-	this->characteristics	= section.characteristics;
-	this->section_data		= section.section_data;
+    this->operator=(section);
 }
 
 pe_section::pe_section(const IMAGE_SECTION_HEADER& header) {
@@ -147,4 +142,106 @@ bool pe_section::is_executable() const {
 
 std::vector<BYTE>& pe_section::get_section_data() {
 	return section_data;
+}
+
+const std::vector<BYTE>& pe_section::get_section_data() const {
+    return section_data;
+}
+
+
+pe_section_io::pe_section_io(pe_section & _section,
+    section_io_mode mode,
+    section_io_addressing_type type) :
+    section(&_section), section_offset(0),
+    last_code(section_io_success), mode(mode), addressing_type(type) {
+}
+
+pe_section_io::pe_section_io(const pe_section_io& io_section) {
+    this->operator=(io_section);
+}
+
+pe_section_io::~pe_section_io() {
+
+}
+
+pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
+    this->section = io_section.section;
+    this->section_offset = io_section.section_offset;
+    this->last_code = io_section.last_code;
+    this->mode = io_section.mode;
+    this->addressing_type = io_section.addressing_type;
+
+    return *this;
+}
+
+template <class T> section_io_code pe_section_io::operator >> (T& data) {
+
+    return section_io_code::section_io_success;
+}
+template <class T> section_io_code pe_section_io::operator<<(T& data) {
+
+    return section_io_code::section_io_success;
+}
+
+section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size, int offset) {
+
+    return section_io_code::section_io_success;
+}
+
+section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size, int offset) {
+
+    return section_io_code::section_io_success;
+}
+
+pe_section_io& pe_section_io::align_up(unsigned int factor, bool offset_to_end) {
+    this->section->get_section_data().resize(ALIGN_UP(this->section->get_size_of_raw_data(), factor));
+    if (offset_to_end) {
+        this->section_offset = this->section->get_size_of_raw_data();
+    }
+    add_size(ALIGN_UP(this->section->get_size_of_raw_data(), factor));
+
+    return *this;
+}
+
+pe_section_io& pe_section_io::add_size(unsigned int size, bool offset_to_end) {
+    if (size) {
+        this->section->get_section_data().resize(this->section->get_size_of_raw_data() + size);
+    }
+    if (offset_to_end) {
+        this->section_offset = this->section->get_size_of_raw_data();
+    }
+
+    return *this;
+}
+
+pe_section_io& pe_section_io::set_mode(section_io_mode mode) {
+    this->mode = mode;
+
+    return *this;
+}
+pe_section_io& pe_section_io::set_addressing_type(section_io_addressing_type type) {
+    this->addressing_type = type;
+
+    return *this;
+}
+pe_section_io& pe_section_io::set_section_offset(unsigned int offset) {
+    this->section_offset = offset;
+
+    return *this;
+}
+
+section_io_mode pe_section_io::get_mode() const {
+    return this->mode;
+}
+section_io_code pe_section_io::get_last_code() const {
+    return this->last_code;
+}
+section_io_addressing_type pe_section_io::get_addressing_type() const {
+    return this->addressing_type;
+}
+unsigned int pe_section_io::get_section_offset() const {
+    return this->section_offset;
+}
+pe_section* pe_section_io::get_section() {
+    return this->section;
 }

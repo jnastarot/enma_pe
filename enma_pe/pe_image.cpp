@@ -35,7 +35,7 @@ pe_image::pe_image(std::string& file_path) {
 	if (hfile && hfile != INVALID_HANDLE_VALUE) {
 		unsigned int file_size = GetFileSize(hfile, 0);
 		unsigned int read_size = 0;
-		void * file_buffer = new BYTE[file_size];
+		BYTE * file_buffer = new BYTE[file_size];
 
         if (file_buffer) {
             if (ReadFile(hfile, file_buffer, file_size, (DWORD*)&read_size, 0) &&

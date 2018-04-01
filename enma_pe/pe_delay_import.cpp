@@ -145,7 +145,7 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
                     lib.set_timestamp(imp_description->TimeDateStamp);
                     lib.set_attributes(imp_description->Attributes.AllAttributes);
 
-					void* lib_iat = &imp_name_section->get_section_data().data()[(imp_description->ImportNameTableRVA - imp_name_section->get_virtual_address())];
+					BYTE * lib_iat = &imp_name_section->get_section_data().data()[(imp_description->ImportNameTableRVA - imp_name_section->get_virtual_address())];
 					DWORD func_iat_rva = imp_description->ImportAddressTableRVA;
 
 
@@ -165,7 +165,7 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 								}
 							}
 							func_iat_rva += sizeof(DWORD);
-							lib_iat = (void*)(&((DWORD*)lib_iat)[1]);
+							lib_iat = (BYTE*)(&((DWORD*)lib_iat)[1]);
 						}
 					}
 					else {
@@ -185,7 +185,7 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 							}
 
 							func_iat_rva += sizeof(DWORD64);
-							lib_iat = (void*)(&((DWORD64*)lib_iat)[1]);
+							lib_iat = (BYTE*)(&((DWORD64*)lib_iat)[1]);
 						}
 					}
 
