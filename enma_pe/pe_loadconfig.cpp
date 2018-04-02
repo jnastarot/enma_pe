@@ -367,7 +367,7 @@ void build_load_config_table(pe_image &image, pe_section& section, load_config_t
         image_load_config->ProcessHeapFlags              = load_config.get_process_heap_flags();
         image_load_config->ProcessAffinityMask           = (DWORD)load_config.get_process_affinity_mask();
         image_load_config->CSDVersion                    = load_config.get_csd_version();
-        image_load_config->Reserved1 = 0;
+       // image_load_config->Reserved1 = 0;
 
         if (load_config.get_editlist()) {
             image_load_config->EditList = (DWORD)image.rva_to_va(load_config.get_editlist());
@@ -470,7 +470,7 @@ void build_load_config_table(pe_image &image, pe_section& section, load_config_t
         image_load_config->ProcessHeapFlags = load_config.get_process_heap_flags();
         image_load_config->ProcessAffinityMask = load_config.get_process_affinity_mask();
         image_load_config->CSDVersion = load_config.get_csd_version();
-        image_load_config->Reserved1 = 0;
+       // image_load_config->Reserved1 = 0;
 
         if (load_config.get_editlist()) {
             image_load_config->EditList = image.rva_to_va(load_config.get_editlist());

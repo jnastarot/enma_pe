@@ -174,7 +174,16 @@ pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
     return *this;
 }
 
-template <class T> section_io_code pe_section_io::operator >> (T& data) {
+void pe_section_io::update_section_boundaries() {
+
+}
+
+section_io_code pe_section_io::get_physical_data(unsigned int data_size, unsigned int &phys_offset) {
+
+    return section_io_code::section_io_success;
+}
+
+template <class T> section_io_code pe_section_io::operator>>(T& data) {
 
     return section_io_code::section_io_success;
 }
@@ -183,12 +192,12 @@ template <class T> section_io_code pe_section_io::operator<<(T& data) {
     return section_io_code::section_io_success;
 }
 
-section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size, int offset) {
+section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size) {
 
     return section_io_code::section_io_success;
 }
 
-section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size, int offset) {
+section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size) {
 
     return section_io_code::section_io_success;
 }

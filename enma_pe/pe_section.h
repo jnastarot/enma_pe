@@ -2,7 +2,7 @@
 
 enum section_io_mode {
     section_io_mode_default,
-    section_io_mode_dont_break_border,
+    section_io_mode_dont_expand_bound,
 };
 
 enum section_io_addressing_type {
@@ -13,7 +13,7 @@ enum section_io_addressing_type {
 enum section_io_code {
     section_io_success,
     section_io_Incomplete,
-    section_io_border_break,//for section_io_mode_dont_break_border
+    section_io_bound_break,
 };
 
 
@@ -71,6 +71,10 @@ class pe_section_io {
     section_io_code last_code;
     section_io_mode mode;
     section_io_addressing_type addressing_type;
+
+
+    void pe_section_io::update_section_boundaries();
+    section_io_code pe_section_io::get_physical_data(unsigned int data_size,unsigned int &phys_offset);
 public:
     pe_section_io::pe_section_io(
         pe_section & _section,
@@ -83,11 +87,11 @@ public:
 
     pe_section_io& pe_section_io::operator=(const pe_section_io& io_section);
 public:
-    template <class T> section_io_code pe_section_io::operator >> (T& data); //read from section
-    template <class T> section_io_code pe_section_io::operator<<(T& data); //write to section
+    template <class T> section_io_code operator>>(T& data); //read from section
+    template <class T> section_io_code operator<<(T& data); //write to section
 
-    section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size, int offset = -1);
-    section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size, int offset = -1);
+    section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size);
+    section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size);
 public:
     pe_section_io& pe_section_io::align_up(unsigned int factor, bool offset_to_end = true);
     pe_section_io& pe_section_io::add_size(unsigned int size, bool offset_to_end = true);

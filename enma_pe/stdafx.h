@@ -19,10 +19,12 @@
 #include <dbghelp.h>
 #pragma comment(lib,"dbghelp.lib")
 
+#include <cstdint>
+
 using namespace std;
 #define ALIGN_UP(a, b) (((a + b - 1) / b) * b)
 
-#pragma warning(disable:28251)
+
 
 #include "enma_pe.h"
 

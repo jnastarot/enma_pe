@@ -140,6 +140,9 @@
     <ClInclude Include="pe_rich_dos.h">
       <Filter>Заголовочные файлы\pe_image\pe_rich_dos</Filter>
     </ClInclude>
+    <ClInclude Include="enma_pe_internal.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

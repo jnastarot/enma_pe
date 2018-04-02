@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "enma_pe_internal.h"
 #include "pe_image.h"
 
 struct erased_zone { DWORD rva; unsigned int size; };

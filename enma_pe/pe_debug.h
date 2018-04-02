@@ -1,26 +1,5 @@
 #pragma once
 
-enum debug_item_type {
-    debug_item_type_unknown ,
-    debug_item_type_coff,
-    debug_item_type_codeview,
-    debug_item_type_fpo,
-    debug_item_type_misc   ,
-    debug_item_type_exception,
-    debug_item_type_fixup,
-    debug_item_type_omap_to_src,
-    debug_item_type_omap_from_src,
-    debug_item_type_borland,
-    debug_item_type_reserved10,
-    debug_item_type_clsid,
-    debug_item_type_vc_feature,
-    debug_item_type_pogo,
-    debug_item_type_iltcg,
-    debug_item_type_mpx ,
-    debug_item_type_timestamp,
-};
-
-
 class debug_item {
     DWORD   characteristics;
     DWORD   timestamp;
