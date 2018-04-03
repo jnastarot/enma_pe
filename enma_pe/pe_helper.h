@@ -36,9 +36,9 @@ enum e_map_compiller {
 
 struct map_segment {
     e_map_segment_class _class;
-    unsigned long long section_number;
-    unsigned long long offset;
-    unsigned long long length;
+    uint64_t section_number;
+    uint64_t offset;
+    uint64_t length;
     std::string segment_name;
     map_segment::map_segment() {
         _class = segment_class_unknown;
@@ -50,9 +50,9 @@ struct map_segment {
 
 struct map_item {
     e_map_data_class _class;
-    unsigned long long section_number;
-    unsigned long long offset;
-    unsigned long long length;
+    uint64_t section_number;
+    uint64_t offset;
+    uint64_t length;
     std::string item_name;
     void * custominfo;
     map_item::map_item() {

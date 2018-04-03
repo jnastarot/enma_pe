@@ -2,15 +2,15 @@
 
 
 class pe_dos_stub {
-    std::vector<BYTE> dos_stub;
+    std::vector<uint8_t> dos_stub;
 public:
     pe_dos_stub::pe_dos_stub();
     pe_dos_stub::~pe_dos_stub();
 public:
-    void pe_dos_stub::set_dos_stub(std::vector<BYTE>& stub);
+    void pe_dos_stub::set_dos_stub(std::vector<uint8_t>& stub);
 
 public:
-    std::vector<BYTE> pe_dos_stub::get_dos_stub() const;
+    std::vector<uint8_t> pe_dos_stub::get_dos_stub() const;
 };
 
 
@@ -141,30 +141,30 @@ enum e_rich_type {
 
 class pe_rich_data {
     e_rich_type type;
-    unsigned short compiler_build;
-    unsigned int count;
+    uint16_t compiler_build;
+    uint32_t count;
 
 public:
     pe_rich_data::pe_rich_data();
     pe_rich_data::pe_rich_data(const pe_rich_data& data);
-    pe_rich_data::pe_rich_data(e_rich_type type,unsigned short compiler_build,unsigned int count);
+    pe_rich_data::pe_rich_data(e_rich_type type,uint16_t compiler_build,uint32_t count);
     pe_rich_data::~pe_rich_data();
 
     pe_rich_data& pe_rich_data::operator=(const pe_rich_data& data);
 public:
     void pe_rich_data::set_type(e_rich_type type);
-    void pe_rich_data::set_compiler_build(unsigned short compiler_build);
-    void pe_rich_data::set_count(unsigned int count);
+    void pe_rich_data::set_compiler_build(uint16_t compiler_build);
+    void pe_rich_data::set_count(uint32_t count);
 public:
     e_rich_type pe_rich_data::get_type() const;
-    unsigned short pe_rich_data::get_compiler_build() const;
-    unsigned int pe_rich_data::get_count() const;
+    uint16_t pe_rich_data::get_compiler_build() const;
+    uint32_t pe_rich_data::get_count() const;
 };
 
 
-bool get_image_dos_stub(_In_ const void * pimage, _Out_ pe_dos_stub& dos_stub);
-bool get_image_rich_data(_In_ const void * pimage, _Out_ std::vector<pe_rich_data>& rich_data);
+bool get_image_dos_stub(_In_ const uint8_t * pimage, _Out_ pe_dos_stub& dos_stub);
+bool get_image_rich_data(_In_ const uint8_t * pimage, _Out_ std::vector<pe_rich_data>& rich_data);
 
-bool has_image_rich_data(_In_ const void * pimage ,
-    _Out_opt_ unsigned int * rich_data_offset = 0, _Out_opt_ unsigned int * rich_data_size = 0, _Out_opt_ DWORD * rich_xor_key = 0);
-bool checksum_rich(_In_ const void * pimage, _Out_opt_ DWORD * correct_rich_xor_key = 0);
+bool has_image_rich_data(_In_ const uint8_t * pimage ,
+    _Out_opt_ uint32_t * rich_data_offset = 0, _Out_opt_ uint32_t * rich_data_size = 0, _Out_opt_ uint32_t * rich_xor_key = 0);
+bool checksum_rich(_In_ const uint8_t * pimage, _Out_opt_ uint32_t * correct_rich_xor_key = 0);

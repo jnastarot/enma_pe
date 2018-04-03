@@ -266,7 +266,7 @@ void build_internal_tls_data(const pe_image &image,pe_section& section,
         tls.set_address_of_index(section.get_virtual_address() + section.get_section_data().size());
 
         DWORD index__ = 0;
-        section.add_data(&index__, sizeof(index__));
+        section.add_data((const uint8_t*)&index__, sizeof(index__));
     }
 
     if (build_items_ids&tls_table_build_callbacks) {

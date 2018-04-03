@@ -1,13 +1,13 @@
 #pragma once
 
 struct a_string_base {
-	unsigned int rva;
-	unsigned int size;
+    uint32_t rva;
+    uint32_t size;
 	std::string str;
 };
 struct w_string_base {
-	unsigned int rva;
-	unsigned int size;
+    uint32_t rva;
+    uint32_t size;
 	std::wstring str;
 };
 

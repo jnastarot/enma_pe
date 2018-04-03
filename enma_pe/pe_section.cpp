@@ -15,27 +15,27 @@ pe_section::pe_section(const pe_section& section) {
     this->operator=(section);
 }
 
-pe_section::pe_section(const IMAGE_SECTION_HEADER& header) {
+pe_section::pe_section(const image_section_header& header) {
 	this->section_name.reserve(8);
-	this->section_name.resize(lstrlenA((char*)header.Name));
-	memcpy((void*)this->section_name.data(), header.Name,8);
+	this->section_name.resize(strlen((char*)header.name));
+	memcpy((void*)this->section_name.data(), header.name,8);
 
-	this->virtual_size		= header.Misc.VirtualSize;
-	this->virtual_address	= header.VirtualAddress;
-	this->pointer_to_raw	= header.PointerToRawData;
-	this->characteristics	= header.Characteristics;
+	this->virtual_size		= header.virtual_size;
+	this->virtual_address	= header.virtual_address;
+	this->pointer_to_raw	= header.pointer_to_raw_data;
+	this->characteristics	= header.characteristics;
 
 	this->section_data.clear();
 }
-pe_section::pe_section(const IMAGE_SECTION_HEADER& header, const std::vector<BYTE>& data) {
+pe_section::pe_section(const image_section_header& header, const std::vector<uint8_t>& data) {
 	this->section_name.reserve(8);
-	this->section_name.resize(lstrlenA((char*)header.Name));
-	memcpy((void*)this->section_name.data(), header.Name, 8);
+	this->section_name.resize(lstrlenA((char*)header.name));
+	memcpy((void*)this->section_name.data(), header.name, 8);
 
-	this->virtual_size		= header.Misc.VirtualSize;
-	this->virtual_address	= header.VirtualAddress;
-	this->pointer_to_raw	= header.PointerToRawData;
-	this->characteristics	= header.Characteristics;
+	this->virtual_size		= header.virtual_size;
+	this->virtual_address	= header.virtual_address;
+	this->pointer_to_raw	= header.pointer_to_raw_data;
+	this->characteristics	= header.characteristics;
 
 	this->section_data = data;
 }
@@ -44,7 +44,7 @@ pe_section::~pe_section() {
 }
 
 pe_section& pe_section::operator=(const pe_section& section) {
-	this->section_name = section.section_name;
+	this->section_name      = section.section_name;
 	this->virtual_size		= section.virtual_size;
 	this->virtual_address	= section.virtual_address;
 	this->pointer_to_raw	= section.pointer_to_raw;
@@ -57,23 +57,23 @@ pe_section& pe_section::set_section_name(const std::string& section_name) {
 	this->section_name = section_name;
 	return *this;
 }
-pe_section& pe_section::set_virtual_size(DWORD virtual_size) {
+pe_section& pe_section::set_virtual_size(uint32_t virtual_size) {
 	this->virtual_size = virtual_size;
 	return *this;
 }
-pe_section& pe_section::set_virtual_address(DWORD virtual_address) {
+pe_section& pe_section::set_virtual_address(uint32_t virtual_address) {
 	this->virtual_address = virtual_address;
 	return *this;
 }
-pe_section& pe_section::set_size_of_raw_data(DWORD size_of_raw_data) {
+pe_section& pe_section::set_size_of_raw_data(uint32_t size_of_raw_data) {
 	section_data.resize(size_of_raw_data);
 	return *this;
 }
-pe_section& pe_section::set_pointer_to_raw(DWORD pointer_to_raw) {
+pe_section& pe_section::set_pointer_to_raw(uint32_t pointer_to_raw) {
 	this->pointer_to_raw = pointer_to_raw;
 	return *this;
 }
-pe_section& pe_section::set_characteristics(DWORD characteristics) {
+pe_section& pe_section::set_characteristics(uint32_t characteristics) {
 	this->characteristics = characteristics;
 	return *this;
 }
@@ -106,7 +106,7 @@ pe_section& pe_section::set_executable(bool flag) {
 	return *this;
 }
 
-void pe_section::add_data(void * data, unsigned int data_size) {
+void pe_section::add_data(const uint8_t * data, uint32_t data_size) {
 	section_data.resize(section_data.size() + data_size);
 	memcpy(section_data.data() + section_data.size() - data_size, data, data_size);
 }
@@ -114,19 +114,19 @@ void pe_section::add_data(void * data, unsigned int data_size) {
 std::string pe_section::get_section_name() const {
 	return section_name;
 }
-DWORD pe_section::get_virtual_size() const {
+uint32_t pe_section::get_virtual_size() const {
 	return virtual_size;
 }
-DWORD pe_section::get_virtual_address() const {
+uint32_t pe_section::get_virtual_address() const {
 	return virtual_address;
 }
-DWORD pe_section::get_size_of_raw_data() const {
+uint32_t pe_section::get_size_of_raw_data() const {
 	return section_data.size();
 }
-DWORD pe_section::get_pointer_to_raw() const {
+uint32_t pe_section::get_pointer_to_raw() const {
 	return pointer_to_raw;
 }
-DWORD pe_section::get_characteristics() const {
+uint32_t pe_section::get_characteristics() const {
 	return characteristics;
 }
 
@@ -140,11 +140,11 @@ bool pe_section::is_executable() const {
 	return (characteristics&IMAGE_SCN_MEM_EXECUTE) != 0;
 }
 
-std::vector<BYTE>& pe_section::get_section_data() {
+std::vector<uint8_t>& pe_section::get_section_data() {
 	return section_data;
 }
 
-const std::vector<BYTE>& pe_section::get_section_data() const {
+const std::vector<uint8_t>& pe_section::get_section_data() const {
     return section_data;
 }
 
@@ -165,11 +165,11 @@ pe_section_io::~pe_section_io() {
 }
 
 pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
-    this->section = io_section.section;
-    this->section_offset = io_section.section_offset;
-    this->last_code = io_section.last_code;
-    this->mode = io_section.mode;
-    this->addressing_type = io_section.addressing_type;
+    this->section           = io_section.section;
+    this->section_offset    = io_section.section_offset;
+    this->last_code         = io_section.last_code;
+    this->mode              = io_section.mode;
+    this->addressing_type   = io_section.addressing_type;
 
     return *this;
 }
@@ -178,7 +178,7 @@ void pe_section_io::update_section_boundaries() {
 
 }
 
-section_io_code pe_section_io::get_physical_data(unsigned int data_size, unsigned int &phys_offset) {
+section_io_code pe_section_io::get_physical_data(uint32_t data_size, uint32_t &phys_offset) {
 
     return section_io_code::section_io_success;
 }
@@ -192,17 +192,17 @@ template <class T> section_io_code pe_section_io::operator<<(T& data) {
     return section_io_code::section_io_success;
 }
 
-section_io_code pe_section_io::read(std::vector<BYTE>& buffer, unsigned int size) {
+section_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
 
     return section_io_code::section_io_success;
 }
 
-section_io_code pe_section_io::write(std::vector<BYTE>& buffer, unsigned int size) {
+section_io_code pe_section_io::write(std::vector<uint8_t>& buffer, uint32_t size) {
 
     return section_io_code::section_io_success;
 }
 
-pe_section_io& pe_section_io::align_up(unsigned int factor, bool offset_to_end) {
+pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
     this->section->get_section_data().resize(ALIGN_UP(this->section->get_size_of_raw_data(), factor));
     if (offset_to_end) {
         this->section_offset = this->section->get_size_of_raw_data();
@@ -212,7 +212,7 @@ pe_section_io& pe_section_io::align_up(unsigned int factor, bool offset_to_end) 
     return *this;
 }
 
-pe_section_io& pe_section_io::add_size(unsigned int size, bool offset_to_end) {
+pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end) {
     if (size) {
         this->section->get_section_data().resize(this->section->get_size_of_raw_data() + size);
     }
@@ -233,7 +233,7 @@ pe_section_io& pe_section_io::set_addressing_type(section_io_addressing_type typ
 
     return *this;
 }
-pe_section_io& pe_section_io::set_section_offset(unsigned int offset) {
+pe_section_io& pe_section_io::set_section_offset(uint32_t offset) {
     this->section_offset = offset;
 
     return *this;
@@ -248,7 +248,7 @@ section_io_code pe_section_io::get_last_code() const {
 section_io_addressing_type pe_section_io::get_addressing_type() const {
     return this->addressing_type;
 }
-unsigned int pe_section_io::get_section_offset() const {
+uint32_t pe_section_io::get_section_offset() const {
     return this->section_offset;
 }
 pe_section* pe_section_io::get_section() {

@@ -9,8 +9,8 @@
 
 
 struct TdsHeader {
-    char Magic[4];
-    int SubSectionDirOffset;
+    int8_t Magic[4];
+    int32_t SubSectionDirOffset;
 };
 
 enum SubSectTypes {
@@ -79,105 +79,106 @@ enum SymbolAlignSizedType
 
 struct SubSectDirItem
 {
-    short Type; // SubSectTypes
-    short Index;
-    int Offset;
-    int Size;
+    int16_t Type; // SubSectTypes
+    int16_t Index;
+    int32_t Offset;
+    int32_t Size;
 };
 
 struct SubSectDir
 {
-    char Unknown[0x4];
-    int Num;
-    char Unknown2[0x8];
+    int8_t Unknown[0x4];
+    int32_t Num;
+    int8_t Unknown2[0x8];
     SubSectDirItem Items[1];
 };
 
 struct GlobalSymHeader
 {
-    unsigned short SymHash;
-    unsigned short AddrHash;
-    unsigned int cbSymbols;
-    unsigned int cbSymHash;
-    unsigned int cbAddrHash;
-    unsigned int cUDTs;
-    unsigned int cOthers;
-    unsigned int Total;
-    unsigned int cNamespaces;
+    uint16_t SymHash;
+    uint16_t AddrHash;
+    uint32_t cbSymbols;
+    uint32_t cbSymHash;
+    uint32_t cbAddrHash;
+    uint32_t cUDTs;
+    uint32_t cOthers;
+    uint32_t Total;
+    uint32_t cNamespaces;
 };
 
 #pragma pack(2)
 
 struct SData32
 {
-    int Offset;
-    short Segment;
-    short Flags;
-    int Type;
-    int Name;
-    int BrowserOffset;
+    int32_t Offset;
+    int16_t Segment;
+    int16_t Flags;
+    int32_t Type;
+    int32_t Name;
+    int32_t BrowserOffset;
 };
 
 struct SProc32
 {
-    int Parent;
-    int End;
-    int Next;
-    int Size1;
-    char Unknown[0x04];
-    int Size;
-    int Start;
-    short Segment;
-    short Unknown2;
-    short Type;
-    short Unknown3;
-    short Name;
-    char Unknown4[0x6];
+    int32_t Parent;
+    int32_t End;
+    int32_t Next;
+    int32_t Size1;
+    int8_t Unknown[0x04];
+    int32_t Size;
+    int32_t Start;
+    int16_t Segment;
+    int16_t Unknown2;
+    int16_t Type;
+    int16_t Unknown3;
+    int16_t Name;
+    int8_t Unknown4[0x6];
     // for global only
-    unsigned char LinkerNameLen;
-    char LinkerName[1];
+    uint8_t  LinkerNameLen;
+    int8_t LinkerName[1];
 };
 
 
 
 
-inline unsigned char EatUChar(const char *& pos)
+inline uint8_t  EatUChar(const int8_t *& pos)
 {
-    unsigned char result = *reinterpret_cast<const unsigned char*>(pos);
-    pos += sizeof(BYTE);
+    uint8_t  result = *reinterpret_cast<const uint8_t *>(pos);
+    pos += 1;
     return result;
 }
 
-inline short EatShort(const char *& pos)
+inline int16_t EatShort(const int8_t *& pos)
 {
-    short result = *reinterpret_cast<const short*>(pos);
-    pos += sizeof(WORD);
+    int16_t result = *reinterpret_cast<const int16_t*>(pos);
+    pos += 2;
     return result;
 }
 
-inline int EatInt(const char *& pos)
+inline int32_t EatInt(const int8_t *& pos)
 {
-    int result = *reinterpret_cast<const int*>(pos);
-    pos += sizeof(DWORD);
+    int32_t result = *reinterpret_cast<const int*>(pos);
+    pos += 4;
     return result;
 }
 
 
 tds_parser::tds_parser(std::string& filepath, pe_image& image, map_root& map, e_map_result &result) {
-    OFSTRUCT ofs = { 0 };
-    DWORD readed;
 
-    HFILE hfile = OpenFile(filepath.c_str(), &ofs, OF_READ);
-    if (hfile != (HFILE)INVALID_HANDLE_VALUE) {
-        unsigned int file_size = GetFileSize((HANDLE)hfile, 0);
+    FILE* hfile = fopen(filepath.c_str(), "rb");
+    if (hfile != nullptr) {
+        fseek(hfile, 0, SEEK_END);
+        uint32_t file_size = ftell(hfile);
+        fseek(hfile, 0, SEEK_SET);
+
         tds_file.resize(file_size);
 
-        if (!ReadFile((HANDLE)hfile, tds_file.data(), file_size, &readed, 0) || readed != file_size) {
+        if (!fread(tds_file.data(), file_size, 1, hfile)) {
             result = e_map_result::map_error_readfile;
             return;
         }
 
-        CloseHandle((HANDLE)hfile);
+        fclose(hfile);
 
         result = parse(image, map);
     }
@@ -185,7 +186,7 @@ tds_parser::tds_parser(std::string& filepath, pe_image& image, map_root& map, e_
         result = e_map_result::map_error_openfile;
     }
 }
-tds_parser::tds_parser(std::vector<BYTE>& tds_file, pe_image& image, map_root& map, e_map_result &result) {
+tds_parser::tds_parser(std::vector<uint8_t>& tds_file, pe_image& image, map_root& map, e_map_result &result) {
     this->tds_file = tds_file;
     result = parse(image, map);
 }
@@ -196,35 +197,35 @@ tds_parser::~tds_parser() {}
 e_map_result tds_parser::parse(pe_image& image, map_root& map) {
     const TdsHeader * header = reinterpret_cast<const TdsHeader *>(tds_file.data());
 
-    if (tds_file.size() > 0x20 && *(WORD*)header->Magic == 0x4246 && (*(WORD*)&header->Magic[2] - 0x3930) < 0x800) {//FB0X
+    if (tds_file.size() > 0x20 && *(uint16_t*)header->Magic == 0x4246 && (*(uint16_t*)&header->Magic[2] - 0x3930) < 0x800) {//FB0X
 
         cout << header->Magic[0] << header->Magic[1] << header->Magic[2] << header->Magic[3] << endl;
         const SubSectDir * ssdir = reinterpret_cast<const SubSectDir *>(tds_file.data() + header->SubSectionDirOffset);
         const SubSectDirItem * items = &ssdir->Items[0];
 
-        for (int i = 0; i < ssdir->Num; i++) {
+        for (int32_t i = 0; i < ssdir->Num; i++) {
 
             const SubSectDirItem * curr = &items[i];
 
             switch (curr->Type) {
 
             case sstNames:
-                p_names_section = (const char*)tds_file.data() + curr->Offset;
+                p_names_section = (const uint8_t*)&tds_file.data()[curr->Offset];
                 break;
             }
         }
 
-        for (int i = 0; i < ssdir->Num; i++) {
+        for (int32_t i = 0; i < ssdir->Num; i++) {
 
             const SubSectDirItem * curr = &items[i];
 
             switch (curr->Type) {
 
             case sstAlignSym:
-                parse_align_symbols( (const char*)tds_file.data() + curr->Offset, (const char*)tds_file.data() + curr->Offset + curr->Size, curr->Index);
+                parse_align_symbols( (const int8_t*)&tds_file.data()[curr->Offset], (const int8_t*)&tds_file.data()[curr->Offset + curr->Size], curr->Index);
                 break;
             case sstGlobalSym:
-                parse_global_symbols( (const char*)tds_file.data() + curr->Offset);
+                parse_global_symbols( (const int8_t*)&tds_file.data()[curr->Offset]);
                 break;
             }
         }
@@ -247,20 +248,20 @@ e_map_result tds_parser::parse(pe_image& image, map_root& map) {
     }
 }
 
-std::string tds_parser::get_name_by_id(int name_id){
-    const char * pos = p_names_section;
-    int num = EatInt(pos);
+std::string tds_parser::get_name_by_id(int32_t name_id){
+    const int8_t * pos = (const int8_t *)p_names_section;
+    int32_t num = EatInt(pos);
     if (name_id > num)
         return std::string();
-    for (int i = 0; i < name_id - 1; i++)
+    for (int32_t i = 0; i < name_id - 1; i++)
         pos += EatUChar(pos) + 1;
-    return std::string(pos + 1);
+    return std::string((char*)(pos + 1));
 }
 
 void tds_parser::parse_item_path(map_item_raw& item, std::string& name) {
 
     std::string path_step;
-    for (unsigned int i = 0; i < name.length(); i++) {
+    for (uint32_t i = 0; i < name.length(); i++) {
 
         if (name[i] == '$') {
             item.item_name = path_step;
@@ -296,13 +297,13 @@ void tds_parser::parse_item_path(map_item_raw& item, std::string& name) {
     }
 }
 
-void tds_parser::parse_symbols(const char * start, const char * end){
-    const char * pos = start;
+void tds_parser::parse_symbols(const int8_t * start, const int8_t * end){
+    const int8_t * pos = start;
 
     while (pos != end) {
 
-        int size = EatShort(pos);
-        int type = EatShort(pos);
+        int32_t size = EatShort(pos);
+        int32_t type = EatShort(pos);
 
         switch (type & 0xFF00){
 
@@ -348,13 +349,13 @@ void tds_parser::parse_symbols(const char * start, const char * end){
         pos += size - 2;
     }
 }
-void tds_parser::parse_align_symbols(const char * start, const char * end, int moduleIndex){
-    const char * pos = start;
-    int Unknown1 = EatInt(pos);
+void tds_parser::parse_align_symbols(const int8_t * start, const int8_t * end, int32_t moduleIndex){
+    const int8_t * pos = start;
+    int32_t Unknown1 = EatInt(pos);
     parse_symbols(pos, end);
 }
-void tds_parser::parse_global_symbols(const char * start){
+void tds_parser::parse_global_symbols(const int8_t * start){
     const GlobalSymHeader * hdr = reinterpret_cast<const GlobalSymHeader *>(start);
-    const char * pos = start + sizeof(GlobalSymHeader);
+    const int8_t * pos = start + sizeof(GlobalSymHeader);
     parse_symbols(pos, pos + hdr->cbSymbols);
 }

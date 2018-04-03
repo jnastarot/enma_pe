@@ -161,6 +161,8 @@ typedef struct _image_data_directory {
 #define IMAGE_DLLCHARACTERISTICS_GUARD_CF               0x4000  // Image supports Control Flow Guard.
 #define IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE  0x8000
 
+#define IMAGE_NUMBEROF_DIRECTORY_ENTRIES    16
+
 typedef struct _image_optional_header {
     uint16_t   magic;
     uint8_t    major_linker_version;
@@ -170,7 +172,7 @@ typedef struct _image_optional_header {
     uint32_t   size_of_uninitialized_data;
     uint32_t   address_of_entry_point;
     uint32_t   base_of_code;
-    uint32_t   base_Of_data;
+    uint32_t   base_of_data;
     uint32_t   image_base;
     uint32_t   section_alignment;
     uint32_t   file_alignment;
@@ -183,8 +185,8 @@ typedef struct _image_optional_header {
     uint32_t   win32_version_value;
     uint32_t   size_of_image;
     uint32_t   size_of_headers;
-    uint32_t   check_sum;
-    uint16_t   sub_system;
+    uint32_t   checksum;
+    uint16_t   subsystem;
     uint16_t   dll_characteristics;
     uint32_t   size_of_stack_reserve;
     uint32_t   size_of_stack_commit;
@@ -192,7 +194,7 @@ typedef struct _image_optional_header {
     uint32_t   size_of_heap_commit;
     uint32_t   loader_flags;
     uint32_t   number_of_rva_and_sizes;
-    image_data_directory data_directory[16];
+    image_data_directory data_directory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } image_optional_header32, *pimage_optional_header32;
 
 typedef struct _image_optional_header64 {
@@ -216,8 +218,8 @@ typedef struct _image_optional_header64 {
     uint32_t   win32_version_value;
     uint32_t   size_of_image;
     uint32_t   size_of_headers;
-    uint32_t   check_sum;
-    uint16_t   sub_system;
+    uint32_t   checksum;
+    uint16_t   subsystem;
     uint16_t   dll_characteristics;
     uint64_t   size_of_stack_reserve;
     uint64_t   size_of_stack_commit;
@@ -225,7 +227,7 @@ typedef struct _image_optional_header64 {
     uint64_t   size_of_heap_commit;
     uint32_t   loader_flags;
     uint32_t   number_of_rva_and_sizes;
-    image_data_directory DataDirectory[16];
+    image_data_directory DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } image_optional_header64, *pimage_optional_header64;
 
 
@@ -477,6 +479,17 @@ typedef struct _image_ia64_runtime_function_entry {
         uint32_t unwind_data;
     };
 } image_ia64_runtime_function_entry, *pimage_ia64_runtime_function_entry;
+
+
+//
+// Win certificate format.
+//
+typedef struct _win_certificate {
+    uint32_t   length;
+    uint16_t   w_revision;
+    uint16_t   w_certificate_type;
+    uint8_t    b_certificate[1];
+} win_certificate, *pwin_certificate;
 
 
 //

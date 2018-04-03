@@ -7,10 +7,10 @@ void demangle(std::string name, std::string& demangled_name) {
 
     char *p = (char*)name.c_str();
     char pre_buffer[500];
-    unsigned int ch_idx = 0;
+    size_t ch_idx = 0;
     char last[2] = { 0 };
     while (ch_idx < name.length()) {
-        int l = strcspn(p, " \n\t()\"\'");
+        size_t l = strcspn(p, " \n\t()\"\'");
 
         if (last) {
             demangled_name += last;
@@ -36,7 +36,7 @@ void demangle(std::string name, std::string& demangled_name) {
 
 void map_add_item(std::vector<std::string> &path, map_item& item, std::vector<map_dir>& map_dirs) {
 
-    for (unsigned int i = 0; i < map_dirs.size(); i++) {
+    for (size_t i = 0; i < map_dirs.size(); i++) {
         if (path.size()) {
             if (map_dirs[i].dir_name == path[0]) {
                 if (path.size() > 1) {
@@ -96,15 +96,15 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
 
     std::vector<std::vector<map_item_raw>> items_by_section;
 
-    items_by_section.resize((unsigned int)segments[segments.size() - 1].section_number);
+    items_by_section.resize((size_t)segments[segments.size() - 1].section_number);
 
-    for (unsigned int i = 0; i < items_raw.size(); i++) { //push items by sections
+    for (size_t i = 0; i < items_raw.size(); i++) { //push items by sections
         if (items_raw[i].section_number) {
-            items_by_section[(unsigned int)items_raw[i].section_number - 1].push_back(items_raw[i]);
+            items_by_section[(size_t)items_raw[i].section_number - 1].push_back(items_raw[i]);
         }
     }
 
-    for (unsigned int item_sec = 0; item_sec < items_by_section.size(); item_sec++) { //sort items by offset
+    for (size_t item_sec = 0; item_sec < items_by_section.size(); item_sec++) { //sort items by offset
 
         std::sort(items_by_section[item_sec].begin(), items_by_section[item_sec].end(), [](const map_item_raw& a, const map_item_raw& b) {
             return a.offset < b.offset;
@@ -112,8 +112,8 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
 
     }
 
-    for (unsigned int item_sec = 0; item_sec < items_by_section.size(); item_sec++) {
-        for (unsigned int item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //calc lens
+    for (size_t item_sec = 0; item_sec < items_by_section.size(); item_sec++) {
+        for (size_t item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //calc lens
             if (items_by_section[item_sec].size() >  item_idx + 1) {
                 if (items_by_section[item_sec][item_idx].offset == items_by_section[item_sec][item_idx + 1].offset) {
                     items_by_section[item_sec].erase(items_by_section[item_sec].begin() + item_idx + 1);
@@ -123,7 +123,7 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
 
                 items_by_section[item_sec][item_idx].length = items_by_section[item_sec][item_idx + 1].offset - items_by_section[item_sec][item_idx].offset;
 
-                for (unsigned int seg_idx = 0; seg_idx < segments.size(); seg_idx++) {
+                for (size_t seg_idx = 0; seg_idx < segments.size(); seg_idx++) {
                     if (segments[seg_idx].section_number == items_by_section[item_sec][item_idx].section_number) {
                         if (is_value_in_bound(
                             segments[seg_idx].offset, segments[seg_idx].length, //if in bound of segment
@@ -139,7 +139,7 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
                 }
             }
             else {
-                for (unsigned int seg_idx = 0; seg_idx < segments.size(); seg_idx++) {
+                for (size_t seg_idx = 0; seg_idx < segments.size(); seg_idx++) {
                     if (segments[seg_idx].section_number == items_by_section[item_sec][item_idx].section_number) {
                         if (is_value_in_bound(
                             segments[seg_idx].offset, segments[seg_idx].length, //if in bound of segment
@@ -163,11 +163,11 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
         }
     }
 
-    for (unsigned int item_sec = 0; item_sec < items_by_section.size(); item_sec++) {
-        for (unsigned int item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //push to rootmap
+    for (size_t item_sec = 0; item_sec < items_by_section.size(); item_sec++) {
+        for (size_t item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //push to rootmap
 
             items_by_section[item_sec][item_idx].offset += //offset to rva
-                image.get_section_by_idx((unsigned int)items_by_section[item_sec][item_idx].section_number - 1)->get_virtual_address();
+                image.get_section_by_idx((size_t)items_by_section[item_sec][item_idx].section_number - 1)->get_virtual_address();
 
             map_add_item(items_by_section[item_sec][item_idx].path, items_by_section[item_sec][item_idx], map.dirs);
         }

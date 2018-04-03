@@ -13,24 +13,26 @@ map_parser::map_parser(std::string& filepath, pe_image& image, map_root& map, e_
 	compiller	  = map_compiller_unknown;
 	parse_context = map_parse_mod_none;
 
-    OFSTRUCT ofs = { 0 };
 
 	raw_mapfile mapfile;
 	std::string content;
 
-	HFILE hfile = OpenFile(filepath.c_str(), &ofs, OF_READ);
+    FILE* hfile = fopen(filepath.c_str(), "rb");
 
-	if (hfile && hfile != (HFILE)INVALID_HANDLE_VALUE) {
-		DWORD bytesread;
-		unsigned int file_size = GetFileSize((HANDLE)hfile, 0);
+	if (hfile != nullptr) {
+
+        fseek(hfile, 0, SEEK_END);
+        uint32_t file_size = ftell(hfile);
+        fseek(hfile, 0, SEEK_SET);
+
 		content.reserve(file_size);
 		content.resize(file_size);
 
-		if (ReadFile((HANDLE)hfile, (LPVOID)content.data(), file_size, &bytesread, 0) &&
-			file_size == bytesread) {
+		if (fread((void*)content.data(), file_size, 1, hfile)) {
+
 			get_raw_map_file(content, mapfile);
 
-			unsigned int line_idx = 0;
+			uint32_t line_idx = 0;
 			for (auto &line : mapfile) {
 
 				if (!line_idx) {
@@ -53,13 +55,13 @@ map_parser::map_parser(std::string& filepath, pe_image& image, map_root& map, e_
 				line_idx++;
 			}
 
-			CloseHandle((HANDLE)hfile);
+			fclose(hfile);
 
 			map_finalize_items(image, segments, items_raw, map);
 			result = e_map_result::map_error_ok;
 			return;
 		}
-		CloseHandle((HANDLE)hfile);
+        fclose(hfile);
 		result = e_map_result::map_error_readfile;
 		return;
 	}
@@ -101,10 +103,10 @@ void map_parser::get_raw_map_file(std::string& map_text, raw_mapfile &mapfile) {
 
 }
 
-bool map_parser::hexstring_to_value(std::string& hex_string, DWORD64& value) {
+bool map_parser::hexstring_to_value(std::string& hex_string, uint64_t& value) {
 	bool was_init_first = false;
 	value = 0;
-	for (unsigned int i = 0; i < hex_string.length(); i++) {
+	for (size_t i = 0; i < hex_string.length(); i++) {
 		if (hex_string[i] >= '0' && hex_string[i] <= '9') {
 			value *= 0x10;
 			value += (hex_string[i] - '0');
@@ -128,7 +130,7 @@ bool map_parser::hexstring_to_value(std::string& hex_string, DWORD64& value) {
 	return was_init_first;
 }
 
-bool map_parser::address_string_to_values(std::string& address_string, DWORD64& section_num, DWORD64& offset) {
+bool map_parser::address_string_to_values(std::string& address_string, uint64_t& section_num, uint64_t& offset) {
 
 	if (hexstring_to_value(address_string.substr(0, 4), section_num) && hexstring_to_value(address_string.substr(5), offset)) {
 		return true;
@@ -137,7 +139,7 @@ bool map_parser::address_string_to_values(std::string& address_string, DWORD64& 
 	return false;
 }
 
-void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::string> &line) {
+void map_parser::parse_line_bolrand(uint32_t line_idx, std::vector<std::string> &line) {
 
 	if (this->parse_context == map_parse_mod_none) {
 		if (line.size() == 5 && line[0] == "Program" && line[1] == "entry" && line[2] == "point" && line[3] == "at") {
@@ -192,12 +194,12 @@ void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::stri
 				std::vector<std::string> path;
 
 				std::string path_step;
-				unsigned int dot_counter = 0;
-				unsigned int dont_count_dots = 0;
-				unsigned int dots_total = 0;
+				uint32_t dot_counter = 0;
+				uint32_t dont_count_dots = 0;
+				uint32_t dots_total = 0;
 
 				bool was_last_dot = false;
-				for (unsigned int i = 0; i < libdata.length(); i++) {
+				for (uint32_t i = 0; i < libdata.length(); i++) {
 
 					if (libdata[i] == '{' || libdata[i] == '<') {
 						dont_count_dots++;
@@ -243,7 +245,7 @@ void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::stri
 				}
 
 				bool is_section_mark = false;
-				for (unsigned int i = 0; i < path_step.length(); i++) {
+				for (size_t i = 0; i < path_step.length(); i++) {
 					if (!is_section_mark) {
 						if (path_step[i] == '$') {
 							is_section_mark = true;
@@ -299,7 +301,7 @@ void map_parser::parse_line_bolrand(unsigned int line_idx, std::vector<std::stri
 }
 
 
-void map_parser::parse_line_visualstudio(unsigned int line_idx, std::vector<std::string> &line) {
+void map_parser::parse_line_visualstudio(uint32_t line_idx, std::vector<std::string> &line) {
 
 	if (this->parse_context == map_parse_mod_none){
 		if(line.size() == 4 && line[0] == "entry" && line[1] == "point" && line[2] == "is") {
@@ -346,7 +348,7 @@ void map_parser::parse_line_visualstudio(unsigned int line_idx, std::vector<std:
 				item._class = (line[3].compare("f") == 0) ? data_class_function : data_class_data;
 
 				std::string libdata = line[line.size() - 1];
-				unsigned int libsplit = libdata.find_first_of(":");
+				uint32_t libsplit = libdata.find_first_of(":");
 
 				std::vector<std::string> path;
 
