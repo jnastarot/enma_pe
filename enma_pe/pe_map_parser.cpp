@@ -103,7 +103,7 @@ void map_parser::get_raw_map_file(std::string& map_text, raw_mapfile &mapfile) {
 
 }
 
-bool map_parser::hexstring_to_value(std::string& hex_string, uint64_t& value) {
+bool map_parser::hexstring_to_value(std::string& hex_string, uint32_t& value) {
 	bool was_init_first = false;
 	value = 0;
 	for (size_t i = 0; i < hex_string.length(); i++) {
@@ -130,7 +130,7 @@ bool map_parser::hexstring_to_value(std::string& hex_string, uint64_t& value) {
 	return was_init_first;
 }
 
-bool map_parser::address_string_to_values(std::string& address_string, uint64_t& section_num, uint64_t& offset) {
+bool map_parser::address_string_to_values(std::string& address_string, uint32_t& section_num, uint32_t& offset) {
 
 	if (hexstring_to_value(address_string.substr(0, 4), section_num) && hexstring_to_value(address_string.substr(5), offset)) {
 		return true;

@@ -69,12 +69,12 @@ bool has_image_rich_data(const uint8_t * pimage,uint32_t * rich_data_offset,
     image_dos_header* dos_header = (image_dos_header*)pimage;
     uint32_t rich_offset = 0;
 
-    for (int rich_end = sizeof(image_dos_header); rich_end < (dos_header->e_lfanew - 8); rich_end += 4) {//check for rich data
+    for (size_t rich_end = sizeof(image_dos_header); rich_end < (dos_header->e_lfanew - 8); rich_end += 4) {//check for rich data
 
         if (*(uint32_t*)(&pimage[rich_end]) == 0x68636952) { //'Rich'
             uint32_t xor_key = *(uint32_t*)(&pimage[rich_end + 4]);
 
-            for (int rich_start = sizeof(image_dos_header);
+            for (size_t rich_start = sizeof(image_dos_header);
                 rich_start < (dos_header->e_lfanew - 8); rich_start += 4) {//get rich offset
 
                 if ((*(uint32_t*)(&pimage[rich_start]) ^ xor_key) == 0x536E6144) { //'DanS'
@@ -132,7 +132,7 @@ bool get_image_rich_data(const uint8_t * pimage, std::vector<pe_rich_data>& rich
 
         rich_data_item* rich_items = (rich_data_item*)(&pimage[rich_offset]);
 
-        for (int item_idx = 2; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
+        for (size_t item_idx = 2; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
             rich_data_item rich_item = rich_items[item_idx];
             *(uint32_t*)(&rich_item) ^= rich_xor_key;
             *(uint32_t*)((uint8_t*)&rich_item + 4) ^= rich_xor_key;
@@ -168,7 +168,7 @@ bool checksum_rich(const uint8_t * pimage,uint32_t * correct_rich_xor_key) {
             calc_hash += GET_RICH_HASH(uint32_t(pimage[i]), i);
         }
 
-        for (int item_idx = 1; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
+        for (size_t item_idx = 1; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
             rich_data_item rich_item = rich_items[item_idx];
             *(uint32_t*)(&rich_item) ^= rich_xor_key;
             *(uint32_t*)((uint8_t*)&rich_item + 4) ^= rich_xor_key;

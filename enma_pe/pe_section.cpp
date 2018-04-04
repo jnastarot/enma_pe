@@ -27,7 +27,9 @@ pe_section::pe_section(const image_section_header& header) {
 
 	this->section_data.clear();
 }
-pe_section::pe_section(const image_section_header& header, const std::vector<uint8_t>& data) {
+pe_section::pe_section(const image_section_header& header, const std::vector<uint8_t>& data):
+    section_data(data){
+
 	this->section_name.reserve(8);
 	this->section_name.resize(lstrlenA((char*)header.name));
 	memcpy((void*)this->section_name.data(), header.name, 8);
@@ -37,7 +39,6 @@ pe_section::pe_section(const image_section_header& header, const std::vector<uin
 	this->pointer_to_raw	= header.pointer_to_raw_data;
 	this->characteristics	= header.characteristics;
 
-	this->section_data = data;
 }
 pe_section::~pe_section() {
 

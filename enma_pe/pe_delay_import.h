@@ -2,12 +2,12 @@
 
 class delay_imported_library {
     std::string library_name;
-    DWORD attributes;
-    DWORD timestamp;
-    DWORD module_handle_rva;
-    DWORD rva_to_iat;
-    DWORD rva_to_bound_iat;
-    DWORD rva_to_unload_info_table;
+    uint32_t  attributes;
+    uint32_t  timestamp;
+    uint32_t  module_handle_rva;
+    uint32_t  rva_to_iat;
+    uint32_t  rva_to_bound_iat;
+    uint32_t  rva_to_unload_info_table;
     
     std::vector<imported_func> imported_items;
 public:
@@ -18,21 +18,21 @@ public:
     delay_imported_library& delay_imported_library::operator=(const delay_imported_library& lib);
 public:
     void delay_imported_library::set_library_name(const std::string& library_name);
-    void delay_imported_library::set_attributes(DWORD attributes);
-    void delay_imported_library::set_timestamp(DWORD timestamp);
-    void delay_imported_library::set_rva_module_handle(DWORD rva);
-    void delay_imported_library::set_rva_iat(DWORD rva);
-    void delay_imported_library::set_rva_bound_iat(DWORD rva);
-    void delay_imported_library::set_rva_unload_info_table(DWORD rva);
+    void delay_imported_library::set_attributes(uint32_t  attributes);
+    void delay_imported_library::set_timestamp(uint32_t  timestamp);
+    void delay_imported_library::set_rva_module_handle(uint32_t  rva);
+    void delay_imported_library::set_rva_iat(uint32_t  rva);
+    void delay_imported_library::set_rva_bound_iat(uint32_t  rva);
+    void delay_imported_library::set_rva_unload_info_table(uint32_t  rva);
     void delay_imported_library::add_item(const imported_func& item);
 public:
     std::string delay_imported_library::get_library_name() const;
-    DWORD delay_imported_library::set_attributes() const;
-    DWORD delay_imported_library::get_timestamp() const;
-    DWORD delay_imported_library::get_rva_module_handle() const;
-    DWORD delay_imported_library::get_rva_iat() const;
-    DWORD delay_imported_library::get_rva_bound_iat() const;
-    DWORD delay_imported_library::get_rva_unload_info_table() const;
+    uint32_t  delay_imported_library::set_attributes() const;
+    uint32_t  delay_imported_library::get_timestamp() const;
+    uint32_t  delay_imported_library::get_rva_module_handle() const;
+    uint32_t  delay_imported_library::get_rva_iat() const;
+    uint32_t  delay_imported_library::get_rva_bound_iat() const;
+    uint32_t  delay_imported_library::get_rva_unload_info_table() const;
     imported_library delay_imported_library::convert_to_imported_library() const;
 };
 

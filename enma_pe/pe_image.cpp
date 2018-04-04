@@ -354,7 +354,7 @@ pe_section& pe_image::add_section(const image_section_header& header) {
 	sections.push_back(new pe_section(header));
 	return *sections[sections.size() - 1];
 }
-pe_section& pe_image::add_section(const image_section_header& header, const std::vector<uint8_t> data) {
+pe_section& pe_image::add_section(const image_section_header& header, const std::vector<uint8_t>& data) {
 	sections.push_back(new pe_section(header, data));
 	return *sections[sections.size() - 1];
 }
@@ -834,7 +834,7 @@ void erase_directories_pe_image(pe_image &image, std::vector<erased_zone>& zones
 	}
 
 	if (delete_empty_sections && image.get_sections().size()) {
-		for (size_t section_idx = image.get_sections().size() - 1; section_idx >= 0; section_idx--) {
+		for (size_t section_idx = image.get_sections().size() - 1; section_idx > 0; section_idx--) {
 			auto _section = image.get_sections()[section_idx];
 
 			for (auto& zone : zones) {

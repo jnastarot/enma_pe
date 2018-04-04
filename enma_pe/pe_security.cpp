@@ -10,8 +10,8 @@
 
 bool erase_security_table(pe_image &image,std::vector<erased_zone>* zones){
 
-    DWORD raw_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_SECURITY);
-    DWORD virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_SECURITY);
+    uint32_t raw_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_SECURITY);
+    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_SECURITY);
 
     if (raw_address && virtual_size) {
 

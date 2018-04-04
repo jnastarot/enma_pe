@@ -1,26 +1,26 @@
 #pragma once
 
 class exceptions_item {
-    DWORD address_begin;
-    DWORD address_end;
-    DWORD address_unwind_data;
+    uint32_t address_begin;
+    uint32_t address_end;
+    uint32_t address_unwind_data;
 public:
     exceptions_item::exceptions_item();
     exceptions_item::exceptions_item(const exceptions_item& item);
-    exceptions_item::exceptions_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data);
+    exceptions_item::exceptions_item(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data);
     exceptions_item::~exceptions_item();
 
     exceptions_item& exceptions_item::operator=(const exceptions_item& item);
 public:
-    void exceptions_item::set_begin_address(DWORD rva_address);
-    void exceptions_item::set_end_address(DWORD rva_address);
-    void exceptions_item::set_unwind_data_address(DWORD rva_address);
+    void exceptions_item::set_begin_address(uint32_t rva_address);
+    void exceptions_item::set_end_address(uint32_t rva_address);
+    void exceptions_item::set_unwind_data_address(uint32_t rva_address);
 
 
 public:
-    DWORD exceptions_item::get_begin_address() const;
-    DWORD exceptions_item::get_end_address() const;
-    DWORD exceptions_item::get_unwind_data_address() const;
+    uint32_t exceptions_item::get_begin_address() const;
+    uint32_t exceptions_item::get_end_address() const;
+    uint32_t exceptions_item::get_unwind_data_address() const;
 
 };
 
@@ -34,7 +34,7 @@ public:
 
     exceptions_table& exceptions_table::operator=(const exceptions_table& exceptions);
 public:
-    void exceptions_table::add_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data);
+    void exceptions_table::add_item(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data);
     void exceptions_table::add_item(const exceptions_item& item);
 public:
 

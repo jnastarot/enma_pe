@@ -37,7 +37,7 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
 
 		if (p_section && (!p_section->is_executable() || find_in_execute_sections)) {
 
-			BYTE * section_raw = p_section->get_section_data().data();
+			uint8_t * section_raw = p_section->get_section_data().data();
             size_t raw_size = p_section->get_size_of_raw_data();
 
             size_t top_ansi = 0;

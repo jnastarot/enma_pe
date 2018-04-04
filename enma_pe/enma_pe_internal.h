@@ -316,8 +316,8 @@ typedef struct _image_export_directory {
     uint16_t   minor_version;
     uint32_t   name;
     uint32_t   base;
-    uint32_t   numberOfFunctions;
-    uint32_t   numberOfNames;
+    uint32_t   number_of_functions;
+    uint32_t   number_of_names;
     uint32_t   address_of_functions;      // RVA from base of image
     uint32_t   address_of_names;          // RVA from base of image
     uint32_t   address_of_name_ordinals;  // RVA from base of image
@@ -423,10 +423,10 @@ typedef struct _image_delayload_descriptor {
 typedef struct _image_resource_directory {
     uint32_t   characteristics;
     uint32_t   time_date_stamp;
-    uint16_t   najor_version;
+    uint16_t   major_version;
     uint16_t   minor_version;
     uint16_t   number_of_named_entries;
-    uint16_t   number_of_Id_entries;
+    uint16_t   number_of_id_entries;
     //  image_resource_directory_entry directory_entries[];
 } image_resource_directory, *pimage_resource_directory;
 
@@ -862,7 +862,7 @@ typedef struct _image_load_config_directory32 {
     uint16_t   csd_version;
     uint16_t   dependent_load_flags;
     uint32_t   edit_list;                               // VA
-    uint32_t   securityCookie;                          // VA
+    uint32_t   security_cookie;                          // VA
     /*end of LOADCONFIG V1*/
     uint32_t   se_handler_table;                        // VA
     uint32_t   se_handler_count;
@@ -959,6 +959,81 @@ typedef struct _image_load_config_directory64 {
     /*end of LOADCONFIG V8*/
 } image_load_config_directory64, *pimage_load_config_directory64;
 
+typedef enum replaces_cor_hdr_numeric_defines
+{
+// COM+ Header entry point flags.
+    COMIMAGE_FLAGS_ILONLY               =0x00000001,
+    COMIMAGE_FLAGS_32BITREQUIRED        =0x00000002,
+    COMIMAGE_FLAGS_IL_LIBRARY           =0x00000004,
+    COMIMAGE_FLAGS_STRONGNAMESIGNED     =0x00000008,
+    COMIMAGE_FLAGS_NATIVE_ENTRYPOINT    =0x00000010,
+    COMIMAGE_FLAGS_TRACKDEBUGDATA       =0x00010000,
+    COMIMAGE_FLAGS_32BITPREFERRED       =0x00020000,
+
+// Version flags for image.
+    COR_VERSION_MAJOR_V2                =2,
+    COR_VERSION_MAJOR                   =COR_VERSION_MAJOR_V2,
+    COR_VERSION_MINOR                   =5,
+    COR_DELETED_NAME_LENGTH             =8,
+    COR_VTABLEGAP_NAME_LENGTH           =8,
+
+// Maximum size of a NativeType descriptor.
+    NATIVE_TYPE_MAX_CB                  =1,
+    COR_ILMETHOD_SECT_SMALL_MAX_DATASIZE=0xFF,
+
+// #defines for the MIH FLAGS
+    IMAGE_COR_MIH_METHODRVA             =0x01,
+    IMAGE_COR_MIH_EHRVA                 =0x02,
+    IMAGE_COR_MIH_BASICBLOCK            =0x08,
+
+// V-table constants
+    COR_VTABLE_32BIT                    =0x01,          // V-table slots are 32-bits in size.
+    COR_VTABLE_64BIT                    =0x02,          // V-table slots are 64-bits in size.
+    COR_VTABLE_FROM_UNMANAGED           =0x04,          // If set, transition from unmanaged.
+    COR_VTABLE_FROM_UNMANAGED_RETAIN_APPDOMAIN  =0x08,  // If set, transition from unmanaged with keeping the current appdomain.
+    COR_VTABLE_CALL_MOST_DERIVED        =0x10,          // Call most derived method described by
+
+// EATJ constants
+    IMAGE_COR_EATJ_THUNK_SIZE           =32,            // Size of a jump thunk reserved range.
+
+// Max name lengths
+    //@todo: Change to unlimited name lengths.
+    MAX_CLASS_NAME                      =1024,
+    MAX_PACKAGE_NAME                    =1024,
+} replaces_cor_hdr_numeric_defines;
+
+// CLR 2.0 header structure.
+typedef struct image_cor20_header
+{
+    // Header versioning
+    uint32_t   cb;
+    uint16_t   major_runtime_version;
+    uint16_t   minor_runtime_version;
+
+    // Symbol table and startup information
+    image_data_directory   meta_data;
+    uint32_t               flags;
+
+    // If COMIMAGE_FLAGS_NATIVE_ENTRYPOINT is not set, EntryPointToken represents a managed entrypoint.
+    // If COMIMAGE_FLAGS_NATIVE_ENTRYPOINT is set, EntryPointRVA represents an RVA to a native entrypoint.
+    union {
+        uint32_t   entry_point_token;
+        uint32_t   entry_point_rva;
+    } DUMMYUNIONNAME;
+
+    // Binding information
+    image_data_directory   resources;
+    image_data_directory   strong_name_signature;
+
+    // Regular fixup and binding information
+    image_data_directory   code_manager_table;
+    image_data_directory   vtable_fixups;
+    image_data_directory   export_address_table_jumps;
+
+    // Precompiled image info (internal use only - set to zero)
+    image_data_directory   managed_native_header;
+
+} image_cor20_header, *pimage_cor20_header;
 
 #pragma pack(pop)
 #pragma warning(pop) 

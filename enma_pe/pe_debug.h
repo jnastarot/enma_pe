@@ -1,45 +1,46 @@
 #pragma once
 
 class debug_item {
-    DWORD   characteristics;
-    DWORD   timestamp;
-    WORD    major_version;
-    WORD    minor_version;
-    DWORD   type;
-    DWORD   size_of_data;
-    DWORD   address_of_raw_data;
-    DWORD   pointer_to_raw_data;
+    uint32_t   characteristics;
+    uint32_t   timestamp;
+    uint16_t    major_version;
+    uint16_t    minor_version;
+    uint32_t   type;
+    uint32_t   size_of_data;
+    uint32_t   address_of_raw_data;
+    uint32_t   pointer_to_raw_data;
 
-    std::vector<BYTE> item_data;
+    std::vector<uint8_t> item_data;
 public:
     debug_item::debug_item();
-    debug_item::debug_item(DWORD   characteristics,DWORD   timestamp,WORD    major_version, WORD    minor_version,
-    DWORD   type, DWORD   size_of_data, DWORD   address_of_raw_data,DWORD   pointer_to_raw_data,
+    debug_item::debug_item(const debug_item& item);
+    debug_item::debug_item(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
+        uint32_t   type, uint32_t   size_of_data, uint32_t   address_of_raw_data, uint32_t   pointer_to_raw_data,
      void * data);
 
     debug_item::~debug_item();
 
     debug_item& debug_item::operator=(const debug_item& item);
 public:
-    void  debug_item::set_characteristics(DWORD characteristics);
-    void  debug_item::set_timestamp(DWORD timestamp);
-    void  debug_item::set_major_version(WORD major_version);
-    void  debug_item::set_minor_version(WORD minor_version);
-    void  debug_item::set_type(DWORD type);
-    void  debug_item::set_size_of_data(DWORD size_of_data);
-    void  debug_item::set_address_of_raw_data(DWORD address_of_raw_data);
-    void  debug_item::set_pointer_to_raw_data(DWORD pointer_to_raw_data);
+    void  debug_item::set_characteristics(uint32_t characteristics);
+    void  debug_item::set_timestamp(uint32_t timestamp);
+    void  debug_item::set_major_version(uint16_t major_version);
+    void  debug_item::set_minor_version(uint16_t minor_version);
+    void  debug_item::set_type(uint32_t type);
+    void  debug_item::set_size_of_data(uint32_t size_of_data);
+    void  debug_item::set_address_of_raw_data(uint32_t address_of_raw_data);
+    void  debug_item::set_pointer_to_raw_data(uint32_t pointer_to_raw_data);
 public:
-    DWORD  debug_item::get_characteristics() const;
-    DWORD  debug_item::get_timestamp() const;
-    WORD   debug_item::get_major_version() const;
-    WORD   debug_item::get_minor_version() const;
-    DWORD  debug_item::get_type() const;
-    DWORD  debug_item::get_size_of_data() const;
-    DWORD  debug_item::get_address_of_raw_data() const;
-    DWORD  debug_item::get_pointer_to_raw_data() const;
+    uint32_t  debug_item::get_characteristics() const;
+    uint32_t  debug_item::get_timestamp() const;
+    uint16_t  debug_item::get_major_version() const;
+    uint16_t  debug_item::get_minor_version() const;
+    uint32_t  debug_item::get_type() const;
+    uint32_t  debug_item::get_size_of_data() const;
+    uint32_t  debug_item::get_address_of_raw_data() const;
+    uint32_t  debug_item::get_pointer_to_raw_data() const;
 
-    std::vector<BYTE> debug_item::get_item_data();
+    std::vector<uint8_t> debug_item::get_item_data();
 };
 
 class debug_table {
@@ -47,6 +48,7 @@ class debug_table {
     std::vector<debug_item> items;
 public:
     debug_table::debug_table();
+    debug_table::debug_table(const debug_table& debug);
     debug_table::~debug_table();
 
     debug_table& debug_table::operator=(const debug_table& debug);

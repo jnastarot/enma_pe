@@ -25,7 +25,6 @@ using namespace std;
 #define ALIGN_UP(a, b) (((a + b - 1) / b) * b)
 
 
-
 #include "enma_pe.h"
 
 

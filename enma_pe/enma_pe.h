@@ -3,7 +3,7 @@
 #include "enma_pe_internal.h"
 #include "pe_image.h"
 
-struct erased_zone { DWORD rva; unsigned int size; };
+struct erased_zone { uint32_t rva; size_t size; };
 
 #include "pe_export.h"
 #include "pe_bound_import.h"
@@ -31,6 +31,10 @@ struct pe_image_expanded {
     bound_import_table  bound_imports;
 
     pe_image image;
+
+    pe_image_expanded::pe_image_expanded(const pe_image_expanded& image_ex) {
+        operator=(image_ex);
+    }
 
     pe_image_expanded& pe_image_expanded::operator=(const pe_image_expanded& image_ex) {
         this->exports       = image_ex.exports;

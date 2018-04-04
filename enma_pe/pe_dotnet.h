@@ -1,57 +1,52 @@
 #pragma once
 
 class dotnet_table {
-    WORD                    major_version;
-    WORD                    minor_version;
-    DWORD                   flags;
+    uint16_t   major_version;
+    uint16_t   minor_version;
+    uint32_t   flags;
 
     union {
-        DWORD               entry_point_token;
-        DWORD               entry_point_rva;
+        uint32_t   entry_point_token;
+        uint32_t   entry_point_rva;
     };
 
-    IMAGE_DATA_DIRECTORY    meta_data;
-    IMAGE_DATA_DIRECTORY    resources;
-    IMAGE_DATA_DIRECTORY    strong_name_signature;
-    IMAGE_DATA_DIRECTORY    code_manager_table;
-    IMAGE_DATA_DIRECTORY    vtable_fixups;
-    IMAGE_DATA_DIRECTORY    export_address_table_jumps;
-    IMAGE_DATA_DIRECTORY    managed_native_header;
-
+    image_data_directory   meta_data;
+    image_data_directory   resources;
+    image_data_directory   strong_name_signature;
+    image_data_directory   code_manager_table;
+    image_data_directory   vtable_fixups;
+    image_data_directory   export_address_table_jumps;
 public:
     dotnet_table::dotnet_table();
     dotnet_table::~dotnet_table();
 
 
 public:
-    void dotnet_table::set_major_version(WORD major_version);
-    void dotnet_table::set_minor_version(WORD minor_version);
+    void dotnet_table::set_major_version(uint16_t major_version);
+    void dotnet_table::set_minor_version(uint16_t minor_version);
 
-    void dotnet_table::set_flags(DWORD flags);
-    void dotnet_table::set_entry_point(DWORD entry_point);
+    void dotnet_table::set_flags(uint32_t flags);
+    void dotnet_table::set_entry_point(uint32_t entry_point);
 
-    void dotnet_table::set_meta_data(IMAGE_DATA_DIRECTORY meta_data);
-    void dotnet_table::set_resources(IMAGE_DATA_DIRECTORY resources);
-    void dotnet_table::set_strong_name_signature(IMAGE_DATA_DIRECTORY strong_name_signature);
-    void dotnet_table::set_code_manager_table(IMAGE_DATA_DIRECTORY code_manager_table);
-    void dotnet_table::set_vtable_fixups(IMAGE_DATA_DIRECTORY vtable_fixups);
-    void dotnet_table::set_export_address_table_jumps(IMAGE_DATA_DIRECTORY export_address_table_jumps);
-    void dotnet_table::set_managed_native_header(IMAGE_DATA_DIRECTORY managed_native_header);
-
+    void dotnet_table::set_meta_data(image_data_directory meta_data);
+    void dotnet_table::set_resources(image_data_directory resources);
+    void dotnet_table::set_strong_name_signature(image_data_directory strong_name_signature);
+    void dotnet_table::set_code_manager_table(image_data_directory code_manager_table);
+    void dotnet_table::set_vtable_fixups(image_data_directory vtable_fixups);
+    void dotnet_table::set_export_address_table_jumps(image_data_directory export_address_table_jumps);
 public:
-    WORD dotnet_table::get_major_version() const;
-    WORD dotnet_table::get_minor_version() const;
+    uint16_t dotnet_table::get_major_version() const;
+    uint16_t dotnet_table::get_minor_version() const;
 
-    DWORD dotnet_table::get_flags() const;
-    DWORD dotnet_table::get_entry_point() const;
+    uint32_t dotnet_table::get_flags() const;
+    uint32_t dotnet_table::get_entry_point() const;
 
-    IMAGE_DATA_DIRECTORY dotnet_table::get_meta_data() const;
-    IMAGE_DATA_DIRECTORY dotnet_table::get_resources() const;
-    IMAGE_DATA_DIRECTORY dotnet_table::get_strong_name_signature() const;
-    IMAGE_DATA_DIRECTORY dotnet_table::get_code_manager_table() const;
-    IMAGE_DATA_DIRECTORY dotnet_table::get_vtable_fixups() const;
-    IMAGE_DATA_DIRECTORY dotnet_table::get_export_address_table_jumps() const;
-    IMAGE_DATA_DIRECTORY dotnet_table::get_managed_native_header() const;
+    image_data_directory dotnet_table::get_meta_data() const;
+    image_data_directory dotnet_table::get_resources() const;
+    image_data_directory dotnet_table::get_strong_name_signature() const;
+    image_data_directory dotnet_table::get_code_manager_table() const;
+    image_data_directory dotnet_table::get_vtable_fixups() const;
+    image_data_directory dotnet_table::get_export_address_table_jumps() const;
 };
 
 bool get_dotnet_table(_In_ const pe_image &image, _Out_ dotnet_table& dotnet);

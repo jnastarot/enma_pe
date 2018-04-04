@@ -8,7 +8,7 @@ resource_data_entry::resource_data_entry()
 {}
 
 
-resource_data_entry::resource_data_entry(void * data, unsigned int data_size, unsigned int codepage)
+resource_data_entry::resource_data_entry(void * data, uint32_t data_size, uint32_t codepage)
 	: codepage(codepage) {
 	this->data.resize(data_size);
 	memcpy(this->data.data(), data, data_size);
@@ -16,20 +16,20 @@ resource_data_entry::resource_data_entry(void * data, unsigned int data_size, un
 resource_data_entry::~resource_data_entry(){}
 
 
-void resource_data_entry::set_codepage(unsigned int codepage) {
+void resource_data_entry::set_codepage(uint32_t codepage) {
 	this->codepage = codepage;
 }
 
-void resource_data_entry::set_data(void * data, unsigned int data_size) {
+void resource_data_entry::set_data(void * data, uint32_t data_size) {
 	this->data.resize(data_size);
 	memcpy(this->data.data(), data, data_size);
 }
 
-unsigned int resource_data_entry::get_codepage() const{
+uint32_t resource_data_entry::get_codepage() const{
 	return this->codepage;
 }
 
-std::vector<BYTE>&	resource_data_entry::get_data() {
+std::vector<uint8_t>&	resource_data_entry::get_data() {
 	return data;
 }
 
@@ -103,7 +103,7 @@ void resource_directory_entry::set_name(const std::wstring& name) {
 	this->id = 0;
 }
 
-void resource_directory_entry::set_id(unsigned int id) {
+void resource_directory_entry::set_id(uint32_t id) {
 	this->id = id;
 	this->named = false;
 	this->name.clear();
@@ -123,7 +123,7 @@ void resource_directory_entry::add_resource_directory(const resource_directory& 
 	includes_data = false;
 }
 
-unsigned int resource_directory_entry::get_id() const{
+uint32_t resource_directory_entry::get_id() const{
 	return this->id;
 }
 
@@ -153,11 +153,16 @@ resource_directory::resource_directory()
 	major_version(0), minor_version(0),
 	number_of_named_entries(0), number_of_id_entries(0)
 {}
-resource_directory::resource_directory(IMAGE_RESOURCE_DIRECTORY * res_dir)
-	: characteristics(res_dir->Characteristics),
-	timestamp(res_dir->TimeDateStamp),
-	major_version(res_dir->MajorVersion), minor_version(res_dir->MinorVersion),
-	number_of_named_entries(res_dir->NumberOfNamedEntries), number_of_id_entries(res_dir->NumberOfIdEntries) {}
+
+resource_directory::resource_directory(const resource_directory& resource_dir) {
+    this->operator=(resource_dir);
+}
+
+resource_directory::resource_directory(const image_resource_directory& res_dir)
+	: characteristics(res_dir.characteristics),
+	timestamp(res_dir.time_date_stamp),
+	major_version(res_dir.major_version), minor_version(res_dir.minor_version),
+	number_of_named_entries(res_dir.number_of_named_entries), number_of_id_entries(res_dir.number_of_id_entries) {}
 
 
 resource_directory::~resource_directory() {
@@ -179,22 +184,22 @@ resource_directory& resource_directory::operator=(const resource_directory& reso
 }
 
 
-void resource_directory::set_characteristics(unsigned int characteristics) {
+void resource_directory::set_characteristics(uint32_t characteristics) {
 	this->characteristics = characteristics;
 }
-void resource_directory::set_timestamp(unsigned int timestamp) {
+void resource_directory::set_timestamp(uint32_t timestamp) {
 	this->timestamp = timestamp;
 }
-void resource_directory::set_number_of_named_entries(unsigned int number) {
+void resource_directory::set_number_of_named_entries(uint32_t number) {
 	this->number_of_named_entries = number;
 }
-void resource_directory::set_number_of_id_entries(unsigned int number) {
+void resource_directory::set_number_of_id_entries(uint32_t number) {
 	this->number_of_id_entries = number;
 }
-void resource_directory::set_major_version(unsigned short major_version) {
+void resource_directory::set_major_version(uint16_t major_version) {
 	this->major_version = major_version;
 }
-void resource_directory::set_minor_version(unsigned short minor_version) {
+void resource_directory::set_minor_version(uint16_t minor_version) {
 	this->minor_version = minor_version;
 }
 void resource_directory::add_resource_directory_entry(resource_directory_entry& entry) {
@@ -212,22 +217,22 @@ void resource_directory::clear_resource_directory_entry_list() {
 	number_of_id_entries	= 0;
 }
 
-unsigned int resource_directory::get_characteristics() const {
+uint32_t resource_directory::get_characteristics() const {
 	return this->characteristics;
 }
-unsigned int resource_directory::get_timestamp() const {
+uint32_t resource_directory::get_timestamp() const {
 	return this->timestamp;
 }
-unsigned short resource_directory::get_major_version() const {
+uint16_t resource_directory::get_major_version() const {
 	return this->major_version;
 }
-unsigned short resource_directory::get_minor_version() const {
+uint16_t resource_directory::get_minor_version() const {
 	return this->minor_version;
 }
-unsigned int resource_directory::get_number_of_named_entries() const {
+uint32_t resource_directory::get_number_of_named_entries() const {
 	return this->number_of_named_entries;
 }
-unsigned int resource_directory::get_number_of_id_entries() const {
+uint32_t resource_directory::get_number_of_id_entries() const {
 	return this->number_of_id_entries;
 }
 std::vector<resource_directory_entry>& resource_directory::get_entry_list() {
@@ -252,7 +257,7 @@ bool entry_sorter::operator()(resource_directory_entry& entry1, resource_directo
 		return entry1.is_named();
 	}
 }
-resource_directory::id_entry_finder::id_entry_finder(unsigned int id)
+resource_directory::id_entry_finder::id_entry_finder(uint32_t id)
 	:id_(id)
 {}
 bool resource_directory::id_entry_finder::operator()(resource_directory_entry& entry) {
@@ -267,7 +272,7 @@ bool resource_directory::name_entry_finder::operator()(resource_directory_entry&
 resource_directory::entry_finder::entry_finder(const std::wstring& name)
 	:name_(name), named_(true), id_(0)
 {}
-resource_directory::entry_finder::entry_finder(unsigned int id)
+resource_directory::entry_finder::entry_finder(uint32_t id)
 	: id_(id), named_(false), name_(L"")
 {}
 bool resource_directory::entry_finder::operator()(resource_directory_entry& entry) {
@@ -278,27 +283,27 @@ bool resource_directory::entry_finder::operator()(resource_directory_entry& entr
 		return !entry.is_named() && entry.get_id() == id_;
 	}
 }
-bool resource_directory::entry_by_id(resource_directory_entry * &entry, unsigned int id) {
-	std::vector<resource_directory_entry>::const_iterator i = std::find_if(entries.begin(), entries.end(), id_entry_finder(id));
+bool resource_directory::entry_by_id(resource_directory_entry * &entry, uint32_t id) {
+	auto& found_entry = std::find_if(entries.begin(), entries.end(), id_entry_finder(id));
 
 
-	if (i == entries.end()) {
+	if (found_entry == entries.end()) {
 		return false;
 	}
 
-	entry = (resource_directory_entry *)&(*i);
+	entry = (resource_directory_entry *)&(*found_entry);
 
 	return true;
 }
 bool resource_directory::entry_by_name(resource_directory_entry * &entry, const std::wstring& name) {
-	std::vector<resource_directory_entry>::const_iterator i = std::find_if(entries.begin(), entries.end(), name_entry_finder(name));
+	auto& found_entry = std::find_if(entries.begin(), entries.end(), name_entry_finder(name));
 
 
-	if (i == entries.end()) {
+	if (found_entry == entries.end()) {
 		return false;
 	}
 
-	entry = (resource_directory_entry *)&(*i);
+	entry = (resource_directory_entry *)&(*found_entry);
 
 
 	return true;
@@ -307,16 +312,16 @@ bool resource_directory::entry_by_name(resource_directory_entry * &entry, const 
 
 
 void calculate_resource_data_space(resource_directory& root,//taken from pe bless
-	unsigned int aligned_offset_from_section_start, unsigned int& needed_size_for_structures, unsigned int& needed_size_for_strings) {
+	uint32_t aligned_offset_from_section_start, uint32_t& needed_size_for_structures, uint32_t& needed_size_for_strings) {
 
-	needed_size_for_structures += sizeof(IMAGE_RESOURCE_DIRECTORY);
+	needed_size_for_structures += sizeof(image_resource_directory);
 
-	for (unsigned int entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
+	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
 
-		needed_size_for_structures += sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY);
+		needed_size_for_structures += sizeof(image_resource_directory_entry);
 
 		if (root.get_entry_list()[entry_idx].is_named()) {
-			needed_size_for_strings += ((root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + sizeof(WORD));
+			needed_size_for_strings += ((root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + sizeof(uint16_t));
 		}
 
 		if (!root.get_entry_list()[entry_idx].is_includes_data()) {
@@ -325,16 +330,16 @@ void calculate_resource_data_space(resource_directory& root,//taken from pe bles
 	}
 }
 
-void calculate_resource_data_space(resource_directory& root, unsigned int needed_size_for_structures, //taken from pe bless
-	unsigned int needed_size_for_strings, unsigned int& needed_size_for_data, unsigned int& current_data_pos) {
+void calculate_resource_data_space(resource_directory& root, uint32_t needed_size_for_structures, //taken from pe bless
+	uint32_t needed_size_for_strings, uint32_t& needed_size_for_data, uint32_t& current_data_pos) {
 
-	for (unsigned int entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
+	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
 
 		if (root.get_entry_list()[entry_idx].is_includes_data()) {
 
-			unsigned int data_size = unsigned int(root.get_entry_list()[entry_idx].get_data_entry().get_data().size()
-				+ sizeof(IMAGE_RESOURCE_DATA_ENTRY)
-				+ ALIGN_UP(current_data_pos, sizeof(unsigned int)) - current_data_pos
+			uint32_t data_size = uint32_t(root.get_entry_list()[entry_idx].get_data_entry().get_data().size()
+				+ sizeof(image_resource_data_entry)
+				+ ALIGN_UP(current_data_pos, sizeof(uint32_t)) - current_data_pos
 				);
 
 			needed_size_for_data += data_size;
@@ -350,32 +355,32 @@ void calculate_resource_data_space(resource_directory& root, unsigned int needed
 }
 
 resource_directory process_resource_directory(const pe_image &image, //taken from pe bless
-	unsigned int res_rva, unsigned int offset_to_directory, std::set<unsigned int>& processed) {
+	uint32_t res_rva, uint32_t offset_to_directory, std::set<uint32_t>& processed) {
 	resource_directory ret;
 
 	if (!processed.insert(offset_to_directory).second) { return ret; }
 
 
-	IMAGE_RESOURCE_DIRECTORY directory;
+    image_resource_directory directory;
 	if (image.get_data_by_rva(res_rva + offset_to_directory, &directory, sizeof(directory))) {
 
-		ret = resource_directory(&directory);
+		ret = resource_directory(directory);
 
-		for (unsigned long i = 0; i != unsigned long(directory.NumberOfIdEntries) + directory.NumberOfNamedEntries; i++) {
+		for (size_t i = 0; i != (directory.number_of_id_entries + directory.number_of_named_entries); i++) {
 			//Read directory entries one by one
-			IMAGE_RESOURCE_DIRECTORY_ENTRY dir_entry;
-			if (image.get_data_by_rva(res_rva + sizeof(IMAGE_RESOURCE_DIRECTORY) + (i * sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY)) + offset_to_directory, &dir_entry, sizeof(dir_entry))) {
+            image_resource_directory_entry dir_entry;
+			if (image.get_data_by_rva(res_rva + sizeof(image_resource_directory) + (i * sizeof(image_resource_directory_entry)) + offset_to_directory, &dir_entry, sizeof(dir_entry))) {
 
 				//Create directory entry structure
 				resource_directory_entry entry;
 
 				//If directory is named
-				if (dir_entry.NameIsString) {
+				if (dir_entry.name_is_string) {
 					//get directory name length
 
-					PIMAGE_RESOURCE_DIR_STRING_U directory_name = (PIMAGE_RESOURCE_DIR_STRING_U)&image.get_section_by_rva(res_rva + dir_entry.NameOffset)->get_section_data().data()[
-						res_rva + dir_entry.NameOffset -
-							image.get_section_by_rva(res_rva + dir_entry.NameOffset)->get_virtual_address()
+					PIMAGE_RESOURCE_DIR_STRING_U directory_name = (PIMAGE_RESOURCE_DIR_STRING_U)&image.get_section_by_rva(res_rva + dir_entry.name_offset)->get_section_data().data()[
+						res_rva + dir_entry.name_offset -
+							image.get_section_by_rva(res_rva + dir_entry.name_offset)->get_virtual_address()
 					];
 
 					std::wstring name;
@@ -386,27 +391,27 @@ resource_directory process_resource_directory(const pe_image &image, //taken fro
 					entry.set_name(name);
 				}
 				else {
-					entry.set_id(dir_entry.Id);
+					entry.set_id(dir_entry.id);
 				}
 
 				//If directory entry has another resource directory
-				if (dir_entry.DataIsDirectory) {
-					entry.add_resource_directory(process_resource_directory(image, res_rva, dir_entry.OffsetToDirectory, processed));
+				if (dir_entry.data_is_directory) {
+					entry.add_resource_directory(process_resource_directory(image, res_rva, dir_entry.offset_to_directory, processed));
 				}
 				else {
 					//If directory entry has data
-					IMAGE_RESOURCE_DATA_ENTRY data_entry;
-					if (image.get_data_by_rva(res_rva + dir_entry.OffsetToData, &data_entry, sizeof(data_entry))) {
+                    image_resource_data_entry data_entry;
+					if (image.get_data_by_rva(res_rva + dir_entry.offset_to_data, &data_entry, sizeof(data_entry))) {
 
 						//Add data entry to directory entry
 						entry.add_data_entry(
 							resource_data_entry(
-								&image.get_section_by_rva(data_entry.OffsetToData)->get_section_data().data()[
-									data_entry.OffsetToData -
-										image.get_section_by_rva(data_entry.OffsetToData)->get_virtual_address()
+								&image.get_section_by_rva(data_entry.offset_to_data)->get_section_data().data()[
+									data_entry.offset_to_data -
+										image.get_section_by_rva(data_entry.offset_to_data)->get_virtual_address()
 								],
-								data_entry.Size,
-										data_entry.CodePage
+								data_entry.size,
+										data_entry.code_page
 										)
 						);
 					}
@@ -421,82 +426,82 @@ resource_directory process_resource_directory(const pe_image &image, //taken fro
 
 
 void rebuild_resource_directory(pe_section& resource_section, resource_directory& root, //taken from pe bless
-	unsigned int& current_structures_pos, unsigned int& current_data_pos, unsigned int& current_strings_pos, unsigned int offset_from_section_start){
+	uint32_t& current_structures_pos, uint32_t& current_data_pos, uint32_t& current_strings_pos, uint32_t offset_from_section_start){
 
-	IMAGE_RESOURCE_DIRECTORY dir = { 0 };
-	dir.Characteristics = root.get_characteristics();
-	dir.MajorVersion	= root.get_major_version();
-	dir.MinorVersion	= root.get_minor_version();
-	dir.TimeDateStamp	= root.get_timestamp();
+    image_resource_directory dir = { 0 };
+	dir.characteristics = root.get_characteristics();
+	dir.major_version	= root.get_major_version();
+	dir.minor_version	= root.get_minor_version();
+	dir.time_date_stamp	= root.get_timestamp();
 
 	std::sort(root.get_entry_list().begin(), root.get_entry_list().end(), entry_sorter());
 
 
-	for (unsigned int entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
+	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
 		if (root.get_entry_list()[entry_idx].is_named()) {
-			++dir.NumberOfNamedEntries;
+			++dir.number_of_named_entries;
 		}
 		else {
-			++dir.NumberOfIdEntries;
+			++dir.number_of_id_entries;
 		}
 	}
 	
 	memcpy(&resource_section.get_section_data().data()[current_structures_pos], &dir, sizeof(dir));
 
-	resource_section.add_data((BYTE*)&dir, sizeof(dir));
+	resource_section.add_data((uint8_t*)&dir, sizeof(dir));
 
-	BYTE* raw_data = resource_section.get_section_data().data();
+	uint8_t* raw_data = resource_section.get_section_data().data();
 
 
 	current_structures_pos += sizeof(dir);
 
-	unsigned int this_current_structures_pos = current_structures_pos;
+	uint32_t this_current_structures_pos = current_structures_pos;
 
-	current_structures_pos += sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY) * (dir.NumberOfNamedEntries + dir.NumberOfIdEntries);
+	current_structures_pos += sizeof(image_resource_directory_entry) * (dir.number_of_named_entries + dir.number_of_id_entries);
 
-	for (std::vector<resource_directory_entry>::iterator it = root.get_entry_list().begin(); it != root.get_entry_list().end(); ++it) {
+	for (auto& entry_item : root.get_entry_list()) {
 
-		IMAGE_RESOURCE_DIRECTORY_ENTRY entry;
+        image_resource_directory_entry entry;
 
-		if ((*it).is_named()){
-			entry.Name = 0x80000000 | (current_strings_pos - offset_from_section_start);
-			WORD unicode_length = (WORD)(*it).get_name().length();
+		if (entry_item.is_named()){
+			entry.name = 0x80000000 | (current_strings_pos - offset_from_section_start);
+			uint16_t unicode_length = (uint16_t)entry_item.get_name().length();
 			memcpy(&raw_data[current_strings_pos], &unicode_length, sizeof(unicode_length));
 			current_strings_pos += sizeof(unicode_length);
 
-			memcpy(&raw_data[current_strings_pos], (*it).get_name().c_str(), (*it).get_name().length() * sizeof(wchar_t) + sizeof(wchar_t));
+			memcpy(&raw_data[current_strings_pos], entry_item.get_name().c_str(), entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t));
 
-			current_strings_pos += static_cast<unsigned long>((*it).get_name().length() * sizeof(wchar_t) + sizeof(wchar_t));
+			current_strings_pos += uint32_t(entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t));
 		}
 		else{
-			entry.Name = (*it).get_id();
+			entry.name = entry_item.get_id();
 		}
 
-		if ((*it).is_includes_data()){
-			current_data_pos = ALIGN_UP(current_data_pos, sizeof(unsigned int));
-			IMAGE_RESOURCE_DATA_ENTRY data_entry = { 0 };
-			data_entry.CodePage = (*it).get_data_entry().get_codepage();
-			data_entry.Size = unsigned int((*it).get_data_entry().get_data().size());
-			data_entry.OffsetToData = resource_section.get_virtual_address() + current_data_pos + sizeof(data_entry);
+		if (entry_item.is_includes_data()){
+			current_data_pos = ALIGN_UP(current_data_pos, sizeof(uint32_t));
+            image_resource_data_entry data_entry = { 0 };
+			data_entry.code_page = entry_item.get_data_entry().get_codepage();
+			data_entry.size = uint32_t(entry_item.get_data_entry().get_data().size());
+			data_entry.offset_to_data = resource_section.get_virtual_address() + current_data_pos + sizeof(data_entry);
 
-			entry.OffsetToData = current_data_pos - offset_from_section_start;
+			entry.offset_to_data = current_data_pos - offset_from_section_start;
 
 			memcpy(&raw_data[current_data_pos], &data_entry, sizeof(data_entry));
 			current_data_pos += sizeof(data_entry);
 
-			memcpy(&raw_data[current_data_pos], (*it).get_data_entry().get_data().data(), data_entry.Size);
-			current_data_pos += data_entry.Size;
+			memcpy(&raw_data[current_data_pos], entry_item.get_data_entry().get_data().data(), data_entry.size);
+			current_data_pos += data_entry.size;
 
 			memcpy(&raw_data[this_current_structures_pos], &entry, sizeof(entry));
 			this_current_structures_pos += sizeof(entry);
 		}
 		else{
-			entry.OffsetToData = 0x80000000 | (current_structures_pos - offset_from_section_start);
+			entry.offset_to_data = 0x80000000 | (current_structures_pos - offset_from_section_start);
 
 			memcpy(&raw_data[this_current_structures_pos], &entry, sizeof(entry));
 			this_current_structures_pos += sizeof(entry);
 
-			rebuild_resource_directory(resource_section, (*it).get_resource_directory(), current_structures_pos, current_data_pos, current_strings_pos, offset_from_section_start);
+			rebuild_resource_directory(resource_section, entry_item.get_resource_directory(), current_structures_pos, current_data_pos, current_strings_pos, offset_from_section_start);
 		}
 	}
 }
@@ -508,7 +513,7 @@ bool get_resources_table(const pe_image &image, resource_directory& resources) {
 		return false;
 	}
 
-	std::set<unsigned int> processed;
+	std::set<uint32_t> processed;
 
 	resources = process_resource_directory(image, image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE), 0, processed);
 	return false;
@@ -521,27 +526,27 @@ void build_resources_table(pe_image &image, pe_section& section, resource_direct
 		return;
 	}
 
-	unsigned int aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), sizeof(unsigned int));
-	unsigned int needed_size_for_structures = aligned_offset_from_section_start - section.get_size_of_raw_data();
-	unsigned int needed_size_for_strings = 0;
-	unsigned int needed_size_for_data = 0;
+	uint32_t aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), sizeof(uint32_t));
+	uint32_t needed_size_for_structures = aligned_offset_from_section_start - section.get_size_of_raw_data();
+	uint32_t needed_size_for_strings = 0;
+	uint32_t needed_size_for_data = 0;
 
 	calculate_resource_data_space(resources, aligned_offset_from_section_start, needed_size_for_structures, needed_size_for_strings);
 
 	{
-		unsigned int current_data_pos = aligned_offset_from_section_start + needed_size_for_structures + needed_size_for_strings;
+		uint32_t current_data_pos = aligned_offset_from_section_start + needed_size_for_structures + needed_size_for_strings;
 		calculate_resource_data_space(resources, needed_size_for_structures, needed_size_for_strings, needed_size_for_data, current_data_pos);
 	}
 
-	unsigned int needed_size = needed_size_for_structures + needed_size_for_strings + needed_size_for_data;
+	uint32_t needed_size = needed_size_for_structures + needed_size_for_strings + needed_size_for_data;
 
 	if (section.get_size_of_raw_data() < needed_size + aligned_offset_from_section_start) {
 		section.get_section_data().resize(section.get_size_of_raw_data() + needed_size + aligned_offset_from_section_start);
 	}
 
-	unsigned int current_structures_pos = aligned_offset_from_section_start;
-	unsigned int current_strings_pos = current_structures_pos + needed_size_for_structures;
-	unsigned int current_data_pos = current_strings_pos + needed_size_for_strings;
+	uint32_t current_structures_pos = aligned_offset_from_section_start;
+	uint32_t current_strings_pos = current_structures_pos + needed_size_for_structures;
+	uint32_t current_data_pos = current_strings_pos + needed_size_for_strings;
 	rebuild_resource_directory(section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
 
 

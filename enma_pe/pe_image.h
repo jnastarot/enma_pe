@@ -68,7 +68,7 @@ public:// data/sections helpers
 	pe_section& pe_image::add_section();
 	pe_section& pe_image::add_section(const pe_section& section);
 	pe_section& pe_image::add_section(const image_section_header& header);
-	pe_section& pe_image::add_section(const image_section_header& header, const std::vector<uint8_t> data);
+	pe_section& pe_image::add_section(const image_section_header& header, const std::vector<uint8_t>& data);
 
 	std::vector<pe_section*>& pe_image::get_sections();
 

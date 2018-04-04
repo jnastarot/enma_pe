@@ -9,7 +9,7 @@ exceptions_item::exceptions_item() :
 exceptions_item::exceptions_item(const exceptions_item& item) {
     this->operator=(item);
 }
-exceptions_item::exceptions_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data):
+exceptions_item::exceptions_item(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data):
     address_begin(address_begin), address_end(address_end), address_unwind_data(address_unwind_data){}
 
 exceptions_item::~exceptions_item() {
@@ -24,23 +24,23 @@ exceptions_item& exceptions_item::operator=(const exceptions_item& item) {
     return *this;
 }
 
-void exceptions_item::set_begin_address(DWORD rva_address) {
+void exceptions_item::set_begin_address(uint32_t rva_address) {
     this->address_begin = rva_address;
 }
-void exceptions_item::set_end_address(DWORD rva_address) {
+void exceptions_item::set_end_address(uint32_t rva_address) {
     this->address_end = rva_address;
 }
-void exceptions_item::set_unwind_data_address(DWORD rva_address) {
+void exceptions_item::set_unwind_data_address(uint32_t rva_address) {
     this->address_unwind_data = rva_address;
 }
 
-DWORD exceptions_item::get_begin_address() const {
+uint32_t exceptions_item::get_begin_address() const {
     return address_begin;
 }
-DWORD exceptions_item::get_end_address() const {
+uint32_t exceptions_item::get_end_address() const {
     return address_end;
 }
-DWORD exceptions_item::get_unwind_data_address() const {
+uint32_t exceptions_item::get_unwind_data_address() const {
     return address_unwind_data;
 }
 
@@ -62,7 +62,7 @@ exceptions_table& exceptions_table::operator=(const exceptions_table& exceptions
     return *this;
 }
 
-void exceptions_table::add_item(DWORD address_begin, DWORD address_end, DWORD address_unwind_data) {
+void exceptions_table::add_item(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data) {
     items.push_back(exceptions_item(address_begin, address_end, address_unwind_data));
 }
 void exceptions_table::add_item(const exceptions_item& item) {
@@ -76,21 +76,21 @@ std::vector<exceptions_item>& exceptions_table::get_items() {
 bool get_exception_table(const pe_image &image, exceptions_table& exceptions) {
     exceptions.get_items().clear();
 
-    DWORD virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
-    DWORD virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
     if (virtual_address && virtual_size) {
         pe_section * except_section = image.get_section_by_rva(virtual_address);
 
-        for (DWORD used_size = 0; used_size < virtual_size; used_size += sizeof(IMAGE_IA64_RUNTIME_FUNCTION_ENTRY)) {
+        for (size_t used_size = 0; used_size < virtual_size; used_size += sizeof(image_ia64_runtime_function_entry)) {
 
-            PIMAGE_IA64_RUNTIME_FUNCTION_ENTRY entry = (PIMAGE_IA64_RUNTIME_FUNCTION_ENTRY)&except_section->get_section_data().data()[
+            image_ia64_runtime_function_entry* entry = (image_ia64_runtime_function_entry*)&except_section->get_section_data().data()[
                 (virtual_address + used_size) - except_section->get_virtual_address()
             ];
 
-            if (!entry->BeginAddress && !entry->EndAddress && !entry->UnwindInfoAddress) { continue; }
+            if (!entry->begin_address && !entry->end_address && !entry->unwind_info_address) { continue; }
 
-            exceptions.add_item(entry->BeginAddress, entry->EndAddress, entry->UnwindInfoAddress);
+            exceptions.add_item(entry->begin_address, entry->end_address, entry->unwind_info_address);
         }
 
         return true;
@@ -109,17 +109,17 @@ void build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
         );
     }
 
-    DWORD virtual_address = section.get_virtual_address() + section.get_size_of_raw_data();
-    DWORD p_exceptions_offset = section.get_size_of_raw_data();
+    uint32_t virtual_address = section.get_virtual_address() + section.get_size_of_raw_data();
+    uint32_t p_exceptions_offset = section.get_size_of_raw_data();
 
 
     for (auto & item : exceptions.get_items()) {     
-        IMAGE_IA64_RUNTIME_FUNCTION_ENTRY entry = { item.get_begin_address(), item.get_end_address(), item.get_unwind_data_address()};
+        image_ia64_runtime_function_entry entry = { item.get_begin_address(), item.get_end_address(), item.get_unwind_data_address()};
 
-        section.get_section_data().resize(section.get_section_data().size() + sizeof(IMAGE_IA64_RUNTIME_FUNCTION_ENTRY));
-        memcpy(section.get_section_data().data() + section.get_section_data().size() - sizeof(IMAGE_IA64_RUNTIME_FUNCTION_ENTRY),
+        section.get_section_data().resize(section.get_section_data().size() + sizeof(image_ia64_runtime_function_entry));
+        memcpy(section.get_section_data().data() + section.get_section_data().size() - sizeof(image_ia64_runtime_function_entry),
             &entry,
-            sizeof(IMAGE_IA64_RUNTIME_FUNCTION_ENTRY));
+            sizeof(image_ia64_runtime_function_entry));
     }
 
 
@@ -129,15 +129,15 @@ void build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
 
 bool erase_exceptions_table(pe_image &image, std::vector<erased_zone>* zones) {
 
-	DWORD virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
-	DWORD virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
 	if (virtual_address && virtual_size) {
 		pe_section * except_section = image.get_section_by_rva(virtual_address);
 
 		if (except_section) {
 		
-			BYTE * except_raw = &except_section->get_section_data().data()[(DWORD)(virtual_address - except_section->get_virtual_address())];
+            uint8_t * except_raw = &except_section->get_section_data().data()[virtual_address - except_section->get_virtual_address()];
 			if (except_section->get_size_of_raw_data() >= virtual_size) {
                 if (zones) { zones->push_back({ virtual_address ,virtual_size }); }
 				ZeroMemory(except_raw, virtual_size);

@@ -2,7 +2,7 @@
 
 
 class tds_parser {
-    std::vector<BYTE>tds_file;
+    std::vector<uint8_t>tds_file;
     const uint8_t * p_names_section;
 
     std::vector<map_segment> segments;
@@ -18,6 +18,6 @@ class tds_parser {
     e_map_result tds_parser::parse(pe_image& image, map_root& map);
 public:
     tds_parser::tds_parser(std::string& filepath, pe_image& image, map_root& map, e_map_result &result);
-    tds_parser::tds_parser(std::vector<BYTE>& tds_file, pe_image& image, map_root& map, e_map_result &result);
+    tds_parser::tds_parser(std::vector<uint8_t>& tds_file, pe_image& image, map_root& map, e_map_result &result);
     tds_parser::~tds_parser();
 };

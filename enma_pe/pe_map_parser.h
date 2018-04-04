@@ -11,8 +11,8 @@ class map_parser {
 	void map_parser::parse_line_bolrand(uint32_t line_idx,std::vector<std::string> &line);
 	void map_parser::parse_line_visualstudio(uint32_t line_idx, std::vector<std::string> &line);
 
-	bool map_parser::hexstring_to_value(std::string& hex_string, uint64_t& value);
-	bool map_parser::address_string_to_values(std::string& address_string, uint64_t& section_num, uint64_t& offset);
+	bool map_parser::hexstring_to_value(std::string& hex_string, uint32_t& value);
+	bool map_parser::address_string_to_values(std::string& address_string, uint32_t& section_num, uint32_t& offset);
 
 	std::vector<std::string> map_parser::get_line_items(std::string& line);
 	void					 map_parser::get_raw_map_file(std::string& map_text, raw_mapfile &mapfile);

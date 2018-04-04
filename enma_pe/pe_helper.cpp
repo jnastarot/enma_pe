@@ -12,7 +12,7 @@ void demangle(std::string name, std::string& demangled_name) {
     while (ch_idx < name.length()) {
         size_t l = strcspn(p, " \n\t()\"\'");
 
-        if (last) {
+        if (last[0]) {
             demangled_name += last;
         }
 
@@ -30,7 +30,7 @@ void demangle(std::string name, std::string& demangled_name) {
         ch_idx += l + 1;
     }
 
-    if (last) { demangled_name += last; }
+    if (last[0]) { demangled_name += last; }
 }
 
 
@@ -167,7 +167,7 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
         for (size_t item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //push to rootmap
 
             items_by_section[item_sec][item_idx].offset += //offset to rva
-                image.get_section_by_idx((size_t)items_by_section[item_sec][item_idx].section_number - 1)->get_virtual_address();
+                image.get_section_by_idx(items_by_section[item_sec][item_idx].section_number - 1)->get_virtual_address();
 
             map_add_item(items_by_section[item_sec][item_idx].path, items_by_section[item_sec][item_idx], map.dirs);
         }

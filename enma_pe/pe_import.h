@@ -1,40 +1,40 @@
 #pragma once
 
 class imported_func {
-	WORD hint;
-	WORD ordinal;
+	uint16_t hint;
+	uint16_t ordinal;
 	std::string func_name;
 	bool b_import_by_name;
 
-	DWORD iat_rva;
+	uint32_t iat_rva;
 public:
 	imported_func::imported_func();
     imported_func::imported_func(const imported_func& func);
-    imported_func::imported_func(DWORD iat_rva, const std::string& func_name, WORD hint);
-    imported_func::imported_func(DWORD iat_rva, WORD ordinal);
+    imported_func::imported_func(uint32_t iat_rva, const std::string& func_name, uint16_t hint);
+    imported_func::imported_func(uint32_t iat_rva, uint16_t ordinal);
 
 	imported_func::~imported_func();
 
 	imported_func& imported_func::operator=(const imported_func& func);
 public:
-	void imported_func::set_hint(WORD hint);
-	void imported_func::set_ordinal(WORD ordinal);
+	void imported_func::set_hint(uint16_t hint);
+	void imported_func::set_ordinal(uint16_t ordinal);
 	void imported_func::set_func_name(const std::string& func_name);
 	void imported_func::set_import_by_name(bool b);
-	void imported_func::set_iat_rva(DWORD rva);
+	void imported_func::set_iat_rva(uint32_t rva);
 public:
-	WORD imported_func::get_hint() const;
-	WORD imported_func::get_ordinal() const;
+	uint16_t imported_func::get_hint() const;
+	uint16_t imported_func::get_ordinal() const;
 	std::string imported_func::get_func_name() const;
 	bool  imported_func::is_import_by_name() const;
-	DWORD imported_func::get_iat_rva() const;
+	uint32_t imported_func::get_iat_rva() const;
 };
 
 class imported_library {
 	std::string library_name;
-	DWORD timestamp;
-	DWORD rva_to_iat;
-    DWORD rva_to_oft;
+	uint32_t timestamp;
+	uint32_t rva_to_iat;
+    uint32_t rva_to_oft;
 
 	std::vector<imported_func> imported_items;
 public:
@@ -45,15 +45,15 @@ public:
 	imported_library& imported_library::operator=(const imported_library& library);
 public:
 	void imported_library::set_library_name(const std::string& library_name);
-	void imported_library::set_timestamp(DWORD timestamp);
-	void imported_library::set_rva_iat(DWORD rva);
-    void imported_library::set_rva_oft(DWORD rva);
+	void imported_library::set_timestamp(uint32_t timestamp);
+	void imported_library::set_rva_iat(uint32_t rva);
+    void imported_library::set_rva_oft(uint32_t rva);
 	void imported_library::add_item(const imported_func& item);
 public:
 	std::string imported_library::get_library_name() const;
-	DWORD imported_library::get_timestamp() const;
-	DWORD imported_library::get_rva_iat() const;
-    DWORD imported_library::get_rva_oft() const;
+	uint32_t imported_library::get_timestamp() const;
+	uint32_t imported_library::get_rva_iat() const;
+    uint32_t imported_library::get_rva_oft() const;
 
 	std::vector<imported_func>& imported_library::get_items();
 };
@@ -72,7 +72,7 @@ public:
 	std::vector<imported_library>& import_table::get_libs();
 	bool import_table::get_imported_lib(const std::string& lib_name, imported_library * &lib);
 	bool import_table::get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, imported_func * &func);
-	bool import_table::get_imported_func(const std::string& lib_name, WORD ordinal, imported_library * &lib, imported_func * &func);
+	bool import_table::get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, imported_func * &func);
 };
 
 

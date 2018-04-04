@@ -186,8 +186,8 @@ tds_parser::tds_parser(std::string& filepath, pe_image& image, map_root& map, e_
         result = e_map_result::map_error_openfile;
     }
 }
-tds_parser::tds_parser(std::vector<uint8_t>& tds_file, pe_image& image, map_root& map, e_map_result &result) {
-    this->tds_file = tds_file;
+tds_parser::tds_parser(std::vector<uint8_t>& tds_file, pe_image& image, map_root& map, e_map_result &result)
+:tds_file(tds_file){
     result = parse(image, map);
 }
 
