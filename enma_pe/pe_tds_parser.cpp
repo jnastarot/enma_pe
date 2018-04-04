@@ -168,7 +168,7 @@ tds_parser::tds_parser(std::string& filepath, pe_image& image, map_root& map, e_
     FILE* hfile = fopen(filepath.c_str(), "rb");
     if (hfile != nullptr) {
         fseek(hfile, 0, SEEK_END);
-        uint32_t file_size = ftell(hfile);
+        size_t file_size = ftell(hfile);
         fseek(hfile, 0, SEEK_SET);
 
         tds_file.resize(file_size);

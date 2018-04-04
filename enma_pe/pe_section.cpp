@@ -31,7 +31,7 @@ pe_section::pe_section(const image_section_header& header, const std::vector<uin
     section_data(data){
 
 	this->section_name.reserve(8);
-	this->section_name.resize(lstrlenA((char*)header.name));
+	this->section_name.resize(strlen((char*)header.name));
 	memcpy((void*)this->section_name.data(), header.name, 8);
 
 	this->virtual_size		= header.virtual_size;

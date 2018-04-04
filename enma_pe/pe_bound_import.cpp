@@ -268,10 +268,10 @@ bool erase_bound_import_table(pe_image &image,std::vector<erased_zone>* zones) {
 
                         if (zones) { zones->push_back({ 
                             uint32_t (virtual_address + ref_description->offset_module_name) ,
-                            uint32_t (lstrlenA(ref_name) + 1) }
+                            uint32_t (strlen(ref_name) + 1) }
                         );}
 
-                        ZeroMemory(ref_name, lstrlenA(ref_name) + 1);
+                        ZeroMemory(ref_name, strlen(ref_name) + 1);
                     }
 
                     if (zones) { zones->push_back({ uint32_t(virtual_address + bound_imp_size + sizeof(image_bound_import_descriptor) +
@@ -288,10 +288,10 @@ bool erase_bound_import_table(pe_image &image,std::vector<erased_zone>* zones) {
 
                     if (zones) { zones->push_back({
                         uint32_t (virtual_address + bound_imp_description->offset_module_name) ,
-                        uint32_t (lstrlenA(name) + 1) }
+                        uint32_t (strlen(name) + 1) }
                     ); }
 
-                    ZeroMemory(name, lstrlenA(name)+1);
+                    ZeroMemory(name, strlen(name)+1);
                 }
 
                 if (zones) { zones->push_back({ uint32_t(virtual_address + bound_imp_size) ,sizeof(image_bound_import_descriptor) }); }

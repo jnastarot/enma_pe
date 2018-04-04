@@ -72,7 +72,7 @@ public:// data/sections helpers
 
 	std::vector<pe_section*>& pe_image::get_sections();
 
-	uint32_t pe_image::get_sections_number() const;;
+    size_t pe_image::get_sections_number() const;;
 	pe_section*	 pe_image::get_section_by_rva(uint32_t rva) const;/*0 - failed \ not 0 - success*/
 	pe_section*	 pe_image::get_section_by_va(uint64_t va) const;
 	pe_section*	 pe_image::get_section_by_raw(uint32_t raw) const;

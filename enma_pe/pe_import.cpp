@@ -496,14 +496,14 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
 					if (zones) {    
 						zones->push_back({
 							imp_description->name ,
-							(uint32_t)lstrlenA((char*)&imp_name_section->get_section_data().data()[
+							(uint32_t)strlen((char*)&imp_name_section->get_section_data().data()[
                                 (imp_description->name - imp_name_section->get_virtual_address())
                             ]) + 1
 						});
 					}
 
 					ZeroMemory((char*)&imp_name_section->get_section_data().data()[imp_description->name - imp_name_section->get_virtual_address()],
-						lstrlenA((char*)&imp_name_section->get_section_data().data()[(imp_description->name - imp_name_section->get_virtual_address())]));
+						strlen((char*)&imp_name_section->get_section_data().data()[(imp_description->name - imp_name_section->get_virtual_address())]));
 
 
                     size_t thunk_items_count = 0;
@@ -529,7 +529,7 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
                                     if (zones) {
                                         zones->push_back({
                                             *(uint32_t*)thunk_table ,
-                                            (uint32_t)lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                            (uint32_t)strlen((char*)&section_func_name->get_section_data().data()[
                                                 (*(uint32_t*)thunk_table - section_func_name->get_virtual_address()) + sizeof(uint16_t)
                                             ]) + 2 + 2
                                         });
@@ -539,7 +539,7 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
                                         (char*)&section_func_name->get_section_data().data()[
                                             (*(uint32_t*)thunk_table - section_func_name->get_virtual_address())
                                         ],
-                                        lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                        strlen((char*)&section_func_name->get_section_data().data()[
                                             (*(uint32_t*)thunk_table - section_func_name->get_virtual_address()) + sizeof(uint16_t)
                                         ]) + 2
                                     );
@@ -573,7 +573,7 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
                                     if (zones) {
                                         zones->push_back({
                                             (uint32_t)(*(uint64_t*)thunk_table) ,
-                                            (uint32_t)lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                            (uint32_t)strlen((char*)&section_func_name->get_section_data().data()[
                                                 (*(uint64_t*)thunk_table - section_func_name->get_virtual_address()) + sizeof(uint16_t)
                                             ]) + 2 + 2
                                         });
@@ -583,7 +583,7 @@ bool erase_import_table(pe_image &image, std::vector<erased_zone>* zones) {
                                         (char*)&section_func_name->get_section_data().data()[
                                             (*(uint64_t*)thunk_table - section_func_name->get_virtual_address())
                                         ],
-                                        lstrlenA((char*)&section_func_name->get_section_data().data()[
+                                        strlen((char*)&section_func_name->get_section_data().data()[
                                             (*(uint64_t*)thunk_table - section_func_name->get_virtual_address()) + sizeof(uint16_t)
                                         ]) + 2
                                      );

@@ -35,7 +35,7 @@ pe_image::pe_image(std::string& file_path) {
 
 	if (hfile != nullptr) {
         fseek(hfile, 0, SEEK_END);
-        uint32_t file_size = ftell(hfile);
+        size_t file_size = ftell(hfile);
         fseek(hfile, 0, SEEK_SET);
 
 		uint8_t * file_buffer = new uint8_t[file_size];
@@ -171,7 +171,7 @@ void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 				set_heap_reserve_size(pe_header->optional_header.size_of_heap_reserve);
 				set_heap_commit_size(pe_header->optional_header.size_of_heap_commit);
 
-				for (size_t i = 0; i < 16; i++) {
+				for (uint32_t i = 0; i < 16; i++) {
 					set_directory_virtual_address(i, pe_header->optional_header.data_directory[i].virtual_address);
 					set_directory_virtual_size(i, pe_header->optional_header.data_directory[i].size);
 				}
@@ -219,7 +219,7 @@ void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 				set_heap_reserve_size(pe_header->optional_header.size_of_heap_reserve);
 				set_heap_commit_size(pe_header->optional_header.size_of_heap_commit);
 
-				for (size_t i = 0; i < 16; i++) {
+				for (uint32_t i = 0; i < 16; i++) {
 					set_directory_virtual_address(i, pe_header->optional_header.DataDirectory[i].virtual_address);
 					set_directory_virtual_size(i, pe_header->optional_header.DataDirectory[i].size);
 				}
@@ -363,7 +363,7 @@ std::vector<pe_section*>& pe_image::get_sections() {
 	return this->sections;
 }
 
-uint32_t pe_image::get_sections_number() const {
+size_t pe_image::get_sections_number() const {
 	return this->sections.size();
 }
 

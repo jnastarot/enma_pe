@@ -212,49 +212,51 @@ bool get_export_table(const pe_image &image, export_table& exports) {
 		pe_section * export_section = image.get_section_by_rva(virtual_address);
 
 		if (export_section) {
-			PIMAGE_EXPORT_DIRECTORY export_desc = (PIMAGE_EXPORT_DIRECTORY)&export_section->get_section_data().data()[virtual_address - export_section->get_virtual_address()];
+			image_export_directory* export_desc = (image_export_directory*)&export_section->get_section_data().data()[virtual_address - export_section->get_virtual_address()];
 
-			exports.set_characteristics(export_desc->Characteristics);
-			exports.set_time_stamp(export_desc->TimeDateStamp);
-			exports.set_major_version(export_desc->MajorVersion);
-			exports.set_minor_version(export_desc->MinorVersion);
-			exports.set_ordinal_base(export_desc->Base);
-			exports.set_number_of_functions(export_desc->NumberOfFunctions);
-			exports.set_number_of_names(export_desc->NumberOfNames);
+			exports.set_characteristics(export_desc->characteristics);
+			exports.set_time_stamp(export_desc->time_date_stamp);
+			exports.set_major_version(export_desc->major_version);
+			exports.set_minor_version(export_desc->minor_version);
+			exports.set_ordinal_base(export_desc->base);
+			exports.set_number_of_functions(export_desc->number_of_functions);
+			exports.set_number_of_names(export_desc->number_of_names);
 
 			if (!exports.get_number_of_functions()) { return false; }
 
-			if (export_desc->Name) {
-				pe_section * name_export_section = image.get_section_by_rva(export_desc->Name);
+			if (export_desc->name) {
+				pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
 				if (name_export_section) {
-					exports.set_library_name(std::string((char*)(&export_section->get_section_data().data()[export_desc->Name - export_section->get_virtual_address()])));
+					exports.set_library_name(std::string((char*)(&export_section->get_section_data().data()[
+                        export_desc->name - export_section->get_virtual_address()
+                    ])));
 				}
 			}
 
-			for (size_t ordinal = 0; ordinal < export_desc->NumberOfFunctions; ordinal++) {
+			for (uint32_t ordinal = 0; ordinal < export_desc->number_of_functions; ordinal++) {
 
 				export_table_item func;
 
-				func.set_rva(*(uint32_t*)&image.get_section_by_rva((export_desc->AddressOfFunctions + ordinal * sizeof(uint32_t)))->get_section_data().data()[
-					(export_desc->AddressOfFunctions + ordinal * sizeof(uint32_t))
-						- image.get_section_by_rva((export_desc->AddressOfFunctions + ordinal * sizeof(uint32_t)))->get_virtual_address()]
+				func.set_rva(*(uint32_t*)&image.get_section_by_rva((export_desc->address_of_functions + ordinal * sizeof(uint32_t)))->get_section_data().data()[
+					(export_desc->address_of_functions + ordinal * sizeof(uint32_t))
+						- image.get_section_by_rva((export_desc->address_of_functions + ordinal * sizeof(uint32_t)))->get_virtual_address()]
 				);
 
 				if (!func.get_rva()) { continue; }
 
-				func.set_ordinal( uint16_t(export_desc->Base + ordinal));
+				func.set_ordinal( uint16_t(export_desc->base + ordinal));
 
-				for (size_t i = 0; i < export_desc->NumberOfNames; i++) {
+				for (uint32_t i = 0; i < export_desc->number_of_names; i++) {
 
-					uint16_t ordinal2 = *(uint16_t*)&image.get_section_by_rva((export_desc->AddressOfNameOrdinals + i * sizeof(uint16_t)))->get_section_data().data()[
-						(export_desc->AddressOfNameOrdinals + i * sizeof(uint16_t))
-							- image.get_section_by_rva((export_desc->AddressOfNameOrdinals + i * sizeof(uint16_t)))->get_virtual_address()];
+					uint16_t ordinal2 = *(uint16_t*)&image.get_section_by_rva((export_desc->address_of_name_ordinals + i * sizeof(uint16_t)))->get_section_data().data()[
+						(export_desc->address_of_name_ordinals + i * sizeof(uint16_t))
+							- image.get_section_by_rva((export_desc->address_of_name_ordinals + i * sizeof(uint16_t)))->get_virtual_address()];
 
 					if (ordinal == ordinal2) {
 
-						uint32_t function_name_rva = *(uint32_t*)&image.get_section_by_rva((export_desc->AddressOfNames + i * sizeof(uint32_t)))->get_section_data().data()[
-							(export_desc->AddressOfNames + i * sizeof(uint32_t))
-								- image.get_section_by_rva((export_desc->AddressOfNames + i * sizeof(uint32_t)))->get_virtual_address()];
+						uint32_t function_name_rva = *(uint32_t*)&image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_section_data().data()[
+							(export_desc->address_of_names + i * sizeof(uint32_t))
+								- image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_virtual_address()];
 
 
 						const char* func_name = (char*)&image.get_section_by_rva(function_name_rva)->get_section_data().data()[
@@ -300,7 +302,7 @@ void build_export_table(pe_image &image, pe_section& section, export_table& expo
         );
     }
 
-	uint32_t needed_size_for_strings = (exports.get_library_name().length() + 1);
+	uint32_t needed_size_for_strings = uint32_t(exports.get_library_name().length() + 1);
 	uint32_t number_of_names			= 0;
 	uint32_t max_ordinal				= 0;
 	uint32_t ordinal_base				= -1;
@@ -447,7 +449,7 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                 pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
                 if (name_export_section) {
                     ZeroMemory((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()]),
-                        lstrlenA((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()])));
+                        strlen((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()])));
                 }
             }
 
@@ -477,7 +479,7 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                             function_name_rva
                                 - image.get_section_by_rva(function_name_rva)->get_virtual_address()];
 
-                        ZeroMemory(func_name, lstrlenA(func_name));
+                        ZeroMemory(func_name, strlen(func_name));
 ;
 
                         if (func_rva >= virtual_address + sizeof(IMAGE_EXPORT_DIRECTORY) &&
@@ -486,7 +488,7 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                             char* forwarded_func_name = (char*)&image.get_section_by_rva(func_rva)->get_section_data().data()[
                                 func_rva - image.get_section_by_rva(func_rva)->get_virtual_address()];
 
-                            ZeroMemory(forwarded_func_name, lstrlenA(forwarded_func_name));
+                            ZeroMemory(forwarded_func_name, strlen(forwarded_func_name));
                         }
 
                         break;

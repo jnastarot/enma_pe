@@ -38,19 +38,19 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
 		if (p_section && (!p_section->is_executable() || find_in_execute_sections)) {
 
 			uint8_t * section_raw = p_section->get_section_data().data();
-            size_t raw_size = p_section->get_size_of_raw_data();
+            uint32_t raw_size = p_section->get_size_of_raw_data();
 
             size_t top_ansi = 0;
             size_t top_wide = 0;
             size_t top_mod_ansi = 0;
             size_t top_mod_wide = 0;
 
-			for (size_t raw_idx = 0; raw_idx < raw_size;) {
+			for (uint32_t raw_idx = 0; raw_idx < raw_size;) {
 				
 				if (is_ascii(section_raw[raw_idx])) {
 					if (top_wide <= raw_idx && raw_idx + 1 < raw_size && (section_raw[raw_idx + 1] == 0)) {
 
-                        size_t i = 0;
+                        uint32_t i = 0;
 						for (i = 0; 
 							(raw_idx + i) < raw_size &&
 							i / 2 < MAX_STRING_SIZE && is_ascii(section_raw[(raw_idx + i)]) &&
@@ -74,7 +74,7 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
 					}
 					else {
 						if (top_ansi <= raw_idx) {
-                            size_t i = 0;
+                            uint32_t i = 0;
 							for (i = 0;
 								(raw_idx + i) < raw_size && i < MAX_STRING_SIZE && is_ascii(section_raw[(raw_idx + i)]);
 								i++
@@ -100,7 +100,7 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
 				if (is_ascii_mod(section_raw[raw_idx])) {
 					if (top_mod_wide <= raw_idx && raw_idx + 1 < raw_size && (section_raw[raw_idx + 1] == 0)) {
 
-                        size_t i = 0;
+                        uint32_t i = 0;
 						for (i = 0;
 							(raw_idx + i) < raw_size &&
 							i / 2 < MAX_STRING_SIZE && is_ascii_mod(section_raw[(raw_idx + i)]) &&
@@ -125,7 +125,7 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
 					}
 					else {
 						if (top_mod_ansi <= raw_idx) {
-                            size_t i = 0;
+                            uint32_t i = 0;
 							for (i = 0;
 								(raw_idx + i) < raw_size && i < MAX_STRING_SIZE && is_ascii_mod(section_raw[(raw_idx + i)]);
 								i++

@@ -36,9 +36,9 @@ enum e_map_compiller {
 
 struct map_segment {
     e_map_segment_class _class;
-    uint32_t section_number;
-    uint32_t offset;
-    uint32_t length;
+    size_t section_number;
+    size_t offset;
+    size_t length;
     std::string segment_name;
     map_segment::map_segment() {
         _class = segment_class_unknown;
@@ -50,9 +50,9 @@ struct map_segment {
 
 struct map_item {
     e_map_data_class _class;
-    uint32_t section_number;
-    uint32_t offset;
-    uint32_t length;
+    size_t section_number;
+    size_t offset;
+    size_t length;
     std::string item_name;
     void * custominfo;
     map_item::map_item() {
