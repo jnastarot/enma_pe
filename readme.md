@@ -1,6 +1,7 @@
 # ENMA PE #
 
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/jnastarot/enma_pe?branch=master&svg=true)](https://ci.appveyor.com/project/jnastarot/enma_pe/branch/master)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield)
 
 ```
 --------------------------------------------------------------------------------
@@ -42,3 +43,7 @@ e.mail..: jnastarot@yandex.ru
 | reading\building of export and resources [pe bliss kaimi](http://kaimi.io/) |
 | tds parser [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_large)
