@@ -52,6 +52,8 @@ directory_code get_directories_placement(pe_image &image, std::vector<directory_
     get_placement_load_config_table(image, placement);
     get_placement_bound_import_table(image, placement);
     get_placement_delay_import_table(image, placement);
+
+    return directory_code::directory_code_success;
 }
 
 void erase_directories_pe_image(pe_image &image, std::vector<directory_placement>& placement, relocation_table* relocs, bool delete_empty_sections) {
