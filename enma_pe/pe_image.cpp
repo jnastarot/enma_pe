@@ -760,11 +760,11 @@ std::vector<pe_rich_data>& pe_image::get_rich_data() {
 }
 
 uint32_t calculate_checksum(const std::vector<uint8_t> &file) {
-    PIMAGE_DOS_HEADER p_dos_header = (PIMAGE_DOS_HEADER)file.data();
+    image_dos_header* p_dos_header = (image_dos_header*)file.data();
     if (p_dos_header->e_magic != IMAGE_DOS_SIGNATURE) { return 0; }
 
     uint32_t checksum_field_offset = p_dos_header->e_lfanew +
-        offsetof(IMAGE_NT_HEADERS32, OptionalHeader.CheckSum);
+        offsetof(image_nt_headers32, optional_header.checksum);
 
     uint64_t checksum = 0;
 
@@ -786,68 +786,3 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &file) {
     return uint32_t(checksum & 0xffffffff);
 }
 
-void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &image) {
-    expanded_image.image = image;
-	get_export_table(expanded_image.image, expanded_image.exports);
-	get_import_table(expanded_image.image, expanded_image.imports);
-	get_resources_table(expanded_image.image, expanded_image.resources);
-	get_exception_table(expanded_image.image, expanded_image.exceptions);
-	get_relocation_table(expanded_image.image, expanded_image.relocations);
-	get_debug_table(expanded_image.image, expanded_image.debug);
-	get_tls_table(expanded_image.image, expanded_image.tls);
-    get_load_config_table(expanded_image.image, expanded_image.load_config);
-    get_bound_import_table(expanded_image.image, expanded_image.bound_imports);
-	get_delay_import_table(expanded_image.image, expanded_image.delay_imports);
-}
-
-void erase_directories_pe_image(pe_image &image, std::vector<erased_zone>& zones, relocation_table* relocs, bool delete_empty_sections) {
-	zones.clear();
-
-	erase_export_table(image, &zones);
-	erase_import_table(image, &zones);
-	erase_resources_table(image, &zones);
-	erase_exceptions_table(image, &zones);
-	erase_relocation_table(image, &zones);
-	erase_debug_table(image, &zones);
-	erase_tls_table(image, &zones, relocs);
-	erase_load_config_table(image, &zones, relocs);
-    erase_bound_import_table(image, &zones);
-	erase_delay_import_table(image, &zones);
-
-	std::sort(zones.begin(), zones.end(), [](erased_zone& lhs, erased_zone& rhs) {
-		return lhs.rva < rhs.rva;
-	});
-
-	for (size_t parent_zone_idx = 0; parent_zone_idx + 1 < zones.size(); parent_zone_idx++) { //link zones
-
-		if (zones[parent_zone_idx].rva <= zones[parent_zone_idx + 1].rva &&
-			(zones[parent_zone_idx].rva + zones[parent_zone_idx].size) >= zones[parent_zone_idx + 1].rva
-			) {
-
-			if ((zones[parent_zone_idx + 1].rva + zones[parent_zone_idx + 1].size) > (zones[parent_zone_idx].rva + zones[parent_zone_idx].size)) {
-				zones[parent_zone_idx].size = ((zones[parent_zone_idx + 1].rva + zones[parent_zone_idx + 1].size) - zones[parent_zone_idx].rva);
-			}
-
-			zones.erase(zones.begin() + parent_zone_idx + 1);
-			parent_zone_idx--;
-		}
-	}
-
-	if (delete_empty_sections && image.get_sections().size()) {
-		for (size_t section_idx = image.get_sections().size() - 1; section_idx > 0; section_idx--) {
-			auto _section = image.get_sections()[section_idx];
-
-			for (auto& zone : zones) {
-				if (_section->get_virtual_address() == zone.rva &&
-					_section->get_virtual_size() <= zone.size) {
-
-					image.get_sections().erase(image.get_sections().begin() + section_idx);
-					goto go_next_;
-				}
-			}
-
-			return;
-		go_next_:;
-		}
-	}
-}

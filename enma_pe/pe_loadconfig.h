@@ -86,6 +86,5 @@ bool get_load_config_table(_In_ const pe_image &image,
     _Out_ load_config_table& load_config);
 void build_load_config_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
 	_Inout_ load_config_table& load_config, _Inout_ relocation_table& relocs);
-bool erase_load_config_table(_Inout_ pe_image &image,
-	_Inout_opt_ std::vector<erased_zone>* zones = 0,
-	_Inout_opt_ relocation_table* relocs = 0);
+
+bool get_placement_load_config_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

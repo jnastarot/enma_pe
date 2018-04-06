@@ -127,27 +127,22 @@ void build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
     image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, section.get_size_of_raw_data() - p_exceptions_offset);
 }
 
-bool erase_exceptions_table(pe_image &image, std::vector<erased_zone>* zones) {
+bool get_placement_exceptions_table(pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
-    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
 	if (virtual_address && virtual_size) {
-		pe_section * except_section = image.get_section_by_rva(virtual_address);
+		pe_section * exception_section = image.get_section_by_rva(virtual_address);
 
-		if (except_section) {
-		
-            uint8_t * except_raw = &except_section->get_section_data().data()[virtual_address - except_section->get_virtual_address()];
-			if (except_section->get_size_of_raw_data() >= virtual_size) {
-                if (zones) { zones->push_back({ virtual_address ,virtual_size }); }
-				ZeroMemory(except_raw, virtual_size);
-                image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 0);
-                image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 0);
+		if (exception_section) {
+            if (ALIGN_UP(exception_section->get_virtual_size(), image.get_section_align()) >= virtual_size) {
+
+                placement.push_back({ virtual_address ,virtual_size, dp_id_exceptions_desc });
 				return true;
 			}
 		}
 	}
 
 	return false;
-
 }

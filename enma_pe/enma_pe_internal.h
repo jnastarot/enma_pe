@@ -668,7 +668,7 @@ typedef struct _non_paged_debug_info {
 // Thread Local Storage
 //
 
-typedef VOID(NTAPI *pimage_tls_callback) (void* dll_handle, uint32_t reason, void * reserved);
+typedef void(__stdcall *pimage_tls_callback) (void* dll_handle, uint32_t reason, void * reserved);
 
 typedef struct _image_tls_directory64 {
     uint64_t start_address_of_raw_data;
@@ -980,7 +980,7 @@ typedef struct image_cor20_header
     union {
         uint32_t   entry_point_token;
         uint32_t   entry_point_rva;
-    } DUMMYUNIONNAME;
+    };
 
     // Binding information
     image_data_directory   resources;

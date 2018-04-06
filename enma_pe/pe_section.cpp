@@ -179,11 +179,12 @@ void pe_section_io::update_section_boundaries() {
 
 }
 
+/*
 section_io_code pe_section_io::get_physical_data(uint32_t data_size, uint32_t &phys_offset) {
 
     return section_io_code::section_io_success;
 }
-
+*/
 template <class T> section_io_code pe_section_io::operator>>(T& data) {
 
     return section_io_code::section_io_success;
@@ -215,7 +216,7 @@ pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
 
 pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end) {
     if (size) {
-        this->section->get_section_data().resize(this->section->get_size_of_raw_data() + size);
+        this->section->get_section_data().resize(this->section->get_section_data().size() + size);
     }
     if (offset_to_end) {
         this->section_offset = this->section->get_size_of_raw_data();

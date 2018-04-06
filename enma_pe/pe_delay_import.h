@@ -54,5 +54,4 @@ public:
 
 
 bool get_delay_import_table(_In_ const pe_image &image, _Out_ delay_import_table& imports);
-bool erase_delay_import_table(_Inout_ pe_image &image,
-	_Inout_opt_ std::vector<erased_zone>* zones = 0);
+bool get_placement_delay_import_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

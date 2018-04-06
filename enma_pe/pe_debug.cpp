@@ -143,7 +143,7 @@ bool get_debug_table(const pe_image &image, debug_table& debug) {
                 ];
 
                 if (p_debug_item->size_of_data) {
-                    pe_section * debug_item_section = image.get_section_by_raw(p_debug_item->pointer_to_raw_data);
+                    pe_section * debug_item_section = image.get_section_by_rva(p_debug_item->address_of_raw_data);
 
                     if (debug_item_section) {
                         debug.add_item(debug_item(p_debug_item->characteristics, p_debug_item->time_date_stamp, p_debug_item->major_version,
@@ -163,7 +163,7 @@ bool get_debug_table(const pe_image &image, debug_table& debug) {
     return false;
 }
 
-bool erase_debug_table(pe_image &image, std::vector<erased_zone>* zones) {
+bool get_placement_debug_table(pe_image &image, std::vector<directory_placement>& placement) {
 
 	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
@@ -178,31 +178,15 @@ bool erase_debug_table(pe_image &image, std::vector<erased_zone>* zones) {
                 ];
 
 				if (p_debug_item->size_of_data) {
-					pe_section * debug_item_section = image.get_section_by_raw(p_debug_item->pointer_to_raw_data);
+					pe_section * debug_item_section = image.get_section_by_rva(p_debug_item->address_of_raw_data);
 
 					if (debug_item_section) {
-						ZeroMemory(&debug_item_section->get_section_data().data()[
-                            p_debug_item->pointer_to_raw_data - debug_item_section->get_pointer_to_raw()
-                        ], p_debug_item->size_of_data);
-					
-						if (zones) {
-							zones->push_back({ p_debug_item->address_of_raw_data ,p_debug_item->size_of_data});
-						}
+                        placement.push_back({ p_debug_item->address_of_raw_data ,p_debug_item->size_of_data , dp_id_debug_item_data });
 					}
-				}
-
-                if (zones) {
-                    zones->push_back({
-                        uint32_t(debug_section->get_virtual_address() + item_offset) ,
-                        (sizeof(image_debug_directory) + 4)
-                    });
-                }
-
-                ZeroMemory(p_debug_item,sizeof(image_debug_directory));
+				}       
 			}
 
-			image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG, 0);
-			image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG, 0);
+            placement.push_back({ virtual_address ,(ALIGN_UP(virtual_size,sizeof(image_debug_directory)) + 4),dp_id_debug_desc });
 			return true;
 		}	
 	}

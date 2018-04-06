@@ -109,7 +109,7 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
                         uint32_t data_raw_size = (tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data);
                         uint32_t data_raw = image.va_to_raw(tls_desc->start_address_of_raw_data);
 						tls.get_raw_data().resize(data_raw_size);
-						ZeroMemory(tls.get_raw_data().data(), tls.get_raw_data().size());
+                        memset(tls.get_raw_data().data(),0, tls.get_raw_data().size());
 
 						if (raw_data_section && 
 							(raw_data_section->get_pointer_to_raw() <= data_raw &&
@@ -171,7 +171,7 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
                         uint32_t data_raw_size = uint32_t(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data);
                         uint32_t data_raw = image.va_to_raw(tls_desc->start_address_of_raw_data);
 						tls.get_raw_data().resize(data_raw_size);
-						ZeroMemory(tls.get_raw_data().data(), tls.get_raw_data().size());
+                        memset(tls.get_raw_data().data(),0, tls.get_raw_data().size());
 
 						if (raw_data_section &&
 							(raw_data_section->get_pointer_to_raw() <= data_raw &&
@@ -322,7 +322,7 @@ void build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, 
             tls_rva - section.get_virtual_address()
         ];
 
-        ZeroMemory(tls_desc, sizeof(image_tls_directory32));
+        memset(tls_desc,0, sizeof(image_tls_directory32));
 
         
         tls_desc->start_address_of_raw_data = (uint32_t)image.rva_to_va(tls.get_start_address_raw_data());
@@ -352,7 +352,7 @@ void build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, 
             tls_rva - section.get_virtual_address()
         ];
 
-        ZeroMemory(tls_desc, sizeof(image_tls_directory64));
+        memset(tls_desc,0, sizeof(image_tls_directory64));
 
 
         tls_desc->start_address_of_raw_data = image.rva_to_va(tls.get_start_address_raw_data());
@@ -386,7 +386,7 @@ void build_tls_full(pe_image &image,pe_section& section,
 }
 
 
-bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation_table* relocs) {
+bool get_placement_tls_table(pe_image &image, std::vector<directory_placement>& placement) {
 
 	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS);
@@ -403,38 +403,18 @@ bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation
 					if (tls_desc->start_address_of_raw_data) {
 						pe_section * raw_data_section = image.get_section_by_va(tls_desc->start_address_of_raw_data);
 						if (raw_data_section) {				
-							ZeroMemory(
-								&raw_data_section->get_section_data().data()[
-									image.va_to_rva(tls_desc->start_address_of_raw_data) - raw_data_section->get_virtual_address()],
-								min(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size())
-							);
-							if (zones) {
-								zones->push_back({
-									image.va_to_rva(tls_desc->start_address_of_raw_data) ,
-									(uint32_t)max(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size())
-								});
-							}
-						}
-						if (relocs) {
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory32, start_address_of_raw_data));
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory32, end_address_of_raw_data));
+                            placement.push_back({
+								image.va_to_rva(tls_desc->start_address_of_raw_data) ,
+								(uint32_t)max(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size()),
+                                dp_id_tls_raw_data
+							});
 						}
 					}
 					if (tls_desc->address_of_index) {
 						pe_section * index_data_section = image.get_section_by_va(tls_desc->address_of_index);
 						if (index_data_section) {
-							*(uint32_t*)&index_data_section->get_section_data().data()[
-								image.va_to_rva(tls_desc->address_of_index) - index_data_section->get_virtual_address()] = 0;
-						}
-						if (relocs) {
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory32, address_of_index));
-						}
-						if (zones) {
-							zones->push_back({
-								image.va_to_rva(tls_desc->address_of_index) ,
-								sizeof(uint32_t)
-							});
-						}
+                            placement.push_back({ image.va_to_rva(tls_desc->address_of_index) ,sizeof(uint32_t),dp_id_tls_index });
+						}			
 					}
 					if (tls_desc->address_of_callbacks) {
 						pe_section * callback_data_section = image.get_section_by_va(tls_desc->address_of_callbacks);
@@ -444,63 +424,33 @@ bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation
 								image.va_to_rva(tls_desc->address_of_callbacks) - callback_data_section->get_virtual_address()
 							];
 
-							while (*raw_callbacks) {
-								if (relocs) { relocs->erase_item(rva_callbacks);}
-								if (zones)  {zones->push_back({rva_callbacks ,sizeof(uint32_t)});}
+                            uint32_t callbacks_count = 0;
 
-								*raw_callbacks = 0;
-								raw_callbacks++;
-								rva_callbacks += sizeof(uint32_t);
-							}
+                            for (; *raw_callbacks; raw_callbacks++, callbacks_count++) {}
 
-						}
-
-						if (relocs) {
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory32, address_of_callbacks));
+                            placement.push_back({ rva_callbacks ,sizeof(uint32_t)*(callbacks_count+1),dp_id_tls_callbacks });
 						}
 					}
 
-					ZeroMemory(tls_raw, virtual_size);
-
-					if (zones) {zones->push_back({virtual_address ,virtual_size});}
+                    placement.push_back({virtual_address ,sizeof(image_tls_directory32),dp_id_tls_desc});
 				}
 				else {
 					image_tls_directory64 * tls_desc = (image_tls_directory64 *)tls_raw;
 					if (tls_desc->start_address_of_raw_data) {
 						pe_section * raw_data_section = image.get_section_by_va(tls_desc->start_address_of_raw_data);
 						if (raw_data_section) {
-							ZeroMemory(
-								&raw_data_section->get_section_data().data()[
-									image.va_to_rva(tls_desc->start_address_of_raw_data) - raw_data_section->get_virtual_address()],
-                                uint32_t(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data)
-										);
-							if (zones) {
-								zones->push_back({
-									image.va_to_rva(tls_desc->start_address_of_raw_data) ,
-									(uint32_t)max(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size())
-								});
-							}
-						}
-						if (relocs) {
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory64, start_address_of_raw_data));
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory64, end_address_of_raw_data));
+                            placement.push_back({
+								image.va_to_rva(tls_desc->start_address_of_raw_data) ,
+								(uint32_t)max(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size()),
+                                dp_id_tls_raw_data
+							});
 						}
 					}
 					if (tls_desc->address_of_index) {
 						pe_section * index_data_section = image.get_section_by_va(tls_desc->address_of_index);
 						if (index_data_section) {
-							*(uint32_t*)&index_data_section->get_section_data().data()[
-								image.va_to_rva(tls_desc->address_of_index) - index_data_section->get_virtual_address()] = 0;
-						}
-						if (relocs) {
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory64, address_of_index));
-						}
-						if (zones) {
-							zones->push_back({
-								image.va_to_rva(tls_desc->address_of_index) ,
-								sizeof(uint32_t)
-							});
-						}
+                            placement.push_back({image.va_to_rva(tls_desc->address_of_index) ,sizeof(uint32_t),dp_id_tls_index });
+						}							
 					}
 					if (tls_desc->address_of_callbacks) {
 						pe_section * callback_data_section = image.get_section_by_va(tls_desc->address_of_callbacks);
@@ -510,27 +460,17 @@ bool erase_tls_table(pe_image &image,std::vector<erased_zone>* zones, relocation
 								image.va_to_rva(tls_desc->address_of_callbacks) - callback_data_section->get_virtual_address()
 							];
 
-							while (*raw_callbacks) {
-								if (relocs) { relocs->erase_item(rva_callbacks); }
-								if (zones) { zones->push_back({ rva_callbacks ,sizeof(uint64_t) }); }
 
-								*raw_callbacks = 0;
-								raw_callbacks++;
-								rva_callbacks += sizeof(uint64_t);
-							}
+                            uint32_t callbacks_count = 0;
 
-						}
-						if (relocs) {
-                            relocs->erase_item(virtual_address + offsetof(image_tls_directory64, address_of_callbacks));
+                            for (; *raw_callbacks; raw_callbacks++, callbacks_count++) {}
+
+                            placement.push_back({ rva_callbacks ,sizeof(uint32_t)*(callbacks_count + 1),dp_id_tls_callbacks });
 						}
 					}
 
-					ZeroMemory(tls_raw, virtual_size);
-					if (zones) { zones->push_back({ virtual_address ,virtual_size }); }
+                    placement.push_back({ virtual_address ,sizeof(image_tls_directory64),dp_id_tls_desc });
 				}
-				
-				image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, 0);
-				image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS, 0);
 				return true;
 			}
 		}

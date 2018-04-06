@@ -234,32 +234,20 @@ void build_relocation_table(pe_image &image, pe_section& section, relocation_tab
 }
 
 
-bool erase_relocation_table(pe_image &image, std::vector<erased_zone>* zones) {
+bool get_placement_relocation_table(pe_image &image, std::vector<directory_placement>& placement) {
 
-    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
+    uint32_t virtual_address  = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
     uint32_t virtual_size	  = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
 	if (virtual_address && virtual_size) {
-		
-
+	
 		pe_section * reloc_section = image.get_section_by_rva(virtual_address);
 
 		if (reloc_section) {
 
-            uint8_t * reloc_raw = &reloc_section->get_section_data().data()[virtual_address - reloc_section->get_virtual_address()];
-			if (reloc_section->get_size_of_raw_data() >= virtual_size) {
+			if (ALIGN_UP(reloc_section->get_virtual_size(),image.get_section_align()) >= virtual_size) {
 
-				ZeroMemory(reloc_raw, virtual_size);
-
-				if (zones) {
-					zones->push_back({
-						virtual_address ,
-						virtual_size
-					});
-				}
-
-				image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, 0);
-				image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, 0);
+                placement.push_back({virtual_address ,virtual_size,dp_id_relocations_desc });
 				return true;
 			}
 		}

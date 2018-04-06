@@ -81,7 +81,4 @@ bool get_export_table(_In_ const pe_image &image,
 	_Out_ export_table& exports);
 void build_export_table(_Inout_ pe_image &image, 
 	_Inout_ pe_section& section, _In_ export_table& exports); 
-bool erase_export_table(_Inout_ pe_image &image,
-	_Inout_opt_ std::vector<erased_zone>* zones = 0);
-
- 
+bool get_placement_export_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

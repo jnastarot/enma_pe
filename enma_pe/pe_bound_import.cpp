@@ -194,9 +194,9 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
         descs_size + names_size
     );
 
-    ZeroMemory(&section.get_section_data().data()[
+    memset(&section.get_section_data().data()[
         bound_import_offset
-    ], descs_size + names_size);
+    ],0, descs_size + names_size);
 
     uint8_t  * desc_data = &section.get_section_data().data()[
         bound_import_offset
@@ -209,9 +209,9 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
         bound_data->number_of_module_forwarder_refs = (uint16_t)bound_desc.get_number_of_forwarder_refs();
         bound_data->offset_module_name = (uint16_t)(descs_size + names_offset);
 
-        lstrcpyA((char*)&section.get_section_data().data()[
+        memcpy((char*)&section.get_section_data().data()[
             bound_import_offset + descs_size + names_offset
-        ], bound_desc.get_library_name().c_str());
+        ], bound_desc.get_library_name().c_str(), bound_desc.get_library_name().length() + 1);
 
         names_offset+= bound_desc.get_library_name().length() + 1;
 
@@ -221,9 +221,9 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
             ref_data->time_date_stamp = bound_ref.get_timestamp();
             ref_data->offset_module_name = (uint16_t)(descs_size + names_offset);
 
-            lstrcpyA((char*)&section.get_section_data().data()[
+            memcpy((char*)&section.get_section_data().data()[
                 bound_import_offset + descs_size + names_offset
-            ], bound_ref.get_ref_name().c_str());
+            ], bound_ref.get_ref_name().c_str(), bound_ref.get_ref_name().length() + 1);
 
             names_offset += bound_ref.get_ref_name().length() + 1;
 
@@ -233,7 +233,7 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
 }
 
 
-bool erase_bound_import_table(pe_image &image,std::vector<erased_zone>* zones) {
+bool get_placement_bound_import_table(pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
@@ -266,18 +266,17 @@ bool erase_bound_import_table(pe_image &image,std::vector<erased_zone>* zones) {
                             (virtual_address + ref_description->offset_module_name) - ref_name_section->get_virtual_address()
                         ];
 
-                        if (zones) { zones->push_back({ 
+                        placement.push_back({
                             uint32_t (virtual_address + ref_description->offset_module_name) ,
-                            uint32_t (strlen(ref_name) + 1) }
-                        );}
-
-                        ZeroMemory(ref_name, strlen(ref_name) + 1);
+                            uint32_t (strlen(ref_name) + 2) ,
+                            dp_id_bound_import_names
+                        });
                     }
 
-                    if (zones) { zones->push_back({ uint32_t(virtual_address + bound_imp_size + sizeof(image_bound_import_descriptor) +
-                        sizeof(image_bound_forwarded_ref)*ref_idx) ,sizeof(image_bound_forwarded_ref) }); }
-
-                    ZeroMemory(ref_description, sizeof(image_bound_forwarded_ref));
+                    placement.push_back({ uint32_t(virtual_address + bound_imp_size + sizeof(image_bound_import_descriptor) +
+                        sizeof(image_bound_forwarded_ref)*ref_idx) ,sizeof(image_bound_forwarded_ref) ,
+                        dp_id_bound_import_ref_desc
+                    }); 
                 }
 
                 pe_section * bound_name_section = image.get_section_by_rva(virtual_address + bound_imp_description->offset_module_name);
@@ -286,20 +285,16 @@ bool erase_bound_import_table(pe_image &image,std::vector<erased_zone>* zones) {
                         (virtual_address + bound_imp_description->offset_module_name) - bound_name_section->get_virtual_address()
                     ];
 
-                    if (zones) { zones->push_back({
+                    placement.push_back({
                         uint32_t (virtual_address + bound_imp_description->offset_module_name) ,
-                        uint32_t (strlen(name) + 1) }
-                    ); }
-
-                    ZeroMemory(name, strlen(name)+1);
+                        uint32_t (strlen(name) + 2) ,
+                        dp_id_bound_import_names
+                    }); 
                 }
 
-                if (zones) { zones->push_back({ uint32_t(virtual_address + bound_imp_size) ,sizeof(image_bound_import_descriptor) }); }
-                ZeroMemory(&raw_decs[bound_imp_size], sizeof(image_bound_import_descriptor));
+                placement.push_back({ uint32_t(virtual_address + bound_imp_size) ,sizeof(image_bound_import_descriptor),dp_id_bound_import_desc });
             }
 
-            image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT, 0);
-            image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT, 0);
             return true;
         }
     }

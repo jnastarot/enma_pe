@@ -516,11 +516,7 @@ void build_load_config_table(pe_image &image, pe_section& section, load_config_t
 
 }
 
-bool erase_load_config_table(pe_image &image, std::vector<erased_zone>* zones, relocation_table* relocs) {
-
-    image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG, 0);
-    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG, 0);
-
+bool get_placement_load_config_table(pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -532,127 +528,66 @@ bool erase_load_config_table(pe_image &image, std::vector<erased_zone>* zones, r
 
                 image_load_config_directory32* image_load_config = (image_load_config_directory32*)&load_cfg_section->get_section_data()[virtual_address - load_cfg_section->get_virtual_address()];
 
-                if (relocs) {
-                    if (image_load_config->lock_prefix_table) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory32, lock_prefix_table));
-                    }
-                    if (image_load_config->edit_list) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory32, edit_list));
-                    }
-                    if (image_load_config->security_cookie) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory32, security_cookie));
-                    }
-                    if (image_load_config->se_handler_table) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory32, se_handler_table));
-                    }
-                    if (image_load_config->guard_cf_check_function_pointer) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory32, guard_cf_check_function_pointer));
-                    }
-                    if (image_load_config->guard_cf_function_table) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory32, guard_cf_function_table));
+            
+                if (offsetof(image_load_config_directory32, se_handler_table) < virtual_size &&
+                    image_load_config->se_handler_count &&
+                    image_load_config->se_handler_table) {
+
+                    placement.push_back({ image.va_to_rva(image_load_config->se_handler_table) ,
+                        image_load_config->se_handler_count * sizeof(uint32_t),
+                        dp_id_loadconfig_se_table
+                    });
+                }
+
+                if (offsetof(image_load_config_directory32, lock_prefix_table) < virtual_size &&
+                    image_load_config->lock_prefix_table) {
+
+                    size_t lock_prefix_count = 0;
+
+                    pe_section * lock_pref_section = image.get_section_by_va(image_load_config->lock_prefix_table);
+
+                    if (lock_pref_section) {
+                        uint32_t * lock_item = (uint32_t *)lock_pref_section->get_section_data().data()[
+                            image.va_to_rva(image_load_config->lock_prefix_table) - lock_pref_section->get_virtual_address()
+                        ];
+                        
+                        for (; *lock_item; lock_item++, lock_prefix_count++) {}
+
+                        placement.push_back({ image.va_to_rva(image_load_config->se_handler_table) ,
+                            (image_load_config->se_handler_count+1) * sizeof(uint32_t),
+                            dp_id_loadconfig_se_table
+                        });
                     }
                 }
 
-                for (uint32_t i = 0; i < image_load_config->se_handler_count; i++) {
-                    uint32_t se_handler_rva  = 0;
+                if (offsetof(image_load_config_directory32, guard_cf_function_table) < virtual_size &&
+                    image_load_config->guard_cf_function_count &&
+                    image_load_config->guard_cf_function_table) {
 
-                    image.set_data_by_rva(image.va_to_rva(image_load_config->se_handler_table + i * sizeof(uint32_t)),
-                        &se_handler_rva, sizeof(se_handler_rva));
-                    if (zones) {
-                        zones->push_back({ image.va_to_rva( image_load_config->se_handler_table + i * sizeof(uint32_t)), sizeof(uint32_t) });
-                    }
+                        placement.push_back({ image.va_to_rva(image_load_config->guard_cf_function_table) ,
+                            image_load_config->guard_cf_function_count * sizeof(uint32_t),
+                            dp_id_loadconfig_cf_table
+                        });
                 }
 
-                if (image_load_config->lock_prefix_table) {
-                    size_t current = 0;
-                    while (true) {
 
-                        uint32_t lock_prefix_va;
-
-                        image.get_data_by_rva(image.va_to_rva(image_load_config->lock_prefix_table + current * sizeof(uint32_t)),
-                            &lock_prefix_va, sizeof(lock_prefix_va));
-
-
-                        if (!lock_prefix_va) {
-                            break;
-                        }
-
-                        lock_prefix_va = 0;
-                        image.set_data_by_rva(image.va_to_rva(image_load_config->lock_prefix_table + current * sizeof(uint32_t)),
-                            &lock_prefix_va, sizeof(lock_prefix_va));
-
-                        if (relocs) {
-                            relocs->erase_item(image.va_to_rva(image_load_config->lock_prefix_table + current * sizeof(uint32_t)));
-                        }
-                        if (zones) {
-                            zones->push_back({ image.va_to_rva(image_load_config->lock_prefix_table + current * sizeof(uint32_t)) , sizeof(uint32_t)*2 });
-                        }
-                        ++current;
-                    }
-                }
-
-                for (uint32_t i = 0; i < image_load_config->guard_cf_function_count; i++) {
-                    uint32_t cf_function_rva = 0;
-
-                    image.set_data_by_rva(image_load_config->guard_cf_function_table + i * sizeof(uint32_t) - (uint32_t)image.get_image_base(),
-                        &cf_function_rva, sizeof(cf_function_rva));
-
-                    if (relocs) {
-                        relocs->erase_item(image_load_config->guard_cf_function_table + i * sizeof(uint32_t) - (uint32_t)image.get_image_base());
-                    }
-                    if (zones) {
-                        zones->push_back({ image_load_config->guard_cf_function_table + i * sizeof(uint32_t) - (uint32_t)image.get_image_base() , sizeof(uint32_t) });
-                    }
-                }
-
-                if (zones) {
-                    zones->push_back({ virtual_address , sizeof(image_load_config_directory32) });
-                }
-                ZeroMemory(image_load_config,sizeof(image_load_config_directory32));
+                placement.push_back({ virtual_address , sizeof(image_load_config_directory32) ,dp_id_loadconfig_desc });
                 return true;
             }
             else {
                 image_load_config_directory64* image_load_config = (image_load_config_directory64*)&load_cfg_section->get_section_data()[virtual_address - load_cfg_section->get_virtual_address()];
 
-                if (relocs) {
-                    if (image_load_config->lock_prefix_table) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory64, lock_prefix_table));
-                    }
-                    if (image_load_config->edit_list) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory64, edit_list));
-                    }
-                    if (image_load_config->security_cookie) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory64, security_cookie));
-                    }
-                    if (image_load_config->se_handler_table) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory64, se_handler_table));
-                    }
-                    if (image_load_config->guard_cf_check_function_pointer) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory64, guard_cf_check_function_pointer));
-                    }
-                    if (image_load_config->guard_cf_function_table) {
-                        relocs->erase_item(virtual_address + offsetof(image_load_config_directory64, guard_cf_function_table));
-                    }
+                if(offsetof(image_load_config_directory64, guard_cf_function_table) < virtual_size &&
+                    image_load_config->guard_cf_function_count &&
+                    image_load_config->guard_cf_function_table) {
+
+                    placement.push_back({ image.va_to_rva(image_load_config->guard_cf_function_table) ,
+                        size_t(image_load_config->guard_cf_function_count * sizeof(uint64_t)),
+                        dp_id_loadconfig_cf_table
+                    });
                 }
 
-                for (uint32_t i = 0; i < image_load_config->guard_cf_function_count; i++) {
-                    uint64_t cf_function_rva = 0;
-
-                    image.set_data_by_rva(image.va_to_rva(image_load_config->guard_cf_function_table + i * sizeof(uint64_t)),
-                        &cf_function_rva, sizeof(cf_function_rva));
-
-                    if (relocs) {
-                        relocs->erase_item(image.va_to_rva(image_load_config->guard_cf_function_table + i * sizeof(uint64_t)));
-                    }
-                    if (zones) {
-                        zones->push_back({image.va_to_rva(image_load_config->guard_cf_function_table + i * sizeof(uint64_t)), sizeof(uint64_t) });
-                    }
-                }
-
-                if (zones) {
-                    zones->push_back({virtual_address , sizeof(image_load_config_directory64) });
-                }
-                ZeroMemory(image_load_config, sizeof(image_load_config_directory64));
+                placement.push_back({ virtual_address , sizeof(image_load_config_directory64),dp_id_loadconfig_desc });
                 return true;
             }
         }

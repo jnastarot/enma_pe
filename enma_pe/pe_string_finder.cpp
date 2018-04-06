@@ -15,16 +15,9 @@ bool is_ascii_mod(char symbol) { //cyrillic
 void get_strings_from_image(const pe_image& image, string_base_table& string_table, bool find_in_execute_sections) {
 	pe_image tide_image = image;
 
-	erase_export_table(tide_image);
-	erase_import_table(tide_image);
-	erase_resources_table(tide_image);
-	erase_exceptions_table(tide_image);
-	erase_relocation_table(tide_image);
-	erase_debug_table(tide_image);
-	erase_tls_table(tide_image);
-	erase_load_config_table(tide_image);
-	erase_delay_import_table(tide_image);	
-    erase_bound_import_table(tide_image);
+    std::vector<directory_placement> placement;
+    get_directories_placement(tide_image, placement);
+    erase_directories_placement(tide_image, placement, 0, true);
 
 	string_table.ansi_base.clear();
 	string_table.wide_base.clear();

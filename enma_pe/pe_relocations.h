@@ -41,5 +41,4 @@ bool get_relocation_table(_In_ const pe_image &image,
 	_Out_ relocation_table& relocs);
 void build_relocation_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
 	_Inout_ relocation_table& relocs);			
-bool erase_relocation_table(_Inout_ pe_image &image, 
-	_Inout_opt_ std::vector<erased_zone>* zones = 0);
+bool get_placement_relocation_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

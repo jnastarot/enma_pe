@@ -60,5 +60,4 @@ public:
 };
 
 bool get_debug_table(_In_ const pe_image &image, _Out_ debug_table& debug);
-bool erase_debug_table(_Inout_ pe_image &image,
-	_Inout_opt_ std::vector<erased_zone>* zones = 0);
+bool get_placement_debug_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

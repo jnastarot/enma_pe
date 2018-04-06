@@ -66,6 +66,10 @@ struct rich_data_item {
 bool has_image_rich_data(const uint8_t * pimage,uint32_t * rich_data_offset,
     uint32_t * rich_data_size, uint32_t * rich_xor_key) {
 
+    if (rich_data_offset) {*rich_data_offset = 0;}
+    if (rich_data_size) {*rich_data_size = 0;}
+    if (rich_xor_key) {*rich_xor_key = 0;}
+
     image_dos_header* dos_header = (image_dos_header*)pimage;
     uint32_t rich_offset = 0;
 
@@ -99,6 +103,9 @@ bool has_image_rich_data(const uint8_t * pimage,uint32_t * rich_data_offset,
 }
 
 bool get_image_dos_stub(const uint8_t * pimage,pe_dos_stub& dos_stub) {
+
+    dos_stub.get_dos_stub().clear();
+
     image_dos_header* dos_header = (image_dos_header*)pimage;
     uint32_t dos_stub_size = 0;
     uint32_t rich_offset = 0;
@@ -153,6 +160,7 @@ bool get_image_rich_data(const uint8_t * pimage, std::vector<pe_rich_data>& rich
 #define GET_RICH_HASH(x,i) (((x) << (i)) | ((x) >> (32 - (i))))
 bool checksum_rich(const uint8_t * pimage,uint32_t * correct_rich_xor_key) {
 
+    if (correct_rich_xor_key) {*correct_rich_xor_key = 0;}
     uint32_t rich_offset = 0;
     uint32_t rich_size = 0;
     uint32_t rich_xor_key = 0;

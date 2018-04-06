@@ -377,15 +377,15 @@ resource_directory process_resource_directory(const pe_image &image, //taken fro
 				//If directory is named
 				if (dir_entry.name_is_string) {
 					//get directory name length
-
-					PIMAGE_RESOURCE_DIR_STRING_U directory_name = (PIMAGE_RESOURCE_DIR_STRING_U)&image.get_section_by_rva(res_rva + dir_entry.name_offset)->get_section_data().data()[
+                    
+                    image_resource_dir_string_u* directory_name = (image_resource_dir_string_u*)&image.get_section_by_rva(res_rva + dir_entry.name_offset)->get_section_data().data()[
 						res_rva + dir_entry.name_offset -
 							image.get_section_by_rva(res_rva + dir_entry.name_offset)->get_virtual_address()
 					];
 
 					std::wstring name;
-					name.resize(directory_name->Length);
-					memcpy((void*)name.data(), directory_name->NameString, directory_name->Length * sizeof(wchar_t));
+					name.resize(directory_name->length);
+					memcpy((void*)name.data(), directory_name->name_string, directory_name->length * sizeof(wchar_t));
 
 					//Set entry UNICODE name
 					entry.set_name(name);
@@ -553,26 +553,23 @@ void build_resources_table(pe_image &image, pe_section& section, resource_direct
 	image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, section.get_virtual_address() + aligned_offset_from_section_start);
 	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE,	needed_size);
 }
-bool erase_resources_table(pe_image &image, std::vector<erased_zone>* zones) {
-	if (!image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE) || !image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE)) {
+
+bool get_placement_resources_table(pe_image &image, std::vector<directory_placement>& placement) {
+
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
+    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);
+
+	if (!virtual_address || !virtual_size) {
 		return false;
 	}
 
-	pe_section * section = image.get_section_by_rva(image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE));
-	if (section) {
-		memset(section->get_section_data().data(), 0, image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE));
+	pe_section * rsrc_section = image.get_section_by_rva(virtual_address);
+	if (rsrc_section) {
+        if (ALIGN_UP(rsrc_section->get_virtual_size(), image.get_section_align()) >= virtual_size) {
 
-		if (zones) {
-			zones->push_back({
-				image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE) ,
-				image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE)
-			});
-		}
-
-
-		image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, 0);
-		image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE, 0);
-		return true;
+            placement.push_back({virtual_address ,virtual_size,dp_id_resources_desc });
+            return true;
+        }
 	}
 
 	return false;

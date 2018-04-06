@@ -12,7 +12,8 @@ enum section_io_addressing_type {
 
 enum section_io_code {
     section_io_success,
-    section_io_Incomplete,
+    section_io_raw_not_present,
+    section_io_incomplete, //part of read\write
     section_io_bound_break,
 };
 
@@ -74,7 +75,9 @@ class pe_section_io {
 
 
     void pe_section_io::update_section_boundaries();
-    section_io_code pe_section_io::get_physical_data(uint32_t data_size,uint32_t &phys_offset);
+
+    section_io_code pe_section_io::view_physical_data(uint32_t raw_offset, uint32_t data_size);
+    section_io_code pe_section_io::view_virtual_data( uint32_t rva_offset, uint32_t data_size);
 public:
     pe_section_io::pe_section_io(
         pe_section & _section,

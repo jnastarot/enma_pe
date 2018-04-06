@@ -268,7 +268,7 @@ bool get_export_table(const pe_image &image, export_table& exports) {
 						func.set_has_name(true);
 						func.set_name_ordinal(ordinal2);
 
-						if (func.get_rva() >= virtual_address + sizeof(IMAGE_EXPORT_DIRECTORY) &&
+						if (func.get_rva() >= virtual_address + sizeof(image_export_directory) &&
 							func.get_rva() < virtual_address + virtual_size) {
 
 							const char* forwarded_func_name = (char*)&image.get_section_by_rva(func.get_rva())->get_section_data().data()[
@@ -428,10 +428,10 @@ void build_export_table(pe_image &image, pe_section& section, export_table& expo
 	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT, needed_size);
 }
 
-bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
+bool get_placement_export_table(pe_image &image, std::vector<directory_placement>& placement) {
    
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT);
-    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT);
+    uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT);
 
 
     if (virtual_address) {
@@ -448,8 +448,12 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
             if (export_desc->name) {
                 pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
                 if (name_export_section) {
-                    ZeroMemory((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()]),
-                        strlen((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()])));
+                    placement.push_back({
+                        export_desc->name,
+                        strlen((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()]))+2,
+                        dp_id_export_names
+                    });
+
                 }
             }
 
@@ -479,16 +483,24 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
                             function_name_rva
                                 - image.get_section_by_rva(function_name_rva)->get_virtual_address()];
 
-                        ZeroMemory(func_name, strlen(func_name));
-;
+                        placement.push_back({
+                            (export_desc->address_of_names + i * sizeof(uint32_t))
+                            - image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_virtual_address(),
+                            strlen(func_name) + 2,
+                            dp_id_export_names
+                        });
 
-                        if (func_rva >= virtual_address + sizeof(IMAGE_EXPORT_DIRECTORY) &&
+                        if (func_rva >= virtual_address + sizeof(image_export_directory) &&
                             func_rva < virtual_address + virtual_size) {
 
                             char* forwarded_func_name = (char*)&image.get_section_by_rva(func_rva)->get_section_data().data()[
                                 func_rva - image.get_section_by_rva(func_rva)->get_virtual_address()];
 
-                            ZeroMemory(forwarded_func_name, strlen(forwarded_func_name));
+                            placement.push_back({
+                                func_rva,
+                                strlen(forwarded_func_name) + 2,
+                                dp_id_export_names
+                            });
                         }
 
                         break;
@@ -497,27 +509,33 @@ bool erase_export_table(pe_image &image, std::vector<erased_zone>* zones) {
             }
 
             if (export_desc->address_of_functions) {
-                ZeroMemory(&image.get_section_by_rva((export_desc->address_of_functions))->get_section_data().data()[
+                placement.push_back({
                     (export_desc->address_of_functions)
-                        - image.get_section_by_rva((export_desc->address_of_functions))->get_virtual_address()],
-                    export_desc->number_of_functions * sizeof(uint32_t));
+                    - image.get_section_by_rva((export_desc->address_of_functions))->get_virtual_address(),
+                    export_desc->number_of_functions * sizeof(uint32_t),
+                    dp_id_export_func_table
+                });
             }
 
             if (export_desc->address_of_names) {
-                ZeroMemory(&image.get_section_by_rva((export_desc->address_of_names))->get_section_data().data()[
+                placement.push_back({
                     (export_desc->address_of_names)
-                        - image.get_section_by_rva((export_desc->address_of_names))->get_virtual_address()],
-                    export_desc->number_of_names * sizeof(uint32_t));
+                    - image.get_section_by_rva((export_desc->address_of_names))->get_virtual_address(),
+                    export_desc->number_of_names * sizeof(uint32_t),
+                    dp_id_export_name_table
+                });
             }
 
             if (export_desc->address_of_name_ordinals) {
-                ZeroMemory(&image.get_section_by_rva((export_desc->address_of_name_ordinals))->get_section_data().data()[
+                placement.push_back({
                     (export_desc->address_of_name_ordinals)
-                        - image.get_section_by_rva((export_desc->address_of_name_ordinals))->get_virtual_address()],
-                    export_desc->number_of_functions * sizeof(uint16_t));
+                    - image.get_section_by_rva((export_desc->address_of_name_ordinals))->get_virtual_address(),
+                    export_desc->number_of_names * sizeof(uint16_t),
+                    dp_id_export_ordinal_table
+                });
             }
 
-            ZeroMemory(&export_section->get_section_data().data()[virtual_address - export_section->get_virtual_address()],sizeof(IMAGE_EXPORT_DIRECTORY));
+            placement.push_back({ virtual_address,sizeof(image_export_directory),dp_id_export_desc });
             return true;
         }
     }

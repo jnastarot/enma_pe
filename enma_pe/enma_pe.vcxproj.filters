@@ -205,6 +205,9 @@
     <ClCompile Include="pe_rich_dos.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_rich_dos</Filter>
     </ClCompile>
+    <ClCompile Include="enma_pe.cpp">
+      <Filter>Заголовочные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />

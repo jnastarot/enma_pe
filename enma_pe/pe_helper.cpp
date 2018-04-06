@@ -19,13 +19,13 @@ void demangle(std::string name, std::string& demangled_name) {
         last[0] = p[l];
         p[l] = 0;
 
-        ZeroMemory(pre_buffer, sizeof(pre_buffer));
-        if (p[0] && !UnDecorateSymbolName(p, pre_buffer, sizeof(pre_buffer), UNDNAME_COMPLETE)) {
-            demangled_name += p;
-        }
-        else {
-            demangled_name += pre_buffer;
-        }
+        memset(pre_buffer,0, sizeof(pre_buffer));
+      //  if (p[0] && !UnDecorateSymbolName(p, pre_buffer, sizeof(pre_buffer), UNDNAME_COMPLETE)) {
+     //       demangled_name += p;
+     //   }
+      //  else {
+     //       demangled_name += pre_buffer;
+      //  }
         p += l + 1;
         ch_idx += l + 1;
     }

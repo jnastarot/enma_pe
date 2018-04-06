@@ -2,5 +2,4 @@
 
 
 
-bool erase_security_table(_Inout_ pe_image &image,
-    _Inout_opt_ std::vector<erased_zone>* zones = 0);
+bool get_placement_security_table(_Inout_ pe_image &image,_Inout_ std::vector<directory_placement>& placement);

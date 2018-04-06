@@ -1,6 +1,7 @@
 # ENMA PE #
-
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/jnastarot/enma_pe?branch=master&svg=true)](https://ci.appveyor.com/project/jnastarot/enma_pe/branch/master)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield)
+| Build | x32 | x64 |
+| Result | [![Build status](https://ci.appveyor.com/api/projects/status/ogdbdwhomqi1yoh1?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe) | [![Build status](https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir) |
 
 ```
 --------------------------------------------------------------------------------

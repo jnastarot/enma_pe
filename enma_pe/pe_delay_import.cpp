@@ -122,13 +122,13 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 	imports.get_libs().clear();
 
 	uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
-	uint32_t  virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+	uint32_t  virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
 	if (virtual_address && virtual_size) {
 		pe_section * imp_section = image.get_section_by_rva(virtual_address);
 		if (imp_section) {
 			uint8_t  * raw_decs = &imp_section->get_section_data().data()[virtual_address - imp_section->get_virtual_address()];
-
+            
 			for (size_t imp_size = 0; imp_size < virtual_size; imp_size += sizeof(image_delayload_descriptor)) {
                 image_delayload_descriptor* imp_description = (image_delayload_descriptor*)(&raw_decs[imp_size]);
 
@@ -202,22 +202,18 @@ bool get_delay_import_table(const pe_image &image, delay_import_table& imports) 
 
 	return false;
 }
-bool erase_delay_import_table(pe_image &image, std::vector<erased_zone>* zones) {
+
+bool get_placement_delay_import_table(pe_image &image, std::vector<directory_placement>& placement) {
 	uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
-	uint32_t  virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+	uint32_t  virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
 	if (virtual_address && virtual_size) {
 		
 		pe_section * imp_section = image.get_section_by_rva(virtual_address);
 		if (imp_section) {
-			uint8_t  * raw_import = &imp_section->get_section_data().data()[virtual_address - imp_section->get_virtual_address()];
+            if (ALIGN_UP(imp_section->get_virtual_size(), image.get_section_align()) >= virtual_size) {
 
-			if (imp_section->get_size_of_raw_data() >= virtual_size) {
-				ZeroMemory(raw_import, virtual_size);
-
-				if (zones) {zones->push_back({virtual_address ,virtual_size});}
-				image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT, 0);
-				image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT, 0);
+                placement.push_back({virtual_address ,virtual_size, dp_id_delay_import });
 				return true;
 			}		
 		}
