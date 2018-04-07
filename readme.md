@@ -1,9 +1,7 @@
-<p align="center">
-
 # ENMA PE #
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield)
 ---
-
+<p align="center">
 
 | Win x32 | Win x64 | Linux |
 | ------- | ------- |
@@ -20,9 +18,9 @@ e.mail..: jnastarot@yandex.ru
 --------------------------------------------------------------------------------
 ```
 ---
-<p align="center">
 
 ### supported PE\PE+ formats
+<p align="center">
 
 
 | directory | `export` | `import` | `bound import` | `delay import` | `rsrc` | `exceptions` | `security` | `relocations`| `debug` | `tls` | `load config` | `.NET` |
