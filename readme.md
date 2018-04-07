@@ -1,15 +1,16 @@
 # ENMA PE #
 ---
-<p align="center">
 
 <table>
+   <thead>
     <tr>
         <th align="center">License</th>
         <th align="center">Windows x32</th>
         <th align="center">Windows x64</th>
         <th align="center">Linux</th>
     </tr>
-
+   </thead>
+   <tbody>
     <tr>
         <td align="center">
             <a href="https://github.com/jnastarot/enma_pe/blob/master/LICENSE">
@@ -32,10 +33,8 @@
             </a>    
         </td>
     </tr>
-
+   </tbody>
 </table>
-
-</p>
 
 
 ```
