@@ -4,4 +4,4 @@ install:
 - sudo apt-get install mono-devel mono-gmcs
 
 script:
-- xbuild Travis-CI-nspec.sln /verbosity:minimal
+- xbuild enma_pe.sln /verbosity:minimal
