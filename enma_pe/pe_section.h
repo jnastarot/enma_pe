@@ -65,6 +65,26 @@ public:
     std::vector<uint8_t>& pe_section::get_section_data();
 };
 
+
+
+/*
+        ................. section1 data
+ |    | |     |     |    ...................section2 data
+ v    v |     |     |       |                ...............section3 data
+ ...... io data (raw not present)                         |      |     
+        |     |     |       |                             |      |
+        v     v     |       |                             |      |
+        ....... io data (code success)                    |      |
+                    |       |                             |      |
+                    v       v                             |      |
+                    ......... io data (code incomplete)   v      v
+                                                          ........ write data (
+                                                                        section_io_success = section_io_mode_default
+                                                                        code bound break = mode_dont_expand_bound 
+                                                                              )    
+                                     
+                                     */  
+
 class pe_section_io {
     pe_section*  section;
     uint32_t section_offset;
@@ -76,8 +96,10 @@ class pe_section_io {
 
     void pe_section_io::update_section_boundaries();
 
-    section_io_code pe_section_io::view_physical_data(uint32_t raw_offset, uint32_t data_size);
-    section_io_code pe_section_io::view_virtual_data( uint32_t rva_offset, uint32_t data_size);
+    section_io_code pe_section_io::view_physical_data(uint32_t raw_offset, uint32_t data_size, 
+        uint32_t& real_offset,uint32_t& available_size);
+    section_io_code pe_section_io::view_virtual_data( uint32_t rva_offset, uint32_t data_size, 
+        uint32_t& real_offset, uint32_t& available_size);
 public:
     pe_section_io::pe_section_io(
         pe_section & _section,

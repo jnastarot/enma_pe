@@ -30,12 +30,12 @@ void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &imag
     expanded_image.image = image;
 	get_export_table(expanded_image.image, expanded_image.exports);
 	get_import_table(expanded_image.image, expanded_image.imports);
-//	get_resources_table(expanded_image.image, expanded_image.resources);
-//	get_exception_table(expanded_image.image, expanded_image.exceptions);
+	get_resources_table(expanded_image.image, expanded_image.resources);//
+	get_exception_table(expanded_image.image, expanded_image.exceptions);//
 	get_relocation_table(expanded_image.image, expanded_image.relocations);
 	get_debug_table(expanded_image.image, expanded_image.debug);
 	get_tls_table(expanded_image.image, expanded_image.tls);
- //   get_load_config_table(expanded_image.image, expanded_image.load_config);
+    get_load_config_table(expanded_image.image, expanded_image.load_config);//
     get_bound_import_table(expanded_image.image, expanded_image.bound_imports);
 	get_delay_import_table(expanded_image.image, expanded_image.delay_imports);
 }
@@ -56,7 +56,7 @@ directory_code get_directories_placement(pe_image &image, std::vector<directory_
     return directory_code::directory_code_success;
 }
 
-void erase_directories_pe_image(pe_image &image, std::vector<directory_placement>& placement, relocation_table* relocs, bool delete_empty_sections) {
+void erase_directories_placement(pe_image &image, std::vector<directory_placement>& placement, relocation_table* relocs, bool delete_empty_sections) {
     
 	std::sort(placement.begin(), placement.end(), [](directory_placement& lhs, directory_placement& rhs) {
 		return lhs.rva < rhs.rva;
@@ -81,9 +81,12 @@ void erase_directories_pe_image(pe_image &image, std::vector<directory_placement
 	}
 
 
-    for (size_t placement_idx = 0; placement_idx < placement.size(); placement_idx--) {
-
-
+    for (auto& item : placement) {
+        if (relocs) {
+            relocs->erase_all_items_in_zone(item.rva, item.size);
+        }
+        //todo
+        
     }
 
 

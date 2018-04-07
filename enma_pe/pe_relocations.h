@@ -20,6 +20,7 @@ public:
     bool relocation_table::erase_item(uint32_t rva);
     bool relocation_table::erase_first_item_by_id(uint32_t relocation_id);
     bool relocation_table::erase_all_items_by_id(uint32_t relocation_id);
+    bool relocation_table::erase_all_items_in_zone(uint32_t rva, uint32_t size);
 
     void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>& found_relocs, uint32_t relocation_id);
 

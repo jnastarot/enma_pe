@@ -179,12 +179,53 @@ void pe_section_io::update_section_boundaries() {
 
 }
 
-/*
-section_io_code pe_section_io::get_physical_data(uint32_t data_size, uint32_t &phys_offset) {
+section_io_code pe_section_io::view_physical_data(uint32_t raw_offset, uint32_t data_size,
+    uint32_t& real_offset, uint32_t& available_size) {
+
+    if (raw_offset < section->get_pointer_to_raw()) {
+        real_offset = 0;
+        available_size = (data_size - (section->get_pointer_to_raw() - raw_offset));
+
+        if (available_size > section->get_section_data().size()) {
+            available_size = section->get_section_data().size();
+
+            return section_io_code::section_io_bound_break;
+        }
+
+        return section_io_code::section_io_incomplete;
+    }
+    else if(raw_offset >= section->get_pointer_to_raw()){
+
+        if (raw_offset < (section->get_pointer_to_raw() + section->get_section_data().size())) {
+            real_offset = (raw_offset - section->get_pointer_to_raw());
+
+
+
+
+        }
+        else {
+            real_offset = (raw_offset - section->get_pointer_to_raw() + section->get_section_data().size());
+
+            //if () {
+
+           // }
+
+            return section_io_code::section_io_bound_break;
+        }
+    }
+
 
     return section_io_code::section_io_success;
 }
-*/
+
+section_io_code pe_section_io::view_virtual_data(uint32_t rva_offset, uint32_t data_size,
+    uint32_t& real_offset, uint32_t& available_size) {
+
+
+    return section_io_code::section_io_success;
+}
+
+
 template <class T> section_io_code pe_section_io::operator>>(T& data) {
 
     return section_io_code::section_io_success;

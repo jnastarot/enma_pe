@@ -62,6 +62,23 @@ bool relocation_table::erase_all_items_by_id(uint32_t relocation_id) {
     return ret;
 }
 
+bool relocation_table::erase_all_items_in_zone(uint32_t rva, uint32_t size) {
+
+    bool ret = false;
+
+    for (size_t item_idx = 0; item_idx < items.size(); item_idx++) {
+        if (items[item_idx].relative_virtual_address >= rva &&
+            items[item_idx].relative_virtual_address < rva + size) {
+            items.erase(items.begin() + item_idx);
+            item_idx--;
+            ret = true;
+        }
+    }
+
+    return ret;
+}
+
+
 void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>& found_relocs, uint32_t relocation_id) {
 
     found_relocs.clear();

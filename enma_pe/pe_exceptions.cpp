@@ -77,7 +77,7 @@ bool get_exception_table(const pe_image &image, exceptions_table& exceptions) {
     exceptions.get_items().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
-    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
     if (virtual_address && virtual_size) {
         pe_section * except_section = image.get_section_by_rva(virtual_address);

@@ -212,5 +212,6 @@
   <ItemGroup>
     <None Include="..\readme.md" />
     <None Include="..\LICENSE" />
+    <None Include="..\.travis.yml" />
   </ItemGroup>
 </Project>
