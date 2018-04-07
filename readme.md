@@ -1,13 +1,42 @@
 # ENMA PE #
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield)
 ---
 <p align="center">
 
-| Win x32 | Win x64 | Linux |
-| ------- | ------- |
-| [![Build status](https://ci.appveyor.com/api/projects/status/ogdbdwhomqi1yoh1?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe) | [![Build status](https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir) | [![Build Status](https://api.travis-ci.org/jnastarot/enma_pe.svg?branch=master)](https://api.travis-ci.org/jnastarot/enma_pe) |
+<table>
+    <tr>
+        <th align="center">License</th>
+        <th align="center">Windows x32</th>
+        <th align="center">Windows x64</th>
+        <th align="center">Linux</th>
+    </tr>
+
+    <tr>
+        <td align="center">
+            <a href="https://github.com/jnastarot/enma_pe/blob/master/LICENSE">
+                <img src="https://img.shields.io/badge/license-LGPLv3%2B-blue.svg" alt="GPLv3+" />
+            </a>    
+        </td>
+        <td align="center">
+            <a href="https://ci.appveyor.com/project/jnastarot/enma-pe">
+                <img src="https://ci.appveyor.com/api/projects/status/ogdbdwhomqi1yoh1?svg=true" alt="appveyor" />
+            </a>    
+        </td>
+        <td align="center">
+            <a href="https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir">
+                <img src="https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy?svg=true" alt="appveyor" />
+            </a>    
+        </td>
+        <td align="center">
+            <a href="https://api.travis-ci.org/jnastarot/enma_pe">
+                <img src="https://api.travis-ci.org/jnastarot/enma_pe.svg?branch=master" alt="travis-ci" />
+            </a>    
+        </td>
+    </tr>
+
+</table>
 
 </p>
+
 
 ```
 --------------------------------------------------------------------------------
@@ -20,16 +49,18 @@ e.mail..: jnastarot@yandex.ru
 ---
 
 ### supported PE\PE+ formats
-<p align="center">
 
+<p align="center">
 
 | directory | `export` | `import` | `bound import` | `delay import` | `rsrc` | `exceptions` | `security` | `relocations`| `debug` | `tls` | `load config` | `.NET` |
 | --------- | -------- | -------- | -------------- | -------------- | ------ | ------------ | ------------ | ------- | ----- | ------------- | ------ |
 | read      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | build     | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |
-| placement | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |
+| placement | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |
+
 
 </p>
+
 ---
 <p align="center">
 
