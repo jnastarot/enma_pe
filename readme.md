@@ -50,9 +50,3 @@ e.mail..: jnastarot@yandex.ru
 | pe rich comp id [richprint](https://github.com/dishather/richprint/) |
 | reading\building of export and resources [pe bliss kaimi](http://kaimi.io/) |
 | tds parser [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
-
-<p align="center">
-<iframe frameborder="0" allowtransparency="true" scrolling="no" src="https://money.yandex.ru/embed/donate.xml?account=410011886390588&quickpay=donate&payment-type-choice=off&default-sum=100&targets=for+a+good+cause&project-name=&project-site=&button-text=05&successURL=" width="423" height="64"></iframe>
-</p>
-
-
