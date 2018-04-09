@@ -75,6 +75,18 @@
     <Filter Include="Заголовочные файлы\pe_image\pe_rich_dos">
       <UniqueIdentifier>{a30b2f81-5af2-470d-8619-0e6737a000bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_demangler">
+      <UniqueIdentifier>{a0b74f99-0c7c-43dd-87a3-cb4c59298e20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_demangler\msvc">
+      <UniqueIdentifier>{0c54fdfb-eb97-435e-9256-1e6ae592d72f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_demangler\bolrand">
+      <UniqueIdentifier>{1820a6c8-35ac-4fe8-bb9c-a1094869d497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_demangler\gcc">
+      <UniqueIdentifier>{ded62214-8109-484b-aa03-e22fcb40878b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -143,6 +155,18 @@
     <ClInclude Include="enma_pe_internal.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="msvc_demangler.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler\msvc</Filter>
+    </ClInclude>
+    <ClInclude Include="bolrand_demangler.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler\bolrand</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_demangler.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_demangler.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler\gcc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -207,6 +231,18 @@
     </ClCompile>
     <ClCompile Include="enma_pe.cpp">
       <Filter>Заголовочные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="msvc_demangler.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler\msvc</Filter>
+    </ClCompile>
+    <ClCompile Include="bolrand_demangler.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler\bolrand</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_demangler.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler</Filter>
+    </ClCompile>
+    <ClCompile Include="gcc_demangler.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_demangler\gcc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

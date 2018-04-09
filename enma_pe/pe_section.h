@@ -120,8 +120,8 @@ public:
 
     pe_section_io& pe_section_io::operator=(const pe_section_io& io_section);
 public:
-    template <class T> section_io_code operator>>(T& data); //read from section
-    template <class T> section_io_code operator<<(T& data); //write to section
+    template <class T> friend pe_section_io& operator>>(pe_section_io& section_io, T& data); //read from section
+   // template <class T> section_io_code operator<<(T& data); //write to section
 
     section_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size);
     section_io_code pe_section_io::write(std::vector<uint8_t>& buffer, uint32_t size);

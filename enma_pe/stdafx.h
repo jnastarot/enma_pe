@@ -14,6 +14,8 @@
 #include <sstream>
 #include <iostream>
 #include <iostream>
+#include <stdarg.h> 
+
 //#include <dbghelp.h>
 //#pragma comment(lib,"dbghelp.lib")
 

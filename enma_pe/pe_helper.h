@@ -91,7 +91,7 @@ void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std
 
 void demangle(std::string name, std::string& demangled_name);
 
-
+#include "pe_demangler.h"
 #include "pe_map_parser.h"
 #include "pe_tds_parser.h"
 #include "pe_string_finder.h"

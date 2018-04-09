@@ -266,22 +266,63 @@ section_io_code pe_section_io::view_by_config(
 }
 
 
-template <class T> section_io_code pe_section_io::operator>>(T& data) {//read
+template <class T>  pe_section_io& operator>>(pe_section_io& section_io, T& data) {//read
 
+    std::vector<uint8_t> buffer;
+    section_io_code code = section_io.read(buffer,sizeof(T));
 
+    switch (code) {
+        case section_io_code::section_io_success:
+        case section_io_code::section_io_incomplete: {
+            memcpy(data, buffer.data(), sizeof(T));
+            break;
+        }
+    }
 
-
-
-    return section_io_code::section_io_success;
+    return *this;
 }
+/*
 template <class T> section_io_code pe_section_io::operator<<(T& data) {//write
 
     return section_io_code::section_io_success;
 }
+*/
 
 section_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
 
-    return section_io_code::section_io_success;
+    uint32_t real_offset = 0;
+    uint32_t available_size = 0;
+    uint32_t start_displacement = 0;
+
+    section_io_code code = view_by_config(this->section_offset, size,
+        real_offset, available_size, start_displacement);
+
+    buffer.clear();
+    buffer.resize(available_size);
+
+    switch (code) {
+        case section_io_code::section_io_success:
+        case section_io_code::section_io_incomplete: {
+            memset(&buffer[0], 0, start_displacement);
+            if (size <= available_size) {
+                memcpy(&buffer[start_displacement], &section->get_section_data().data()[real_offset], size);
+                this->section_offset += size;
+            }
+            else {
+                memcpy(&buffer[start_displacement], &section->get_section_data().data()[real_offset], available_size);
+                this->section_offset += available_size;
+            }
+            
+            break;
+        }
+
+        case section_io_code::section_io_data_not_present: {
+            break;
+        }
+    }
+
+    
+    return code;
 }
 
 section_io_code pe_section_io::write(std::vector<uint8_t>& buffer, uint32_t size) {
