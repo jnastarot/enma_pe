@@ -87,6 +87,15 @@
     <Filter Include="Заголовочные файлы\pe_helpers\pe_demangler\gcc">
       <UniqueIdentifier>{ded62214-8109-484b-aa03-e22fcb40878b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_image\pe_io">
+      <UniqueIdentifier>{8cfc90d6-248b-4587-a8a6-c4b9c424ff24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_image\pe_io\pe_section_io">
+      <UniqueIdentifier>{75fd8c67-bd6d-439d-8f7a-935b3da586db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_image\pe_io\pe_image_io">
+      <UniqueIdentifier>{c0009d24-c11d-4370-a4c8-5aba0e44c509}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -167,6 +176,12 @@
     <ClInclude Include="gcc_demangler.h">
       <Filter>Заголовочные файлы\pe_helpers\pe_demangler\gcc</Filter>
     </ClInclude>
+    <ClInclude Include="pe_image_io.h">
+      <Filter>Заголовочные файлы\pe_image\pe_io\pe_image_io</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_section_io.h">
+      <Filter>Заголовочные файлы\pe_image\pe_io\pe_section_io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -243,6 +258,12 @@
     </ClCompile>
     <ClCompile Include="gcc_demangler.cpp">
       <Filter>Заголовочные файлы\pe_helpers\pe_demangler\gcc</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_image_io.cpp">
+      <Filter>Заголовочные файлы\pe_image\pe_io\pe_image_io</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_section_io.cpp">
+      <Filter>Заголовочные файлы\pe_image\pe_io\pe_section_io</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

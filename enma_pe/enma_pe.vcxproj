@@ -149,6 +149,7 @@
     <ClInclude Include="pe_exceptions.h" />
     <ClInclude Include="pe_export.h" />
     <ClInclude Include="pe_image.h" />
+    <ClInclude Include="pe_image_io.h" />
     <ClInclude Include="pe_import.h" />
     <ClInclude Include="pe_loadconfig.h" />
     <ClInclude Include="pe_map_parser.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="pe_resources.h" />
     <ClInclude Include="pe_rich_dos.h" />
     <ClInclude Include="pe_section.h" />
+    <ClInclude Include="pe_section_io.h" />
     <ClInclude Include="pe_security.h" />
     <ClInclude Include="pe_string_finder.h" />
     <ClInclude Include="pe_tls.h" />
@@ -176,6 +178,7 @@
     <ClCompile Include="pe_exceptions.cpp" />
     <ClCompile Include="pe_export.cpp" />
     <ClCompile Include="pe_image.cpp" />
+    <ClCompile Include="pe_image_io.cpp" />
     <ClCompile Include="pe_import.cpp" />
     <ClCompile Include="pe_loadconfig.cpp" />
     <ClCompile Include="pe_map_parser.cpp" />
@@ -183,6 +186,7 @@
     <ClCompile Include="pe_resources.cpp" />
     <ClCompile Include="pe_rich_dos.cpp" />
     <ClCompile Include="pe_section.cpp" />
+    <ClCompile Include="pe_section_io.cpp" />
     <ClCompile Include="pe_security.cpp" />
     <ClCompile Include="pe_string_finder.cpp" />
     <ClCompile Include="pe_tls.cpp" />

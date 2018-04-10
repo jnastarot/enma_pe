@@ -182,3 +182,4 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &file);
 //void save_pe_image(_In_ const pe_image &image, _Out_ std::vector<uint8_t>& image_out);
 //void load_pe_image(_In_ std::vector<uint8_t>& image_out , _Out_ pe_image &image);
 
+#include "pe_image_io.h"
