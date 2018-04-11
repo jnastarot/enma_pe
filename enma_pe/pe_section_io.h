@@ -1,22 +1,55 @@
 #pragma once
 
+
+enum section_io_mode {
+    section_io_mode_default,
+    section_io_mode_allow_expand,
+};
+
+enum section_io_addressing_type {
+    section_address_raw,
+    section_address_rva,
+};
+
+enum section_io_code {
+    section_io_success,
+    section_io_incomplete, //part of read\write
+    section_io_data_not_present,
+};
+
+
 /*
         ................. section1 data
  |    | |     |     |    ...................section2 data
  v    v |     |     |       |                ...............section3 data
- ...... io data (raw not present)                         |      |     
+ ...... io data (data not present)                        |      |     
         |     |     |       |                             |      |
         v     v     |       |                             |      |
         ....... io data (code success)                    |      |
                     |       |                             |      |
                     v       v                             |      |
                     ......... io data (code incomplete)   v      v
-                                                          ........ write data (
-                                                                        section_io_success = section_io_mode_default
-                                                                        code bound break = mode_dont_expand_bound 
-                                                                              )    
+                                                          ........ io data (
+                                                                      section_io_success = section_io_mode_default
+                                                                      section_io_data_not_present = section_io_mode_allow_expand 
+                                                                     )    
                                      
                                      */  
+
+/*
+
+
+                ............................................ section data
+   ........................................................................... i\o data
+   |            |                                          |                 |
+   |            |                                          |                 |
+   |<---------->|<---------------------------------------->|<--------------->|
+   down_oversize              available_size                    up_oversize
+                    
+
+
+*/
+
 
 class pe_section_io {
     pe_section*  section;
@@ -29,17 +62,14 @@ class pe_section_io {
     section_io_mode mode;
     section_io_addressing_type addressing_type;
 
-
-    void pe_section_io::update_section_boundaries();
-
-    section_io_code pe_section_io::view_data(
-        uint32_t raw_offset, uint32_t required_size,
-        uint32_t& real_offset,uint32_t& available_size, uint32_t& start_displacement,
+    bool pe_section_io::view_data( //-> true if data or path of data is available or can be used trought adding size 
+        uint32_t required_offset, uint32_t required_size,uint32_t& real_offset,
+        uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
         uint32_t present_offset, uint32_t present_size);
 
-    section_io_code pe_section_io::view_by_config(
-        uint32_t raw_offset, uint32_t required_size,
-        uint32_t& real_offset, uint32_t& available_size, uint32_t& start_displacement);
+    
+
+    uint32_t pe_section_io::get_present_size(uint32_t required_offset);
 public:
     pe_section_io::pe_section_io(
         pe_section & _section,
@@ -54,11 +84,41 @@ public:
 
     pe_section_io& pe_section_io::operator=(const pe_section_io& io_section);
 public:
-    template <class T> friend pe_section_io& operator>>(pe_section_io& section_io, T& data); //read from section
-   // template <class T> section_io_code operator<<(T& data); //write to section
+
+    template<typename T>
+    pe_section_io& pe_section_io::operator>> (const T& data){//read from section
+
+        read((void*)&data, sizeof(T));
+
+        return *this;
+    }
+    template<typename T>
+    pe_section_io& pe_section_io::operator << (const T& data) {//write to section
+
+        write((void*)&data, sizeof(T));
+
+        return *this;
+    }
+
+    section_io_code pe_section_io::read(void * data, uint32_t size);
+    section_io_code pe_section_io::write(void * data, uint32_t size);
 
     section_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size);
-    section_io_code pe_section_io::write(std::vector<uint8_t>& buffer, uint32_t size);
+    section_io_code pe_section_io::write(std::vector<uint8_t>& buffer);
+
+
+    section_io_code pe_section_io::internal_read(uint32_t data_offset,
+        void * buffer, uint32_t size,
+        uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize
+    );
+    section_io_code pe_section_io::internal_write(uint32_t data_offset,
+        void * buffer, uint32_t size,
+        uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
+    );
+
+    bool pe_section_io::view_section( //-> return like in view_data
+        uint32_t required_offset, uint32_t required_size, uint32_t& real_offset,
+        uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize);
 public:
     pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end = true);
     pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end = true);
@@ -69,6 +129,7 @@ public:
     pe_section_io& pe_section_io::set_raw_aligment(uint32_t aligment);
     pe_section_io& pe_section_io::set_virtual_aligment(uint32_t aligment);
 public:
+
     section_io_mode            pe_section_io::get_mode() const;
     section_io_code            pe_section_io::get_last_code() const;
     section_io_addressing_type pe_section_io::get_addressing_type() const;

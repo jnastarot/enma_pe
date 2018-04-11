@@ -1,23 +1,5 @@
 #pragma once
 
-enum section_io_mode {
-    section_io_mode_default,
-    section_io_mode_dont_expand_bound,
-};
-
-enum section_io_addressing_type {
-    section_address_raw,
-    section_address_rva,
-};
-
-enum section_io_code {
-    section_io_success,
-    section_io_incomplete, //part of read\write
-    section_io_data_not_present,
-};
-
-
-
 class pe_section{
 	std::string section_name;
 	uint32_t virtual_size;

@@ -29,176 +29,293 @@ pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
     return *this;
 }
 
-void pe_section_io::update_section_boundaries() {
-
-}
-
-section_io_code pe_section_io::view_data(
-    uint32_t  raw_offset, uint32_t required_size,
-    uint32_t& real_offset, uint32_t& available_size,uint32_t& start_displacement,
+bool pe_section_io::view_data(
+    uint32_t  required_offset, uint32_t required_size,uint32_t& real_offset,
+    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
     uint32_t present_offset, uint32_t present_size) {
 
 
     //         ...............
     //  .............................
-    //  |    | |             |
-    //  v    v |             |
-    // (start_displacement)  |
-    //         |             |
-    //         v             v
-    //         (available_size)
+    //  |    | |             |      |
+    //  v    v |             |      |
+    // (down_oversize)       |      |
+    //         |             |      |
+    //         v             v      |
+    //         (available_size)     |
+    //                       |      |
+    //                       v      v
+    //                       (up_oversize)
 
+    real_offset     = 0;
+    available_size  = 0;
+    down_oversize   = 0;
+    up_oversize     = 0;
 
+    if (required_offset < present_offset) {
+        down_oversize = (present_offset - required_offset);
 
-    if (raw_offset < present_offset) {
-        real_offset = 0;
-        start_displacement = (present_offset - raw_offset);
-        available_size = (required_size - start_displacement);
+        if (down_oversize >= required_size) {
 
-        if (available_size > present_size) {
-            available_size = present_size;
-
-            return section_io_code::section_io_incomplete;
+            return false; //not in bounds
         }
+        else {
+            available_size = (required_size - down_oversize);
 
-        return section_io_code::section_io_incomplete;
+            if (available_size > present_size) {
+                up_oversize = (available_size - present_size);
+                available_size = present_size;
+
+                return true;//partially in bounds
+            }
+
+            return true;//partially in bounds
+        }
     }
-    else if(raw_offset >= present_offset){
-        start_displacement = 0;
+    else {//if(required_offset >= present_offset)
 
-        if (raw_offset < (present_offset + present_size)) {
-            real_offset = (raw_offset - present_offset);
+        if (required_offset < (present_offset + present_size)) {
+            real_offset = (required_offset - present_offset);
 
-            if (required_size + real_offset > (present_offset + present_size)) {
-                available_size = ((present_offset + present_size) - real_offset);
+            if (required_size + required_offset > (present_offset + present_size)) {
+                up_oversize = (required_size + required_offset) - (present_offset + present_size);
+                available_size = required_size - up_oversize;
 
-                return section_io_code::section_io_incomplete;
+                return true; //partially in bounds
             }
             else {
                 available_size = required_size;
 
-                return section_io_code::section_io_success;
+                return true; //full in bounds
             }
         }
         else {
-            real_offset = (raw_offset - present_offset + present_size);
+            real_offset = (required_offset - present_offset + present_size);
+            up_oversize = (required_size + required_offset) - (present_offset + present_size);
             available_size = 0;
 
-            return section_io_code::section_io_incomplete;
+            return true; //trough full adding size 
         }
     }
 
-    return section_io_code::section_io_success;
+    return true;
 }
 
-section_io_code pe_section_io::view_by_config(
-    uint32_t raw_offset, uint32_t required_size,
-    uint32_t& real_offset, uint32_t& available_size, uint32_t& start_displacement) {
+bool pe_section_io::view_section(
+    uint32_t required_offset, uint32_t required_size,uint32_t& real_offset,
+    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize) {
 
  
     switch (addressing_type) {
         case section_io_addressing_type::section_address_raw: {
             return view_data(
-                raw_offset, required_size,
-                real_offset, available_size, start_displacement,
-                this->section->get_pointer_to_raw(), ALIGN_UP(this->section->get_section_data().size(), this->raw_aligment)
+                required_offset, required_size,
+                real_offset, available_size, down_oversize, up_oversize,
+                this->section->get_pointer_to_raw(), ALIGN_UP(section->get_size_of_raw_data(), this->raw_aligment)
             );
         }
 
         case section_io_addressing_type::section_address_rva: {
             return view_data(
-                raw_offset, required_size,
-                real_offset, available_size, start_displacement,
+                required_offset, required_size,
+                real_offset, available_size, down_oversize, up_oversize,
                 this->section->get_virtual_address(), ALIGN_UP(this->section->get_virtual_size(), this->virtual_aligment)
             );
         }
     }
     
-    return section_io_code::section_io_success;
+    return false;
 }
 
+uint32_t pe_section_io::get_present_size(uint32_t required_offset) {
 
-template <class T>  pe_section_io& operator>>(pe_section_io& section_io, T& data) {//read
-
-    std::vector<uint8_t> buffer;
-    section_io_code code = section_io.read(buffer,sizeof(T));
-
-    switch (code) {
-        case section_io_code::section_io_success:
-        case section_io_code::section_io_incomplete: {
-            memcpy(data, buffer.data(), sizeof(T));
-            break;
+    if (section->get_pointer_to_raw() > required_offset) {
+        return section->get_size_of_raw_data();
+    }
+    else {
+        if (section->get_size_of_raw_data() > required_offset) {
+            return section->get_size_of_raw_data() - required_offset;
+        }
+        else {
+            return 0;
         }
     }
 
-    return *this;
+    return 0;
 }
-/*
-template <class T> section_io_code pe_section_io::operator<<(T& data) {//write
 
-    return section_io_code::section_io_success;
+section_io_code pe_section_io::internal_read(
+    uint32_t data_offset,
+    void * buffer, uint32_t size,
+    uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize) {
+
+    uint32_t real_offset    = 0;
+
+    bool b_view = view_section(data_offset, size,
+        real_offset,
+        readed_size, down_oversize, up_oversize);
+
+
+    if (b_view && readed_size) {
+        uint32_t present_size = get_present_size(real_offset);
+
+        if (readed_size > present_size) {
+            if (present_size) {
+                memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], present_size);
+            }
+            memset(&((uint8_t*)buffer)[down_oversize + present_size], 0, readed_size - present_size);
+        }
+        else {
+            memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], readed_size);
+        }
+
+        if (down_oversize || up_oversize) {
+
+            last_code = section_io_code::section_io_incomplete;
+            return section_io_code::section_io_incomplete;
+        }
+
+        last_code = section_io_code::section_io_success;
+        return section_io_code::section_io_success;
+    }
+
+    last_code = section_io_code::section_io_data_not_present;
+    return section_io_code::section_io_data_not_present;
 }
-*/
 
-section_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
+section_io_code pe_section_io::internal_write(
+    uint32_t data_offset,
+    void * buffer, uint32_t size,
+    uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize) {
+
 
     uint32_t real_offset = 0;
-    uint32_t available_size = 0;
-    uint32_t start_displacement = 0;
 
-    section_io_code code = view_by_config(this->section_offset, size,
-        real_offset, available_size, start_displacement);
+    bool b_view = view_section(data_offset, size,
+        real_offset,
+        wrote_size, down_oversize, up_oversize);
 
-    buffer.clear();
-    buffer.resize(available_size);
 
-    switch (code) {
-        case section_io_code::section_io_success:
-        case section_io_code::section_io_incomplete: {
-            memset(&buffer[0], 0, start_displacement);
-            if (size <= available_size) {
-                memcpy(&buffer[start_displacement], &section->get_section_data().data()[real_offset], size);
-                this->section_offset += size;
+    if (b_view &&
+        (wrote_size || (up_oversize && mode == section_io_mode::section_io_mode_allow_expand) )) {
+
+        if ((up_oversize && mode == section_io_mode::section_io_mode_allow_expand)) { 
+            if (addressing_type == section_io_addressing_type::section_address_raw) {
+
+                add_size(
+                    (ALIGN_UP(section->get_size_of_raw_data(), this->raw_aligment) - section->get_size_of_raw_data()) + up_oversize            
+                    , false);
+
+                wrote_size += up_oversize;
+                up_oversize = 0;
+            }
+            else if (addressing_type == section_io_addressing_type::section_address_rva) {
+
+                add_size(
+                    (ALIGN_UP(section->get_virtual_size(), this->virtual_aligment) - section->get_virtual_size()) + up_oversize
+                    , false);
+
+                wrote_size += up_oversize;
+                up_oversize = 0;
             }
             else {
-                memcpy(&buffer[start_displacement], &section->get_section_data().data()[real_offset], available_size);
-                this->section_offset += available_size;
+                return section_io_code::section_io_data_not_present;//unk addressing_type
+            }        
+        }
+        else { //check if necessary add an emulated part
+            if (addressing_type == section_io_addressing_type::section_address_raw) {
+                if (real_offset + wrote_size > section->get_size_of_raw_data()) {
+
+                    add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
+                }
             }
-            
-            break;
+            else if (addressing_type == section_io_addressing_type::section_address_rva) {
+                if (real_offset + wrote_size > section->get_virtual_size()) {
+
+                    add_size((real_offset + wrote_size) - section->get_virtual_size(), false);
+                }
+            }
         }
 
-        case section_io_code::section_io_data_not_present: {
-            break;
+        memcpy(&section->get_section_data().data()[real_offset], &((uint8_t*)buffer)[down_oversize], wrote_size);
+
+        if (down_oversize || up_oversize) {
+
+            last_code = section_io_code::section_io_incomplete;
+            return section_io_code::section_io_incomplete;
         }
+
+        last_code = section_io_code::section_io_success;
+        return section_io_code::section_io_success;
     }
 
-    
+    last_code = section_io_code::section_io_data_not_present;
+    return section_io_code::section_io_data_not_present;
+}
+
+section_io_code pe_section_io::read(void * data, uint32_t size) {
+
+    uint32_t readed_size;
+    uint32_t down_oversize;
+    uint32_t up_oversize;
+
+
+    section_io_code code = internal_read(section_offset, data, size,
+        readed_size, down_oversize, up_oversize);
+
+    section_offset += readed_size;
+
     return code;
 }
 
-section_io_code pe_section_io::write(std::vector<uint8_t>& buffer, uint32_t size) {
+section_io_code pe_section_io::write(void * data, uint32_t size) {
 
-    return section_io_code::section_io_success;
+    uint32_t wrote_size;
+    uint32_t down_oversize;
+    uint32_t up_oversize;
+
+    section_io_code code = internal_write(section_offset, data, size,
+        wrote_size, down_oversize, up_oversize);
+
+    section_offset += wrote_size;
+
+    return code;
+}
+
+section_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
+
+    if (buffer.size() < size) { buffer.resize(size); }
+
+    return read(buffer.data(), buffer.size());
+}
+
+section_io_code pe_section_io::write(std::vector<uint8_t>& buffer) {
+
+    return write(buffer.data(), buffer.size());
 }
 
 pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
-    this->section->get_section_data().resize(ALIGN_UP(this->section->get_size_of_raw_data(), factor));
+    section->get_section_data().resize(ALIGN_UP(section->get_size_of_raw_data(), factor));
     if (offset_to_end) {
-        this->section_offset = this->section->get_size_of_raw_data();
+        section_offset = section->get_size_of_raw_data();
     }
-    add_size(ALIGN_UP(this->section->get_size_of_raw_data(), factor));
+    add_size(ALIGN_UP(section->get_size_of_raw_data(), factor));
 
     return *this;
 }
 
 pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end) {
     if (size) {
-        this->section->get_section_data().resize(this->section->get_section_data().size() + size);
+        section->get_section_data().resize(section->get_size_of_raw_data() + size);
     }
     if (offset_to_end) {
-        this->section_offset = this->section->get_size_of_raw_data();
+        section_offset = section->get_size_of_raw_data();
     }
+
+    if (section->get_size_of_raw_data() > section->get_virtual_size()) {
+        section->set_virtual_size(section->get_size_of_raw_data());
+    }
+
 
     return *this;
 }
@@ -251,3 +368,4 @@ uint32_t pe_section_io::get_virtual_aligment() const {
 pe_section* pe_section_io::get_section() {
     return this->section;
 }
+
