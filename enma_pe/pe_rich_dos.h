@@ -1,19 +1,5 @@
 #pragma once
 
-
-class pe_dos_stub {
-    std::vector<uint8_t> dos_stub;
-public:
-    pe_dos_stub::pe_dos_stub();
-    pe_dos_stub::~pe_dos_stub();
-public:
-    void pe_dos_stub::set_dos_stub(std::vector<uint8_t>& stub);
-
-public:
-    std::vector<uint8_t> pe_dos_stub::get_dos_stub() const;
-};
-
-
 enum e_rich_type {
   rich_type_unknown  = 0,
   rich_type_unmarked = 1,
@@ -139,31 +125,87 @@ enum e_rich_type {
 };
 
 
-class pe_rich_data {
+class pe_dos_header {
+    image_dos_header dos_h;
+public:
+    pe_dos_header::pe_dos_header();
+    pe_dos_header::~pe_dos_header();
+public:
+    void pe_dos_header::set_header(image_dos_header * header);
+
+public:
+    image_dos_header& pe_dos_header::get_header();
+};
+
+
+class pe_dos_stub {
+    std::vector<uint8_t> dos_stub;
+public:
+    pe_dos_stub::pe_dos_stub();
+    pe_dos_stub::~pe_dos_stub();
+public:
+    void pe_dos_stub::set_stub(std::vector<uint8_t>& stub);
+
+public:
+    std::vector<uint8_t> pe_dos_stub::get_stub() const;
+};
+
+
+
+class pe_rich_item {
     e_rich_type type;
     uint16_t compiler_build;
     uint32_t count;
 
 public:
+    pe_rich_item::pe_rich_item();
+    pe_rich_item::pe_rich_item(const pe_rich_item& item);
+    pe_rich_item::pe_rich_item(e_rich_type type,uint16_t compiler_build,uint32_t count);
+    pe_rich_item::~pe_rich_item();
+
+    pe_rich_item& pe_rich_item::operator=(const pe_rich_item& item);
+public:
+    void pe_rich_item::set_type(e_rich_type type);
+    void pe_rich_item::set_compiler_build(uint16_t compiler_build);
+    void pe_rich_item::set_count(uint32_t count);
+public:
+    e_rich_type pe_rich_item::get_type() const;
+    uint16_t pe_rich_item::get_compiler_build() const;
+    uint32_t pe_rich_item::get_count() const;
+};
+
+class pe_rich_data {
+    std::vector<pe_rich_item> items;
+    uint32_t rich_offset;
+    uint32_t rich_size;
+    uint32_t rich_xorkey;
+    uint32_t rich_correct_xorkey;
+public:
     pe_rich_data::pe_rich_data();
     pe_rich_data::pe_rich_data(const pe_rich_data& data);
-    pe_rich_data::pe_rich_data(e_rich_type type,uint16_t compiler_build,uint32_t count);
     pe_rich_data::~pe_rich_data();
 
     pe_rich_data& pe_rich_data::operator=(const pe_rich_data& data);
 public:
-    void pe_rich_data::set_type(e_rich_type type);
-    void pe_rich_data::set_compiler_build(uint16_t compiler_build);
-    void pe_rich_data::set_count(uint32_t count);
+    void pe_rich_data::set_rich_offset(uint32_t offset);
+    void pe_rich_data::set_rich_size(uint32_t size);
+    void pe_rich_data::set_rich_xorkey(uint32_t xorkey);
+    void pe_rich_data::set_rich_correct_xorkey(uint32_t correct_xorkey);
+
 public:
-    e_rich_type pe_rich_data::get_type() const;
-    uint16_t pe_rich_data::get_compiler_build() const;
-    uint32_t pe_rich_data::get_count() const;
+    uint32_t pe_rich_data::get_rich_offset() const;
+    uint32_t pe_rich_data::get_rich_size() const;
+    uint32_t pe_rich_data::get_rich_xorkey() const;
+    uint32_t pe_rich_data::get_rich_correct_xorkey() const;
+    bool     pe_rich_data::is_valid_rich() const;
+    bool     pe_rich_data::is_present() const;
+    std::vector<pe_rich_item>& pe_rich_data::get_items();
 };
 
 
-bool get_image_dos_stub(_In_ const uint8_t * pimage, _Out_ pe_dos_stub& dos_stub);
-bool get_image_rich_data(_In_ const uint8_t * pimage, _Out_ std::vector<pe_rich_data>& rich_data);
+bool get_image_dos_header(_In_ const uint8_t * pimage, _Out_ pe_dos_header& dos_header);
+bool get_image_dos_stub(_In_ const uint8_t * pimage,   _Out_ pe_dos_stub& dos_stub);
+bool get_image_rich_data(_In_ const uint8_t * pimage,  _Out_ pe_rich_data& rich_data);
 
 bool has_image_rich_data(_In_ const uint8_t * pimage ,
     _Out_opt_ uint32_t * rich_data_offset = 0, _Out_opt_ uint32_t * rich_data_size = 0, _Out_opt_ uint32_t * rich_xor_key = 0);

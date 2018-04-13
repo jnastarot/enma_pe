@@ -66,8 +66,9 @@ pe_image::~pe_image() {
 pe_image& pe_image::operator=(const pe_image& image) {
 	clear_image();
 
-    dos_stub.set_dos_stub(image.dos_stub.get_dos_stub());
-    rich_data = image.rich_data;
+    dos_header = image.dos_header;
+    dos_stub   = image.dos_stub;
+    rich_data  = image.rich_data;
 
 	image_status        = image.image_status;
 	machine	            = image.machine;
@@ -115,30 +116,25 @@ pe_image& pe_image::operator=(const pe_image& image) {
 
 
 void pe_image::init_from_file(uint8_t * image, uint32_t size) {
-	image_dos_header* dos_header = (image_dos_header*)image;
-
 	if (size < sizeof(image_dos_header)) {this->image_status = pe_image_status_bad_format;return;};
 
-
-	if (dos_header->e_magic == IMAGE_DOS_SIGNATURE) { //check MZ sign
+	if (get_image_dos_header(image, dos_header)) { //check MZ sign
 
         get_image_dos_stub(image,dos_stub);
+        get_image_rich_data(image, rich_data);
 
-        if (has_image_rich_data(image) && checksum_rich(image)) {
-            get_image_rich_data(image, rich_data);
-        }
 
-		if (*(uint32_t*)(&image[dos_header->e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
-			uint32_t section_offset = dos_header->e_lfanew;
+		if (*(uint32_t*)(&image[dos_header.get_header().e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
+			uint32_t section_offset = dos_header.get_header().e_lfanew;
 			uint32_t number_of_sections = 0;
 			
 			if (*(uint16_t*)(&image[
-                    dos_header->e_lfanew + (uint32_t)offsetof(image_nt_headers32, optional_header.magic)
+                    dos_header.get_header().e_lfanew + (uint32_t)offsetof(image_nt_headers32, optional_header.magic)
                 ]) == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
 
 				if (size < section_offset + sizeof(image_nt_headers32)) { this->image_status = pe_image_status_bad_format; return; };
 
-                image_nt_headers32* pe_header = (image_nt_headers32*)(&image[dos_header->e_lfanew]);
+                image_nt_headers32* pe_header = (image_nt_headers32*)(&image[dos_header.get_header().e_lfanew]);
 
 				set_machine(pe_header->file_header.machine);
 				set_timestamp(pe_header->file_header.time_date_stamp);
@@ -181,12 +177,12 @@ void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 				section_offset += sizeof(image_nt_headers32);
 			}
 			else if (*(uint16_t*)(&image[
-                    dos_header->e_lfanew + (uint32_t)offsetof(image_nt_headers64, optional_header.magic)
+                    dos_header.get_header().e_lfanew + (uint32_t)offsetof(image_nt_headers64, optional_header.magic)
                 ]) == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
 				
                 if (size < section_offset + sizeof(image_nt_headers64)) { this->image_status = pe_image_status_bad_format; return; };
 
-                image_nt_headers64* pe_header = (image_nt_headers64*)(&image[dos_header->e_lfanew]);
+                image_nt_headers64* pe_header = (image_nt_headers64*)(&image[dos_header.get_header().e_lfanew]);
 
 				set_machine(pe_header->file_header.machine);
 				set_timestamp(pe_header->file_header.time_date_stamp);
@@ -523,9 +519,9 @@ void    pe_image::set_image_status(pe_image_status status) {
 	this->image_status = status;
 }
 void    pe_image::set_dos_stub(pe_dos_stub& dos_stub) {
-    this->dos_stub.set_dos_stub(dos_stub.get_dos_stub());
+    this->dos_stub = dos_stub;
 }
-void    pe_image::set_rich_data(std::vector<pe_rich_data>& rich_data) {
+void    pe_image::set_rich_data(pe_rich_data& rich_data) {
     this->rich_data = rich_data;
 }
 void    pe_image::set_machine(uint16_t machine) {
@@ -634,10 +630,10 @@ pe_image_status pe_image::get_image_status() const {
 	return image_status;
 }
 bool        pe_image::has_dos_stub() const {
-    return dos_stub.get_dos_stub().size() != 0;
+    return dos_stub.get_stub().size() != 0;
 }
 bool        pe_image::has_rich_data() const {
-    return rich_data.size() != 0;
+    return rich_data.is_present();
 }
 uint16_t    pe_image::get_machine() const {
 	return machine;
@@ -747,15 +743,18 @@ uint32_t    pe_image::get_directory_virtual_size(uint32_t directory_idx) const {
 
 bool        pe_image::has_directory(uint32_t directory_idx) const {
 	if (directory_idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES) {
-		return (this->directories[directory_idx].virtual_address != 0 || this->directories[directory_idx].size != 0);
+		return (this->directories[directory_idx].virtual_address != 0);
 	}
 	return false;
 }
 
+pe_dos_header&  pe_image::get_dos_header() {
+    return dos_header;
+}
 pe_dos_stub& pe_image::get_dos_stub() {
     return dos_stub;
 }
-std::vector<pe_rich_data>& pe_image::get_rich_data() {
+pe_rich_data& pe_image::get_rich_data() {
     return rich_data;
 }
 

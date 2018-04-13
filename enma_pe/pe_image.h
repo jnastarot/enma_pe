@@ -11,8 +11,10 @@ enum pe_image_status {
 
 class pe_image{
 	pe_image_status image_status;
-    pe_dos_stub               dos_stub;
-    std::vector<pe_rich_data> rich_data;
+
+    pe_dos_header  dos_header;
+    pe_dos_stub    dos_stub;
+    pe_rich_data   rich_data;
 
 	uint16_t   machine;
 	uint32_t   timestamp;
@@ -98,7 +100,7 @@ public:
 public:
 	void        pe_image::set_image_status(pe_image_status status);
     void        pe_image::set_dos_stub(pe_dos_stub& dos_stub);
-    void        pe_image::set_rich_data(std::vector<pe_rich_data>& rich_data);
+    void        pe_image::set_rich_data(pe_rich_data& rich_data);
 	void        pe_image::set_machine(uint16_t machine);
 	void        pe_image::set_timestamp(uint32_t timestamp);
 	void        pe_image::set_characteristics(uint16_t characteristics);
@@ -134,6 +136,11 @@ public:
 	void		pe_image::set_directory_virtual_size(uint32_t directory_idx, uint32_t virtual_size);
 public://getter
 	pe_image_status		       pe_image::get_image_status() const;
+
+    pe_dos_header&  pe_image::get_dos_header();
+    pe_dos_stub&    pe_image::get_dos_stub();
+    pe_rich_data&   pe_image::get_rich_data();
+
     bool        pe_image::has_dos_stub() const;
     bool        pe_image::has_rich_data() const;
 	uint16_t    pe_image::get_machine() const;
@@ -171,8 +178,6 @@ public://getter
 	uint32_t    pe_image::get_directory_virtual_size(uint32_t directory_idx) const;
 	bool        pe_image::has_directory(uint32_t directory_idx) const;
 
-    pe_dos_stub&               pe_image::get_dos_stub();
-    std::vector<pe_rich_data>& pe_image::get_rich_data();
 public://util
 	void				pe_image::clear_image();
 };
