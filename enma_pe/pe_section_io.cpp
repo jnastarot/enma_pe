@@ -39,77 +39,7 @@ pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
     return *this;
 }
 
-bool pe_section_io::view_data(
-    uint32_t  required_offset, uint32_t required_size,uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-    uint32_t present_offset, uint32_t present_size) {
 
-
-    //         ...............
-    //  .............................
-    //  |    | |             |      |
-    //  v    v |             |      |
-    // (down_oversize)       |      |
-    //         |             |      |
-    //         v             v      |
-    //         (available_size)     |
-    //                       |      |
-    //                       v      v
-    //                       (up_oversize)
-
-    real_offset     = 0;
-    available_size  = 0;
-    down_oversize   = 0;
-    up_oversize     = 0;
-
-    if (required_offset < present_offset) {
-        down_oversize = (present_offset - required_offset);
-
-        if (down_oversize >= required_size) {
-
-            return false; //not in bounds
-        }
-        else {
-            available_size = (required_size - down_oversize);
-
-            if (available_size > present_size) {
-                up_oversize = (available_size - present_size);
-                available_size = present_size;
-
-                return true;//partially in bounds
-            }
-
-            return true;//partially in bounds
-        }
-    }
-    else {//if(required_offset >= present_offset)
-
-        if (required_offset < (present_offset + present_size)) {
-            real_offset = (required_offset - present_offset);
-
-            if (required_size + required_offset > (present_offset + present_size)) {
-                up_oversize = (required_size + required_offset) - (present_offset + present_size);
-                available_size = required_size - up_oversize;
-
-                return true; //partially in bounds
-            }
-            else {
-                available_size = required_size;
-
-                return true; //full in bounds
-            }
-        }
-        else {
-            real_offset = (required_offset - present_offset + present_size);
-            up_oversize = (required_size + required_offset) - (present_offset + present_size);
-            available_size = 0;
-
-            return true; //trough full adding size 
-        }
-    }
-
-    return true;
-}
 
 bool pe_section_io::view_section(
     uint32_t required_offset, uint32_t required_size,uint32_t& real_offset,
@@ -132,6 +62,8 @@ bool pe_section_io::view_section(
                 this->section->get_virtual_address(), ALIGN_UP(this->section->get_virtual_size(), this->virtual_aligment)
             );
         }
+
+        default: {return false; }
     }
     
     return false;
@@ -169,9 +101,9 @@ enma_io_code pe_section_io::internal_read(
     if (b_view && readed_size) {
         uint32_t present_size = get_present_size(real_offset);
 
-        if (readed_size > present_size) {
-            if (present_size) {
-                memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], present_size);
+        if (readed_size + real_offset > present_size) {
+            if (present_size > real_offset) {
+                memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], readed_size);
             }
             memset(&((uint8_t*)buffer)[down_oversize + present_size], 0, readed_size - present_size);
         }
@@ -234,13 +166,13 @@ enma_io_code pe_section_io::internal_write(
         }
         else { //check if necessary add an emulated part
             if (addressing_type == enma_io_addressing_type::enma_io_address_raw) {
-                if (real_offset + wrote_size > section->get_size_of_raw_data()) {
+                if (real_offset + wrote_size > section->get_size_of_raw_data()) { //aligned by raw align
 
                     add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
                 }
             }
             else if (addressing_type == enma_io_addressing_type::enma_io_address_rva) {
-                if (real_offset + wrote_size > section->get_virtual_size()) {
+                if (real_offset + wrote_size > section->get_virtual_size()) {//aligned by virtual align
 
                     add_size((real_offset + wrote_size) - section->get_virtual_size(), false);
                 }

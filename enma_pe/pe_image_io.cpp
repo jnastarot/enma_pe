@@ -28,20 +28,159 @@ pe_image_io& pe_image_io::operator=(const pe_image_io& image_io) {
 
 
 
-bool pe_image_io::view_data( //-> true if data or path of data is available or can be used trought adding size 
+
+
+bool pe_image_io::view_image( //-> return like in view_data
     uint32_t required_offset, uint32_t required_size, uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-    uint32_t present_offset, uint32_t present_size) {
+    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize) {
 
 
+    if (image->get_sections_number()) {
+        switch (addressing_type) {
+        case enma_io_addressing_type::enma_io_address_raw: {
+            pe_section * first_ = image->get_sections()[0];
+            pe_section * last_ = image->get_last_section();
+
+            
+            return view_data(
+                required_offset, required_size,
+                real_offset, available_size, down_oversize, up_oversize,
+                first_->get_pointer_to_raw(), ALIGN_UP(
+                    last_->get_pointer_to_raw() + last_->get_size_of_raw_data() - first_->get_pointer_to_raw(),
+                    image->get_file_align())
+                + image->get_overlay_data().size());
+        }
+
+        case enma_io_addressing_type::enma_io_address_rva: {
+            pe_section * first_ = image->get_sections()[0];
+            pe_section * last_ = image->get_last_section();
+
+            return view_data(
+                required_offset, required_size,
+                real_offset, available_size, down_oversize, up_oversize,
+                first_->get_virtual_address(), ALIGN_UP(
+                    last_->get_virtual_address() + last_->get_virtual_size() - first_->get_virtual_address(),
+                    image->get_section_align())
+            );
+        }
+
+        default: {return false; }
+        }
+    }
 
     return false;
 }
 
 uint32_t pe_image_io::get_present_size(uint32_t required_offset) {
 
+    if (image->get_sections_number()) {
+        pe_section * first_ = image->get_sections()[0];
+        pe_section * last_ = image->get_last_section();
+
+        switch (addressing_type) {
+
+            case enma_io_addressing_type::enma_io_address_raw: {
+
+                uint32_t total_size = ALIGN_UP(
+                    last_->get_pointer_to_raw() + last_->get_size_of_raw_data() - first_->get_pointer_to_raw(),
+                    image->get_file_align())
+                    + image->get_overlay_data().size();
+
+                if (required_offset < total_size) {
+                    return total_size - required_offset;
+                }
+
+                break;
+            }
+
+            case enma_io_addressing_type::enma_io_address_rva: {
+
+                uint32_t total_size = ALIGN_UP(
+                    last_->get_virtual_address() + last_->get_virtual_size() - first_->get_virtual_address(),
+                    image->get_section_align());
+
+                if (required_offset < total_size) {
+                    return total_size - required_offset;
+                }
+
+                break;
+            }
+
+        default: {return 0; }
+        }
+    }
 
     return 0;
+}
+
+
+enma_io_code pe_image_io::internal_read(uint32_t data_offset,
+    void * buffer, uint32_t size,
+    uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize
+) {
+    uint32_t real_offset = 0;
+
+    bool b_view = view_image(data_offset, size,
+        real_offset,
+        readed_size, down_oversize, up_oversize);
+
+
+    if (b_view && readed_size) {
+        uint32_t present_size = get_present_size(real_offset);
+        uint32_t total_readed_size    = 0;
+        uint32_t total_down_oversize  = 0;
+        uint32_t total_up_oversize    = 0;
+
+        for (auto &section : image->get_sections()) {
+
+            uint32_t sec_readed_size = 0;
+            uint32_t sec_down_oversize = 0;
+            uint32_t sec_up_oversize = 0;
+
+            enma_io_code code = pe_section_io(*section, *image, mode, addressing_type).internal_read(
+                data_offset, buffer, size, sec_readed_size, sec_down_oversize, sec_up_oversize
+            );
+
+            total_readed_size += sec_readed_size;
+            total_up_oversize = sec_up_oversize;
+
+            if (!total_up_oversize || total_readed_size == readed_size) {
+                break;
+            }
+        }
+
+        if (addressing_type == enma_io_addressing_type::enma_io_address_raw &&
+            total_up_oversize && image->get_overlay_data().size()) { //take up size from overlay
+
+            memcpy(&((uint8_t*)buffer)[down_oversize + total_readed_size], image->get_overlay_data().data(),
+                min(image->get_overlay_data().size(), total_up_oversize));
+
+            total_up_oversize -= min(image->get_overlay_data().size(), total_up_oversize);
+        }
+
+        readed_size = total_readed_size;
+        up_oversize = total_up_oversize;
+
+        if (down_oversize || up_oversize) {
+            last_code = enma_io_code::enma_io_incomplete;
+            return enma_io_code::enma_io_incomplete;
+        }
+
+        last_code = enma_io_code::enma_io_success;
+        return enma_io_code::enma_io_success;
+    }
+
+    last_code = enma_io_code::enma_io_data_not_present;
+    return enma_io_code::enma_io_data_not_present;
+}
+
+enma_io_code pe_image_io::internal_write(uint32_t data_offset,
+    void * buffer, uint32_t size,
+    uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
+) {
+
+
+    return enma_io_code::enma_io_data_not_present;
 }
 
 enma_io_code pe_image_io::read(void * data, uint32_t size) {
@@ -85,34 +224,6 @@ enma_io_code pe_image_io::write(std::vector<uint8_t>& buffer) {
     return write(buffer.data(), buffer.size());
 }
 
-enma_io_code pe_image_io::internal_read(uint32_t data_offset,
-    void * buffer, uint32_t size,
-    uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize
-) {
-
-
-    return enma_io_code::enma_io_data_not_present;
-}
-
-enma_io_code pe_image_io::internal_write(uint32_t data_offset,
-    void * buffer, uint32_t size,
-    uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
-) {
-
-
-    return enma_io_code::enma_io_data_not_present;
-}
-
-bool pe_image_io::view_image( //-> return like in view_data
-    uint32_t required_offset, uint32_t required_size, uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize) {
-
-
-    return false;
-}
-
-
-
 pe_image_io& pe_image_io::set_mode(enma_io_mode mode) {
 
     this->mode = mode;
@@ -147,4 +258,78 @@ uint32_t  pe_image_io::get_image_offset() const {
 
 pe_image*  pe_image_io::get_image() {
     return this->image;
+}
+
+
+
+bool view_data(
+    uint32_t  required_offset, uint32_t required_size, uint32_t& real_offset,
+    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
+    uint32_t present_offset, uint32_t present_size) {
+
+
+    //         ...............
+    //  .............................
+    //  |    | |             |      |
+    //  v    v |             |      |
+    // (down_oversize)       |      |
+    //         |             |      |
+    //         v             v      |
+    //         (available_size)     |
+    //                       |      |
+    //                       v      v
+    //                       (up_oversize)
+
+    real_offset = 0;
+    available_size = 0;
+    down_oversize = 0;
+    up_oversize = 0;
+
+    if (required_offset < present_offset) {
+        down_oversize = (present_offset - required_offset);
+
+        if (down_oversize >= required_size) {
+
+            return false; //not in bounds
+        }
+        else {
+            available_size = (required_size - down_oversize);
+
+            if (available_size > present_size) {
+                up_oversize = (available_size - present_size);
+                available_size = present_size;
+
+                return true;//partially in bounds
+            }
+
+            return true;//partially in bounds
+        }
+    }
+    else {//if(required_offset >= present_offset)
+
+        if (required_offset < (present_offset + present_size)) {
+            real_offset = (required_offset - present_offset);
+
+            if (required_size + required_offset >(present_offset + present_size)) {
+                up_oversize = (required_size + required_offset) - (present_offset + present_size);
+                available_size = required_size - up_oversize;
+
+                return true; //partially in bounds
+            }
+            else {
+                available_size = required_size;
+
+                return true; //full in bounds
+            }
+        }
+        else {
+            real_offset = (required_offset - present_offset + present_size);
+            up_oversize = (required_size + required_offset) - (present_offset + present_size);
+            available_size = 0;
+
+            return true; //trough full adding size 
+        }
+    }
+
+    return true;
 }

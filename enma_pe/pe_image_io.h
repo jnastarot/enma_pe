@@ -16,6 +16,11 @@ enum enma_io_code {
     enma_io_data_not_present,
 };
 
+inline bool view_data(//-> true if data or path of data is available or can be used trought adding size
+    uint32_t  required_offset, uint32_t required_size, uint32_t& real_offset,
+    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
+    uint32_t present_offset, uint32_t present_size);
+
 
 #include "pe_section_io.h"
 
@@ -26,11 +31,6 @@ class pe_image_io{
     enma_io_code last_code;
     enma_io_mode mode;
     enma_io_addressing_type addressing_type;
-
-    bool pe_image_io::view_data( //-> true if data or path of data is available or can be used trought adding size 
-        uint32_t required_offset, uint32_t required_size, uint32_t& real_offset,
-        uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-        uint32_t present_offset, uint32_t present_size);
 
     uint32_t pe_image_io::get_present_size(uint32_t required_offset);
 public:
@@ -46,14 +46,14 @@ public:
     pe_image_io& pe_image_io::operator=(const pe_image_io& image_io);
 public:
     template<typename T>
-    pe_image_io& pe_image_io::operator >> (const T& data) {//read from section
+    pe_image_io& pe_image_io::operator >> (const T& data) {//read from image
 
         read((void*)&data, sizeof(T));
 
         return *this;
     }
     template<typename T>
-    pe_image_io& pe_image_io::operator << (const T& data) {//write to section
+    pe_image_io& pe_image_io::operator << (const T& data) {//write to image
 
         write((void*)&data, sizeof(T));
 

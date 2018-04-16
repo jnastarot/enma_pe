@@ -47,12 +47,6 @@ class pe_section_io {
     enma_io_code last_code;
     enma_io_mode mode;
     enma_io_addressing_type addressing_type;
-
-    bool pe_section_io::view_data( //-> true if data or path of data is available or can be used trought adding size 
-        uint32_t required_offset, uint32_t required_size,uint32_t& real_offset,
-        uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-        uint32_t present_offset, uint32_t present_size);
-
     
 
     uint32_t pe_section_io::get_present_size(uint32_t required_offset);

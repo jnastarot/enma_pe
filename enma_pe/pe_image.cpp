@@ -111,6 +111,9 @@ pe_image& pe_image::operator=(const pe_image& image) {
 		this->add_section(*image.sections[i]);
 	}
 
+
+    overlay_data = image.overlay_data;
+
 	return *this;
 }
 
@@ -229,7 +232,7 @@ void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 			}
 
 
-
+            uint32_t image_top_size = 0;
 			for (size_t i = 0; i < number_of_sections; i++) {
 				image_section_header* section_image = (image_section_header*)(&image[section_offset]);
 				
@@ -246,8 +249,14 @@ void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 
 				add_section(pe_section(*section_image, section_data));
 				section_offset += sizeof(image_section_header);
+
+                image_top_size = ALIGN_UP((section_image->pointer_to_raw_data + section_image->size_of_raw_data),this->file_align);
 			}
 
+            if (image_top_size < size) {
+                overlay_data.resize(size - image_top_size);
+                memcpy(overlay_data.data(), &image[image_top_size], size - image_top_size);
+            }
 
 			this->image_status = pe_image_status_ok;
 			return;
@@ -395,6 +404,14 @@ pe_section*	 pe_image::get_section_by_idx(uint32_t idx) const {
 
 	return 0;
 }
+pe_section*	 pe_image::get_last_section() const {
+    if (this->sections.size()) {
+        return this->sections[this->sections.size() - 1];
+    }
+    
+    return 0;
+}
+
 uint32_t    pe_image::va_to_rva(uint64_t va) const {
     if (va) {
         return uint32_t(va - this->image_base);
@@ -518,6 +535,9 @@ bool    pe_image::get_data_by_raw(pe_section * section, uint32_t raw, void* data
 void    pe_image::set_image_status(pe_image_status status) {
 	this->image_status = status;
 }
+void    pe_image::set_dos_header(pe_dos_header& header) {
+    this->dos_header = header;
+}
 void    pe_image::set_dos_stub(pe_dos_stub& dos_stub) {
     this->dos_stub = dos_stub;
 }
@@ -613,6 +633,9 @@ void    pe_image::set_heap_reserve_size(uint64_t heap_reserve_size) {
 }
 void    pe_image::set_heap_commit_size(uint64_t heap_commit_size) {
 	this->heap_commit_size = heap_commit_size;
+}
+void    pe_image::set_overlay_data(std::vector<uint8_t>& data) {
+    this->overlay_data = data;
 }
 void    pe_image::set_directory_virtual_address(uint32_t directory_idx, uint32_t virtual_address) {
 	if (directory_idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES) {
@@ -726,6 +749,10 @@ uint64_t   pe_image::get_heap_commit_size() const {
 	return heap_commit_size;
 }
 
+std::vector<uint8_t>&   pe_image::get_overlay_data() {
+    return overlay_data;
+}
+
 uint32_t    pe_image::get_directory_virtual_address(uint32_t directory_idx) const {
 	if (directory_idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES) {
 		return this->directories[directory_idx].virtual_address;
@@ -756,6 +783,28 @@ pe_dos_stub& pe_image::get_dos_stub() {
 }
 pe_rich_data& pe_image::get_rich_data() {
     return rich_data;
+}
+
+
+double get_data_entropy(const std::vector<uint8_t> &data) {
+
+    uint32_t bytes_count[256];
+    memset(bytes_count, 0, sizeof(bytes_count));
+
+    for (size_t offset = 0; offset < data.size(); offset++) {
+        bytes_count[data[offset]]++;
+    }
+
+    double total_entropy = 0.;
+
+    for (size_t i = 0; i < 256; i++) {
+        double temp = (double)bytes_count[i] / data.size();
+        if (temp > 0.) {
+            total_entropy += fabs(temp * (log(temp) * 1.44269504088896340736));
+        }
+    }
+
+    return total_entropy;
 }
 
 uint32_t calculate_checksum(const std::vector<uint8_t> &file) {

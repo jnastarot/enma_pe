@@ -209,7 +209,7 @@ bool get_image_dos_stub(const uint8_t * pimage,pe_dos_stub& dos_stub) {
     if (dos_stub_size > sizeof(image_dos_header)) {
         std::vector<uint8_t> dos_stub_holder;
         dos_stub_holder.resize(dos_stub_size - sizeof(image_dos_header));
-        memcpy(dos_stub_holder.data(), (uint8_t*)pimage + sizeof(image_dos_header), dos_stub_size);
+        memcpy(dos_stub_holder.data(), (uint8_t*)pimage + sizeof(image_dos_header), dos_stub_size - sizeof(image_dos_header));
         dos_stub.set_stub(dos_stub_holder);
         return true;
     }
