@@ -71,16 +71,8 @@ bool pe_section_io::view_section(
 
 uint32_t pe_section_io::get_present_size(uint32_t required_offset) {
 
-    if (section->get_pointer_to_raw() > required_offset) {
-        return section->get_size_of_raw_data();
-    }
-    else {
-        if (section->get_size_of_raw_data() > required_offset) {
-            return section->get_size_of_raw_data() - required_offset;
-        }
-        else {
-            return 0;
-        }
+    if (required_offset < section->get_size_of_raw_data()) {
+        return section->get_size_of_raw_data() - required_offset;
     }
 
     return 0;
@@ -101,14 +93,18 @@ enma_io_code pe_section_io::internal_read(
     if (b_view && readed_size) {
         uint32_t present_size = get_present_size(real_offset);
 
-        if (readed_size + real_offset > present_size) {
-            if (present_size > real_offset) {
+        if (present_size) {
+
+            if (present_size >= readed_size) {
                 memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], readed_size);
             }
-            memset(&((uint8_t*)buffer)[down_oversize + present_size], 0, readed_size - present_size);
+            else {               
+                memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], present_size);
+                memset(&((uint8_t*)buffer)[down_oversize + present_size], 0, readed_size - present_size);
+            }
         }
         else {
-            memcpy(&((uint8_t*)buffer)[down_oversize], &section->get_section_data().data()[real_offset], readed_size);
+            memset(&((uint8_t*)buffer)[down_oversize], 0, readed_size);
         }
 
         if (down_oversize || up_oversize) {

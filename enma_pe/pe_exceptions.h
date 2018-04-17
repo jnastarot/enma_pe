@@ -36,6 +36,8 @@ public:
 public:
     void exceptions_table::add_item(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data);
     void exceptions_table::add_item(const exceptions_item& item);
+    void exceptions_table::add_item(const image_ia64_runtime_function_entry& exc_entry);
+    
 public:
 
     std::vector<exceptions_item>& exceptions_table::get_items();
@@ -46,4 +48,4 @@ public:
 bool get_exception_table(_In_ const pe_image &image, _Out_ exceptions_table& exceptions);
 void build_exceptions_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
     _In_ exceptions_table& exceptions);
-bool get_placement_exceptions_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+bool get_placement_exceptions_table(_Inout_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);

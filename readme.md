@@ -47,9 +47,7 @@ e.mail..: jnastarot@yandex.ru
 
 | TODO list |
 | :-------: |
-| `pe_section_io` for comfortable work with `pe_section` |
-| `pe_image_io` for comfortable work with `pe_image`     |
-| rewrite source on `pe_image_io` and `pe_section_io`    |
+| rewrite source on `pe_image_io` and `pe_section_io`   :arrow_backward: |
 | `pe_demangler` for `gcc`, `visual studio`, `delphi` mangled names|
 | do something for comfortable work with `TD32(.tds)`, `.pdb`, `.dbg`, `.map`|
 ---

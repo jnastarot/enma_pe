@@ -68,6 +68,10 @@ void exceptions_table::add_item(uint32_t address_begin, uint32_t address_end, ui
 void exceptions_table::add_item(const exceptions_item& item) {
     items.push_back(item);
 }
+void exceptions_table::add_item(const image_ia64_runtime_function_entry& exc_entry) {
+    items.push_back(exceptions_item(exc_entry.begin_address, exc_entry.end_address, exc_entry.unwind_info_address));
+}
+
 std::vector<exceptions_item>& exceptions_table::get_items() {
     return items;
 }
@@ -79,18 +83,19 @@ bool get_exception_table(const pe_image &image, exceptions_table& exceptions) {
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
-    if (virtual_address && virtual_size) {
-        pe_section * except_section = image.get_section_by_rva(virtual_address);
+    if (virtual_address && virtual_size /*req size*/) {
+        pe_image_io exception_io((pe_image &)image);
+        exception_io.set_image_offset(virtual_address);
 
-        for (size_t used_size = 0; used_size < virtual_size; used_size += sizeof(image_ia64_runtime_function_entry)) {
+        while (exception_io.get_image_offset() < virtual_address + virtual_size) {
+            image_ia64_runtime_function_entry exc_entry;
+            enma_io_code code = exception_io.read(&exc_entry, sizeof(exc_entry));
 
-            image_ia64_runtime_function_entry* entry = (image_ia64_runtime_function_entry*)&except_section->get_section_data().data()[
-                (virtual_address + used_size) - except_section->get_virtual_address()
-            ];
+            if (code != enma_io_code::enma_io_success) {
+                return false; //directory corrupt
+            }
 
-            if (!entry->begin_address && !entry->end_address && !entry->unwind_info_address) { continue; }
-
-            exceptions.add_item(entry->begin_address, entry->end_address, entry->unwind_info_address);
+            exceptions.add_item(exc_entry);
         }
 
         return true;
@@ -101,47 +106,56 @@ bool get_exception_table(const pe_image &image, exceptions_table& exceptions) {
 
 void build_exceptions_table(pe_image &image, pe_section& section, exceptions_table& exceptions) {
 
-    if (!exceptions.get_items().size()) { return; }
 
-    if (section.get_size_of_raw_data() & 0xF) {
-        section.get_section_data().resize(
-            section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-        );
+    if (exceptions.get_items().size()) {
+        pe_section_io exc_section(section, image, enma_io_mode_allow_expand);
+        exc_section.align_up(0x10);
+
+        uint32_t exc_virtual_address = exc_section.get_section_offset();
+
+        for (auto & item : exceptions.get_items()) {
+            image_ia64_runtime_function_entry entry = { item.get_begin_address(), item.get_end_address(), item.get_unwind_data_address() };
+
+            exc_section.write(&entry, sizeof(entry));
+        }
+
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, exc_virtual_address);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 
+            exceptions.get_items().size() * sizeof(image_ia64_runtime_function_entry));
     }
+    else {
 
-    uint32_t virtual_address = section.get_virtual_address() + section.get_size_of_raw_data();
-    uint32_t p_exceptions_offset = section.get_size_of_raw_data();
-
-
-    for (auto & item : exceptions.get_items()) {     
-        image_ia64_runtime_function_entry entry = { item.get_begin_address(), item.get_end_address(), item.get_unwind_data_address()};
-
-        section.get_section_data().resize(section.get_section_data().size() + sizeof(image_ia64_runtime_function_entry));
-        memcpy(section.get_section_data().data() + section.get_section_data().size() - sizeof(image_ia64_runtime_function_entry),
-            &entry,
-            sizeof(image_ia64_runtime_function_entry));
-    }
-
-
-    image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, virtual_address);
-    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, section.get_size_of_raw_data() - p_exceptions_offset);
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 0);
+    }  
 }
 
-bool get_placement_exceptions_table(pe_image &image, std::vector<directory_placement>& placement) {
+bool get_placement_exceptions_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
 	if (virtual_address && virtual_size) {
-		pe_section * exception_section = image.get_section_by_rva(virtual_address);
+        pe_image_io exception_io((pe_image &)image);
 
-		if (exception_section) {
-            if (ALIGN_UP(exception_section->get_virtual_size(), image.get_section_align()) >= virtual_size) {
+        uint32_t _offset_real = 0;
+        uint32_t available_size = 0;
+        uint32_t down_oversize = 0;
+        uint32_t up_oversize = 0;
 
-                placement.push_back({ virtual_address ,virtual_size, dp_id_exceptions_desc });
-				return true;
-			}
-		}
+        exception_io.view_image(
+            virtual_address, virtual_size,
+            _offset_real,
+            available_size, down_oversize, up_oversize
+        );
+
+        
+        if (!down_oversize && !up_oversize) {
+            placement.push_back({ virtual_address ,available_size, dp_id_exceptions_desc });
+            return true;
+        }
+
+        return false;
 	}
 
 	return false;
