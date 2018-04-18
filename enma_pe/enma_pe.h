@@ -11,6 +11,8 @@
 #endif
 
 #include "enma_pe_internal.h"
+#include "enma_pe_properties.h"
+
 #include "pe_image.h"
 
 enum directory_placment_id {
@@ -62,8 +64,7 @@ struct directory_placement {
 enum directory_code {
     directory_code_success,
     directory_code_not_present,
-    directory_code_partially_initialized,
-    directory_code_bad,
+    directory_code_currupted,
 };
 
 #include "pe_export.h"

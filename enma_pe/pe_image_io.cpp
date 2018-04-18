@@ -71,48 +71,6 @@ bool pe_image_io::view_image( //-> return like in view_data
     return false;
 }
 
-uint32_t pe_image_io::get_present_size(uint32_t required_offset) {
-
-    if (image->get_sections_number()) {
-        pe_section * first_ = image->get_sections()[0];
-        pe_section * last_ = image->get_last_section();
-
-        switch (addressing_type) {
-
-            case enma_io_addressing_type::enma_io_address_raw: {
-
-                uint32_t total_size = ALIGN_UP(
-                    last_->get_pointer_to_raw() + last_->get_size_of_raw_data() - first_->get_pointer_to_raw(),
-                    image->get_file_align())
-                    + image->get_overlay_data().size();
-
-                if (required_offset < total_size) {
-                    return total_size - required_offset;
-                }
-
-                break;
-            }
-
-            case enma_io_addressing_type::enma_io_address_rva: {
-
-                uint32_t total_size = ALIGN_UP(
-                    last_->get_virtual_address() + last_->get_virtual_size() - first_->get_virtual_address(),
-                    image->get_section_align());
-
-                if (required_offset < total_size) {
-                    return total_size - required_offset;
-                }
-
-                break;
-            }
-
-        default: {return 0; }
-        }
-    }
-
-    return 0;
-}
-
 
 enma_io_code pe_image_io::internal_read(uint32_t data_offset,
     void * buffer, uint32_t size,
@@ -126,16 +84,15 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 
 
     if (b_view && readed_size) {
-        uint32_t present_size = get_present_size(real_offset);
         uint32_t total_readed_size    = 0;
         uint32_t total_down_oversize  = 0;
         uint32_t total_up_oversize    = 0;
 
         for (auto &section : image->get_sections()) {
 
-            uint32_t sec_readed_size = 0;
+            uint32_t sec_readed_size   = 0;
             uint32_t sec_down_oversize = 0;
-            uint32_t sec_up_oversize = 0;
+            uint32_t sec_up_oversize   = 0;
 
             enma_io_code code = pe_section_io(*section, *image, mode, addressing_type).internal_read(
                 data_offset, buffer, size, sec_readed_size, sec_down_oversize, sec_up_oversize
@@ -179,7 +136,53 @@ enma_io_code pe_image_io::internal_write(uint32_t data_offset,
     uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
 ) {
 
+    uint32_t real_offset = 0;
 
+    bool b_view = view_image(data_offset, size,
+        real_offset,
+        wrote_size, down_oversize, up_oversize);
+
+
+    if (b_view &&
+        (wrote_size || (up_oversize && mode == enma_io_mode::enma_io_mode_allow_expand))) {
+
+        uint32_t total_wroted_size   = 0;
+        uint32_t total_down_oversize = 0;
+        uint32_t total_up_oversize   = 0;
+
+        for (size_t section_idx = 0; section_idx < image->get_sections().size(); section_idx++) {
+
+            uint32_t sec_wroted_size   = 0;
+            uint32_t sec_down_oversize = 0;
+            uint32_t sec_up_oversize   = 0;
+
+            pe_section_io section_io(*image->get_sections()[section_idx], *image,
+                (section_idx == (image->get_sections().size()-1) &&
+                    mode == enma_io_mode::enma_io_mode_allow_expand) ? enma_io_mode_allow_expand : enma_io_mode_default,addressing_type);
+
+
+            section_io.internal_write(data_offset, buffer, size,
+                sec_wroted_size, sec_down_oversize, sec_up_oversize);
+
+
+            total_wroted_size += sec_wroted_size;
+            total_up_oversize  = sec_up_oversize;
+
+            if (!total_up_oversize) { break; }
+        }
+        up_oversize = total_up_oversize;
+
+        if (down_oversize || up_oversize) {
+
+            last_code = enma_io_code::enma_io_incomplete;
+            return enma_io_code::enma_io_incomplete;
+        }
+
+        last_code = enma_io_code::enma_io_success;
+        return enma_io_code::enma_io_success;
+    }
+
+    last_code = enma_io_code::enma_io_data_not_present;
     return enma_io_code::enma_io_data_not_present;
 }
 

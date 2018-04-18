@@ -233,11 +233,7 @@ enma_io_code pe_section_io::write(std::vector<uint8_t>& buffer) {
 }
 
 pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
-    section->get_section_data().resize(ALIGN_UP(section->get_size_of_raw_data(), factor));
-    if (offset_to_end) {
-        section_offset = section->get_size_of_raw_data();
-    }
-    add_size(ALIGN_UP(section->get_size_of_raw_data(), factor));
+    add_size(ALIGN_UP(section->get_size_of_raw_data(), factor) - section->get_size_of_raw_data());
 
     return *this;
 }
@@ -246,9 +242,7 @@ pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end) {
     if (size) {
         section->get_section_data().resize(section->get_size_of_raw_data() + size);
     }
-    if (offset_to_end) {
-        section_offset = section->get_size_of_raw_data();
-    }
+    if (offset_to_end) { seek_to_end(); }
 
     if (section->get_size_of_raw_data() > section->get_virtual_size()) {
         section->set_virtual_size(section->get_size_of_raw_data());
@@ -283,7 +277,43 @@ pe_section_io& pe_section_io::set_virtual_aligment(uint32_t aligment) {
 
     return *this;
 }
+pe_section_io& pe_section_io::seek_to_start() {
 
+    switch (addressing_type) {
+        case enma_io_addressing_type::enma_io_address_raw: {
+            this->section_offset = this->section->get_pointer_to_raw();
+            break;
+        }
+
+        case enma_io_addressing_type::enma_io_address_rva: {
+            this->section_offset = this->section->get_virtual_address();
+            break;
+        }
+
+        default: {this->section_offset = 0; break; }
+    }
+
+    return *this;
+}
+pe_section_io& pe_section_io::seek_to_end() {
+
+    switch (addressing_type) {
+    case enma_io_addressing_type::enma_io_address_raw: {
+        this->section_offset = this->section->get_pointer_to_raw() + this->section->get_size_of_raw_data();
+        break;
+    }
+
+    case enma_io_addressing_type::enma_io_address_rva: {
+        this->section_offset = this->section->get_virtual_address() + this->section->get_virtual_size();
+        break;
+    }
+
+    default: {this->section_offset = 0; break; }
+    }
+
+
+    return *this;
+}
 
 enma_io_mode pe_section_io::get_mode() const {
     return this->mode;

@@ -115,6 +115,9 @@ public:
     pe_section_io& pe_section_io::set_section_offset(uint32_t offset);
     pe_section_io& pe_section_io::set_raw_aligment(uint32_t aligment);
     pe_section_io& pe_section_io::set_virtual_aligment(uint32_t aligment);
+
+    pe_section_io& pe_section_io::seek_to_start();
+    pe_section_io& pe_section_io::seek_to_end();
 public:
 
     enma_io_mode            pe_section_io::get_mode() const;

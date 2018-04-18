@@ -227,7 +227,7 @@ typedef struct _image_optional_header64 {
     uint64_t   size_of_heap_commit;
     uint32_t   loader_flags;
     uint32_t   number_of_rva_and_sizes;
-    image_data_directory DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+    image_data_directory data_directory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } image_optional_header64, *pimage_optional_header64;
 
 
@@ -768,7 +768,7 @@ typedef struct _image_dynamic_relocation64 {
     //image_base_relocation base_relocations[0];
 } image_dynamic_relocation64, *pimage_dynamic_relocation64;
 
-typedef struct _image_dynamic_relocation32_V2 {
+typedef struct _image_dynamic_relocation32_v2 {
     uint32_t   header_size;
     uint32_t   fixup_info_size;
     uint32_t   symbol;
@@ -776,9 +776,9 @@ typedef struct _image_dynamic_relocation32_V2 {
     uint32_t   flags;
     // ...     variable length header fields
     // uint8_t    fixup_info[fixup_info_size]
-} image_dynamic_relocation32_V2, *pimage_dynamic_relocation32_V2;
+} image_dynamic_relocation32_v2, *pimage_dynamic_relocation32_v2;
 
-typedef struct _image_dynamic_relocation64_V2 {
+typedef struct _image_dynamic_relocation64_v2 {
     uint32_t   header_size;
     uint32_t   fixup_info_size;
     uint64_t   symbol;
@@ -786,7 +786,7 @@ typedef struct _image_dynamic_relocation64_V2 {
     uint32_t   flags;
     // ...     variable length header fields
     // uint8_t    fixup_info[fixup_info_size]
-} image_dynamic_relocation64_V2, *pimage_dynamic_relocation64_V2;
+} image_dynamic_relocation64_v2, *pimage_dynamic_relocation64_v2;
 
 typedef struct _image_dynamic_relocation_table {
     uint32_t   version;

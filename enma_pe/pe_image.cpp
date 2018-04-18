@@ -117,6 +117,56 @@ pe_image& pe_image::operator=(const pe_image& image) {
 	return *this;
 }
 
+template <typename image_format>
+bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,uint32_t& number_of_sections) {
+
+    typename image_format::image_nt_headers * header = (typename image_format::image_nt_headers *)nt_header;
+
+    if (header->optional_header.magic == image_format::image_magic) {
+
+        image.set_machine(header->file_header.machine);
+        image.set_timestamp(header->file_header.time_date_stamp);
+        image.set_characteristics(header->file_header.characteristics);
+        image.set_magic(header->optional_header.magic);
+        image.set_major_linker(header->optional_header.major_linker_version);
+        image.set_minor_linker(header->optional_header.minor_linker_version);
+        image.set_size_of_code(header->optional_header.size_of_code);
+        image.set_size_of_init_data(header->optional_header.size_of_initialized_data);
+        image.set_size_of_uninit_data(header->optional_header.size_of_uninitialized_data);
+        image.set_entry_point(header->optional_header.address_of_entry_point);
+        image.set_base_of_code(header->optional_header.base_of_code);
+        image.set_image_base(header->optional_header.image_base);
+        image.set_section_align(header->optional_header.section_alignment);
+        image.set_file_align(header->optional_header.file_alignment);
+        image.set_os_ver_major(header->optional_header.major_operating_system_version);
+        image.set_os_ver_minor(header->optional_header.minor_operating_system_version);
+        image.set_image_ver_major(header->optional_header.major_image_version);
+        image.set_image_ver_minor(header->optional_header.minor_image_version);
+        image.set_subsystem_ver_major(header->optional_header.major_subsystem_version);
+        image.set_subsystem_ver_minor(header->optional_header.minor_subsystem_version);
+        image.set_image_size(header->optional_header.size_of_image);
+        image.set_headers_size(header->optional_header.size_of_headers);
+        image.set_checksum(header->optional_header.checksum);
+        image.set_sub_system(header->optional_header.subsystem);
+        image.set_characteristics_dll(header->optional_header.dll_characteristics);
+        image.set_stack_reserve_size(header->optional_header.size_of_stack_reserve);
+        image.set_stack_commit_size(header->optional_header.size_of_stack_commit);
+        image.set_heap_reserve_size(header->optional_header.size_of_heap_reserve);
+        image.set_heap_commit_size(header->optional_header.size_of_heap_commit);
+
+        for (uint32_t i = 0; i < 16; i++) {
+            image.set_directory_virtual_address(i, header->optional_header.data_directory[i].virtual_address);
+            image.set_directory_virtual_size(i, header->optional_header.data_directory[i].size);
+        }
+
+        sections_offset   += header->file_header.size_of_optional_header;
+        number_of_sections = header->file_header.number_of_sections;
+        return true;
+    }
+
+    return false;
+}
+
 
 void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 	if (size < sizeof(image_dos_header)) {this->image_status = pe_image_status_bad_format;return;};
@@ -128,109 +178,24 @@ void pe_image::init_from_file(uint8_t * image, uint32_t size) {
 
 
 		if (*(uint32_t*)(&image[dos_header.get_header().e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
-			uint32_t section_offset = dos_header.get_header().e_lfanew;
+			uint32_t section_offset = dos_header.get_header().e_lfanew + sizeof(uint32_t) + sizeof(image_file_header);
 			uint32_t number_of_sections = 0;
 			
-			if (*(uint16_t*)(&image[
-                    dos_header.get_header().e_lfanew + (uint32_t)offsetof(image_nt_headers32, optional_header.magic)
-                ]) == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+            if (size < section_offset + sizeof(image_nt_headers32)) { this->image_status = pe_image_status_bad_format; return; };
 
-				if (size < section_offset + sizeof(image_nt_headers32)) { this->image_status = pe_image_status_bad_format; return; };
-
-                image_nt_headers32* pe_header = (image_nt_headers32*)(&image[dos_header.get_header().e_lfanew]);
-
-				set_machine(pe_header->file_header.machine);
-				set_timestamp(pe_header->file_header.time_date_stamp);
-				set_characteristics(pe_header->file_header.characteristics);
-				set_magic(pe_header->optional_header.magic);
-				set_major_linker(pe_header->optional_header.major_linker_version);
-				set_minor_linker(pe_header->optional_header.minor_linker_version);
-				set_size_of_code(pe_header->optional_header.size_of_code);
-				set_size_of_init_data(pe_header->optional_header.size_of_initialized_data);
-				set_size_of_uninit_data(pe_header->optional_header.size_of_uninitialized_data);
-				set_entry_point(pe_header->optional_header.address_of_entry_point);
-				set_base_of_code(pe_header->optional_header.base_of_code);
-				set_base_of_data(pe_header->optional_header.base_of_data);
-				set_image_base(pe_header->optional_header.image_base);
-				set_section_align(pe_header->optional_header.section_alignment);
-				set_file_align(pe_header->optional_header.file_alignment);
-				set_os_ver_major(pe_header->optional_header.major_operating_system_version);
-				set_os_ver_minor(pe_header->optional_header.minor_operating_system_version);
-				set_image_ver_major(pe_header->optional_header.major_image_version);
-				set_image_ver_minor(pe_header->optional_header.minor_image_version);
-				set_subsystem_ver_major(pe_header->optional_header.major_subsystem_version);
-				set_subsystem_ver_minor(pe_header->optional_header.minor_subsystem_version);
-				set_image_size(pe_header->optional_header.size_of_image);
-				set_headers_size(pe_header->optional_header.size_of_headers);
-				set_checksum(pe_header->optional_header.checksum);
-				set_sub_system(pe_header->optional_header.subsystem);
-				set_characteristics_dll(pe_header->optional_header.dll_characteristics);
-				set_stack_reserve_size(pe_header->optional_header.size_of_stack_reserve);
-				set_stack_commit_size(pe_header->optional_header.size_of_stack_commit);
-				set_heap_reserve_size(pe_header->optional_header.size_of_heap_reserve);
-				set_heap_commit_size(pe_header->optional_header.size_of_heap_commit);
-
-				for (uint32_t i = 0; i < 16; i++) {
-					set_directory_virtual_address(i, pe_header->optional_header.data_directory[i].virtual_address);
-					set_directory_virtual_size(i, pe_header->optional_header.data_directory[i].size);
-				}
-
-
-				number_of_sections = pe_header->file_header.number_of_sections;
-				section_offset += sizeof(image_nt_headers32);
-			}
-			else if (*(uint16_t*)(&image[
-                    dos_header.get_header().e_lfanew + (uint32_t)offsetof(image_nt_headers64, optional_header.magic)
-                ]) == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
-				
+            if (init_nt_header<image_32>(*this, (void*)&image[dos_header.get_header().e_lfanew], section_offset, number_of_sections)) {
+                set_base_of_data(pimage_nt_headers32(&image[dos_header.get_header().e_lfanew])->optional_header.base_of_data);
+            }
+            else {
                 if (size < section_offset + sizeof(image_nt_headers64)) { this->image_status = pe_image_status_bad_format; return; };
 
-                image_nt_headers64* pe_header = (image_nt_headers64*)(&image[dos_header.get_header().e_lfanew]);
+                if (!init_nt_header<image_64>(*this, (void*)&image[dos_header.get_header().e_lfanew], section_offset, number_of_sections)) {
+                    this->image_status = pe_image_status_bad_format;
+                    return;
+                }
 
-				set_machine(pe_header->file_header.machine);
-				set_timestamp(pe_header->file_header.time_date_stamp);
-				set_characteristics(pe_header->file_header.characteristics);
-				set_magic(pe_header->optional_header.magic);
-				set_major_linker(pe_header->optional_header.major_linker_version);
-				set_minor_linker(pe_header->optional_header.minor_linker_version);
-				set_size_of_code(pe_header->optional_header.size_of_code);
-				set_size_of_init_data(pe_header->optional_header.size_of_initialized_data);
-				set_size_of_uninit_data(pe_header->optional_header.size_of_uninitialized_data);
-				set_entry_point(pe_header->optional_header.address_of_entry_point);
-				set_base_of_code(pe_header->optional_header.base_of_code);
-				set_base_of_data(0);
-				set_image_base(pe_header->optional_header.image_base);
-				set_section_align(pe_header->optional_header.section_alignment);
-				set_file_align(pe_header->optional_header.file_alignment);
-				set_os_ver_major(pe_header->optional_header.major_operating_system_version);
-				set_os_ver_minor(pe_header->optional_header.minor_operating_system_version);
-				set_image_ver_major(pe_header->optional_header.major_image_version);
-				set_image_ver_minor(pe_header->optional_header.minor_image_version);
-				set_subsystem_ver_major(pe_header->optional_header.major_subsystem_version);
-				set_subsystem_ver_minor(pe_header->optional_header.minor_subsystem_version);
-				set_image_size(pe_header->optional_header.size_of_image);
-				set_headers_size(pe_header->optional_header.size_of_headers);
-				set_checksum(pe_header->optional_header.checksum);
-				set_sub_system(pe_header->optional_header.subsystem);
-				set_characteristics_dll(pe_header->optional_header.dll_characteristics);
-				set_stack_reserve_size(pe_header->optional_header.size_of_stack_reserve);
-				set_stack_commit_size(pe_header->optional_header.size_of_stack_commit);
-				set_heap_reserve_size(pe_header->optional_header.size_of_heap_reserve);
-				set_heap_commit_size(pe_header->optional_header.size_of_heap_commit);
-
-				for (uint32_t i = 0; i < 16; i++) {
-					set_directory_virtual_address(i, pe_header->optional_header.DataDirectory[i].virtual_address);
-					set_directory_virtual_size(i, pe_header->optional_header.DataDirectory[i].size);
-				}
-
-				number_of_sections = pe_header->file_header.number_of_sections;
-				section_offset += sizeof(image_nt_headers64);
-			}
-			else {
-				this->image_status = pe_image_status_bad_format;
-				return;
-			}
-
+                set_base_of_data(0);
+            }
 
             uint32_t image_top_size = 0;
 			for (size_t i = 0; i < number_of_sections; i++) {
@@ -449,86 +414,6 @@ uint32_t    pe_image::raw_to_rva(uint32_t raw) const {
 		return  (raw - section->get_pointer_to_raw()) + section->get_virtual_address();
 	else
 		return 0;
-}
-
-bool    pe_image::set_data_by_rva(uint32_t rva, void* data, uint32_t data_size) {
-	return set_data_by_rva(get_section_by_rva(rva), rva, data, data_size);
-}
-bool    pe_image::set_data_by_raw(uint32_t raw, void* data, uint32_t data_size) {
-	return set_data_by_raw(get_section_by_raw(raw), raw, data, data_size);
-}
-bool    pe_image::set_data_by_rva(pe_section * section, uint32_t rva, void* data, uint32_t data_size) {
-
-	if (section) {
-		uint32_t data_offset = rva - section->get_virtual_address();
-
-		if (section->get_size_of_raw_data() < data_offset + data_size) {
-			section->set_size_of_raw_data(data_offset + data_size);
-		}
-
-		memcpy(&section->get_section_data().data()[data_offset],
-			data, data_size);
-
-		return true;
-	}
-
-	return false;
-}
-bool    pe_image::set_data_by_raw(pe_section * section, uint32_t raw, void* data, uint32_t data_size) {
-
-	if (section) {
-		uint32_t data_offset = raw - section->get_pointer_to_raw();
-
-		if (section->get_size_of_raw_data() < data_offset + data_size) {
-			section->set_size_of_raw_data(data_offset + data_size);
-		}
-
-		memcpy(&section->get_section_data().data()[data_offset],
-			data, data_size);
-
-		return true;
-	}
-
-	return false;
-}
-
-
-bool    pe_image::get_data_by_rva(uint32_t rva, void* data, uint32_t data_size) const {
-	return get_data_by_rva(get_section_by_rva(rva), rva, data, data_size);
-
-}
-bool    pe_image::get_data_by_raw(uint32_t raw, void* data, uint32_t data_size) const {
-	return get_data_by_raw(get_section_by_raw(raw), raw, data, data_size);
-}
-bool    pe_image::get_data_by_rva(pe_section * section, uint32_t rva, void* data, uint32_t data_size) const {
-
-	if (section) {
-		if (section->get_virtual_address() <= rva &&
-			section->get_virtual_address() + section->get_virtual_size() > rva + data_size) {
-
-			memcpy(data,
-				&section->get_section_data().data()[rva - section->get_virtual_address()], data_size);
-
-			return true;
-		}
-	}
-
-	return false;
-}
-bool    pe_image::get_data_by_raw(pe_section * section, uint32_t raw, void* data, uint32_t data_size) const {
-
-	if (section) {
-		if (section->get_pointer_to_raw() <= raw &&
-			section->get_pointer_to_raw() + section->get_size_of_raw_data() > raw + data_size) {
-
-			memcpy(data,
-				&section->get_section_data().data()[raw - section->get_pointer_to_raw()], data_size);
-
-			return true;
-		}
-	}
-
-	return false;
 }
 
 

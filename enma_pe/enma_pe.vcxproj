@@ -139,6 +139,7 @@
     <ClInclude Include="bolrand_demangler.h" />
     <ClInclude Include="enma_pe_internal.h" />
     <ClInclude Include="enma_pe.h" />
+    <ClInclude Include="enma_pe_properties.h" />
     <ClInclude Include="gcc_demangler.h" />
     <ClInclude Include="msvc_demangler.h" />
     <ClInclude Include="pe_bound_import.h" />

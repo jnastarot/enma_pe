@@ -109,7 +109,7 @@ void build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
 
     if (exceptions.get_items().size()) {
         pe_section_io exc_section(section, image, enma_io_mode_allow_expand);
-        exc_section.align_up(0x10);
+        exc_section.seek_to_end().align_up(0x10);
 
         uint32_t exc_virtual_address = exc_section.get_section_offset();
 

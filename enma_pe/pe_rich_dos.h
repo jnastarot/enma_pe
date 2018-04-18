@@ -2,7 +2,7 @@
 
 enum e_rich_type {
   rich_type_unknown  = 0,
-  rich_type_unmarked = 1,
+  rich_type_total_import = 1,
 
   //[ C ]
   rich_type_C_0x0104 = 260,//VS2015 - VS2017

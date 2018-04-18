@@ -181,73 +181,80 @@ bool get_relocation_table(const pe_image &image, relocation_table& relocs) {
 
 void build_relocation_table(pe_image &image, pe_section& section, relocation_table& relocs) {
 
-    if (section.get_size_of_raw_data() & 0xF) {
-        section.get_section_data().resize(
-            section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-        );
-    }
+
+    if (relocs.get_items().size()) {
 
 
-    image_base_relocation reloc_decs;
-	std::vector<uint8_t> data_buffer;
-	std::vector<uint16_t> reloc_block;
-    uint32_t virtual_address = section.get_virtual_address() + section.get_size_of_raw_data();
-    uint16_t reloc_type;
-    size_t raw_idxer = 0;
+        pe_section_io reloc_section = pe_section_io(section, image, enma_io_mode::enma_io_mode_allow_expand);
+        reloc_section.align_up(0x10).seek_to_end();
 
-	if (image.is_x32_image()){
-		reloc_type = IMAGE_REL_BASED_HIGHLOW << 12;
-	}
-	else{
-		reloc_type = IMAGE_REL_BASED_DIR64 << 12;
-	}
+        uint32_t virtual_address = reloc_section.get_section_offset();
+
+        image_base_relocation reloc_decs;
+        std::vector<uint8_t> data_buffer;
+        std::vector<uint16_t> reloc_block;
+        
+        uint16_t reloc_type;
+        size_t raw_idxer = 0;
+
+        if (image.is_x32_image()) {
+            reloc_type = IMAGE_REL_BASED_HIGHLOW << 12;
+        }
+        else {
+            reloc_type = IMAGE_REL_BASED_DIR64 << 12;
+        }
+
+        relocs.sort();
 
 
-    relocs.sort();
+        for (size_t r_i = 0; r_i < relocs.size(); r_i++) {
 
-	for (size_t r_i = 0; r_i < relocs.size(); r_i++) {
+            if (!r_i) { reloc_decs.virtual_address = (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000); }
 
-		if (!r_i) { reloc_decs.virtual_address = (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000); }
+        loop_n:
+            if (reloc_decs.virtual_address == (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000)) {
+                reloc_block.push_back((relocs.get_items()[r_i].relative_virtual_address & 0xFFF) | reloc_type);
+            }
+            else {
+                if (reloc_block.size() & 1) { reloc_block.push_back(0); }//align of parity
+                data_buffer.resize(data_buffer.size() + sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t));
+                reloc_decs.size_of_block = sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t);
 
-	loop_n:
-		if (reloc_decs.virtual_address == (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000)) {
-			reloc_block.push_back((relocs.get_items()[r_i].relative_virtual_address & 0xFFF) | reloc_type);
-		}
-		else {
-			if (reloc_block.size() & 1) { reloc_block.push_back(0); }//align of parity
-			data_buffer.resize(data_buffer.size() + sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t));
-			reloc_decs.size_of_block = sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t);
+                memcpy(&data_buffer.data()[raw_idxer], &reloc_decs, sizeof(image_base_relocation));
+                raw_idxer += sizeof(image_base_relocation);
+                memcpy(&data_buffer.data()[raw_idxer], reloc_block.data(), reloc_block.size() * sizeof(uint16_t));
+                raw_idxer += reloc_block.size() * sizeof(uint16_t);
 
-			memcpy(&data_buffer.data()[raw_idxer], &reloc_decs, sizeof(image_base_relocation));
+                reloc_block.clear();
+                reloc_decs.virtual_address = (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000);
+                if (r_i == relocs.size())break;
+                goto loop_n;
+            }
+        }
+
+        if (reloc_block.size()) {
+            if (reloc_block.size() & 1) { reloc_block.push_back(0); }//align of parity
+            data_buffer.resize(data_buffer.size() + sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t));
+            reloc_decs.size_of_block = sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t);
+
+            memcpy(&data_buffer.data()[raw_idxer], (uint8_t*)&reloc_decs, sizeof(image_base_relocation));
             raw_idxer += sizeof(image_base_relocation);
-			memcpy(&data_buffer.data()[raw_idxer], reloc_block.data(), reloc_block.size() * sizeof(uint16_t)); 
+            memcpy(&data_buffer.data()[raw_idxer], reloc_block.data(), reloc_block.size() * sizeof(uint16_t));
             raw_idxer += reloc_block.size() * sizeof(uint16_t);
 
-			reloc_block.clear();
-			reloc_decs.virtual_address = (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000);
-			if (r_i == relocs.size())break;
-			goto loop_n;
-		}
-	}
-
-	if (reloc_block.size()) {
-		if (reloc_block.size() & 1) { reloc_block.push_back(0); }//align of parity
-		data_buffer.resize(data_buffer.size() + sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t));
-		reloc_decs.size_of_block = sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t);
-
-		memcpy(&data_buffer.data()[raw_idxer], (uint8_t*)&reloc_decs, sizeof(image_base_relocation));
-        raw_idxer += sizeof(image_base_relocation);
-		memcpy(&data_buffer.data()[raw_idxer], reloc_block.data(), reloc_block.size() * sizeof(uint16_t));
-        raw_idxer += reloc_block.size() * sizeof(uint16_t);
-
-		reloc_block.clear();
-	}
+            reloc_block.clear();
+        }
 
 
-	if (image.set_data_by_rva(&section, virtual_address, data_buffer.data(), data_buffer.size())) {
-		image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, virtual_address);
-		image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, data_buffer.size());
-	}
+        if (reloc_section.write(data_buffer.data(), data_buffer.size()) == enma_io_success) {
+            image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, virtual_address);
+            image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, data_buffer.size());
+        }
+    }
+    else {
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, 0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, 0);
+    }
 }
 
 

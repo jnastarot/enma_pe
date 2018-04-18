@@ -244,33 +244,39 @@ bool get_load_config_table(const pe_image &image, load_config_table& load_config
                 }
                 load_config.set_guard_flags(image_load_config->guard_flags);
 
+                /*
+                pe_image_io loadcfg_se_handlers_io((pe_image &)image);
+                loadcfg_se_handlers_io.set_image_offset(image.va_to_rva(image_load_config->se_handler_table));
+
+
                 for (uint32_t i = 0; i < image_load_config->se_handler_count; i++) {
                     uint32_t se_handler_rva;
 
-                    image.get_data_by_rva(image.va_to_rva(image_load_config->se_handler_table + i * sizeof(uint32_t)),
-                        &se_handler_rva, sizeof(se_handler_rva));
+                    loadcfg_se_handlers_io >> se_handler_rva;
 
                     load_config.get_se_handlers().push_back( se_handler_rva );
                 }
 
                 if (image_load_config->lock_prefix_table) {
-                    size_t current = 0;
-                    while (true){
-
-                        uint32_t lock_prefix_va;
-
-                        image.get_data_by_rva(image.va_to_rva(image_load_config->lock_prefix_table + current * sizeof(uint32_t)),
-                            &lock_prefix_va, sizeof(lock_prefix_va));
+                    pe_image_io loadcfg_lock_prefix_io((pe_image &)image);
+                    loadcfg_lock_prefix_io.set_image_offset(image.va_to_rva(image_load_config->lock_prefix_table));
 
 
-                        if (!lock_prefix_va) {
-                            break;
+                    uint32_t lock_prefix_va = 0;
+                    do {
+
+                        if (loadcfg_lock_prefix_io.read(&lock_prefix_va, sizeof(lock_prefix_va)) == enma_io_success) {
+                            load_config.get_lock_prefixes().push_back(image.va_to_rva(lock_prefix_va));
                         }
+                        else {
+                            return false; //err
+                        }
+
                         
-                       load_config.get_lock_prefixes().push_back(image.va_to_rva(lock_prefix_va));
-                        ++current;
-                    }
+                    } while (lock_prefix_va);
                 }
+
+
                 for (uint32_t i = 0; i < image_load_config->guard_cf_function_count; i++) {
                     uint32_t cf_function_va;
 
@@ -279,6 +285,8 @@ bool get_load_config_table(const pe_image &image, load_config_table& load_config
                     
                     load_config.get_guard_cf_functions().push_back(image.va_to_rva(cf_function_va));
                 }
+                */
+
                 return true;
             }
             else {
@@ -317,7 +325,7 @@ bool get_load_config_table(const pe_image &image, load_config_table& load_config
                 }
                 load_config.set_guard_flags(image_load_config->guard_flags);
 
-
+                /*
                 for (uint32_t i = 0; i < image_load_config->guard_cf_function_count; i++) {
                     uint64_t cf_function_va;
 
@@ -326,6 +334,8 @@ bool get_load_config_table(const pe_image &image, load_config_table& load_config
 
                     load_config.get_guard_cf_functions().push_back(image.va_to_rva(cf_function_va));
                 }
+                */
+
                 return true;
             }
         }

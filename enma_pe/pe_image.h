@@ -76,7 +76,7 @@ public:// data/sections helpers
 
 	std::vector<pe_section*>& pe_image::get_sections();
 
-    size_t pe_image::get_sections_number() const;;
+    size_t pe_image::get_sections_number() const;
 	pe_section*	 pe_image::get_section_by_rva(uint32_t rva) const;/*0 - failed \ not 0 - success*/
 	pe_section*	 pe_image::get_section_by_va(uint64_t va) const;
 	pe_section*	 pe_image::get_section_by_raw(uint32_t raw) const;
@@ -89,16 +89,7 @@ public:// data/sections helpers
 	uint32_t    pe_image::rva_to_raw(uint32_t rva) const;
     uint64_t    pe_image::raw_to_va(uint32_t raw) const;
 	uint32_t    pe_image::raw_to_rva(uint32_t raw) const;
-public:
-	bool        pe_image::set_data_by_rva(uint32_t rva, void* data, uint32_t data_size);
-	bool        pe_image::set_data_by_raw(uint32_t raw, void* data, uint32_t data_size);
-	bool        pe_image::set_data_by_rva(pe_section * section, uint32_t rva, void* data, uint32_t data_size);
-	bool        pe_image::set_data_by_raw(pe_section * section, uint32_t raw, void* data, uint32_t data_size);
 
-	bool        pe_image::get_data_by_rva(uint32_t rva, void* data, uint32_t data_size) const;
-	bool        pe_image::get_data_by_raw(uint32_t raw, void* data, uint32_t data_size) const;
-	bool        pe_image::get_data_by_rva(pe_section * section, uint32_t rva, void* data, uint32_t data_size) const;
-	bool        pe_image::get_data_by_raw(pe_section * section, uint32_t raw, void* data, uint32_t data_size) const;
 public:
     void        pe_image::set_image_status(pe_image_status status);
     void        pe_image::set_dos_header(pe_dos_header& header);

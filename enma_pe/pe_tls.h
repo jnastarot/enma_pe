@@ -48,15 +48,15 @@ enum tls_table_build_id {
 
 
 
-bool get_tls_table(_In_ const pe_image &image,_Out_ tls_table& tls);
+directory_code get_tls_table(_In_ const pe_image &image,_Out_ tls_table& tls);
 
 
-void build_internal_tls_data(_In_ const pe_image &image, _Inout_ pe_section& section,
+bool build_internal_tls_data(_In_ const pe_image &image, _Inout_ pe_section& section,
     _Out_ tls_table& tls, _Out_ relocation_table& relocs,
     _In_ uint32_t build_items_ids/*tls_table_build_id*/);
-void build_tls_table_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
+bool build_tls_table_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
 	_Inout_ tls_table& tls, _Out_ relocation_table& relocs);
-void build_tls_full(_Inout_ pe_image &image, _Inout_ pe_section& section, 
+bool build_tls_full(_Inout_ pe_image &image, _Inout_ pe_section& section, 
     _Inout_ tls_table& tls, _Out_ relocation_table& relocs);
 
-bool get_placement_tls_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_tls_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

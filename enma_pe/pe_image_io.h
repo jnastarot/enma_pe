@@ -32,7 +32,6 @@ class pe_image_io{
     enma_io_mode mode;
     enma_io_addressing_type addressing_type;
 
-    uint32_t pe_image_io::get_present_size(uint32_t required_offset);
 public:
     pe_image_io::pe_image_io(
         pe_image& image,
@@ -59,6 +58,9 @@ public:
 
         return *this;
     }
+
+
+
 
     enma_io_code pe_image_io::read(void * data, uint32_t size);
     enma_io_code pe_image_io::write(void * data, uint32_t size);

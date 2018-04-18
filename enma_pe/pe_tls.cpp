@@ -79,7 +79,8 @@ std::vector<tls_table::tls_callback>& tls_table::get_callbacks() {
 	return callbacks;
 }
 
-bool get_tls_table(const pe_image &image, tls_table& tls) {
+template<typename image_format>
+directory_code _get_tls_table(const pe_image &image, tls_table& tls) {
 
     tls.set_start_address_raw_data(0);
     tls.set_end_address_raw_data(0);
@@ -87,169 +88,82 @@ bool get_tls_table(const pe_image &image, tls_table& tls) {
     tls.set_address_of_callbacks(0);
     tls.set_characteristics(0);
     tls.get_callbacks().clear();
+    tls.get_raw_data().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS);
-    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS);
 
-	if (virtual_address && virtual_size) {
-		pe_section * tls_section = image.get_section_by_rva(virtual_address);
 
-		if (tls_section) {
-			uint8_t * tls_raw = &tls_section->get_section_data().data()[virtual_address - tls_section->get_virtual_address()];
-			if (tls_section->get_size_of_raw_data() >= virtual_size) {
+    if (virtual_address) {
+        pe_image_io tls_io((pe_image &)image);
+       
+        typename image_format::image_tls_directory tls_directory;
 
-				if (image.is_x32_image()) {
-					image_tls_directory32 * tls_desc = (image_tls_directory32 *)tls_raw;
-					if (tls_desc->start_address_of_raw_data) {
-						tls.set_start_address_raw_data(image.va_to_rva(tls_desc->start_address_of_raw_data));
-						tls.set_end_address_raw_data(image.va_to_rva(tls_desc->end_address_of_raw_data));
+        if (tls_io.set_image_offset(virtual_address).read(&tls_directory, sizeof(tls_directory)) == enma_io_success) {
 
-						pe_section * raw_data_section = image.get_section_by_va(tls_desc->start_address_of_raw_data);
+            if (tls_directory.start_address_of_raw_data) {
+                tls.set_start_address_raw_data(image.va_to_rva(tls_directory.start_address_of_raw_data));
+                tls.set_end_address_raw_data(image.va_to_rva(tls_directory.end_address_of_raw_data));
 
-                        uint32_t data_raw_size = (tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data);
-                        uint32_t data_raw = image.va_to_raw(tls_desc->start_address_of_raw_data);
-						tls.get_raw_data().resize(data_raw_size);
-                        memset(tls.get_raw_data().data(),0, tls.get_raw_data().size());
+                tls_io.set_image_offset(image.va_to_rva(tls_directory.start_address_of_raw_data));
 
-						if (raw_data_section && 
-							(raw_data_section->get_pointer_to_raw() <= data_raw &&
-							raw_data_section->get_pointer_to_raw() + raw_data_section->get_size_of_raw_data() > data_raw + data_raw_size)
-							) {
-							
-							memcpy(tls.get_raw_data().data(),
-								&raw_data_section->get_section_data().data()[data_raw - raw_data_section->get_pointer_to_raw()],
-								data_raw_size
-							);
-						}
-					}
-					else {
-						tls.set_start_address_raw_data(0);
-						tls.set_end_address_raw_data(0);
-						tls.get_raw_data().clear();
-					}
+                tls.get_raw_data().resize(tls_directory.end_address_of_raw_data - tls_directory.start_address_of_raw_data);
 
-					if (tls_desc->address_of_index) {
-						tls.set_address_of_index(image.va_to_rva(tls_desc->address_of_index));
-					}
-					else {
-						tls.set_address_of_index(0);
-					}
+                if (tls_io.read(tls.get_raw_data().data(), tls.get_raw_data().size()) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+            }
 
-					if (tls_desc->address_of_callbacks) {
-						pe_section * callback_data_section = image.get_section_by_va(tls_desc->address_of_callbacks);
-						if (callback_data_section) {
-							tls.get_callbacks().clear();
+            if (tls_directory.address_of_index) {
+                tls.set_address_of_index(image.va_to_rva(tls_directory.address_of_index));
+            }
+            if (tls_directory.address_of_callbacks) {
+                tls.set_address_of_callbacks(image.va_to_rva(tls_directory.address_of_callbacks));
 
-                            uint32_t * raw_callbacks = (uint32_t*)&callback_data_section->get_section_data().data()[
-								image.va_to_rva(tls_desc->address_of_callbacks) - callback_data_section->get_virtual_address()
-							];
+                tls_io.set_image_offset(image.va_to_rva(tls_directory.address_of_callbacks));
 
-							while (*raw_callbacks) {
-								tls.get_callbacks().push_back({ image.va_to_rva(*raw_callbacks),true });
-								raw_callbacks++;
-							}
+                typename image_format::ptr_size tls_callback = 0;
 
-						}
+                do {
+                    tls_io >> tls_callback;
+                    if (tls_io.get_last_code() != enma_io_success) { return directory_code::directory_code_currupted; }
 
-						tls.set_address_of_callbacks(image.va_to_rva(tls_desc->address_of_callbacks));
-					}
-					else {
-						tls.set_address_of_callbacks(0);
-					}
+                    if (tls_callback) {
+                        tls.get_callbacks().push_back({ image.va_to_rva(tls_callback),true });
+                    }
 
-					tls.set_characteristics(tls_desc->characteristics);
-                    tls.set_size_of_zero_fill(tls_desc->size_of_zero_fill);
-				}
-				else {
-					image_tls_directory64 * tls_desc = (image_tls_directory64 *)tls_raw;
-					if (tls_desc->start_address_of_raw_data) {
-						tls.set_start_address_raw_data(image.va_to_rva(tls_desc->start_address_of_raw_data));
-						tls.set_end_address_raw_data(image.va_to_rva(tls_desc->end_address_of_raw_data));
+                } while (tls_callback);
+            }
 
-						pe_section * raw_data_section = image.get_section_by_va(tls_desc->start_address_of_raw_data);
+            tls.set_characteristics(tls_directory.characteristics);
+            tls.set_size_of_zero_fill(tls_directory.size_of_zero_fill);
 
-                        uint32_t data_raw_size = uint32_t(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data);
-                        uint32_t data_raw = image.va_to_raw(tls_desc->start_address_of_raw_data);
-						tls.get_raw_data().resize(data_raw_size);
-                        memset(tls.get_raw_data().data(),0, tls.get_raw_data().size());
+            return directory_code::directory_code_success;
+        }
 
-						if (raw_data_section &&
-							(raw_data_section->get_pointer_to_raw() <= data_raw &&
-								raw_data_section->get_pointer_to_raw() + raw_data_section->get_size_of_raw_data() > data_raw + data_raw_size)
-							) {
-
-							memcpy(tls.get_raw_data().data(),
-								&raw_data_section->get_section_data().data()[data_raw - raw_data_section->get_pointer_to_raw()],
-								data_raw_size
-							);
-						}
-					}
-					else {
-						tls.set_start_address_raw_data(0);
-						tls.set_end_address_raw_data(0);
-						tls.get_raw_data().clear();
-					}
-
-					if (tls_desc->address_of_index) {
-						tls.set_address_of_index(image.va_to_rva(tls_desc->address_of_index));
-					}
-					else {
-						tls.set_address_of_index(0);
-					}
-
-					if (tls_desc->address_of_callbacks) {
-						pe_section * callback_data_section = image.get_section_by_va(tls_desc->address_of_callbacks);
-						if (callback_data_section) {
-							tls.get_callbacks().clear();
-
-							uint64_t * raw_callbacks = (uint64_t*)&callback_data_section->get_section_data().data()[
-								image.va_to_rva(tls_desc->address_of_callbacks) - callback_data_section->get_virtual_address()
-							];
-
-							while (*raw_callbacks) {
-								tls.get_callbacks().push_back({ image.va_to_rva(*raw_callbacks),true });
-								raw_callbacks++;
-							}
-
-						}
-
-						tls.set_address_of_callbacks(image.va_to_rva(tls_desc->address_of_callbacks));
-					}
-					else {
-						tls.set_address_of_callbacks(0);
-					}
-
-					tls.set_characteristics(tls_desc->characteristics);
-                    tls.set_size_of_zero_fill(tls_desc->size_of_zero_fill);
-				}
-				return true;
-			}
-		}
-	}
-
-	return false;
+        return directory_code::directory_code_currupted;
+    }
+    
+    return directory_code::directory_code_not_present;
 }
 
-
-
-void build_internal_tls_data(const pe_image &image,pe_section& section,
+template<typename image_format>
+bool _build_internal_tls_data(const pe_image &image, pe_section& section,
     tls_table& tls, relocation_table& relocs, uint32_t build_items_ids/*tls_table_build_id*/) {
+
+    pe_section_io tls_io(section,(pe_image &)image,enma_io_mode_allow_expand);
+    tls_io.seek_to_end();
 
     if (build_items_ids&tls_table_build_raw_data) {
 
         if (tls.get_raw_data().size()) {
+            tls_io.align_up(0x10);
 
-            if (section.get_size_of_raw_data() & 0xF) {
-                section.get_section_data().resize(
-                    section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-                );
+            tls.set_start_address_raw_data(tls_io.get_section_offset());
+            tls.set_end_address_raw_data(tls_io.get_section_offset() + tls.get_raw_data().size());
+
+            if (tls_io.write(tls.get_raw_data().data(), tls.get_raw_data().size()) != enma_io_success) {
+                return false; //err
             }
-
-            tls.set_start_address_raw_data(section.get_virtual_address() + section.get_section_data().size());
-            tls.set_end_address_raw_data(
-                section.get_virtual_address() + section.get_section_data().size() + tls.get_raw_data().size());
-
-            section.add_data(tls.get_raw_data().data(), tls.get_raw_data().size());
         }
         else {
             tls.set_start_address_raw_data(0);
@@ -258,223 +172,184 @@ void build_internal_tls_data(const pe_image &image,pe_section& section,
     }
 
     if (build_items_ids&tls_table_build_address_of_index) {
-        if (section.get_size_of_raw_data() & 0x3) {
-            section.get_section_data().resize(
-                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x3))
-            );
-        }
-        
-        tls.set_address_of_index(section.get_virtual_address() + section.get_section_data().size());
+        tls_io.align_up(sizeof(typename image_format::ptr_size));
+
+        tls.set_address_of_index(tls_io.get_section_offset());
 
         uint32_t index__ = 0;
-        section.add_data((const uint8_t*)&index__, sizeof(index__));
+
+        if (tls_io.write(&index__, sizeof(index__)) != enma_io_success) {
+            return false; //err
+        }
     }
 
     if (build_items_ids&tls_table_build_callbacks) {
-        if (section.get_size_of_raw_data() & 0x3) {
-            section.get_section_data().resize(
-                section.get_section_data().size() + (0x4 - (section.get_section_data().size() & 0x3))
-            );
-        }
 
         if (tls.get_callbacks().size()) {
-            tls.set_address_of_callbacks(section.get_virtual_address() + section.get_section_data().size());
+            tls_io.align_up(sizeof(typename image_format::ptr_size));
+
+            tls.set_address_of_callbacks(tls_io.get_section_offset());
+
+            for (auto& callback_item : tls.get_callbacks()) {
+                typename image_format::ptr_size call_back_va = callback_item.rva_callback;
+
+                if (callback_item.use_relocation) {
+                    call_back_va = (typename image_format::ptr_size)image.rva_to_va(callback_item.rva_callback);
+                    relocs.add_item(tls_io.get_section_offset(), 0);
+                }
+
+                if (tls_io.write(&call_back_va,sizeof(call_back_va)) != enma_io_success) {
+                    return false;//err
+                }
+            }
+
+            tls_io.add_size(sizeof(typename image_format::ptr_size));
         }
         else {
             tls.set_address_of_callbacks(0);
         }
-
-        for (auto& callback_item : tls.get_callbacks()) {
-           
-            if (image.is_x32_image()) {
-                uint32_t call_back_va = callback_item.rva_callback;
-                if (callback_item.use_relocation) {
-                    call_back_va = (uint32_t)image.rva_to_va(callback_item.rva_callback);
-                    relocs.add_item(section.get_virtual_address() + section.get_size_of_raw_data(), 0);
-                }
-                section.add_data((uint8_t*)&call_back_va, sizeof(call_back_va));
-            }
-            else {
-                uint64_t call_back_va = callback_item.rva_callback;
-                if (callback_item.use_relocation) {
-                    call_back_va = image.rva_to_va(callback_item.rva_callback);
-                    relocs.add_item(section.get_virtual_address() + section.get_size_of_raw_data(), 0);
-                }
-                section.add_data((uint8_t*)&call_back_va, sizeof(call_back_va));
-            }
-        }
     }
+    return true;
 }
 
-void build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, relocation_table& relocs) {
 
-    if (section.get_size_of_raw_data() & 0xF) {
-        section.get_section_data().resize(
-            section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-        );
+template<typename image_format>
+bool _build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, relocation_table& relocs) {
+
+    pe_section_io tls_io(section, (pe_image &)image, enma_io_mode_allow_expand);
+    tls_io.align_up(0x10).seek_to_end();
+
+    uint32_t tls_rva = tls_io.get_section_offset();
+
+    typename image_format::image_tls_directory tls_directory;
+    memset(&tls_directory, 0, sizeof(tls_directory));
+
+    if (tls.get_start_address_raw_data()) {
+        tls_directory.start_address_of_raw_data = image.rva_to_va(tls.get_start_address_raw_data());
+        tls_directory.end_address_of_raw_data   = image.rva_to_va(tls.get_end_address_raw_data());
+
+        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, start_address_of_raw_data), 0);
+        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, end_address_of_raw_data),   0);
     }
 
-    if (image.is_x32_image()) {
-        uint32_t tls_rva = section.get_virtual_address() + section.get_section_data().size();
-        section.get_section_data().resize(section.get_section_data().size() + sizeof(image_tls_directory32));
+    if (tls.get_address_of_index()) {
+        tls_directory.address_of_index = image.rva_to_va(tls.get_address_of_index());
+        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, address_of_index), 0);
+    }
 
-        image_tls_directory32* tls_desc = (image_tls_directory32*)&section.get_section_data().data()[
-            tls_rva - section.get_virtual_address()
-        ];
+    if (tls.get_address_of_callbacks()) {
+        tls_directory.address_of_callbacks = image.rva_to_va(tls.get_address_of_callbacks());
+        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, address_of_callbacks), 0);
+    }
+    
+    tls_directory.size_of_zero_fill     = tls.get_size_of_zero_fill();
+    tls_directory.characteristics       = tls.get_characteristics();
 
-        memset(tls_desc,0, sizeof(image_tls_directory32));
-
-        
-        tls_desc->start_address_of_raw_data = (uint32_t)image.rva_to_va(tls.get_start_address_raw_data());
-        tls_desc->end_address_of_raw_data   = (uint32_t)image.rva_to_va(tls.get_end_address_raw_data());
-        tls_desc->address_of_index          = (uint32_t)image.rva_to_va(tls.get_address_of_index());
-
-        relocs.add_item(tls_rva + offsetof(image_tls_directory32, start_address_of_raw_data), 0);
-        relocs.add_item(tls_rva + offsetof(image_tls_directory32, end_address_of_raw_data), 0);
-        relocs.add_item(tls_rva + offsetof(image_tls_directory32, address_of_index), 0);
-
-        if (tls.get_address_of_callbacks()) {
-            tls_desc->address_of_callbacks = (uint32_t)image.rva_to_va(tls.get_address_of_callbacks());
-            relocs.add_item(tls_rva + offsetof(image_tls_directory32, address_of_callbacks), 0);
-        }
-        tls_desc->size_of_zero_fill = tls.get_size_of_zero_fill();
-        tls_desc->characteristics = tls.get_characteristics();
-
-      
+    if (tls_io.write(&tls_directory, sizeof(tls_directory)) == enma_io_success) {
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, tls_rva);
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS,sizeof(image_tls_directory32));
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS, sizeof(typename image_format::image_tls_directory));
+
+        return true;
     }
     else {
-        uint32_t tls_rva = section.get_virtual_address() + section.get_section_data().size();
-        section.get_section_data().resize(section.get_section_data().size() + sizeof(image_tls_directory64));
 
-        image_tls_directory64* tls_desc = (image_tls_directory64*)&section.get_section_data().data()[
-            tls_rva - section.get_virtual_address()
-        ];
-
-        memset(tls_desc,0, sizeof(image_tls_directory64));
-
-
-        tls_desc->start_address_of_raw_data = image.rva_to_va(tls.get_start_address_raw_data());
-        tls_desc->end_address_of_raw_data   = image.rva_to_va(tls.get_end_address_raw_data());
-        tls_desc->address_of_index          = image.rva_to_va(tls.get_address_of_index());
-
-        relocs.add_item(tls_rva + offsetof(image_tls_directory64, start_address_of_raw_data), 0);
-        relocs.add_item(tls_rva + offsetof(image_tls_directory64, end_address_of_raw_data), 0);
-        relocs.add_item(tls_rva + offsetof(image_tls_directory64, address_of_index), 0);
-
-        if (tls.get_address_of_callbacks()) {
-            tls_desc->address_of_callbacks = image.rva_to_va(tls.get_end_address_raw_data());
-            relocs.add_item(tls_rva + offsetof(image_tls_directory64, address_of_callbacks), 0);
-        }
-        tls_desc->size_of_zero_fill = tls.get_size_of_zero_fill();
-        tls_desc->characteristics   = tls.get_characteristics();
-
-
-        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS, tls_rva);
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS, sizeof(image_tls_directory64));
+        return false;
     }
 }
 
-void build_tls_full(pe_image &image,pe_section& section,
+
+template<typename image_format>
+directory_code _get_placement_tls_table(pe_image &image, std::vector<directory_placement>& placement) {
+
+    tls_table tls;
+
+    directory_code code = get_tls_table(image, tls);
+
+    if (code == directory_code::directory_code_success) {
+        placement.push_back({ 
+            image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS) ,
+            sizeof(typename image_format::image_tls_directory),dp_id_tls_desc 
+        });
+
+        if (tls.get_start_address_raw_data()) {
+            placement.push_back({
+                tls.get_start_address_raw_data() ,
+                tls.get_raw_data().size(),dp_id_tls_raw_data
+            });
+        }
+
+        if (tls.get_address_of_index()) {
+            placement.push_back({
+                tls.get_address_of_index() ,
+                sizeof(uint32_t),dp_id_tls_index
+            });
+        }
+
+        if (tls.get_address_of_callbacks()) {
+            placement.push_back({
+                tls.get_address_of_callbacks() ,
+                (tls.get_callbacks().size() + 1 ) * sizeof(typename image_format::ptr_size),dp_id_tls_callbacks
+            });
+            
+        }
+        
+        return directory_code::directory_code_success;
+    }
+
+    return code;
+}
+
+directory_code get_tls_table(const pe_image &image, tls_table& tls) {
+
+    if (image.is_x32_image()) {
+        return _get_tls_table<image_32>(image, tls);
+    }
+    else {
+        return _get_tls_table<image_64>(image, tls);
+    }
+}
+
+bool build_internal_tls_data(const pe_image &image,pe_section& section,
+    tls_table& tls, relocation_table& relocs, uint32_t build_items_ids/*tls_table_build_id*/) {
+
+    if (image.is_x32_image()) {
+        return _build_internal_tls_data<image_32>(image, section, tls, relocs, build_items_ids);
+    }
+    else {
+        return _build_internal_tls_data<image_64>(image, section, tls, relocs, build_items_ids);
+    }
+}
+
+bool build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, relocation_table& relocs) {
+    if (image.is_x32_image()) {
+        return _build_tls_table_only<image_32>(image, section, tls, relocs);
+    }
+    else {
+        return _build_tls_table_only<image_64>(image, section, tls, relocs);
+    }
+}
+
+bool build_tls_full(pe_image &image,pe_section& section,
     tls_table& tls,relocation_table& relocs) {
 
-    build_internal_tls_data(image, section, tls, relocs,
-        tls_table_build_raw_data | tls_table_build_address_of_index | tls_table_build_callbacks);
+    if (build_internal_tls_data(image, section, tls, relocs,
+        tls_table_build_raw_data | tls_table_build_address_of_index | tls_table_build_callbacks) &&
+        build_tls_table_only(image, section, tls, relocs)) {
 
-    build_tls_table_only(image, section, tls, relocs);
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 
-bool get_placement_tls_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_tls_table(pe_image &image, std::vector<directory_placement>& placement) {
 
-	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS);
-    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_TLS);
-
-	if (virtual_address) {
-		pe_section * tls_section = image.get_section_by_rva(virtual_address);
-		
-		if (tls_section) {
-			uint8_t * tls_raw = &tls_section->get_section_data().data()[virtual_address - tls_section->get_virtual_address()];
-			if (tls_section->get_size_of_raw_data() >= virtual_size) {
-
-				if (image.is_x32_image()) {
-					image_tls_directory32 * tls_desc = (image_tls_directory32 *)tls_raw;
-					if (tls_desc->start_address_of_raw_data) {
-						pe_section * raw_data_section = image.get_section_by_va(tls_desc->start_address_of_raw_data);
-						if (raw_data_section) {				
-                            placement.push_back({
-								image.va_to_rva(tls_desc->start_address_of_raw_data) ,
-								(uint32_t)max(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size()),
-                                dp_id_tls_raw_data
-							});
-						}
-					}
-					if (tls_desc->address_of_index) {
-						pe_section * index_data_section = image.get_section_by_va(tls_desc->address_of_index);
-						if (index_data_section) {
-                            placement.push_back({ image.va_to_rva(tls_desc->address_of_index) ,sizeof(uint32_t),dp_id_tls_index });
-						}			
-					}
-					if (tls_desc->address_of_callbacks) {
-						pe_section * callback_data_section = image.get_section_by_va(tls_desc->address_of_callbacks);
-						if (callback_data_section) {
-                            uint32_t rva_callbacks = image.va_to_rva(tls_desc->address_of_callbacks);
-                            uint32_t * raw_callbacks = (uint32_t*)&callback_data_section->get_section_data().data()[
-								image.va_to_rva(tls_desc->address_of_callbacks) - callback_data_section->get_virtual_address()
-							];
-
-                            uint32_t callbacks_count = 0;
-
-                            for (; *raw_callbacks; raw_callbacks++, callbacks_count++) {}
-
-                            placement.push_back({ rva_callbacks ,sizeof(uint32_t)*(callbacks_count+1),dp_id_tls_callbacks });
-						}
-					}
-
-                    placement.push_back({virtual_address ,sizeof(image_tls_directory32),dp_id_tls_desc});
-				}
-				else {
-					image_tls_directory64 * tls_desc = (image_tls_directory64 *)tls_raw;
-					if (tls_desc->start_address_of_raw_data) {
-						pe_section * raw_data_section = image.get_section_by_va(tls_desc->start_address_of_raw_data);
-						if (raw_data_section) {
-                            placement.push_back({
-								image.va_to_rva(tls_desc->start_address_of_raw_data) ,
-								(uint32_t)max(tls_desc->end_address_of_raw_data - tls_desc->start_address_of_raw_data, raw_data_section->get_section_data().size()),
-                                dp_id_tls_raw_data
-							});
-						}
-					}
-					if (tls_desc->address_of_index) {
-						pe_section * index_data_section = image.get_section_by_va(tls_desc->address_of_index);
-						if (index_data_section) {
-                            placement.push_back({image.va_to_rva(tls_desc->address_of_index) ,sizeof(uint32_t),dp_id_tls_index });
-						}							
-					}
-					if (tls_desc->address_of_callbacks) {
-						pe_section * callback_data_section = image.get_section_by_va(tls_desc->address_of_callbacks);
-						if (callback_data_section) {
-                            uint32_t rva_callbacks = image.va_to_rva(tls_desc->address_of_callbacks);
-                            uint64_t * raw_callbacks = (uint64_t*)&callback_data_section->get_section_data().data()[
-								image.va_to_rva(tls_desc->address_of_callbacks) - callback_data_section->get_virtual_address()
-							];
-
-
-                            uint32_t callbacks_count = 0;
-
-                            for (; *raw_callbacks; raw_callbacks++, callbacks_count++) {}
-
-                            placement.push_back({ rva_callbacks ,sizeof(uint32_t)*(callbacks_count + 1),dp_id_tls_callbacks });
-						}
-					}
-
-                    placement.push_back({ virtual_address ,sizeof(image_tls_directory64),dp_id_tls_desc });
-				}
-				return true;
-			}
-		}
-	}
-
-	return false;
+    if (image.is_x32_image()) {
+        return _get_placement_tls_table<image_32>(image, placement);
+    }
+    else {
+        return _get_placement_tls_table<image_64>(image, placement);
+    } 
 }
