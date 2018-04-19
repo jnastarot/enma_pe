@@ -3,7 +3,7 @@
 
 | License |  Windows x32 | Windows x64 | Linux |
 | ------- |  ----------- | ----------- | ----- |
-| [![License](https://img.shields.io/badge/license-LGPLv3%2B-blue.svg)](https://github.com/jnastarot/enma_pe/blob/master/LICENSE)  [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield) | [![Build status](https://ci.appveyor.com/api/projects/status/ogdbdwhomqi1yoh1?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe) | [![Build status](https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir) | [![Build Status](https://api.travis-ci.org/jnastarot/enma_pe.svg?branch=master)](https://travis-ci.org/jnastarot/enma_pe) |
+| [![License](https://img.shields.io/badge/license-BSD3-blue.svg)](https://github.com/jnastarot/enma_pe/blob/master/LICENSE)  [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield) | [![Build status](https://ci.appveyor.com/api/projects/status/ogdbdwhomqi1yoh1?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe) | [![Build status](https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir) | [![Build Status](https://api.travis-ci.org/jnastarot/enma_pe.svg?branch=master)](https://travis-ci.org/jnastarot/enma_pe) |
 
 
 
@@ -55,5 +55,5 @@ e.mail..: jnastarot@yandex.ru
 | credits |
 | ---------- |
 | pe rich comp id [richprint](https://github.com/dishather/richprint/) |
-| reading\building of export and resources [pe bliss kaimi](http://kaimi.io/) |
+| export and resources [pe bliss kaimi](http://kaimi.io/) |
 | tds parser [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
