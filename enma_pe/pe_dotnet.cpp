@@ -77,7 +77,7 @@ void dotnet_table::set_export_address_table_jumps(image_data_directory export_ad
 }
 
 
-bool get_dotnet_table(const pe_image &image,dotnet_table& dotnet) {
+directory_code get_dotnet_table(const pe_image &image,dotnet_table& dotnet) {
 
     dotnet.set_major_version(0);
     dotnet.set_minor_version(0);
@@ -91,30 +91,34 @@ bool get_dotnet_table(const pe_image &image,dotnet_table& dotnet) {
     dotnet.set_export_address_table_jumps({ 0,0 });
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
-    uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 
     if (virtual_address) {
-        pe_section * dotnet_section = image.get_section_by_rva(virtual_address);
+        pe_image_io dotnet_io(image);
+        dotnet_io.set_image_offset(virtual_address);
 
-        if (dotnet_section) {
-            image_cor20_header* dotnet_header =
-                (image_cor20_header*)&dotnet_section->get_section_data().data()[virtual_address - dotnet_section->get_virtual_address()];
+        image_cor20_header dotnet_header;
 
-            dotnet.set_major_version(dotnet_header->major_runtime_version);
-            dotnet.set_minor_version(dotnet_header->minor_runtime_version);
-
-            dotnet.set_flags(dotnet_header->flags);
-            dotnet.set_entry_point(dotnet_header->entry_point_rva);
-
-            dotnet.set_meta_data(dotnet_header->meta_data);
-            dotnet.set_resources(dotnet_header->resources);
-            dotnet.set_strong_name_signature(dotnet_header->strong_name_signature);
-            dotnet.set_code_manager_table(dotnet_header->code_manager_table);
-            dotnet.set_vtable_fixups(dotnet_header->vtable_fixups);
-            dotnet.set_export_address_table_jumps(dotnet_header->export_address_table_jumps);
-            return true;
+        if (dotnet_io.read(&dotnet_header, sizeof(dotnet_header)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
         }
+
+
+        dotnet.set_major_version(dotnet_header.major_runtime_version);
+        dotnet.set_minor_version(dotnet_header.minor_runtime_version);
+
+        dotnet.set_flags(dotnet_header.flags);
+        dotnet.set_entry_point(dotnet_header.entry_point_rva);
+
+        dotnet.set_meta_data(dotnet_header.meta_data);
+        dotnet.set_resources(dotnet_header.resources);
+        dotnet.set_strong_name_signature(dotnet_header.strong_name_signature);
+        dotnet.set_code_manager_table(dotnet_header.code_manager_table);
+        dotnet.set_vtable_fixups(dotnet_header.vtable_fixups);
+        dotnet.set_export_address_table_jumps(dotnet_header.export_address_table_jumps);
+
+        return directory_code::directory_code_success;
+
     }
 
-    return false;
+    return directory_code::directory_code_not_present;
 }

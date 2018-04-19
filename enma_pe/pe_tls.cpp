@@ -259,7 +259,7 @@ bool _build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls,
 
 
 template<typename image_format>
-directory_code _get_placement_tls_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code _get_placement_tls_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     tls_table tls;
 
@@ -344,7 +344,7 @@ bool build_tls_full(pe_image &image,pe_section& section,
 }
 
 
-directory_code get_placement_tls_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_tls_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     if (image.is_x32_image()) {
         return _get_placement_tls_table<image_32>(image, placement);

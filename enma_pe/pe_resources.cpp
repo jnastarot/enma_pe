@@ -625,7 +625,7 @@ bool build_resources_table(pe_image &image, pe_section& section, resource_direct
 	return rebuild_resource_directory(image, section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
 }
 
-directory_code get_placement_resources_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_resources_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE);

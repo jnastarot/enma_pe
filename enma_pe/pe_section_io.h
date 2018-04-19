@@ -93,6 +93,8 @@ public:
     enma_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size);
     enma_io_code pe_section_io::write(std::vector<uint8_t>& buffer);
 
+    enma_io_code pe_section_io::memory_set(uint32_t size, uint8_t data);
+
     enma_io_code pe_section_io::read_string(std::string& _string);
     enma_io_code pe_section_io::read_wstring(std::wstring& _wstring);
 

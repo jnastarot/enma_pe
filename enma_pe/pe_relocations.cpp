@@ -248,7 +248,7 @@ bool build_relocation_table(pe_image &image, pe_section& section, relocation_tab
 }
 
 
-directory_code get_placement_relocation_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_relocation_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address  = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
     uint32_t virtual_size	  = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);

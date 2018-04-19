@@ -49,4 +49,4 @@ public:
     image_data_directory dotnet_table::get_export_address_table_jumps() const;
 };
 
-bool get_dotnet_table(_In_ const pe_image &image, _Out_ dotnet_table& dotnet);
+directory_code get_dotnet_table(_In_ const pe_image &image, _Out_ dotnet_table& dotnet);

@@ -48,4 +48,4 @@ public:
 directory_code get_exception_table(_In_ const pe_image &image, _Out_ exceptions_table& exceptions);
 bool build_exceptions_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
     _In_ exceptions_table& exceptions);
-directory_code get_placement_exceptions_table(_Inout_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_exceptions_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);

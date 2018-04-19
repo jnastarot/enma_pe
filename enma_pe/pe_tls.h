@@ -59,4 +59,4 @@ bool build_tls_table_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
 bool build_tls_full(_Inout_ pe_image &image, _Inout_ pe_section& section, 
     _Inout_ tls_table& tls, _Out_ relocation_table& relocs);
 
-directory_code get_placement_tls_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_tls_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);

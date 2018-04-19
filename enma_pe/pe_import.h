@@ -83,4 +83,4 @@ void build_import_table(_Inout_ pe_image &image,
     _In_opt_ bool use_original_table = false,
     _In_opt_ bool rebuild_tables = true);
 
-bool get_placement_import_table(_Inout_ pe_image &image,_Inout_ std::vector<directory_placement>& placement);
+bool get_placement_import_table(_In_ const pe_image &image,_Inout_ std::vector<directory_placement>& placement);

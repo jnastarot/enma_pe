@@ -60,4 +60,4 @@ public:
 };
 
 directory_code get_debug_table(_In_ const pe_image &image, _Out_ debug_table& debug);
-directory_code get_placement_debug_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_debug_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);

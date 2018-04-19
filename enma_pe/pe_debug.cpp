@@ -186,18 +186,18 @@ directory_code get_debug_table(const pe_image &image, debug_table& debug) {
     return directory_code::directory_code_not_present;
 }
 
-directory_code get_placement_debug_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_debug_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
 
     if (virtual_address && virtual_size) {
         pe_image_io debug_io(image);
+        uint32_t total_desc_size = 0;
 
         debug_io.set_image_offset(virtual_address);
         while (debug_io.get_image_offset() < virtual_address + virtual_size) {
-            placement.push_back({ debug_io.get_image_offset(),
-                ALIGN_UP(sizeof(image_debug_directory),0x10),dp_id_debug_desc });
+            total_desc_size += sizeof(image_debug_directory);
 
             image_debug_directory debug_desc;
 
@@ -212,7 +212,7 @@ directory_code get_placement_debug_table(pe_image &image, std::vector<directory_
                 uint32_t up_oversize = 0;
 
                 debug_io.view_image(
-                    debug_desc.address_of_raw_data, debug_desc.size_of_data,
+                    debug_desc.address_of_raw_data, ALIGN_UP(debug_desc.size_of_data, 0x10),
                     _offset_real,
                     available_size, down_oversize, up_oversize
                 );
@@ -220,9 +220,11 @@ directory_code get_placement_debug_table(pe_image &image, std::vector<directory_
                 if (down_oversize || up_oversize) {
                     return directory_code::directory_code_currupted;
                 }
-                placement.push_back({ debug_desc.address_of_raw_data ,ALIGN_UP(debug_desc.size_of_data,0x10) , dp_id_debug_item_data });
+                placement.push_back({ debug_desc.address_of_raw_data ,available_size , dp_id_debug_item_data });
             }
         }
+
+        placement.push_back({ virtual_address,ALIGN_UP(total_desc_size,0x10),dp_id_debug_desc });
 
         return directory_code::directory_code_success;
     }

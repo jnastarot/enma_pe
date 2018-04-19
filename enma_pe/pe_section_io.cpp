@@ -232,6 +232,15 @@ enma_io_code pe_section_io::write(std::vector<uint8_t>& buffer) {
     return write(buffer.data(), buffer.size());
 }
 
+enma_io_code pe_section_io::memory_set(uint32_t size, uint8_t data) {
+
+    std::vector<uint8_t> set_buffer;
+    set_buffer.resize(size);
+    memset(set_buffer.data(), data, size);
+
+    return write(set_buffer);
+}
+
 enma_io_code pe_section_io::read_string(std::string& _string) {
     
     _string.clear();

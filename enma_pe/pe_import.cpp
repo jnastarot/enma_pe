@@ -477,7 +477,7 @@ void build_import_table(pe_image &image, pe_section& section, import_table& impo
     image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IAT, thunk_size);
 }
 
-bool get_placement_import_table(pe_image &image, std::vector<directory_placement>& placement) {
+bool get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
 	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
 

@@ -8,13 +8,13 @@ class load_config_table{
 	uint32_t 		global_flagsclear;
 	uint32_t 		global_flagsset;
 	uint32_t 		criticalsection_default_timeout;
-    uint64_t 	decommit_freeblock_threshold;
-    uint64_t 	decommit_totalfree_threshold;
+    uint64_t        decommit_freeblock_threshold;
+    uint64_t        decommit_totalfree_threshold;
     uint32_t 	    lock_prefix_table;      
-    uint64_t    maximum_allocation_size;
-    uint64_t 	virtual_memory_threshold;
+    uint64_t        maximum_allocation_size;
+    uint64_t        virtual_memory_threshold;
 	uint32_t 		process_heap_flags;
-    uint64_t 	process_affinity_mask;
+    uint64_t        process_affinity_mask;
 	uint16_t 		csd_version;
     uint32_t 	    editlist;			
     uint32_t 	    security_cookie;		
@@ -22,6 +22,27 @@ class load_config_table{
     uint32_t 	    guard_cf_check_function_pointer;
     uint32_t 	    guard_cf_function_table;
 	uint32_t 		guard_flags;
+    image_load_config_code_integrity code_integrity;
+    /*end of LOADCONFIG V4*/
+    uint32_t        guard_address_taken_iat_entry_table;
+    uint32_t        guard_address_taken_iat_entry_count;
+    uint32_t        guard_long_jump_target_table;
+    uint32_t        guard_long_jump_target_count;
+    /*end of LOADCONFIG V5*/
+    uint32_t        dynamic_value_reloc_table;
+    uint32_t        chpe_meta_data_pointer;
+    /*end of LOADCONFIG V6*/
+    uint32_t        guard_rf_failure_routine;
+    uint32_t        guard_rf_failure_routine_function_pointer;
+    uint32_t        dynamic_value_reloc_table_offset;
+    uint16_t        dynamic_value_reloc_table_section;
+    uint16_t        reserved2;
+    /*end of LOADCONFIG V7*/
+    uint32_t        guard_rf_verify_stack_pointer_function_pointer;
+    uint32_t        hot_patch_table_offset;
+    /*end of LOADCONFIG V8*/
+    uint32_t        reserved3;
+    uint32_t        enclave_configuration_pointer;
 
 	std::vector<uint32_t > se_handlers;
 	std::vector<uint32_t > lock_prefixes_rva;

@@ -23,6 +23,22 @@ load_config_table::load_config_table() {
 	guard_cf_check_function_pointer = 0; // VA
 	guard_cf_function_table			= 0; // VA
 	guard_flags						= 0;
+    code_integrity                  = {0};
+    guard_address_taken_iat_entry_table = 0; // VA
+    guard_address_taken_iat_entry_count = 0;
+    guard_long_jump_target_table        = 0; // VA
+    guard_long_jump_target_count        = 0;
+    dynamic_value_reloc_table           = 0; // VA
+    chpe_meta_data_pointer              = 0;
+    guard_rf_failure_routine            = 0; // VA
+    guard_rf_failure_routine_function_pointer = 0; // VA
+    dynamic_value_reloc_table_offset    = 0;
+    dynamic_value_reloc_table_section   = 0;
+    reserved2                           = 0;
+    guard_rf_verify_stack_pointer_function_pointer = 0; // VA
+    hot_patch_table_offset              = 0;
+    reserved3                           = 0;
+    enclave_configuration_pointer       = 0; // VA
 }
 load_config_table::~load_config_table() {
 

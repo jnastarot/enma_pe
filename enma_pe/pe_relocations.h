@@ -42,4 +42,4 @@ directory_code get_relocation_table(_In_ const pe_image &image,
 	_Out_ relocation_table& relocs);
 bool build_relocation_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
 	_Inout_ relocation_table& relocs);			
-directory_code get_placement_relocation_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_relocation_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);

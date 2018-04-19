@@ -207,87 +207,100 @@ directory_code get_export_table(const pe_image &image, export_table& exports) {
 	uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT);
 
 
-	if (virtual_address) {
+    if (virtual_address) {
+        pe_image_io export_io(image);
 
-		pe_section * export_section = image.get_section_by_rva(virtual_address);
+        image_export_directory export_desc;
 
-		if (export_section) {
-			image_export_directory* export_desc = (image_export_directory*)&export_section->get_section_data().data()[virtual_address - export_section->get_virtual_address()];
+        if (export_io.set_image_offset(virtual_address).read(&export_desc, sizeof(export_desc)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
 
-			exports.set_characteristics(export_desc->characteristics);
-			exports.set_time_stamp(export_desc->time_date_stamp);
-			exports.set_major_version(export_desc->major_version);
-			exports.set_minor_version(export_desc->minor_version);
-			exports.set_ordinal_base(export_desc->base);
-			exports.set_number_of_functions(export_desc->number_of_functions);
-			exports.set_number_of_names(export_desc->number_of_names);
+        exports.set_characteristics(export_desc.characteristics);
+        exports.set_time_stamp(export_desc.time_date_stamp);
+        exports.set_major_version(export_desc.major_version);
+        exports.set_minor_version(export_desc.minor_version);
+        exports.set_ordinal_base(export_desc.base);
+        exports.set_number_of_functions(export_desc.number_of_functions);
+        exports.set_number_of_names(export_desc.number_of_names);
 
-			if (!exports.get_number_of_functions()) { return directory_code::directory_code_success; }
+        if (!exports.get_number_of_functions()) { return directory_code::directory_code_success; }
 
-			if (export_desc->name) {
-				pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
-				if (name_export_section) {
-					exports.set_library_name(std::string((char*)(&export_section->get_section_data().data()[
-                        export_desc->name - export_section->get_virtual_address()
-                    ])));
-				}
-			}
+        std::string lib_name;
+        if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
 
-			for (uint32_t ordinal = 0; ordinal < export_desc->number_of_functions; ordinal++) {
+        exports.set_library_name(lib_name);
 
-				export_table_item func;
+        for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
 
-				func.set_rva(*(uint32_t*)&image.get_section_by_rva((export_desc->address_of_functions + ordinal * sizeof(uint32_t)))->get_section_data().data()[
-					(export_desc->address_of_functions + ordinal * sizeof(uint32_t))
-						- image.get_section_by_rva((export_desc->address_of_functions + ordinal * sizeof(uint32_t)))->get_virtual_address()]
-				);
+            uint32_t func_rva;
 
-				if (!func.get_rva()) { continue; }
+            export_table_item func;
 
-				func.set_ordinal( uint16_t(export_desc->base + ordinal));
+            if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * sizeof(uint32_t)).read(
+                &func_rva, sizeof(func_rva)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-				for (uint32_t i = 0; i < export_desc->number_of_names; i++) {
+            func.set_rva(func_rva);
 
-					uint16_t ordinal2 = *(uint16_t*)&image.get_section_by_rva((export_desc->address_of_name_ordinals + i * sizeof(uint16_t)))->get_section_data().data()[
-						(export_desc->address_of_name_ordinals + i * sizeof(uint16_t))
-							- image.get_section_by_rva((export_desc->address_of_name_ordinals + i * sizeof(uint16_t)))->get_virtual_address()];
+            if (!func_rva) { continue; }
 
-					if (ordinal == ordinal2) {
+            func.set_ordinal(uint16_t(export_desc.base + ordinal));
 
-						uint32_t function_name_rva = *(uint32_t*)&image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_section_data().data()[
-							(export_desc->address_of_names + i * sizeof(uint32_t))
-								- image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_virtual_address()];
+            for (uint32_t i = 0; i < export_desc.number_of_names; i++) {
 
+                uint16_t ordinal2;
 
-						const char* func_name = (char*)&image.get_section_by_rva(function_name_rva)->get_section_data().data()[
-							function_name_rva
-								- image.get_section_by_rva(function_name_rva)->get_virtual_address()];
+                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * sizeof(uint16_t)).read(
+                    &ordinal2, sizeof(ordinal2)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
 
 
-						func.set_func_name(std::string(func_name));
-						func.set_has_name(true);
-						func.set_name_ordinal(ordinal2);
+                if (ordinal == ordinal2) {
 
-						if (func.get_rva() >= virtual_address + sizeof(image_export_directory) &&
-							func.get_rva() < virtual_address + virtual_size) {
+                    uint32_t function_name_rva;
 
-							const char* forwarded_func_name = (char*)&image.get_section_by_rva(func.get_rva())->get_section_data().data()[
-								func.get_rva() - image.get_section_by_rva(func.get_rva())->get_virtual_address()];
+                    if (export_io.set_image_offset(export_desc.address_of_names + i * sizeof(uint32_t)).read(
+                        &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
+                        return directory_code::directory_code_currupted;
+                    }
 
-							func.set_forward_name(std::string(forwarded_func_name));
-							func.set_forward(true);
-						}
+                    std::string func_name;
 
-						break;
-					}
-				}
+                    if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
+                        return directory_code::directory_code_currupted;
+                    }
 
-				exports.add_item(func);
-			}
+                    func.set_func_name(func_name);
+                    func.set_has_name(true);
+                    func.set_name_ordinal(ordinal2);
 
-			return directory_code::directory_code_success;
-		}
-	}
+                    if (func_rva >= virtual_address + sizeof(image_export_directory) &&
+                        func_rva < virtual_address + virtual_size) {
+
+                        std::string forwarded_func_name;
+
+                        if (export_io.set_image_offset(func_rva).read_string(forwarded_func_name) != enma_io_success) {
+                            return directory_code::directory_code_currupted;
+                        }
+
+                        func.set_forward_name(std::string(forwarded_func_name));
+                        func.set_forward(true);
+                    }
+
+                    break;
+                }
+            }
+
+            exports.add_item(func);
+        }
+
+        return directory_code::directory_code_success;
+    }
 
 	return directory_code::directory_code_not_present;
 }
@@ -296,11 +309,9 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 
 	if (!exports.get_items().size()) { return true; }
 
-    if (section.get_size_of_raw_data() & 0xF) {
-        section.get_section_data().resize(
-            section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-        );
-    }
+    pe_section_io export_io(section, image, enma_io_mode_allow_expand);
+    export_io.align_up(0x10).seek_to_end();
+
 
 	uint32_t needed_size_for_strings = uint32_t(exports.get_library_name().length() + 1);
 	uint32_t number_of_names			= 0;
@@ -320,7 +331,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 		ordinal_base = std::min<uint32_t>(ordinal_base, func.get_ordinal());
 
 		if (func.has_name()) {
-			++number_of_names;
+			number_of_names++;
 			needed_size_for_function_names += uint32_t(func.get_func_name().length() + 1);
 		}
 		if (func.is_forward()) {
@@ -331,46 +342,38 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 	needed_size_for_strings += needed_size_for_function_names;
 	needed_size_for_strings += needed_size_for_function_forwards;
 	uint32_t needed_size_for_function_name_ordinals = number_of_names * sizeof(uint16_t);
-	uint32_t needed_size_for_function_name_rvas = number_of_names * sizeof(uint32_t);
-	uint32_t needed_size_for_function_addresses = (max_ordinal - ordinal_base + 1) * sizeof(uint32_t);
-
-
-	uint32_t directory_pos = section.get_size_of_raw_data();
-
-	uint32_t needed_size = sizeof(image_export_directory);
-	needed_size += needed_size_for_function_name_ordinals;
-	needed_size += needed_size_for_function_addresses;
-	needed_size += needed_size_for_strings;
-	needed_size += needed_size_for_function_name_rvas;
-
-	section.get_section_data().resize(needed_size + directory_pos);
-
-
-	uint8_t * raw_data = section.get_section_data().data();
-
-	uint32_t current_pos_of_function_names = uint32_t(exports.get_library_name().length() + 1 + directory_pos + sizeof(image_export_directory));
+	uint32_t needed_size_for_function_name_rvas     = number_of_names * sizeof(uint32_t);
+	uint32_t needed_size_for_function_addresses     = (max_ordinal - ordinal_base + 1) * sizeof(uint32_t);
+    
+    uint32_t directory_pos = export_io.get_section_offset();
+	uint32_t current_pos_of_function_names = uint32_t(ALIGN_UP(exports.get_library_name().length() + 1,0x2) + directory_pos + sizeof(image_export_directory));
 	uint32_t current_pos_of_function_name_ordinals = current_pos_of_function_names + needed_size_for_function_names;
-	uint32_t current_pos_of_function_forwards = current_pos_of_function_name_ordinals + needed_size_for_function_name_ordinals;
-	uint32_t current_pos_of_function_addresses = current_pos_of_function_forwards + needed_size_for_function_forwards;
+	uint32_t current_pos_of_function_forwards   = current_pos_of_function_name_ordinals + needed_size_for_function_name_ordinals;
+	uint32_t current_pos_of_function_addresses  = current_pos_of_function_forwards + needed_size_for_function_forwards;
 	uint32_t current_pos_of_function_names_rvas = current_pos_of_function_addresses + needed_size_for_function_addresses;
 
 
-    image_export_directory dir = { 0 };
-	dir.characteristics     = exports.get_characteristics();
-	dir.major_version       = exports.get_major_version();
-	dir.minor_version       = exports.get_minor_version();
-	dir.time_date_stamp	    = exports.get_time_stamp();
-	dir.number_of_functions	= max_ordinal - ordinal_base + 1;
-	dir.number_of_names	    = number_of_names;
-	dir.base                = ordinal_base;
-	dir.address_of_functions    = section.get_virtual_address() + current_pos_of_function_addresses;
-	dir.address_of_name_ordinals= section.get_virtual_address() + current_pos_of_function_name_ordinals;
-	dir.address_of_names        = section.get_virtual_address() + current_pos_of_function_names_rvas;
-	dir.name                    = section.get_virtual_address() + directory_pos + sizeof(image_export_directory);
-	memcpy(&raw_data[directory_pos], &dir, sizeof(dir));
+    image_export_directory export_desc = { 0 };
+    export_desc.characteristics     = exports.get_characteristics();
+    export_desc.major_version       = exports.get_major_version();
+    export_desc.minor_version       = exports.get_minor_version();
+    export_desc.time_date_stamp	    = exports.get_time_stamp();
+    export_desc.number_of_functions	= max_ordinal - ordinal_base + 1;
+    export_desc.number_of_names	    = number_of_names;
+    export_desc.base                = ordinal_base;
+    export_desc.address_of_functions    = current_pos_of_function_addresses;
+    export_desc.address_of_name_ordinals= current_pos_of_function_name_ordinals;
+    export_desc.address_of_names        = current_pos_of_function_names_rvas;
+    export_desc.name                    = directory_pos + sizeof(image_export_directory);
 
+    if (export_io.write(&export_desc, sizeof(export_desc)) != enma_io_success) {
+        return false;
+    }
 
-	memcpy(&raw_data[directory_pos + sizeof(image_export_directory)], exports.get_library_name().c_str(), exports.get_library_name().length() + 1);
+    if (export_io.write((void*)exports.get_library_name().c_str(), exports.get_library_name().length() + 1) != enma_io_success) {
+        return false;
+    }
+    export_io.align_up(0x2);
 
 
 	typedef std::map<std::string, uint16_t> funclist;
@@ -382,7 +385,10 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 
 			uint32_t len = sizeof(uint32_t) * (func.get_ordinal() - last_ordinal - 1);
 			if (len){
-				memset(&raw_data[current_pos_of_function_addresses], 0, len);
+                if (export_io.set_section_offset(current_pos_of_function_addresses).memory_set(len,0) != enma_io_success) {
+                    return false;
+                }
+
 				current_pos_of_function_addresses += len;
 			}
 
@@ -395,50 +401,86 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 		}
 
 		if (func.is_forward()) {
-			uint32_t function_rva = section.get_virtual_address() + current_pos_of_function_forwards;
-			memcpy(&raw_data[current_pos_of_function_addresses], &function_rva, sizeof(function_rva));
-			current_pos_of_function_addresses += sizeof(function_rva);
+			
+            if (export_io.set_section_offset(current_pos_of_function_addresses).write(
+                &current_pos_of_function_forwards, sizeof(current_pos_of_function_forwards)) != enma_io_success) {
 
-			memcpy(&raw_data[current_pos_of_function_forwards], func.get_forward_name().c_str(), func.get_forward_name().length() + 1);
+                return false;
+            }
+            
+            current_pos_of_function_addresses += sizeof(uint32_t);
+
+            if (export_io.set_section_offset(current_pos_of_function_forwards).write(
+                (void*)func.get_forward_name().c_str(), func.get_forward_name().length() + 1) != enma_io_success) {
+
+                return false;
+            }
+
 			current_pos_of_function_forwards += static_cast<uint32_t>(func.get_forward_name().length() + 1);
 		}
 		else{
 			uint32_t function_rva = func.get_rva();
-			memcpy(&raw_data[current_pos_of_function_addresses], &function_rva, sizeof(function_rva));
+
+            if (export_io.set_section_offset(current_pos_of_function_addresses).write(
+                &function_rva, sizeof(function_rva)) != enma_io_success) {
+
+                return false;
+            }
+
 			current_pos_of_function_addresses += sizeof(function_rva);
 		}
 	}
 
 	for (funclist::const_iterator it = funcs.begin(); it != funcs.end(); ++it){
 
-		uint32_t function_name_rva = section.get_virtual_address() + current_pos_of_function_names;
-		memcpy(&raw_data[current_pos_of_function_names_rvas], &function_name_rva, sizeof(function_name_rva));
-		current_pos_of_function_names_rvas += sizeof(function_name_rva);
 
-		memcpy(&raw_data[current_pos_of_function_names], (*it).first.c_str(), (*it).first.length() + 1);
+        if (export_io.set_section_offset(current_pos_of_function_names_rvas).write(
+            &current_pos_of_function_names, sizeof(current_pos_of_function_names)) != enma_io_success) {
+
+            return false;
+        }
+
+		current_pos_of_function_names_rvas += sizeof(uint32_t);
+
+        if (export_io.set_section_offset(current_pos_of_function_names).write(
+           (void*) (*it).first.c_str(), (*it).first.length() + 1) != enma_io_success) {
+
+            return false;
+        }
+
 		current_pos_of_function_names += static_cast<uint32_t>((*it).first.length() + 1);
 
-		uint16_t name_ordinal = (*it).second;
-		memcpy(&raw_data[current_pos_of_function_name_ordinals], &name_ordinal, sizeof(name_ordinal));
-		current_pos_of_function_name_ordinals += sizeof(name_ordinal);
+
+        if (export_io.set_section_offset(current_pos_of_function_name_ordinals).write(
+            (void*)&((*it).second), sizeof((*it).second)) != enma_io_success) {
+
+            return false;
+        }
+
+		current_pos_of_function_name_ordinals += sizeof(uint16_t);
 	}
 
 
-	image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT, section.get_virtual_address() + directory_pos);
-	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT, needed_size);
-
+	image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT, directory_pos);
+	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT, 
+        sizeof(image_export_directory) +
+        needed_size_for_function_name_ordinals + 
+        needed_size_for_function_addresses +
+        needed_size_for_strings +
+        needed_size_for_function_name_rvas
+    );
 
     return true;
 }
 
-directory_code get_placement_export_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_export_table(const pe_image &image, std::vector<directory_placement>& placement) {
    
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT);
 
 
     if (virtual_address) {
-
+        pe_image_io export_io(image);
         pe_section * export_section = image.get_section_by_rva(virtual_address);
 
         if (export_section) {
