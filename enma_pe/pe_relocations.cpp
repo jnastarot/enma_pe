@@ -142,61 +142,57 @@ std::vector<relocation_item>& relocation_table::get_items() {
 }
 
 
-bool get_relocation_table(const pe_image &image, relocation_table& relocs) {
+directory_code get_relocation_table(const pe_image &image, relocation_table& relocs) {
 	relocs.clear();
 	
     uint32_t virtual_address	= image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
     uint32_t virtual_size		= image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
 	if (virtual_address && virtual_size) {
-		pe_section * reloc_section = image.get_section_by_rva(virtual_address);
+        pe_image_io reloc_io(image);
+        reloc_io.set_image_offset(virtual_address);
 
-		if (reloc_section && reloc_section->get_size_of_raw_data() >= virtual_size) {
-			uint8_t * reloc_raw = &reloc_section->get_section_data().data()[virtual_address - reloc_section->get_virtual_address()];
 
-			for (uint32_t s_offset = 0; s_offset < virtual_size;) {
-				image_base_relocation* reloc_base = (image_base_relocation*)&reloc_raw[s_offset];
-				s_offset += sizeof(image_base_relocation);
+        while (reloc_io.get_image_offset() < virtual_address + virtual_size) {
+            image_base_relocation reloc_base;
 
-                relocs.get_items().reserve(reloc_base->size_of_block/sizeof(uint16_t));
+            if (reloc_io.read(&reloc_base,sizeof(reloc_base)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-				for (uint32_t block_offset = sizeof(image_base_relocation);
-                    s_offset < virtual_size && block_offset < reloc_base->size_of_block; 
-                    block_offset += sizeof(uint16_t), s_offset += sizeof(uint16_t)) {
+            uint32_t current_block_size = sizeof(image_base_relocation);
 
-                    uint16_t rel = *(uint32_t*)&reloc_raw[s_offset];
-					if (rel >> 12 == IMAGE_REL_BASED_ABSOLUTE)continue;
+            relocs.get_items().reserve(reloc_base.size_of_block / sizeof(uint16_t)); 
+            while ( (reloc_io.get_image_offset() < virtual_address + virtual_size) &&
+                (current_block_size < reloc_base.size_of_block)) {
+                uint16_t rel;
 
-                    relocs.get_items().push_back({ (rel & 0x0FFF) | reloc_base->virtual_address,0 ,0});
-				}
+                if (reloc_io.read(&rel, sizeof(rel)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
 
-			}
+                if (rel >> 12 == IMAGE_REL_BASED_ABSOLUTE) { current_block_size += sizeof(uint16_t);  continue; }
 
-			return true;
-		}
+                relocs.add_item((rel & 0x0FFF) | reloc_base.virtual_address, 0);
+                current_block_size += sizeof(uint16_t);
+            }
+        }
+        return directory_code::directory_code_success;
 	}
 
-	return false;
+	return directory_code::directory_code_not_present;
 }
 
-void build_relocation_table(pe_image &image, pe_section& section, relocation_table& relocs) {
+bool build_relocation_table(pe_image &image, pe_section& section, relocation_table& relocs) {
 
 
     if (relocs.get_items().size()) {
-
-
         pe_section_io reloc_section = pe_section_io(section, image, enma_io_mode::enma_io_mode_allow_expand);
         reloc_section.align_up(0x10).seek_to_end();
 
         uint32_t virtual_address = reloc_section.get_section_offset();
-
-        image_base_relocation reloc_decs;
-        std::vector<uint8_t> data_buffer;
-        std::vector<uint16_t> reloc_block;
-        
         uint16_t reloc_type;
-        size_t raw_idxer = 0;
-
+        
         if (image.is_x32_image()) {
             reloc_type = IMAGE_REL_BASED_HIGHLOW << 12;
         }
@@ -206,76 +202,80 @@ void build_relocation_table(pe_image &image, pe_section& section, relocation_tab
 
         relocs.sort();
 
+        std::vector<std::vector<uint32_t>> reloc_tables;
 
-        for (size_t r_i = 0; r_i < relocs.size(); r_i++) {
+        uint32_t reloc_last_hi = 0;
+        for (auto& reloc : relocs.get_items()) {
+            if (!reloc_tables.size() ||
+                reloc_last_hi != (reloc.relative_virtual_address & 0xFFFFF000)) {
 
-            if (!r_i) { reloc_decs.virtual_address = (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000); }
-
-        loop_n:
-            if (reloc_decs.virtual_address == (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000)) {
-                reloc_block.push_back((relocs.get_items()[r_i].relative_virtual_address & 0xFFF) | reloc_type);
+                reloc_tables.push_back(std::vector<uint32_t>());
+                reloc_last_hi = reloc.relative_virtual_address & 0xFFFFF000;
             }
-            else {
-                if (reloc_block.size() & 1) { reloc_block.push_back(0); }//align of parity
-                data_buffer.resize(data_buffer.size() + sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t));
-                reloc_decs.size_of_block = sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t);
 
-                memcpy(&data_buffer.data()[raw_idxer], &reloc_decs, sizeof(image_base_relocation));
-                raw_idxer += sizeof(image_base_relocation);
-                memcpy(&data_buffer.data()[raw_idxer], reloc_block.data(), reloc_block.size() * sizeof(uint16_t));
-                raw_idxer += reloc_block.size() * sizeof(uint16_t);
+            reloc_tables[reloc_tables.size() - 1].push_back(reloc.relative_virtual_address);
+        }
 
-                reloc_block.clear();
-                reloc_decs.virtual_address = (relocs.get_items()[r_i].relative_virtual_address & 0xFFFFF000);
-                if (r_i == relocs.size())break;
-                goto loop_n;
+        for (auto& reloc_table : reloc_tables) {
+            image_base_relocation reloc_base = { 
+                reloc_table[0] & 0xFFFFF000 ,
+                sizeof(image_base_relocation) + reloc_table.size()*sizeof(uint16_t) + (reloc_table.size() & 1 ? sizeof(uint16_t) : 0)
+            };
+
+            if (reloc_section.write(&reloc_base, sizeof(reloc_base)) != enma_io_success) { return false; }
+
+            for (auto& reloc : reloc_table) {
+                uint16_t reloc_ = reloc & 0xFFF | reloc_type;
+                if (reloc_section.write(&reloc_, sizeof(reloc_)) != enma_io_success) { return false; }
             }
+
+            if (reloc_table.size()&1) { //parity align
+                uint16_t reloc_ = 0;
+                if (reloc_section.write(&reloc_, sizeof(reloc_)) != enma_io_success) { return false; }
+            }
+
         }
 
-        if (reloc_block.size()) {
-            if (reloc_block.size() & 1) { reloc_block.push_back(0); }//align of parity
-            data_buffer.resize(data_buffer.size() + sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t));
-            reloc_decs.size_of_block = sizeof(image_base_relocation) + reloc_block.size() * sizeof(uint16_t);
-
-            memcpy(&data_buffer.data()[raw_idxer], (uint8_t*)&reloc_decs, sizeof(image_base_relocation));
-            raw_idxer += sizeof(image_base_relocation);
-            memcpy(&data_buffer.data()[raw_idxer], reloc_block.data(), reloc_block.size() * sizeof(uint16_t));
-            raw_idxer += reloc_block.size() * sizeof(uint16_t);
-
-            reloc_block.clear();
-        }
-
-
-        if (reloc_section.write(data_buffer.data(), data_buffer.size()) == enma_io_success) {
-            image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, virtual_address);
-            image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, data_buffer.size());
-        }
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, virtual_address);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, reloc_section.get_section_offset() - virtual_address);
     }
     else {
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC, 0);
         image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC, 0);
     }
+
+    return true;
 }
 
 
-bool get_placement_relocation_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_relocation_table(pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address  = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
     uint32_t virtual_size	  = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
 	if (virtual_address && virtual_size) {
 	
-		pe_section * reloc_section = image.get_section_by_rva(virtual_address);
+        pe_image_io reloc_io(image);
 
-		if (reloc_section) {
+        uint32_t _offset_real = 0;
+        uint32_t available_size = 0;
+        uint32_t down_oversize = 0;
+        uint32_t up_oversize = 0;
 
-			if (ALIGN_UP(reloc_section->get_virtual_size(),image.get_section_align()) >= virtual_size) {
+        reloc_io.view_image(
+            virtual_address, ALIGN_UP(virtual_size,0x10),
+            _offset_real,
+            available_size, down_oversize, up_oversize
+        );
 
-                placement.push_back({virtual_address ,virtual_size,dp_id_relocations_desc });
-				return true;
-			}
-		}
+        placement.push_back({ virtual_address ,available_size ,dp_id_relocations_desc });
+
+        if (!down_oversize && !up_oversize) {
+            return directory_code::directory_code_success;
+        }
+
+        return directory_code::directory_code_currupted;
 	}
 
-	return false;
+	return directory_code::directory_code_not_present;
 }

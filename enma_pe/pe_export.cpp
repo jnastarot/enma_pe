@@ -191,7 +191,7 @@ bool export_table::get_exported_function(uint16_t ordinal, export_table_item * &
 	return false;
 }
 
-bool get_export_table(const pe_image &image, export_table& exports) {
+directory_code get_export_table(const pe_image &image, export_table& exports) {
 	exports.set_characteristics(0);
 	exports.set_time_stamp(0);
 	exports.set_major_version(0);
@@ -222,7 +222,7 @@ bool get_export_table(const pe_image &image, export_table& exports) {
 			exports.set_number_of_functions(export_desc->number_of_functions);
 			exports.set_number_of_names(export_desc->number_of_names);
 
-			if (!exports.get_number_of_functions()) { return false; }
+			if (!exports.get_number_of_functions()) { return directory_code::directory_code_success; }
 
 			if (export_desc->name) {
 				pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
@@ -285,16 +285,16 @@ bool get_export_table(const pe_image &image, export_table& exports) {
 				exports.add_item(func);
 			}
 
-			return true;
+			return directory_code::directory_code_success;
 		}
 	}
 
-	return false;
+	return directory_code::directory_code_not_present;
 }
 
-void build_export_table(pe_image &image, pe_section& section, export_table& exports) {//taken from pe bless
+bool build_export_table(pe_image &image, pe_section& section, export_table& exports) {//taken from pe bless
 
-	if (!exports.get_items().size()) { return; }
+	if (!exports.get_items().size()) { return true; }
 
     if (section.get_size_of_raw_data() & 0xF) {
         section.get_section_data().resize(
@@ -426,9 +426,12 @@ void build_export_table(pe_image &image, pe_section& section, export_table& expo
 
 	image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT, section.get_virtual_address() + directory_pos);
 	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT, needed_size);
+
+
+    return true;
 }
 
-bool get_placement_export_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_export_table(pe_image &image, std::vector<directory_placement>& placement) {
    
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT);
@@ -443,7 +446,7 @@ bool get_placement_export_table(pe_image &image, std::vector<directory_placement
                 virtual_address - export_section->get_virtual_address()
             ];
 
-            if (!export_desc->number_of_functions) { return false; }
+            if (!export_desc->number_of_functions) { return directory_code::directory_code_success; }
 
             if (export_desc->name) {
                 pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
@@ -536,11 +539,11 @@ bool get_placement_export_table(pe_image &image, std::vector<directory_placement
             }
 
             placement.push_back({ virtual_address,sizeof(image_export_directory),dp_id_export_desc });
-            return true;
+            return directory_code::directory_code_success;
         }
     }
 
-    return false;
+    return directory_code::directory_code_not_present;
 }
 
 

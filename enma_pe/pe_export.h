@@ -77,8 +77,8 @@ public:
 };
 
 
-bool get_export_table(_In_ const pe_image &image,	
+directory_code get_export_table(_In_ const pe_image &image,
 	_Out_ export_table& exports);
-void build_export_table(_Inout_ pe_image &image, 
+bool build_export_table(_Inout_ pe_image &image, 
 	_Inout_ pe_section& section, _In_ export_table& exports); 
-bool get_placement_export_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_export_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

@@ -232,6 +232,48 @@ enma_io_code pe_section_io::write(std::vector<uint8_t>& buffer) {
     return write(buffer.data(), buffer.size());
 }
 
+enma_io_code pe_section_io::read_string(std::string& _string) {
+    
+    _string.clear();
+    char _char = 0;
+
+    do {
+        enma_io_code code = read(&_char, sizeof(_char));
+
+        if (code != enma_io_success) {
+            return code;
+        }
+
+        if (_char) {
+            _string += _char;
+        }
+
+    } while (_char);
+
+    return enma_io_code::enma_io_success;
+}
+
+enma_io_code pe_section_io::read_wstring(std::wstring& _wstring) {
+
+    _wstring.clear();
+    wchar_t _char = 0;
+
+    do {
+        enma_io_code code = read(&_char, sizeof(_char));
+
+        if (code != enma_io_success) {
+            return code;
+        }
+
+        if (_char) {
+            _wstring += _char;
+        }
+
+    } while (_char);
+
+    return enma_io_code::enma_io_success;
+}
+
 pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
     add_size(ALIGN_UP(section->get_size_of_raw_data(), factor) - section->get_size_of_raw_data());
 
@@ -242,12 +284,12 @@ pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end) {
     if (size) {
         section->get_section_data().resize(section->get_size_of_raw_data() + size);
     }
-    if (offset_to_end) { seek_to_end(); }
 
     if (section->get_size_of_raw_data() > section->get_virtual_size()) {
         section->set_virtual_size(section->get_size_of_raw_data());
     }
 
+    if (offset_to_end) { seek_to_end(); }
 
     return *this;
 }

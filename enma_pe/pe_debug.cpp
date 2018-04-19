@@ -100,7 +100,7 @@ uint32_t  debug_item::get_address_of_raw_data() const {
 uint32_t  debug_item::get_pointer_to_raw_data() const {
     return this->pointer_to_raw_data;
 }
-std::vector<uint8_t> debug_item::get_item_data() {
+std::vector<uint8_t>& debug_item::get_item_data() {
     return this->item_data;
 }
 
@@ -127,69 +127,105 @@ std::vector<debug_item>& debug_table::get_items() {
 }
 
 
-bool get_debug_table(const pe_image &image, debug_table& debug) {
+directory_code get_debug_table(const pe_image &image, debug_table& debug) {
     debug.get_items().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
 
-    if (virtual_address) {
-      	pe_section * debug_section = image.get_section_by_rva(virtual_address);
+    if (virtual_address && virtual_size) {
+        pe_image_io debug_io(image);
 
-        if (debug_section) {
-            for (size_t item_offset = 0; item_offset < virtual_size; item_offset += sizeof(image_debug_directory)) {
-                image_debug_directory* p_debug_item = (image_debug_directory*)&debug_section->get_section_data().data()[
-                    virtual_address - debug_section->get_virtual_address() + item_offset
-                ];
+        debug_io.set_image_offset(virtual_address);
+        while (debug_io.get_image_offset() < virtual_address + virtual_size) {
+            image_debug_directory debug_desc;
 
-                if (p_debug_item->size_of_data) {
-                    pe_section * debug_item_section = image.get_section_by_rva(p_debug_item->address_of_raw_data);
+            if (debug_io.read(&debug_desc,sizeof(debug_desc)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-                    if (debug_item_section) {
-                        debug.add_item(debug_item(p_debug_item->characteristics, p_debug_item->time_date_stamp, p_debug_item->major_version,
-                            p_debug_item->minor_version, p_debug_item->type, p_debug_item->size_of_data, p_debug_item->address_of_raw_data,
-                            p_debug_item->pointer_to_raw_data, 
-                            &debug_item_section->get_section_data().data()[
-                                p_debug_item->pointer_to_raw_data - debug_item_section->get_pointer_to_raw()
-                            ]
-                        ));
-                    }
+            debug_item item;
+            item.set_characteristics(debug_desc.characteristics);
+            item.set_timestamp(debug_desc.time_date_stamp);
+            item.set_major_version(debug_desc.major_version);
+            item.set_minor_version(debug_desc.minor_version);
+            item.set_type(debug_desc.type);
+            item.set_size_of_data(debug_desc.size_of_data);
+            item.set_address_of_raw_data(debug_desc.address_of_raw_data);
+            item.set_pointer_to_raw_data(debug_desc.pointer_to_raw_data);
+
+           
+            if (debug_desc.size_of_data && debug_desc.address_of_raw_data) {
+                uint32_t _offset_real = 0;
+                uint32_t available_size = 0;
+                uint32_t down_oversize = 0;
+                uint32_t up_oversize = 0;
+
+                debug_io.view_image(
+                    debug_desc.address_of_raw_data, debug_desc.size_of_data,
+                    _offset_real,
+                    available_size, down_oversize, up_oversize
+                );
+
+                if (down_oversize || up_oversize) {
+                    return directory_code::directory_code_currupted;
+                }
+
+                if (pe_image_io(image).set_image_offset(debug_desc.address_of_raw_data).read(
+                    item.get_item_data(), debug_desc.size_of_data) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
                 }
             }
-            return true;
+
+            debug.add_item(item);
         }
+
+        return directory_code::directory_code_success;
     }
 
-    return false;
+    return directory_code::directory_code_not_present;
 }
 
-bool get_placement_debug_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_debug_table(pe_image &image, std::vector<directory_placement>& placement) {
 
-	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
 
-	if (virtual_address && virtual_size) {
-		pe_section * debug_section = image.get_section_by_rva(virtual_address);
+    if (virtual_address && virtual_size) {
+        pe_image_io debug_io(image);
 
-		if (debug_section) {
-			for (size_t item_offset = 0; item_offset < virtual_size; item_offset += sizeof(image_debug_directory)) {
-                image_debug_directory* p_debug_item = (image_debug_directory*)&debug_section->get_section_data().data()[
-                    virtual_address - debug_section->get_virtual_address() + item_offset
-                ];
+        debug_io.set_image_offset(virtual_address);
+        while (debug_io.get_image_offset() < virtual_address + virtual_size) {
+            placement.push_back({ debug_io.get_image_offset(),
+                ALIGN_UP(sizeof(image_debug_directory),0x10),dp_id_debug_desc });
 
-				if (p_debug_item->size_of_data) {
-					pe_section * debug_item_section = image.get_section_by_rva(p_debug_item->address_of_raw_data);
+            image_debug_directory debug_desc;
 
-					if (debug_item_section) {
-                        placement.push_back({ p_debug_item->address_of_raw_data ,p_debug_item->size_of_data , dp_id_debug_item_data });
-					}
-				}       
-			}
+            if (debug_io.read(&debug_desc, sizeof(debug_desc)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-            placement.push_back({ virtual_address ,(ALIGN_UP(virtual_size,sizeof(image_debug_directory)) + 4),dp_id_debug_desc });
-			return true;
-		}	
-	}
+            if (debug_desc.size_of_data && debug_desc.address_of_raw_data) {
+                uint32_t _offset_real = 0;
+                uint32_t available_size = 0;
+                uint32_t down_oversize = 0;
+                uint32_t up_oversize = 0;
 
-	return false;
+                debug_io.view_image(
+                    debug_desc.address_of_raw_data, debug_desc.size_of_data,
+                    _offset_real,
+                    available_size, down_oversize, up_oversize
+                );
+
+                if (down_oversize || up_oversize) {
+                    return directory_code::directory_code_currupted;
+                }
+                placement.push_back({ debug_desc.address_of_raw_data ,ALIGN_UP(debug_desc.size_of_data,0x10) , dp_id_debug_item_data });
+            }
+        }
+
+        return directory_code::directory_code_success;
+    }
+
+	return directory_code::directory_code_not_present;
 }

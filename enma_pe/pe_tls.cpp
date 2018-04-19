@@ -94,7 +94,7 @@ directory_code _get_tls_table(const pe_image &image, tls_table& tls) {
 
 
     if (virtual_address) {
-        pe_image_io tls_io((pe_image &)image);
+        pe_image_io tls_io(image);
        
         typename image_format::image_tls_directory tls_directory;
 
@@ -268,7 +268,7 @@ directory_code _get_placement_tls_table(pe_image &image, std::vector<directory_p
     if (code == directory_code::directory_code_success) {
         placement.push_back({ 
             image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS) ,
-            sizeof(typename image_format::image_tls_directory),dp_id_tls_desc 
+            ALIGN_UP(sizeof(typename image_format::image_tls_directory),0x10),dp_id_tls_desc
         });
 
         if (tls.get_start_address_raw_data()) {

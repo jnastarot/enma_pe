@@ -12,6 +12,44 @@ bool is_ascii_mod(char symbol) { //cyrillic
 #define MIN_STRING_SIZE 4
 #define MAX_STRING_SIZE 1000
 
+
+
+void get_strings_from_image_by_locale(const pe_image& image, string_base_table& string_table, char * locale,
+    bool find_in_execute_sections) {
+
+    pe_image tide_image = image;
+    std::vector<directory_placement> placement;
+    get_directories_placement(tide_image, placement);
+    erase_directories_placement(tide_image, placement, 0, true);
+
+    string_table.ansi_base.clear();
+    string_table.wide_base.clear();
+
+    _locale_t loc = _create_locale(LC_CTYPE, locale);
+
+
+    for (auto& section : tide_image.get_sections()) {
+        if (!find_in_execute_sections && section->is_executable()) { continue; }
+
+        
+
+        //find ansi strings
+        for (size_t byte_idx = 0; byte_idx < section->get_size_of_raw_data(); byte_idx++) {
+            
+
+        }
+
+
+
+
+    }
+
+
+
+    _free_locale(loc);
+}
+
+
 void get_strings_from_image(const pe_image& image, string_base_table& string_table, bool find_in_execute_sections) {
 	pe_image tide_image = image;
 

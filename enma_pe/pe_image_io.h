@@ -38,6 +38,11 @@ public:
         enma_io_mode mode = enma_io_mode_default,
         enma_io_addressing_type type = enma_io_address_rva
     );
+    pe_image_io::pe_image_io(
+        const pe_image& image,
+        enma_io_addressing_type type = enma_io_address_rva
+    );
+
     pe_image_io::pe_image_io(const pe_image_io& image_io);
     
     pe_image_io::~pe_image_io();
@@ -68,6 +73,8 @@ public:
     enma_io_code pe_image_io::read(std::vector<uint8_t>& buffer, uint32_t size);
     enma_io_code pe_image_io::write(std::vector<uint8_t>& buffer);
 
+    enma_io_code pe_image_io::read_string(std::string& _string);
+    enma_io_code pe_image_io::read_wstring(std::wstring& _wstring);
 
     enma_io_code pe_image_io::internal_read(uint32_t data_offset,
         void * buffer, uint32_t size,

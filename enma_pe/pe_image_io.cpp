@@ -8,6 +8,12 @@ pe_image_io::pe_image_io(
     enma_io_addressing_type type
 ):image(&image),mode(mode), addressing_type(type){}
 
+
+pe_image_io::pe_image_io(
+    const pe_image& image,
+    enma_io_addressing_type type
+): image((pe_image*)&image), mode(enma_io_mode_default), addressing_type(type) {}
+
 pe_image_io::pe_image_io(const pe_image_io& image_io) {
     operator=(image_io);
 }
@@ -227,6 +233,49 @@ enma_io_code pe_image_io::write(std::vector<uint8_t>& buffer) {
     return write(buffer.data(), buffer.size());
 }
 
+enma_io_code pe_image_io::read_string(std::string& _string) {
+
+    _string.clear();
+    char _char = 0;
+
+    do {
+        enma_io_code code = read(&_char, sizeof(_char));
+
+        if (code != enma_io_success) {
+            return code;
+        }
+
+        if (_char) {
+            _string += _char;
+        }
+
+    } while (_char);
+
+    return enma_io_code::enma_io_success;
+}
+
+enma_io_code pe_image_io::read_wstring(std::wstring& _wstring) {
+
+    _wstring.clear();
+    wchar_t _char = 0;
+
+    do {
+        enma_io_code code = read(&_char, sizeof(_char));
+
+        if (code != enma_io_success) {
+            return code;
+        }
+
+        if (_char) {
+            _wstring += _char;
+        }
+
+    } while (_char);
+
+    return enma_io_code::enma_io_success;
+}
+
+
 pe_image_io& pe_image_io::set_mode(enma_io_mode mode) {
 
     this->mode = mode;
@@ -310,7 +359,7 @@ bool view_data(
     }
     else {//if(required_offset >= present_offset)
 
-        if (required_offset < (present_offset + present_size)) {
+        if (required_offset <= (present_offset + present_size)) {
             real_offset = (required_offset - present_offset);
 
             if (required_size + required_offset >(present_offset + present_size)) {

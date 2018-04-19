@@ -3,8 +3,8 @@
 class debug_item {
     uint32_t   characteristics;
     uint32_t   timestamp;
-    uint16_t    major_version;
-    uint16_t    minor_version;
+    uint16_t   major_version;
+    uint16_t   minor_version;
     uint32_t   type;
     uint32_t   size_of_data;
     uint32_t   address_of_raw_data;
@@ -40,7 +40,7 @@ public:
     uint32_t  debug_item::get_address_of_raw_data() const;
     uint32_t  debug_item::get_pointer_to_raw_data() const;
 
-    std::vector<uint8_t> debug_item::get_item_data();
+    std::vector<uint8_t>& debug_item::get_item_data();
 };
 
 class debug_table {
@@ -59,5 +59,5 @@ public:
     std::vector<debug_item>& debug_table::get_items();
 };
 
-bool get_debug_table(_In_ const pe_image &image, _Out_ debug_table& debug);
-bool get_placement_debug_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_debug_table(_In_ const pe_image &image, _Out_ debug_table& debug);
+directory_code get_placement_debug_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);

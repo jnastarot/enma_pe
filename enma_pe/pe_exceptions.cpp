@@ -77,34 +77,34 @@ std::vector<exceptions_item>& exceptions_table::get_items() {
 }
 
 
-bool get_exception_table(const pe_image &image, exceptions_table& exceptions) {
+directory_code get_exception_table(const pe_image &image, exceptions_table& exceptions) {
     exceptions.get_items().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
     if (virtual_address && virtual_size /*req size*/) {
-        pe_image_io exception_io((pe_image &)image);
+        pe_image_io exception_io(image);
         exception_io.set_image_offset(virtual_address);
 
         while (exception_io.get_image_offset() < virtual_address + virtual_size) {
             image_ia64_runtime_function_entry exc_entry;
-            enma_io_code code = exception_io.read(&exc_entry, sizeof(exc_entry));
 
-            if (code != enma_io_code::enma_io_success) {
-                return false; //directory corrupt
+            if (exception_io.read(&exc_entry, sizeof(exc_entry)) != enma_io_code::enma_io_success) {
+
+                return directory_code::directory_code_currupted;
             }
 
             exceptions.add_item(exc_entry);
         }
 
-        return true;
+        return directory_code::directory_code_success;
     }
 
-	return false;
+	return directory_code::directory_code_not_present;
 }
 
-void build_exceptions_table(pe_image &image, pe_section& section, exceptions_table& exceptions) {
+bool build_exceptions_table(pe_image &image, pe_section& section, exceptions_table& exceptions) {
 
 
     if (exceptions.get_items().size()) {
@@ -116,7 +116,9 @@ void build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
         for (auto & item : exceptions.get_items()) {
             image_ia64_runtime_function_entry entry = { item.get_begin_address(), item.get_end_address(), item.get_unwind_data_address() };
 
-            exc_section.write(&entry, sizeof(entry));
+            if (exc_section.write(&entry, sizeof(entry)) != enma_io_success) {
+                return false;
+            }
         }
 
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, exc_virtual_address);
@@ -128,35 +130,37 @@ void build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 0);
         image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 0);
     }  
+
+    return true;
 }
 
-bool get_placement_exceptions_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_exceptions_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 
 	if (virtual_address && virtual_size) {
-        pe_image_io exception_io((pe_image &)image);
+        pe_image_io exception_io(image);
 
-        uint32_t _offset_real = 0;
+        uint32_t _offset_real   = 0;
         uint32_t available_size = 0;
-        uint32_t down_oversize = 0;
-        uint32_t up_oversize = 0;
+        uint32_t down_oversize  = 0;
+        uint32_t up_oversize    = 0;
 
         exception_io.view_image(
-            virtual_address, virtual_size,
+            virtual_address, ALIGN_UP(virtual_size,0x10),
             _offset_real,
             available_size, down_oversize, up_oversize
         );
 
-        
-        if (!down_oversize && !up_oversize) {
-            placement.push_back({ virtual_address ,available_size, dp_id_exceptions_desc });
-            return true;
+        placement.push_back({ virtual_address ,available_size, dp_id_exceptions_desc });
+
+        if (!down_oversize && !up_oversize) {          
+            return directory_code::directory_code_success;
         }
 
-        return false;
+        return directory_code::directory_code_currupted;
 	}
 
-	return false;
+	return directory_code::directory_code_not_present;
 }

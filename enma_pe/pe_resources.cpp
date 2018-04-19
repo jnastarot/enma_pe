@@ -354,10 +354,10 @@ void calculate_resource_data_space(resource_directory& root, uint32_t needed_siz
 	}
 }
 
-bool process_resource_directory(const pe_image &image, //taken from pe bless
+directory_code process_resource_directory(const pe_image &image, //taken from pe bless
 	uint32_t res_rva, uint32_t offset_to_directory, std::set<uint32_t>& processed, resource_directory& rsrc_table) {
 
-	if (!processed.insert(offset_to_directory).second) { return true; }
+	if (!processed.insert(offset_to_directory).second) { return directory_code::directory_code_success; }
 
 
     image_resource_directory directory;
@@ -398,11 +398,11 @@ bool process_resource_directory(const pe_image &image, //taken from pe bless
                             entry.set_name(name);
                         }
                         else {
-                            return false;
+                            return directory_code::directory_code_currupted;
                         }
                     }
                     else {
-                        return false;
+                        return directory_code::directory_code_currupted;
                     }
 				}
 				else {
@@ -412,8 +412,14 @@ bool process_resource_directory(const pe_image &image, //taken from pe bless
 				//If directory entry has another resource directory
 				if (dir_entry.data_is_directory) {
                     resource_directory rsrc_entry;
-                    if (process_resource_directory(image, res_rva, dir_entry.offset_to_directory, processed, rsrc_entry)) {
+
+                    directory_code code = process_resource_directory(image, res_rva, dir_entry.offset_to_directory, processed, rsrc_entry);
+
+                    if (code == directory_code::directory_code_success) {
                         entry.add_resource_directory(rsrc_entry);
+                    }
+                    else {
+                        return code;
                     }
 				}
 				else {
@@ -435,25 +441,25 @@ bool process_resource_directory(const pe_image &image, //taken from pe bless
 						);
                     }
                     else {
-                        return false;
+                        return directory_code::directory_code_currupted;
                     }
 				}
 
                 rsrc_table.add_resource_directory_entry(entry);
             }
             else {
-                return false;
+                return directory_code::directory_code_currupted;
             }
 		}
 	}
-	return true;
+	return directory_code::directory_code_success;
 }
 
 
-void rebuild_resource_directory(pe_image &image,pe_section& resource_section, resource_directory& root, //taken from pe bless
+bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, resource_directory& root, //taken from pe bless
 	uint32_t& current_structures_pos, uint32_t& current_data_pos, uint32_t& current_strings_pos, uint32_t offset_from_section_start){
 
-    pe_section_io section_io(resource_section, image);
+    pe_section_io section_io(resource_section, image,enma_io_mode_allow_expand);
 
     image_resource_directory dir = { 0 };
 	dir.characteristics = root.get_characteristics();
@@ -494,15 +500,19 @@ void rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
 			entry.name = 0x80000000 | (current_strings_pos - offset_from_section_start);
 			uint16_t unicode_length = (uint16_t)entry_item.get_name().length();
 
-            section_io.set_section_offset(resource_section.get_virtual_address() + current_strings_pos).write(
+            if(section_io.set_section_offset(resource_section.get_virtual_address() + current_strings_pos).write(
                 &unicode_length, sizeof(unicode_length)
-            );
+            ) != enma_io_success) {
+                return false;
+            }
 
 			current_strings_pos += sizeof(unicode_length);
 
-            section_io.set_section_offset(resource_section.get_virtual_address() + current_strings_pos).write(
+            if (section_io.set_section_offset(resource_section.get_virtual_address() + current_strings_pos).write(
                 (void*)entry_item.get_name().c_str(), entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t)
-            );
+            ) != enma_io_success) {
+                return false;
+            }
 
 			current_strings_pos += uint32_t(entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t));
 		}
@@ -519,55 +529,71 @@ void rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
 
 			entry.offset_to_data = current_data_pos - offset_from_section_start;
 
-            section_io.set_section_offset(resource_section.get_virtual_address() + current_data_pos).write(
+            if (section_io.set_section_offset(resource_section.get_virtual_address() + current_data_pos).write(
                 &data_entry, sizeof(data_entry)
-            );
+            ) != enma_io_success) {
+                return false;
+            }
 
 			current_data_pos += sizeof(data_entry);
 
-            section_io.set_section_offset(resource_section.get_virtual_address() + current_data_pos).write(
+            if (section_io.set_section_offset(resource_section.get_virtual_address() + current_data_pos).write(
                 entry_item.get_data_entry().get_data().data(), data_entry.size
-            );
+            ) != enma_io_success) {
+                return false;
+            }
 
 			current_data_pos += data_entry.size;
 
-            section_io.set_section_offset(resource_section.get_virtual_address() + this_current_structures_pos).write(
+            if (section_io.set_section_offset(resource_section.get_virtual_address() + this_current_structures_pos).write(
                 &entry, sizeof(entry)
-            );
+            ) != enma_io_success) {
+                return false;
+            }
 
 			this_current_structures_pos += sizeof(entry);
 		}
 		else{
 			entry.offset_to_data = 0x80000000 | (current_structures_pos - offset_from_section_start);
 
-            section_io.set_section_offset(resource_section.get_virtual_address() + this_current_structures_pos).write(
+            if (section_io.set_section_offset(resource_section.get_virtual_address() + this_current_structures_pos).write(
                 &entry, sizeof(entry)
-            );
+            ) != enma_io_success) {
+                return false;
+            }
 
 			this_current_structures_pos += sizeof(entry);
 
-			rebuild_resource_directory(image, resource_section, entry_item.get_resource_directory(), current_structures_pos, current_data_pos, current_strings_pos, offset_from_section_start);
+            if (!rebuild_resource_directory(image, resource_section, entry_item.get_resource_directory(), 
+                current_structures_pos, current_data_pos, current_strings_pos, offset_from_section_start)) {
+
+                return false;
+            }
 		}
 	}
+
+    return true;
 }
 
-bool get_resources_table(const pe_image &image, resource_directory& resources) {
+directory_code get_resources_table(const pe_image &image, resource_directory& resources) {
     resources.clear_resource_directory_entry_list();
 
-	if (!image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE) || !image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE)) {
-		return false;
+	if (!image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE) || 
+        !image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE)) {
+
+		return directory_code::directory_code_not_present;
 	}
 
 	std::set<uint32_t> processed;
 
 	return process_resource_directory(image, image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE), 0, processed, resources);
 }
-void build_resources_table(pe_image &image, pe_section& section, resource_directory& resources) {//taken from pe bless
+bool build_resources_table(pe_image &image, pe_section& section, resource_directory& resources) {//taken from pe bless
 
 	if (resources.get_entry_list().empty()) {
 		image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, 0);
 		image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE, 0);
-		return;
+		return true;
 	}
 
 	uint32_t aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), sizeof(uint32_t));
@@ -591,31 +617,43 @@ void build_resources_table(pe_image &image, pe_section& section, resource_direct
 	uint32_t current_structures_pos = aligned_offset_from_section_start;
 	uint32_t current_strings_pos = current_structures_pos + needed_size_for_structures;
 	uint32_t current_data_pos = current_strings_pos + needed_size_for_strings;
-	rebuild_resource_directory(image, section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
+
+    image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, section.get_virtual_address() + aligned_offset_from_section_start);
+    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE, needed_size);
 
 
-	image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, section.get_virtual_address() + aligned_offset_from_section_start);
-	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE,	needed_size);
+	return rebuild_resource_directory(image, section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
 }
 
-bool get_placement_resources_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_resources_table(pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE);
 
-	if (!virtual_address || !virtual_size) {
-		return false;
-	}
+	if (virtual_address && virtual_size) {
+        pe_image_io rsrc_io(image);
 
-	pe_section * rsrc_section = image.get_section_by_rva(virtual_address);
-	if (rsrc_section) {
-        if (ALIGN_UP(rsrc_section->get_virtual_size(), image.get_section_align()) >= virtual_size) {
+        uint32_t _offset_real = 0;
+        uint32_t available_size = 0;
+        uint32_t down_oversize = 0;
+        uint32_t up_oversize = 0;
 
-            placement.push_back({virtual_address ,virtual_size,dp_id_resources_desc });
-            return true;
+        rsrc_io.view_image(
+            virtual_address, virtual_size,
+            _offset_real,
+            available_size, down_oversize, up_oversize
+        );
+
+        placement.push_back({ virtual_address ,available_size, dp_id_resources_desc });
+
+        if (!down_oversize && !up_oversize) {
+            return directory_code::directory_code_success;
         }
-	}
 
-	return false;
+        return directory_code::directory_code_currupted;
+    }
+    else {
+        return directory_code::directory_code_not_present;
+    }
 }
  
