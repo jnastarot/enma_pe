@@ -59,7 +59,7 @@ public:
 
 
 
-bool get_bound_import_table(_In_ const pe_image &image, _Out_ bound_import_table& imports);
-void build_bound_import_table(_In_ const pe_image &image, _Inout_ pe_section& section, 
+directory_code get_bound_import_table(_In_ const pe_image &image, _Out_ bound_import_table& imports);
+bool build_bound_import_table(_Inout_ pe_image &image, _Inout_ pe_section& section, 
     _In_ bound_import_table& imports);
-bool get_placement_bound_import_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_bound_import_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);

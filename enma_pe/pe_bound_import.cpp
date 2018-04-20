@@ -103,70 +103,78 @@ std::vector<bound_imported_library>& bound_import_table::get_libs() {
 }
 
 
-bool get_bound_import_table(const pe_image &image, bound_import_table& imports) {
+directory_code get_bound_import_table(const pe_image &image, bound_import_table& imports) {
 
     imports.get_libs().clear();
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
     if (virtual_address) {
+        pe_image_io bnd_import_desc_io(image);
+        bnd_import_desc_io.set_image_offset(virtual_address);
 
-        pe_section * bound_imp_section = image.get_section_by_rva(virtual_address);
-        if (bound_imp_section) {
-            uint8_t  * raw_decs = &bound_imp_section->get_section_data().data()[
-                virtual_address - bound_imp_section->get_virtual_address()
-            ];
+        image_bound_import_descriptor bound_imp_description;
 
-            for (size_t bound_imp_size = 0;; bound_imp_size += sizeof(image_bound_import_descriptor)) {
-                image_bound_import_descriptor* bound_imp_description = (image_bound_import_descriptor*)(&raw_decs[bound_imp_size]);
+        if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
 
-                if (!bound_imp_description->time_date_stamp &&
-                    !bound_imp_description->offset_module_name &&
-                    !bound_imp_description->number_of_module_forwarder_refs) {
-                    break;
-                }
+        if (bound_imp_description.time_date_stamp && bound_imp_description.offset_module_name) {
 
+            do {
                 bound_imported_library bound_lib;
-                bound_lib.set_timestamp(bound_imp_description->time_date_stamp);
+                bound_lib.set_timestamp(bound_imp_description.time_date_stamp);
 
-                for (size_t ref_idx = 0; ref_idx < bound_imp_description->number_of_module_forwarder_refs; ref_idx++) {
-                    image_bound_forwarded_ref* ref_description = (image_bound_forwarded_ref*)(&raw_decs[
-                        bound_imp_size + sizeof(image_bound_import_descriptor) +
-                            sizeof(image_bound_forwarded_ref)*ref_idx
-                    ]);
+                std::string lib_name;
 
-                    pe_section * ref_name_section = image.get_section_by_rva(virtual_address + ref_description->offset_module_name);
-                    if (ref_name_section) {
-                        bound_lib.add_ref(bound_imported_ref(
-                            (char*)&ref_name_section->get_section_data().data()[
-                                (virtual_address + bound_imp_description->offset_module_name) - ref_name_section->get_virtual_address()
-                            ], ref_description->time_date_stamp
-                        ));
-                    }
+                if (pe_image_io(image).set_image_offset(virtual_address + bound_imp_description.offset_module_name).read_string(
+                    lib_name) != enma_io_success) {
+
+                    return directory_code::directory_code_currupted;
                 }
 
-                bound_imp_size += sizeof(image_bound_forwarded_ref)*bound_imp_description->number_of_module_forwarder_refs;
 
-                pe_section * bound_name_section = image.get_section_by_rva(virtual_address + bound_imp_description->offset_module_name);
-                if (bound_name_section) {
-                    bound_lib.set_library_name((char*)&bound_name_section->get_section_data().data()[
-                        (virtual_address + bound_imp_description->offset_module_name) - bound_name_section->get_virtual_address()
-                    ]);          
+                for (size_t ref_idx = 0; ref_idx < bound_imp_description.number_of_module_forwarder_refs; ref_idx++) {
+                    image_bound_forwarded_ref ref_description;
+
+                    if (bnd_import_desc_io.read(&ref_description, sizeof(ref_description)) != enma_io_success) {
+                        return directory_code::directory_code_currupted;
+                    }
+
+                    std::string ref_name;
+
+                    if (pe_image_io(image).set_image_offset(virtual_address + ref_description.offset_module_name).read_string(
+                        ref_name) != enma_io_success) {
+
+                        return directory_code::directory_code_currupted;
+                    }
+
+                    bound_lib.add_ref(bound_imported_ref(ref_name, ref_description.time_date_stamp));
                 }
 
                 imports.add_lib(bound_lib);
-            }
 
-            return true;
+                if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+            } while (bound_imp_description.time_date_stamp && bound_imp_description.offset_module_name);
         }
+
+        return directory_code::directory_code_success;
     }
 
 
-    return false;
+    return directory_code::directory_code_not_present;
 }
 
-void build_bound_import_table(const pe_image &image,pe_section& section,
+bool build_bound_import_table(pe_image &image,pe_section& section,
     bound_import_table& imports) {
+
+    if (!imports.get_libs().size()) { 
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT,0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT,0);
+        return true; 
+    }
 
     if (section.get_size_of_raw_data() & 0xF) {
         section.get_section_data().resize(
@@ -233,71 +241,72 @@ void build_bound_import_table(const pe_image &image,pe_section& section,
 }
 
 
-bool get_placement_bound_import_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_bound_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
     if (virtual_address) {
-        pe_section * bound_imp_section = image.get_section_by_rva(virtual_address);
-        if (bound_imp_section) {
-            uint8_t  * raw_decs = &bound_imp_section->get_section_data().data()[
-                virtual_address - bound_imp_section->get_virtual_address()
-            ];
+        pe_image_io bnd_import_desc_io(image);
+        bnd_import_desc_io.set_image_offset(virtual_address);
 
-            for (size_t bound_imp_size = 0;; bound_imp_size += sizeof(image_bound_import_descriptor)) {
-                image_bound_import_descriptor* bound_imp_description = (image_bound_import_descriptor*)(&raw_decs[bound_imp_size]);
-                
-                if (!bound_imp_description->time_date_stamp &&
-                    !bound_imp_description->offset_module_name &&
-                    !bound_imp_description->number_of_module_forwarder_refs) {
-                    break;
+        image_bound_import_descriptor bound_imp_description;
+
+        if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
+
+        if (bound_imp_description.time_date_stamp && bound_imp_description.offset_module_name) {
+
+            do {
+                bound_imported_library bound_lib;
+                bound_lib.set_timestamp(bound_imp_description.time_date_stamp);
+
+                std::string lib_name;
+
+                if (pe_image_io(image).set_image_offset(virtual_address + bound_imp_description.offset_module_name).read_string(
+                    lib_name) != enma_io_success) {
+
+                    return directory_code::directory_code_currupted;
                 }
 
+                placement.push_back({ virtual_address + bound_imp_description.offset_module_name ,ALIGN_UP((lib_name.length() + 1) , 0x2) ,
+                    dp_id_bound_import_names
+                });
 
-                for (size_t ref_idx = 0; ref_idx < bound_imp_description->number_of_module_forwarder_refs; ref_idx++) {
-                    image_bound_forwarded_ref* ref_description = (image_bound_forwarded_ref*)(&raw_decs[
-                        bound_imp_size + sizeof(image_bound_import_descriptor) +
-                            sizeof(image_bound_forwarded_ref)*ref_idx
-                    ]);
 
-                    pe_section * ref_name_section = image.get_section_by_rva(virtual_address + ref_description->offset_module_name);
-                    if (ref_name_section) {
-                        char * ref_name = (char*)&ref_name_section->get_section_data().data()[
-                            (virtual_address + ref_description->offset_module_name) - ref_name_section->get_virtual_address()
-                        ];
+                for (size_t ref_idx = 0; ref_idx < bound_imp_description.number_of_module_forwarder_refs; ref_idx++) {
+                    image_bound_forwarded_ref ref_description;
 
-                        placement.push_back({
-                            uint32_t (virtual_address + ref_description->offset_module_name) ,
-                            uint32_t (strlen(ref_name) + 2) ,
-                            dp_id_bound_import_names
-                        });
+                    if (bnd_import_desc_io.read(&ref_description, sizeof(ref_description)) != enma_io_success) {
+                        return directory_code::directory_code_currupted;
                     }
 
-                    placement.push_back({ uint32_t(virtual_address + bound_imp_size + sizeof(image_bound_import_descriptor) +
-                        sizeof(image_bound_forwarded_ref)*ref_idx) ,sizeof(image_bound_forwarded_ref) ,
-                        dp_id_bound_import_ref_desc
-                    }); 
-                }
+                    std::string ref_name;
 
-                pe_section * bound_name_section = image.get_section_by_rva(virtual_address + bound_imp_description->offset_module_name);
-                if (bound_name_section) {
-                    char * name = (char*)&bound_name_section->get_section_data().data()[
-                        (virtual_address + bound_imp_description->offset_module_name) - bound_name_section->get_virtual_address()
-                    ];
+                    if (pe_image_io(image).set_image_offset(virtual_address + ref_description.offset_module_name).read_string(
+                        ref_name) != enma_io_success) {
 
-                    placement.push_back({
-                        uint32_t (virtual_address + bound_imp_description->offset_module_name) ,
-                        uint32_t (strlen(name) + 2) ,
+                        return directory_code::directory_code_currupted;
+                    }
+
+
+                    placement.push_back({ virtual_address + ref_description.offset_module_name ,ALIGN_UP((ref_name.length() + 1) , 0x2) ,
                         dp_id_bound_import_names
-                    }); 
+                    });
                 }
 
-                placement.push_back({ uint32_t(virtual_address + bound_imp_size) ,sizeof(image_bound_import_descriptor),dp_id_bound_import_desc });
-            }
+                if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+            } while (bound_imp_description.time_date_stamp && bound_imp_description.offset_module_name);
 
-            return true;
+            placement.push_back({ virtual_address ,
+                ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address) ,0x10), dp_id_bound_import_desc });
         }
+
+        return directory_code::directory_code_success;
     }
 
-    return false;
+
+    return directory_code::directory_code_not_present;
 }

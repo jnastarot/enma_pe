@@ -226,12 +226,14 @@ directory_code get_export_table(const pe_image &image, export_table& exports) {
 
         if (!exports.get_number_of_functions()) { return directory_code::directory_code_success; }
 
-        std::string lib_name;
-        if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
-            return directory_code::directory_code_currupted;
-        }
+        if (export_desc.name) {
+            std::string lib_name;
+            if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-        exports.set_library_name(lib_name);
+            exports.set_library_name(lib_name);
+        }
 
         for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
 
@@ -484,68 +486,73 @@ directory_code get_placement_export_table(const pe_image &image, std::vector<dir
         pe_section * export_section = image.get_section_by_rva(virtual_address);
 
         if (export_section) {
-            image_export_directory* export_desc = (image_export_directory*)&export_section->get_section_data().data()[
-                virtual_address - export_section->get_virtual_address()
-            ];
+            image_export_directory export_desc;
 
-            if (!export_desc->number_of_functions) { return directory_code::directory_code_success; }
+            if (export_io.set_image_offset(virtual_address).read(&export_desc, sizeof(export_desc)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-            if (export_desc->name) {
-                pe_section * name_export_section = image.get_section_by_rva(export_desc->name);
-                if (name_export_section) {
-                    placement.push_back({
-                        export_desc->name,
-                        strlen((char*)(&export_section->get_section_data().data()[export_desc->name - export_section->get_virtual_address()]))+2,
-                        dp_id_export_names
-                    });
+            if (!export_desc.number_of_functions) { return directory_code::directory_code_success; }
 
+            if (export_desc.name) {
+                std::string lib_name;
+
+                if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
                 }
+
+                placement.push_back({export_desc.name, ALIGN_UP(lib_name.length()+1,0x2),dp_id_export_names});
             }
 
 
-            for (uint32_t ordinal = 0; ordinal < export_desc->number_of_functions; ordinal++) {
+            for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
 
-                uint32_t func_rva = *(uint32_t*)&image.get_section_by_rva((export_desc->address_of_functions + ordinal * sizeof(uint32_t)))->get_section_data().data()[
-                    (export_desc->address_of_functions + ordinal * sizeof(uint32_t))
-                        - image.get_section_by_rva((export_desc->address_of_functions + ordinal * sizeof(uint32_t)))->get_virtual_address()];
+                uint32_t func_rva;
+
+                if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * sizeof(uint32_t)).read(
+                    &func_rva, sizeof(func_rva)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
 
                 if (!func_rva) { continue; }
 
 
-                for (uint32_t i = 0; i < export_desc->number_of_names; i++) {
+                for (uint32_t i = 0; i < export_desc.number_of_names; i++) {
 
-                    uint16_t ordinal2 = *(uint16_t*)&image.get_section_by_rva((export_desc->address_of_name_ordinals + i * sizeof(uint16_t)))->get_section_data().data()[
-                        (export_desc->address_of_name_ordinals + i * sizeof(uint16_t))
-                            - image.get_section_by_rva((export_desc->address_of_name_ordinals + i * sizeof(uint16_t)))->get_virtual_address()];
+                    uint16_t ordinal2;
+
+                    if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * sizeof(uint16_t)).read(
+                        &ordinal2, sizeof(ordinal2)) != enma_io_success) {
+                        return directory_code::directory_code_currupted;
+                    }
 
                     if (ordinal == ordinal2) {
 
-                        uint32_t function_name_rva = *(uint32_t*)&image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_section_data().data()[
-                            (export_desc->address_of_names + i * sizeof(uint32_t))
-                                - image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_virtual_address()];
+                        uint32_t function_name_rva;
 
-                        char* func_name = (char*)&image.get_section_by_rva(function_name_rva)->get_section_data().data()[
-                            function_name_rva
-                                - image.get_section_by_rva(function_name_rva)->get_virtual_address()];
+                        if (export_io.set_image_offset(export_desc.address_of_names + i * sizeof(uint32_t)).read(
+                            &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
+                            return directory_code::directory_code_currupted;
+                        }
 
-                        placement.push_back({
-                            (export_desc->address_of_names + i * sizeof(uint32_t))
-                            - image.get_section_by_rva((export_desc->address_of_names + i * sizeof(uint32_t)))->get_virtual_address(),
-                            strlen(func_name) + 2,
-                            dp_id_export_names
-                        });
+                        std::string func_name;
+
+                        if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
+                            return directory_code::directory_code_currupted;
+                        }
+
+                        placement.push_back({ function_name_rva,ALIGN_UP(func_name.length()+1,0x2),dp_id_export_names});
 
                         if (func_rva >= virtual_address + sizeof(image_export_directory) &&
                             func_rva < virtual_address + virtual_size) {
 
-                            char* forwarded_func_name = (char*)&image.get_section_by_rva(func_rva)->get_section_data().data()[
-                                func_rva - image.get_section_by_rva(func_rva)->get_virtual_address()];
+                            std::string forwarded_func_name;
 
-                            placement.push_back({
-                                func_rva,
-                                strlen(forwarded_func_name) + 2,
-                                dp_id_export_names
-                            });
+                            if (export_io.set_image_offset(func_rva).read_string(forwarded_func_name) != enma_io_success) {
+                                return directory_code::directory_code_currupted;
+                            }
+
+                            placement.push_back({ func_rva,ALIGN_UP(forwarded_func_name.length() + 1,0x2),dp_id_export_names });
                         }
 
                         break;
@@ -553,34 +560,25 @@ directory_code get_placement_export_table(const pe_image &image, std::vector<dir
                 }
             }
 
-            if (export_desc->address_of_functions) {
-                placement.push_back({
-                    (export_desc->address_of_functions)
-                    - image.get_section_by_rva((export_desc->address_of_functions))->get_virtual_address(),
-                    export_desc->number_of_functions * sizeof(uint32_t),
+            if (export_desc.address_of_functions) {
+                placement.push_back({ export_desc.address_of_functions,export_desc.number_of_functions * sizeof(uint32_t),
                     dp_id_export_func_table
                 });
             }
 
-            if (export_desc->address_of_names) {
-                placement.push_back({
-                    (export_desc->address_of_names)
-                    - image.get_section_by_rva((export_desc->address_of_names))->get_virtual_address(),
-                    export_desc->number_of_names * sizeof(uint32_t),
+            if (export_desc.address_of_names) {
+                placement.push_back({ export_desc.address_of_names,export_desc.number_of_names * sizeof(uint32_t),
                     dp_id_export_name_table
                 });
             }
 
-            if (export_desc->address_of_name_ordinals) {
-                placement.push_back({
-                    (export_desc->address_of_name_ordinals)
-                    - image.get_section_by_rva((export_desc->address_of_name_ordinals))->get_virtual_address(),
-                    export_desc->number_of_names * sizeof(uint16_t),
+            if (export_desc.address_of_name_ordinals) {
+                placement.push_back({ export_desc.address_of_name_ordinals,export_desc.number_of_functions * sizeof(uint16_t),
                     dp_id_export_ordinal_table
                 });
             }
 
-            placement.push_back({ virtual_address,sizeof(image_export_directory),dp_id_export_desc });
+            placement.push_back({ virtual_address,ALIGN_UP(sizeof(image_export_directory),0x10),dp_id_export_desc });
             return directory_code::directory_code_success;
         }
     }

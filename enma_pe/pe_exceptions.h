@@ -39,6 +39,7 @@ public:
     void exceptions_table::add_item(const image_ia64_runtime_function_entry& exc_entry);
     
 public:
+    size_t exceptions_table::size() const;
 
     std::vector<exceptions_item>& exceptions_table::get_items();
 };
