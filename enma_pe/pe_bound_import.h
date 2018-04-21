@@ -44,7 +44,7 @@ public:
 };
 
 class bound_import_table {
-    std::vector<bound_imported_library> libs;
+    std::vector<bound_imported_library> libraries;
 public:
     bound_import_table::bound_import_table();
     bound_import_table::bound_import_table(const bound_import_table& imports);
@@ -52,9 +52,13 @@ public:
 
     bound_import_table& bound_import_table::operator=(const bound_import_table& imports);
 public:
-    void bound_import_table::add_lib(const bound_imported_library& lib);
+    void bound_import_table::add_library(const bound_imported_library& lib);
+    void bound_import_table::clear();
 public:
-    std::vector<bound_imported_library>& bound_import_table::get_libs();
+    bool bound_import_table::has_library(const std::string& library_name, uint32_t timestamp) const;
+    size_t bound_import_table::size();
+
+    std::vector<bound_imported_library>& bound_import_table::get_libraries();
 };
 
 

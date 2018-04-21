@@ -91,21 +91,42 @@ bound_import_table::~bound_import_table() {
 }
 
 bound_import_table& bound_import_table::operator=(const bound_import_table& imports) {
-    this->libs = imports.libs;
+    this->libraries = imports.libraries;
 
     return *this;
 }
-void bound_import_table::add_lib(const bound_imported_library& lib) {
-    libs.push_back(lib);
+void bound_import_table::add_library(const bound_imported_library& lib) {
+    libraries.push_back(lib);
 }
-std::vector<bound_imported_library>& bound_import_table::get_libs() {
-    return libs;
+void bound_import_table::clear() {
+    this->libraries.clear();
+}
+
+size_t bound_import_table::size() {
+    return this->libraries.size();
+}
+
+bool bound_import_table::has_library(const std::string& library_name, uint32_t timestamp) const {
+
+    for (auto& library : this->libraries) {
+        if (library.get_library_name() == library_name &&
+            library.get_timestamp() == timestamp) {
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+std::vector<bound_imported_library>& bound_import_table::get_libraries() {
+    return libraries;
 }
 
 
 directory_code get_bound_import_table(const pe_image &image, bound_import_table& imports) {
 
-    imports.get_libs().clear();
+    imports.clear();
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
@@ -152,7 +173,7 @@ directory_code get_bound_import_table(const pe_image &image, bound_import_table&
                     bound_lib.add_ref(bound_imported_ref(ref_name, ref_description.time_date_stamp));
                 }
 
-                imports.add_lib(bound_lib);
+                imports.add_library(bound_lib);
 
                 if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
                     return directory_code::directory_code_currupted;
@@ -170,73 +191,72 @@ directory_code get_bound_import_table(const pe_image &image, bound_import_table&
 bool build_bound_import_table(pe_image &image,pe_section& section,
     bound_import_table& imports) {
 
-    if (!imports.get_libs().size()) { 
-        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT,0);
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT,0);
-        return true; 
-    }
+    if (imports.size()) { 
+        pe_section_io bnd_import_desc_io(section, image,enma_io_mode_allow_expand);
+        pe_section_io bnd_import_names_io(section, image, enma_io_mode_allow_expand);
 
-    if (section.get_size_of_raw_data() & 0xF) {
-        section.get_section_data().resize(
-            section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-        );
-    }
+        bnd_import_desc_io.align_up(0x10).seek_to_end();
 
-    size_t bound_import_offset = section.get_section_data().size();
-    size_t  descs_size = 0;
-    size_t  names_size = 0;
+        size_t  descs_size = 0;
+        size_t  names_size = 0;
 
-    for (auto& bound_desc : imports.get_libs()) {
+        for (auto& bound_desc : imports.get_libraries()) {
+            descs_size += sizeof(image_bound_import_descriptor);
+            names_size += bound_desc.get_library_name().length() + 1;
+
+            for (auto& bound_ref : bound_desc.get_refs()) {
+                descs_size += sizeof(image_bound_forwarded_ref);
+                names_size += ALIGN_UP( (bound_ref.get_ref_name().length() + 1),0x2);
+            }
+        }
         descs_size += sizeof(image_bound_import_descriptor);
-        names_size += bound_desc.get_library_name().length() + 1;
+        descs_size = ALIGN_UP(descs_size, 0x10);
 
-        for (auto& bound_ref : bound_desc.get_refs()){
-            descs_size += sizeof(image_bound_forwarded_ref);
-            names_size += bound_ref.get_ref_name().length() + 1;
+        uint32_t virtual_address = bnd_import_desc_io.get_section_offset();
+        bnd_import_names_io.set_section_offset(bnd_import_desc_io.get_section_offset() + descs_size);
+
+        
+        for (auto& bound_desc : imports.get_libraries()) {
+            image_bound_import_descriptor bound_lib;
+            bound_lib.time_date_stamp = bound_desc.get_timestamp();
+            bound_lib.number_of_module_forwarder_refs = (uint16_t)bound_desc.get_number_of_forwarder_refs();
+            bound_lib.offset_module_name = (uint16_t)(bnd_import_names_io.get_section_offset() - virtual_address);
+
+            if (bnd_import_desc_io.write(&bound_lib,sizeof(bound_lib)) != enma_io_success) {
+                return false;
+            }
+
+            if (bnd_import_names_io.write(
+                (void*)bound_desc.get_library_name().c_str(), bound_desc.get_library_name().length() + 1) != enma_io_success) {
+
+                return false;
+            }
+            bnd_import_names_io.align_up(0x2);
+
+            for (auto& bound_ref : bound_desc.get_refs()) {
+                image_bound_forwarded_ref ref_lib;
+                ref_lib.time_date_stamp = bound_ref.get_timestamp();
+                ref_lib.offset_module_name = (uint16_t)(bnd_import_names_io.get_section_offset() - virtual_address);
+
+                if (bnd_import_desc_io.write(&ref_lib, sizeof(ref_lib)) != enma_io_success) {
+                    return false;
+                }
+
+                if (bnd_import_names_io.write(
+                    (void*)bound_ref.get_ref_name().c_str(), bound_ref.get_ref_name().length() + 1) != enma_io_success) {
+
+                    return false;
+                }
+                bnd_import_names_io.align_up(0x2);
+            }
         }
+
+        return true;
     }
-    descs_size += sizeof(image_bound_import_descriptor);
-
-    section.get_section_data().resize(
-        section.get_section_data().size() + 
-        descs_size + names_size
-    );
-
-    memset(&section.get_section_data().data()[
-        bound_import_offset
-    ],0, descs_size + names_size);
-
-    uint8_t  * desc_data = &section.get_section_data().data()[
-        bound_import_offset
-    ];
-    size_t names_offset = 0;
-
-    for (auto& bound_desc : imports.get_libs()) {
-        image_bound_import_descriptor* bound_data = (image_bound_import_descriptor*)desc_data;
-        bound_data->time_date_stamp = bound_desc.get_timestamp();
-        bound_data->number_of_module_forwarder_refs = (uint16_t)bound_desc.get_number_of_forwarder_refs();
-        bound_data->offset_module_name = (uint16_t)(descs_size + names_offset);
-
-        memcpy((char*)&section.get_section_data().data()[
-            bound_import_offset + descs_size + names_offset
-        ], bound_desc.get_library_name().c_str(), bound_desc.get_library_name().length() + 1);
-
-        names_offset+= bound_desc.get_library_name().length() + 1;
-
-        desc_data += sizeof(image_bound_import_descriptor);
-        for (auto& bound_ref : bound_desc.get_refs()) {
-            image_bound_forwarded_ref* ref_data = (image_bound_forwarded_ref*)desc_data;
-            ref_data->time_date_stamp = bound_ref.get_timestamp();
-            ref_data->offset_module_name = (uint16_t)(descs_size + names_offset);
-
-            memcpy((char*)&section.get_section_data().data()[
-                bound_import_offset + descs_size + names_offset
-            ], bound_ref.get_ref_name().c_str(), bound_ref.get_ref_name().length() + 1);
-
-            names_offset += bound_ref.get_ref_name().length() + 1;
-
-            desc_data += sizeof(image_bound_forwarded_ref);
-        }
+    else {
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT, 0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT, 0);
+        return true;
     }
 }
 

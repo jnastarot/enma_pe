@@ -1,33 +1,39 @@
 #pragma once
 
 class imported_func {
-	uint16_t hint;
-	uint16_t ordinal;
-	std::string func_name;
-	bool b_import_by_name;
+    uint32_t iat_rva;
 
-	uint32_t iat_rva;
+	uint16_t hint;
+    std::string func_name;
+
+	uint16_t ordinal;
+	
+    uint64_t iat_item;
+
+	bool b_import_by_name;
 public:
 	imported_func::imported_func();
     imported_func::imported_func(const imported_func& func);
-    imported_func::imported_func(uint32_t iat_rva, const std::string& func_name, uint16_t hint);
-    imported_func::imported_func(uint32_t iat_rva, uint16_t ordinal);
+    imported_func::imported_func(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item = 0);
+    imported_func::imported_func(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item = 0);
 
 	imported_func::~imported_func();
 
 	imported_func& imported_func::operator=(const imported_func& func);
 public:
+    void imported_func::set_func_name(const std::string& func_name);
 	void imported_func::set_hint(uint16_t hint);
 	void imported_func::set_ordinal(uint16_t ordinal);
-	void imported_func::set_func_name(const std::string& func_name);
-	void imported_func::set_import_by_name(bool b);
 	void imported_func::set_iat_rva(uint32_t rva);
+    void imported_func::set_iat_item(uint64_t iat_item);
+    void imported_func::set_import_by_name(bool b);
 public:
+    std::string imported_func::get_func_name() const;
 	uint16_t imported_func::get_hint() const;
 	uint16_t imported_func::get_ordinal() const;
-	std::string imported_func::get_func_name() const;
-	bool  imported_func::is_import_by_name() const;
 	uint32_t imported_func::get_iat_rva() const;
+    uint64_t imported_func::get_iat_item()const;
+    bool  imported_func::is_import_by_name() const;
 };
 
 class imported_library {

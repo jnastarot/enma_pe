@@ -35,10 +35,10 @@ public:
 };
 
 class export_table {
-	uint32_t   characteristics;
-	uint32_t   time_stamp;
-	uint16_t    major_version;
-	uint16_t    minor_version;
+	uint32_t characteristics;
+	uint32_t time_stamp;
+	uint16_t major_version;
+	uint16_t minor_version;
 	uint32_t ordinal_base;
 	uint32_t number_of_functions;
 	uint32_t number_of_names;

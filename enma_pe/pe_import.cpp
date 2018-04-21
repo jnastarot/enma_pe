@@ -7,17 +7,18 @@ imported_func::imported_func() {
 	ordinal				= 0;
 	b_import_by_name	= 0;
 	iat_rva				= 0;
+    iat_item            = 0;
     func_name.clear();
 }
 imported_func::imported_func(const imported_func& func) {
     this->operator=(func);
 }
-imported_func::imported_func(uint32_t iat_rva, const std::string& func_name, uint16_t hint):
-    iat_rva(iat_rva), func_name(func_name), hint(hint), ordinal(0), b_import_by_name(true){
+imported_func::imported_func(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item):
+    iat_rva(iat_rva), func_name(func_name), hint(hint), ordinal(0), b_import_by_name(true), iat_item(iat_item){
 
 }
-imported_func::imported_func(uint32_t iat_rva, uint16_t ordinal):
-    iat_rva(iat_rva), ordinal(ordinal), hint(0), b_import_by_name(false){
+imported_func::imported_func(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item):
+    iat_rva(iat_rva), ordinal(ordinal), hint(0), b_import_by_name(false), iat_item(iat_item){
 }
 
 imported_func::~imported_func() {
@@ -31,6 +32,7 @@ imported_func& imported_func::operator=(const imported_func& func) {
 	this->func_name = func.func_name;
 	this->ordinal = func.ordinal;
 	this->b_import_by_name = func.b_import_by_name;
+    this->iat_item = func.iat_item;
 
     return *this;
 }
@@ -66,6 +68,9 @@ bool  imported_func::is_import_by_name() const {
 }
 uint32_t imported_func::get_iat_rva() const {
 	return this->iat_rva;
+}
+uint64_t imported_func::get_iat_item()const {
+    return this->iat_item;
 }
 
 imported_library::imported_library() {
