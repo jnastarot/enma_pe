@@ -33,27 +33,26 @@ pe_image::pe_image(std::string& file_path) {
     FILE* hfile = fopen(file_path.c_str(), "rb");
 
 
-	if (hfile != nullptr) {
+    if (hfile != nullptr) {
         fseek(hfile, 0, SEEK_END);
         size_t file_size = ftell(hfile);
         fseek(hfile, 0, SEEK_SET);
 
-		uint8_t * file_buffer = new uint8_t[file_size];
+        uint8_t * file_buffer = new uint8_t[file_size];
 
-        if (file_buffer) {
 
-            if (fread(file_buffer, file_size, 1, hfile)) {
+        if (fread(file_buffer, file_size, 1, hfile)) {
 
-                init_from_file(file_buffer, file_size);
-            }
-            else {
-                image_status = pe_image_status_bad_format;
-            }
-
-            delete[] file_buffer;
+            init_from_file(file_buffer, file_size);
         }
-		fclose(hfile);
-	}
+        else {
+            image_status = pe_image_status_bad_format;
+        }
+
+        delete[] file_buffer;
+
+        fclose(hfile);
+    }
 	else {
 		image_status = pe_image_status_unknown;
 	}

@@ -79,12 +79,21 @@ pe_section& pe_section::set_characteristics(uint32_t characteristics) {
 	return *this;
 }
 
+pe_section& pe_section::set_shared(bool flag) {
+    if (flag) {
+        this->characteristics |= IMAGE_SCN_MEM_SHARED;
+    }
+    else {
+        this->characteristics &= ~IMAGE_SCN_MEM_SHARED;
+    }
+    return *this;
+}
 pe_section& pe_section::set_readable(bool flag) {
 	if (flag) {
 		this->characteristics |= IMAGE_SCN_MEM_READ;
 	}
 	else {
-		this->characteristics = ~((~this->characteristics) | IMAGE_SCN_MEM_READ);
+		this->characteristics &= ~IMAGE_SCN_MEM_READ;
 	}
 	return *this;
 }
@@ -93,7 +102,7 @@ pe_section& pe_section::set_writeable(bool flag) {
 		this->characteristics |= IMAGE_SCN_MEM_WRITE;
 	}
 	else {
-		this->characteristics = ~((~this->characteristics) | IMAGE_SCN_MEM_WRITE);
+		this->characteristics &= ~IMAGE_SCN_MEM_WRITE;
 	}
 	return *this;
 }
@@ -102,10 +111,11 @@ pe_section& pe_section::set_executable(bool flag) {
 		this->characteristics |= IMAGE_SCN_MEM_EXECUTE;
 	}
 	else {
-		this->characteristics = ~((~this->characteristics) | IMAGE_SCN_MEM_EXECUTE);
+		this->characteristics &= ~IMAGE_SCN_MEM_EXECUTE;
 	}
 	return *this;
 }
+
 
 void pe_section::add_data(const uint8_t * data, uint32_t data_size) {
 	section_data.resize(section_data.size() + data_size);
@@ -131,6 +141,9 @@ uint32_t pe_section::get_characteristics() const {
 	return characteristics;
 }
 
+bool pe_section::is_shared() const {
+    return (characteristics&IMAGE_SCN_MEM_SHARED) != 0;
+}
 bool pe_section::is_readable() const {
 	return (characteristics&IMAGE_SCN_MEM_READ) != 0;
 }

@@ -25,6 +25,7 @@ public:
 	pe_section& pe_section::set_pointer_to_raw(uint32_t pointer_to_raw);
 	pe_section& pe_section::set_characteristics(uint32_t characteristics);
 
+    pe_section& pe_section::set_shared(bool flag);
 	pe_section& pe_section::set_readable(bool flag);
 	pe_section& pe_section::set_writeable(bool flag);
 	pe_section& pe_section::set_executable(bool flag);
@@ -38,9 +39,11 @@ public:
 	uint32_t pe_section::get_pointer_to_raw() const;
 	uint32_t pe_section::get_characteristics() const;
 
+    bool pe_section::is_shared() const;
 	bool pe_section::is_readable() const;
 	bool pe_section::is_writeable() const;
 	bool pe_section::is_executable() const;
+
 
     const std::vector<uint8_t>& pe_section::get_section_data() const;
     std::vector<uint8_t>& pe_section::get_section_data();

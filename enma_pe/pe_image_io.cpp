@@ -6,13 +6,14 @@ pe_image_io::pe_image_io(
     pe_image& image,
     enma_io_mode mode,
     enma_io_addressing_type type
-):image(&image),mode(mode), addressing_type(type){}
+):image(&image),mode(mode), addressing_type(type),image_offset(0),last_code(enma_io_success){}
 
 
 pe_image_io::pe_image_io(
     const pe_image& image,
     enma_io_addressing_type type
-): image((pe_image*)&image), mode(enma_io_mode_default), addressing_type(type) {}
+): image((pe_image*)&image), mode(enma_io_mode_default), addressing_type(type), 
+    image_offset(0), last_code(enma_io_success) {}
 
 pe_image_io::pe_image_io(const pe_image_io& image_io) {
     operator=(image_io);

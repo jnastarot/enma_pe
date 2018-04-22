@@ -56,6 +56,8 @@ public:
     void bound_import_table::clear();
 public:
     bool bound_import_table::has_library(const std::string& library_name, uint32_t timestamp) const;
+    bool bound_import_table::has_library(const std::string& library_name) const;
+
     size_t bound_import_table::size();
 
     std::vector<bound_imported_library>& bound_import_table::get_libraries();

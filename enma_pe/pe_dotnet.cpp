@@ -5,6 +5,17 @@
 
 dotnet_table::dotnet_table() {
 
+    major_version = 0;
+    minor_version = 0;
+    flags = 0;
+    entry_point_rva = 0;
+
+    meta_data = { 0,0 };
+    resources = { 0,0 };
+    strong_name_signature = { 0,0 };
+    code_manager_table = { 0,0 };
+    vtable_fixups = { 0,0 };
+    export_address_table_jumps = {0,0};
 }
 dotnet_table::~dotnet_table() {
 

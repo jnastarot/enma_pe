@@ -119,6 +119,19 @@ bool bound_import_table::has_library(const std::string& library_name, uint32_t t
     return false;
 }
 
+bool bound_import_table::has_library(const std::string& library_name) const {
+
+    for (auto& library : this->libraries) {
+        if (library.get_library_name() == library_name) {
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 std::vector<bound_imported_library>& bound_import_table::get_libraries() {
     return libraries;
 }

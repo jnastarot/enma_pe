@@ -90,7 +90,7 @@ void map_add_item(std::vector<std::string> &path, map_item& item, std::vector<ma
     }
 }
 
-#define is_value_in_bound(st,len,val) (st <= val && val < st+len)
+#define is_value_in_bound(st,len,val) ((st) <= (val) && (val) < (st+(len)))
 
 void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std::vector<map_item_raw>& items_raw, map_root& map) {
 

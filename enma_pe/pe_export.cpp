@@ -40,14 +40,14 @@ bool export_table_item::operator==(const export_table_item& item) {
 	return false;
 }
 
-void  export_table_item::set_rva(uint32_t rva) {
-	this->rva = rva;
+void  export_table_item::set_rva(uint32_t _rva) {
+	this->rva = _rva;
 }
-void  export_table_item::set_ordinal(uint16_t ordinal) {
-	this->ordinal = ordinal;
+void  export_table_item::set_ordinal(uint16_t _ordinal) {
+	this->ordinal = _ordinal;
 }
-void  export_table_item::set_name_ordinal(uint16_t ordinal) {
-	this->name_ordinal = ordinal;
+void  export_table_item::set_name_ordinal(uint16_t _ordinal) {
+	this->name_ordinal = _ordinal;
 }
 void  export_table_item::set_has_name(bool b) {
 	this->b_name = b;
@@ -483,104 +483,101 @@ directory_code get_placement_export_table(const pe_image &image, std::vector<dir
 
     if (virtual_address) {
         pe_image_io export_io(image);
-        pe_section * export_section = image.get_section_by_rva(virtual_address);
 
-        if (export_section) {
-            image_export_directory export_desc;
+        image_export_directory export_desc;
 
-            if (export_io.set_image_offset(virtual_address).read(&export_desc, sizeof(export_desc)) != enma_io_success) {
+        if (export_io.set_image_offset(virtual_address).read(&export_desc, sizeof(export_desc)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
+
+        if (!export_desc.number_of_functions) { return directory_code::directory_code_success; }
+
+        if (export_desc.name) {
+            std::string lib_name;
+
+            if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
                 return directory_code::directory_code_currupted;
             }
 
-            if (!export_desc.number_of_functions) { return directory_code::directory_code_success; }
+            placement.push_back({ export_desc.name, ALIGN_UP(lib_name.length() + 1,0x2),dp_id_export_names });
+        }
 
-            if (export_desc.name) {
-                std::string lib_name;
 
-                if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
-                    return directory_code::directory_code_currupted;
-                }
+        for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
 
-                placement.push_back({export_desc.name, ALIGN_UP(lib_name.length()+1,0x2),dp_id_export_names});
+            uint32_t func_rva;
+
+            if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * sizeof(uint32_t)).read(
+                &func_rva, sizeof(func_rva)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
             }
 
+            if (!func_rva) { continue; }
 
-            for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
 
-                uint32_t func_rva;
+            for (uint32_t i = 0; i < export_desc.number_of_names; i++) {
 
-                if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * sizeof(uint32_t)).read(
-                    &func_rva, sizeof(func_rva)) != enma_io_success) {
+                uint16_t ordinal2;
+
+                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * sizeof(uint16_t)).read(
+                    &ordinal2, sizeof(ordinal2)) != enma_io_success) {
                     return directory_code::directory_code_currupted;
                 }
 
-                if (!func_rva) { continue; }
+                if (ordinal == ordinal2) {
 
+                    uint32_t function_name_rva;
 
-                for (uint32_t i = 0; i < export_desc.number_of_names; i++) {
-
-                    uint16_t ordinal2;
-
-                    if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * sizeof(uint16_t)).read(
-                        &ordinal2, sizeof(ordinal2)) != enma_io_success) {
+                    if (export_io.set_image_offset(export_desc.address_of_names + i * sizeof(uint32_t)).read(
+                        &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
                         return directory_code::directory_code_currupted;
                     }
 
-                    if (ordinal == ordinal2) {
+                    std::string func_name;
 
-                        uint32_t function_name_rva;
-
-                        if (export_io.set_image_offset(export_desc.address_of_names + i * sizeof(uint32_t)).read(
-                            &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
-                            return directory_code::directory_code_currupted;
-                        }
-
-                        std::string func_name;
-
-                        if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
-                            return directory_code::directory_code_currupted;
-                        }
-
-                        placement.push_back({ function_name_rva,ALIGN_UP(func_name.length()+1,0x2),dp_id_export_names});
-
-                        if (func_rva >= virtual_address + sizeof(image_export_directory) &&
-                            func_rva < virtual_address + virtual_size) {
-
-                            std::string forwarded_func_name;
-
-                            if (export_io.set_image_offset(func_rva).read_string(forwarded_func_name) != enma_io_success) {
-                                return directory_code::directory_code_currupted;
-                            }
-
-                            placement.push_back({ func_rva,ALIGN_UP(forwarded_func_name.length() + 1,0x2),dp_id_export_names });
-                        }
-
-                        break;
+                    if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
+                        return directory_code::directory_code_currupted;
                     }
+
+                    placement.push_back({ function_name_rva,ALIGN_UP(func_name.length() + 1,0x2),dp_id_export_names });
+
+                    if (func_rva >= virtual_address + sizeof(image_export_directory) &&
+                        func_rva < virtual_address + virtual_size) {
+
+                        std::string forwarded_func_name;
+
+                        if (export_io.set_image_offset(func_rva).read_string(forwarded_func_name) != enma_io_success) {
+                            return directory_code::directory_code_currupted;
+                        }
+
+                        placement.push_back({ func_rva,ALIGN_UP(forwarded_func_name.length() + 1,0x2),dp_id_export_names });
+                    }
+
+                    break;
                 }
             }
-
-            if (export_desc.address_of_functions) {
-                placement.push_back({ export_desc.address_of_functions,export_desc.number_of_functions * sizeof(uint32_t),
-                    dp_id_export_func_table
-                });
-            }
-
-            if (export_desc.address_of_names) {
-                placement.push_back({ export_desc.address_of_names,export_desc.number_of_names * sizeof(uint32_t),
-                    dp_id_export_name_table
-                });
-            }
-
-            if (export_desc.address_of_name_ordinals) {
-                placement.push_back({ export_desc.address_of_name_ordinals,export_desc.number_of_functions * sizeof(uint16_t),
-                    dp_id_export_ordinal_table
-                });
-            }
-
-            placement.push_back({ virtual_address,ALIGN_UP(sizeof(image_export_directory),0x10),dp_id_export_desc });
-            return directory_code::directory_code_success;
         }
+
+        if (export_desc.address_of_functions) {
+            placement.push_back({ export_desc.address_of_functions,export_desc.number_of_functions * sizeof(uint32_t),
+                dp_id_export_func_table
+            });
+        }
+
+        if (export_desc.address_of_names) {
+            placement.push_back({ export_desc.address_of_names,export_desc.number_of_names * sizeof(uint32_t),
+                dp_id_export_name_table
+            });
+        }
+
+        if (export_desc.address_of_name_ordinals) {
+            placement.push_back({ export_desc.address_of_name_ordinals,export_desc.number_of_functions * sizeof(uint16_t),
+                dp_id_export_ordinal_table
+            });
+        }
+
+        placement.push_back({ virtual_address,ALIGN_UP(sizeof(image_export_directory),0x10),dp_id_export_desc });
+        return directory_code::directory_code_success;
     }
 
     return directory_code::directory_code_not_present;

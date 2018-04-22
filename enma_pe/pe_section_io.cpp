@@ -35,6 +35,8 @@ pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
     this->last_code         = io_section.last_code;
     this->mode              = io_section.mode;
     this->addressing_type   = io_section.addressing_type;
+    this->raw_aligment      = io_section.raw_aligment;
+    this->virtual_aligment  = io_section.virtual_aligment;
 
     return *this;
 }
@@ -144,7 +146,7 @@ enma_io_code pe_section_io::internal_write(
                     (ALIGN_UP(section->get_size_of_raw_data(), this->raw_aligment) - section->get_size_of_raw_data()) + up_oversize            
                     , false);
 
-                wrote_size += up_oversize;
+                wrote_size += min(up_oversize, size);
                 up_oversize = 0;
             }
             else if (addressing_type == enma_io_addressing_type::enma_io_address_rva) {
@@ -153,7 +155,7 @@ enma_io_code pe_section_io::internal_write(
                     (ALIGN_UP(section->get_virtual_size(), this->virtual_aligment) - section->get_virtual_size()) + up_oversize
                     , false);
 
-                wrote_size += up_oversize;
+                wrote_size += min(up_oversize, size);
                 up_oversize = 0;
             }
             else {
@@ -284,7 +286,12 @@ enma_io_code pe_section_io::read_wstring(std::wstring& _wstring) {
 }
 
 pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
-    add_size(ALIGN_UP(section->get_size_of_raw_data(), factor) - section->get_size_of_raw_data());
+    add_size(ALIGN_UP(section->get_size_of_raw_data(), factor) - section->get_size_of_raw_data(), offset_to_end);
+
+    return *this;
+}
+pe_section_io& pe_section_io::align_up_offset(uint32_t factor) {
+    this->section_offset = ALIGN_UP(this->section_offset, factor);
 
     return *this;
 }

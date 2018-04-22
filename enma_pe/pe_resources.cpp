@@ -63,21 +63,23 @@ resource_directory_entry::includes::includes()
 
 resource_directory_entry& resource_directory_entry::operator=(const resource_directory_entry& other) {
 
-	release();
+    if (&other != this) {
+        release();
 
-	id = other.id;
-	name = other.name;
-	includes_data = other.includes_data;
-	named = other.named;
+        id = other.id;
+        name = other.name;
+        includes_data = other.includes_data;
+        named = other.named;
 
-	if (other._ptr.data) {
-		if (other.includes_data) {
-			_ptr.data = new resource_data_entry(*other._ptr.data);
-		}
-		else {
-			_ptr.dir = new resource_directory(*other._ptr.dir);
-		}
-	}
+        if (other._ptr.data) {
+            if (other.includes_data) {
+                _ptr.data = new resource_data_entry(*other._ptr.data);
+            }
+            else {
+                _ptr.dir = new resource_directory(*other._ptr.dir);
+            }
+        }
+    }
 
 	return *this;
 }
@@ -367,6 +369,8 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 	if (rsrc_io.set_image_offset(res_rva + offset_to_directory).read(&directory, sizeof(directory)) == enma_io_success) {
 
         rsrc_table = resource_directory(directory);
+        rsrc_table.set_number_of_id_entries(0);  //because on add_resource_directory_entry count the number
+        rsrc_table.set_number_of_named_entries(0);
 
 		for (size_t i = 0; i != (directory.number_of_id_entries + directory.number_of_named_entries); i++) {
 			//Read directory entries one by one
@@ -428,17 +432,15 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
                     
 					if (rsrc_io.set_image_offset(res_rva + dir_entry.offset_to_data).read(&data_entry, sizeof(data_entry)) == enma_io_success) {
 
-						//Add data entry to directory entry
-						entry.add_data_entry(
-							resource_data_entry(
-								&image.get_section_by_rva(data_entry.offset_to_data)->get_section_data().data()[
-									data_entry.offset_to_data -
-										image.get_section_by_rva(data_entry.offset_to_data)->get_virtual_address()
-								],
-								data_entry.size,
-										data_entry.code_page
-										)
-						);
+                        std::vector<uint8_t> entry_data;
+
+                        if (rsrc_io.set_image_offset(data_entry.offset_to_data).read(entry_data, data_entry.size) == enma_io_success) {
+
+                            entry.add_data_entry(resource_data_entry(entry_data.data(), entry_data.size(), data_entry.code_page));
+                        }
+                        else {
+                            return directory_code::directory_code_currupted;
+                        }				
                     }
                     else {
                         return directory_code::directory_code_currupted;

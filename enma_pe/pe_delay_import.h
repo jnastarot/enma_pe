@@ -62,7 +62,7 @@ public:
 public:
     size_t delay_import_table::size() const;
     import_table delay_import_table::convert_to_import_table() const;
-    std::vector<delay_imported_library>& delay_import_table::get_libs();
+    std::vector<delay_imported_library>& delay_import_table::get_libraries();
 };
 
 

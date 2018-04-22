@@ -38,9 +38,11 @@ public:
 
 class imported_library {
 	std::string library_name;
-	uint32_t timestamp;
-	uint32_t rva_to_iat;
-    uint32_t rva_to_oft;
+	
+    uint32_t timestamp;
+	uint32_t iat_rva;
+    uint32_t oft_rva;
+    uint32_t library_name_rva;
 
 	std::vector<imported_func> imported_items;
 public:
@@ -54,18 +56,22 @@ public:
 	void imported_library::set_timestamp(uint32_t timestamp);
 	void imported_library::set_rva_iat(uint32_t rva);
     void imported_library::set_rva_oft(uint32_t rva);
+    void imported_library::set_rva_library_name(uint32_t rva);
 	void imported_library::add_item(const imported_func& item);
+    void imported_library::clear();
 public:
+    size_t imported_library::size();
 	std::string imported_library::get_library_name() const;
 	uint32_t imported_library::get_timestamp() const;
 	uint32_t imported_library::get_rva_iat() const;
     uint32_t imported_library::get_rva_oft() const;
+    uint32_t imported_library::get_rva_library_name() const;
 
 	std::vector<imported_func>& imported_library::get_items();
 };
 
 class import_table {
-	std::vector<imported_library> libs;
+	std::vector<imported_library> libraries;
 public:
 	import_table::import_table();
     import_table::import_table(const import_table& imports);
@@ -73,20 +79,40 @@ public:
 
 	import_table& import_table::operator=(const import_table& imports);
 public:
-	void import_table::add_lib(const imported_library& lib);
+	void import_table::add_library(const imported_library& lib);
+    void import_table::clear();
 public:
-	std::vector<imported_library>& import_table::get_libs();
+    size_t import_table::size();
+
+	std::vector<imported_library>& import_table::get_libraries();
 	bool import_table::get_imported_lib(const std::string& lib_name, imported_library * &lib);
 	bool import_table::get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, imported_func * &func);
 	bool import_table::get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, imported_func * &func);
 };
 
 
-bool get_import_table(_In_ const pe_image &image,	
-    _Out_ import_table& imports);
-void build_import_table(_Inout_ pe_image &image,
-	_Inout_ pe_section& section, _Inout_ import_table& imports, 
-    _In_opt_ bool use_original_table = false,
-    _In_opt_ bool rebuild_tables = true);
+enum import_table_build_id {
+    import_table_build_iat          = 1 << 1,
+    import_table_build_oft          = 1 << 2,
+    import_table_build_library_name = 1 << 3,
+};
 
-bool get_placement_import_table(_In_ const pe_image &image,_Inout_ std::vector<directory_placement>& placement);
+
+directory_code get_import_table(_In_ const pe_image &image,
+    _Out_ import_table& imports,
+    _In_opt_ const bound_import_table* bound_imports = 0);
+
+
+bool build_internal_import_data(_Inout_ pe_image &image,
+    _Inout_ pe_section& section, _Inout_ import_table& imports,
+    _In_ uint32_t build_items_ids/*import_table_build_id*/,
+    _In_opt_ const bound_import_table* bound_imports = 0);
+
+bool build_import_table_only(_Inout_ pe_image &image,
+	_Inout_ pe_section& section, _Inout_ import_table& imports);
+
+bool build_import_table_full(_Inout_ pe_image &image,
+    _Inout_ pe_section& section, _Inout_ import_table& imports,
+    _In_opt_ const bound_import_table* bound_imports = 0);
+
+directory_code get_placement_import_table(_In_ const pe_image &image,_Inout_ std::vector<directory_placement>& placement);

@@ -332,15 +332,9 @@ bool build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls, 
 bool build_tls_full(pe_image &image,pe_section& section,
     tls_table& tls,relocation_table& relocs) {
 
-    if (build_internal_tls_data(image, section, tls, relocs,
+    return build_internal_tls_data(image, section, tls, relocs,
         tls_table_build_raw_data | tls_table_build_address_of_index | tls_table_build_callbacks) &&
-        build_tls_table_only(image, section, tls, relocs)) {
-
-        return true;
-    }
-    else {
-        return false;
-    }
+        build_tls_table_only(image, section, tls, relocs);
 }
 
 

@@ -75,8 +75,9 @@ uint64_t imported_func::get_iat_item()const {
 
 imported_library::imported_library() {
 	timestamp		= 0;
-    rva_to_iat		= 0;
-    rva_to_oft      = 0;
+    iat_rva		    = 0;
+    oft_rva         = 0;
+    library_name_rva = 0;
     library_name.clear();
 	imported_items.clear();
 }
@@ -89,8 +90,9 @@ imported_library::~imported_library() {
 imported_library& imported_library::operator=(const imported_library& library) {
 
 	this->timestamp      = library.timestamp;
-	this->rva_to_iat     = library.rva_to_iat;
-    this->rva_to_oft     = library.rva_to_oft;
+	this->iat_rva        = library.iat_rva;
+    this->oft_rva        = library.oft_rva;
+    this->library_name_rva = library.library_name_rva;
 	this->library_name   = library.library_name;
 	this->imported_items = library.imported_items;
 
@@ -105,14 +107,24 @@ void imported_library::set_timestamp(uint32_t timestamp) {
 	this->timestamp = timestamp;
 }
 void imported_library::set_rva_iat(uint32_t rva) {
-	this->rva_to_iat = rva;
+	this->iat_rva = rva;
 }
 void imported_library::set_rva_oft(uint32_t rva) {
-    this->rva_to_oft = rva;
+    this->oft_rva = rva;
+}
+void imported_library::set_rva_library_name(uint32_t rva) {
+    this->library_name_rva = rva;
 }
 
 void imported_library::add_item(const imported_func& item) {
 	this->imported_items.push_back(item);
+}
+void imported_library::clear() {
+    this->imported_items.clear();
+}
+
+size_t imported_library::size() {
+    return this->imported_items.size();
 }
 
 std::string imported_library::get_library_name() const {
@@ -122,11 +134,15 @@ uint32_t imported_library::get_timestamp() const {
 	return this->timestamp;
 }
 uint32_t imported_library::get_rva_iat() const {
-	return this->rva_to_iat;
+	return this->iat_rva;
 }
 uint32_t imported_library::get_rva_oft() const {
-    return this->rva_to_oft;
+    return this->oft_rva;
 }
+uint32_t imported_library::get_rva_library_name() const {
+    return this->library_name_rva;
+}
+
 
 std::vector<imported_func>& imported_library::get_items() {
 	return this->imported_items;
@@ -145,344 +161,441 @@ import_table::~import_table() {
 
 import_table& import_table::operator=(const import_table& imports) {
 
-	this->libs = imports.libs;
+	this->libraries = imports.libraries;
 
     return *this;
 }
 
-void import_table::add_lib(const imported_library& lib) {
-	this->libs.push_back(lib);
+void import_table::add_library(const imported_library& lib) {
+	this->libraries.push_back(lib);
 }
 
-std::vector<imported_library>& import_table::get_libs() {
-	return this->libs;
+void import_table::clear() {
+    this->libraries.clear();
+}
+
+size_t import_table::size() {
+    return this->libraries.size();
+}
+
+std::vector<imported_library>& import_table::get_libraries() {
+	return this->libraries;
 }
 
 bool import_table::get_imported_lib(const std::string& lib_name, imported_library * &lib) {
 
-	for (size_t i = 0; i < libs.size(); i++) {
-		if (libs[i].get_library_name() == lib_name) {
-			lib = &libs[i];
-			return true;
-		}
-	}
+    for (auto& library : libraries) {
+        if (library.get_library_name() == lib_name) {
+            lib = &library;
+            return true;
+        }
+    }
 
 	return false;
 }
-bool import_table::get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, imported_func * &func) {
+bool import_table::get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, imported_func * &_func) {
 
-	for (size_t i = 0; i < libs.size(); i++) {
-		if (libs[i].get_library_name() == lib_name) {
-			for (size_t j = 0; j < libs[i].get_items().size(); j++) {
-				if (libs[i].get_items()[j].is_import_by_name() && libs[i].get_items()[j].get_func_name() == func_name) {
-					lib = &libs[i];
-					func = &libs[i].get_items()[j];
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
-}
-bool import_table::get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, imported_func * &func) {
-
-	for (uint32_t i = 0; i < libs.size(); i++) {
-		if (libs[i].get_library_name() == lib_name) {
-			for (uint32_t j = 0; j < libs[i].get_items().size(); j++) {
-				if (!libs[i].get_items()[j].is_import_by_name() && libs[i].get_items()[j].get_ordinal() == ordinal) {
-					lib = &libs[i];
-					func = &libs[i].get_items()[j];
-					return true;
-				}
-			}
-		}
-	}
+    for (auto& library : libraries) {
+        if (library.get_library_name() == lib_name) {
+            for (auto& func : library.get_items()) {
+                if (func.is_import_by_name() && func.get_func_name() == func_name) {
+                    lib = &library;
+                    _func = &func;
+                    return true;
+                }
+            }
+        }
+    }
 
 	return false;
 }
+bool import_table::get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, imported_func * &_func) {
+
+    for (auto& library : libraries) {
+        if (library.get_library_name() == lib_name) {
+            for (auto& func : library.get_items()) {
+                if (!func.is_import_by_name() && func.get_ordinal() == ordinal) {
+                    lib = &library;
+                    _func = &func;
+                    return true;
+                }
+            }
+        }
+    }
+
+	return false;
+}
+
+template<typename image_format>
+directory_code _get_import_table(const pe_image &image, import_table& imports,const bound_import_table* bound_imports) {
+    imports.clear();
+
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
 
 
-bool get_import_table(const pe_image &image, import_table& imports) {
-	imports.get_libs().clear();
-	
-	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
-	uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT);
+    if (virtual_address) {
+        pe_image_io import_io(image);
+        import_io.set_image_offset(virtual_address);
 
-	if (virtual_address) {
-		pe_section * imp_section = image.get_section_by_rva(virtual_address);
-		if (imp_section) {
-			uint8_t  * raw_decs = &imp_section->get_section_data().data()[virtual_address - imp_section->get_virtual_address()];
+        image_import_descriptor import_desc;
 
-            size_t imp_size = 0;
-            image_import_descriptor* imp_description = (image_import_descriptor*)(&raw_decs[imp_size]);
+        if (import_io.read(&import_desc,sizeof(import_desc)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
 
-            for (size_t imp_size = 0; imp_description->first_thunk && imp_description->name; imp_size += sizeof(image_import_descriptor)) {
-                imp_description = (image_import_descriptor*)(&raw_decs[imp_size]);
+        if (import_desc.first_thunk) {
 
-                if (imp_description->first_thunk && imp_description->name) {
+            do {
+                imported_library library;
 
-                    pe_section * imp_name_section = image.get_section_by_rva(imp_description->name);
-                    pe_section * imp_iat_section = image.get_section_by_rva(imp_description->first_thunk);
-                    pe_section * imp_oft_section = image.get_section_by_rva(imp_description->original_first_thunk);
+                std::string library_name;
+                if (pe_image_io(image).set_image_offset(import_desc.name).read_string(library_name) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
 
-                    imported_library import_lib;
-                    import_lib.set_library_name(std::string(((char*)&imp_name_section->get_section_data().data()[
-                        imp_description->name - imp_name_section->get_virtual_address()
-                    ])));
-                    import_lib.set_rva_iat(imp_description->first_thunk);
-                    import_lib.set_rva_oft(imp_description->original_first_thunk);
-                    import_lib.set_timestamp(imp_description->time_date_stamp);
+                library.set_library_name(library_name);
+                library.set_rva_library_name(import_desc.name);
+                library.set_rva_iat(import_desc.first_thunk);
+                library.set_rva_oft(import_desc.original_first_thunk);
+                library.set_timestamp(import_desc.time_date_stamp);
 
-                    void* lib_iat = &imp_name_section->get_section_data().data()[(imp_description->first_thunk - imp_iat_section->get_virtual_address())];
+                bool is_bound_library = (import_desc.time_date_stamp &&
+                    bound_imports && bound_imports->has_library(library_name, import_desc.time_date_stamp));
 
-                    if (imp_oft_section) {
-                        lib_iat = &imp_oft_section->get_section_data().data()[(imp_description->original_first_thunk - imp_oft_section->get_virtual_address())];
-                    }
+                pe_image_io iat_io(image);
+                pe_image_io original_iat_io(image);
+                iat_io.set_image_offset(import_desc.first_thunk);
+                original_iat_io.set_image_offset(import_desc.original_first_thunk);
 
-                    uint32_t iat_ft_rva = imp_description->first_thunk;
 
-                    if (image.is_x32_image()) {
-                        for (; *(uint32_t*)lib_iat; lib_iat = (void*)(&((uint32_t*)lib_iat)[1])) {
+                typename image_format::ptr_size iat_item = 0;
 
-                            if (*(uint32_t*)lib_iat&IMAGE_ORDINAL_FLAG32) {
-                                import_lib.add_item(imported_func(iat_ft_rva, *(uint32_t*)lib_iat & 0xFFFF));
+                if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+
+                if (iat_item) {
+                    do {
+                        imported_func func;
+
+                        if (import_desc.original_first_thunk) {
+                            typename image_format::ptr_size original_iat_item = 0;
+                            if (original_iat_io.read(&original_iat_item, sizeof(original_iat_item)) != enma_io_success) {
+                                return directory_code::directory_code_currupted;
+                            }
+
+                            if (original_iat_item&image_format::ordinal_flag) {
+
+                                library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                    original_iat_item^image_format::ordinal_flag, iat_item));
                             }
                             else {
-                                pe_section * imp_func = image.get_section_by_rva(*(uint32_t*)lib_iat);
-                                if (imp_func) {
-                                    import_lib.add_item(imported_func(
-                                        iat_ft_rva,
-                                        (char*)&imp_func->get_section_data().data()[(*(uint32_t*)lib_iat - imp_func->get_virtual_address()) + sizeof(uint16_t)],
-                                        *(uint16_t*)&imp_func->get_section_data().data()[(*(uint32_t*)lib_iat - imp_func->get_virtual_address())]
-                                    ));
-                                }
-                            }
-                            iat_ft_rva += sizeof(uint32_t);
-                        }
-                    }
-                    else {
-                        for (; *(uint64_t*)lib_iat; lib_iat = (void*)(&((uint64_t*)lib_iat)[1])) {
+                                pe_image_io import_func_name_io(image);
+                                import_func_name_io.set_image_offset(original_iat_item);
 
-                            if (*(uint64_t*)lib_iat&IMAGE_ORDINAL_FLAG64) {
-                                import_lib.add_item(imported_func(iat_ft_rva, *(uint64_t*)lib_iat & 0xFFFF));
+                                uint16_t hint;
+                                std::string func_name;
+
+                                if (import_func_name_io.read(&hint,sizeof(hint)) != enma_io_success) {
+                                    return directory_code::directory_code_currupted;
+                                }
+
+                                if (import_func_name_io.read_string(func_name) != enma_io_success) {
+                                    return directory_code::directory_code_currupted;
+                                }
+
+                                library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                    func_name, hint, iat_item));
+                            }
+                        }
+                        else {
+
+                            if (is_bound_library) {
+                                library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size), "",
+                                    0, iat_item));
                             }
                             else {
-                                pe_section * imp_func = image.get_section_by_rva(*(uint32_t*)lib_iat);
-                                if (imp_func) {
-                                    import_lib.add_item(imported_func(
-                                        iat_ft_rva,
-                                        (char*)&imp_func->get_section_data().data()[(*(uint32_t*)lib_iat - imp_func->get_virtual_address()) + sizeof(uint16_t)],
-                                        *(uint16_t*)&imp_func->get_section_data().data()[(*(uint32_t*)lib_iat - imp_func->get_virtual_address())]
-                                    ));
+
+                                if (iat_item&image_format::ordinal_flag) {
+                                    library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                        iat_item^image_format::ordinal_flag, iat_item));
+                                }
+                                else {
+                                    pe_image_io import_func_name_io(image);
+                                    import_func_name_io.set_image_offset(iat_item);
+
+                                    uint16_t hint;
+                                    std::string func_name;
+
+                                    if (import_func_name_io.read(&hint, sizeof(hint)) != enma_io_success) {
+                                        return directory_code::directory_code_currupted;
+                                    }
+
+                                    if (import_func_name_io.read_string(func_name) != enma_io_success) {
+                                        return directory_code::directory_code_currupted;
+                                    }
+
+                                    library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                        func_name, hint, iat_item));
                                 }
                             }
-
-                            iat_ft_rva += sizeof(uint64_t);
                         }
-                    }
 
-                    imports.add_lib(import_lib);
+                        if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
+                            return directory_code::directory_code_currupted;
+                        }
+                    } while (iat_item);
                 }
-            }
-			return true;
-		}
-	}
 
-	return false;
+                imports.add_library(library);
+
+                if (import_io.read(&import_desc, sizeof(import_desc)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+            } while (import_desc.first_thunk);
+        }
+
+        return directory_code::directory_code_success;
+    }
+
+
+    return directory_code::directory_code_not_present;
 }
 
-void build_import_table(pe_image &image, pe_section& section, import_table& imports,
-    bool use_original_table, bool rebuild_tables) {
+template<typename image_format>
+bool _build_internal_import_data(pe_image &image, pe_section& section, import_table& imports,
+    uint32_t build_items_ids/*import_table_build_id*/,
+    const bound_import_table* bound_imports = 0) {
 
-    if (!imports.get_libs().size()) { return; }
+    if (imports.size()) {
+        pe_section_io import_io(section, image, enma_io_mode_allow_expand);
+        import_io.align_up(0x10).seek_to_end();
 
-    if (section.get_size_of_raw_data() & 0xF) {
-        section.get_section_data().resize(
-            section.get_section_data().size() + (0x10 - (section.get_section_data().size() & 0xF))
-        );
-    }
+        size_t names_size = 0;
+        size_t thunk_size = 0;
+        size_t original_thunk_size = 0;
 
-    size_t desc_table_size = sizeof(image_import_descriptor);
-    size_t lib_names_size = 0;
-    size_t func_names_size = 0;
-    size_t thunk_size = 0;
-    size_t original_thunk_size = 0;
+        for (auto& library : imports.get_libraries()) {
+            if (!library.size()) { continue; }
 
-    for (auto& lib : imports.get_libs()) {
-        if (!lib.get_items().size()) { continue; }
+            uint32_t current_lib_thunk_size = 0;
 
-        uint32_t current_lib_thunk_size = 0;
+            if ((build_items_ids & import_table_build_iat) || (build_items_ids & import_table_build_oft)) {
 
-        for (auto& func : lib.get_items()) {
-            if (func.is_import_by_name()) {
-                func_names_size += func.get_func_name().length() + 1 + sizeof(uint16_t);//hint
-                if ((func.get_func_name().length() + 1) & 1) { func_names_size += 1; }//+1 uint8_t  for aligned func name
-            }
+                for (auto& func : library.get_items()) {
 
-            if (image.is_x32_image()) { current_lib_thunk_size += sizeof(uint32_t); }
-            else { current_lib_thunk_size += sizeof(uint64_t); }
-        }
-
-        if (image.is_x32_image()) { current_lib_thunk_size += sizeof(uint32_t); }
-        else { current_lib_thunk_size += sizeof(uint64_t); }
-
-        if (rebuild_tables || (!lib.get_rva_iat())) {
-            thunk_size += current_lib_thunk_size;
-        }
-
-        if (use_original_table) {
-            if (rebuild_tables || (!lib.get_rva_oft())) {
-                original_thunk_size += current_lib_thunk_size;
-            }
-        }
-
-        lib_names_size += lib.get_library_name().length() + 1;
-        if ((lib.get_library_name().length() + 1) & 1) { func_names_size += 1; }//+1 uint8_t  for aligned lib name
-        desc_table_size += sizeof(image_import_descriptor);
-    }
-
-    uint32_t import_desc_virtual_address = section.get_virtual_address() + section.get_size_of_raw_data() + thunk_size;
-    uint32_t import_iat_virtual_address = section.get_virtual_address() + section.get_size_of_raw_data();
-    uint32_t p_import_offset = section.get_size_of_raw_data();
-    
-
-    section.get_section_data().resize(section.get_size_of_raw_data() +
-        desc_table_size +
-        lib_names_size +
-        func_names_size + 
-        thunk_size +
-        original_thunk_size);
-
-
-    uint8_t  * import_thunks = &section.get_section_data().data()[p_import_offset];
-    image_import_descriptor* import_descs = (image_import_descriptor*)&section.get_section_data().data()[p_import_offset + thunk_size];
-    uint8_t  * import_original_thunks = &section.get_section_data().data()[p_import_offset + thunk_size + desc_table_size];
-    uint8_t  * import_names = &section.get_section_data().data()[p_import_offset + thunk_size + desc_table_size + original_thunk_size];
-
-
-    for (auto& lib : imports.get_libs()) {
-        if (!lib.get_items().size()) { continue; }
-
-        import_descs->characteristics = 0;
-        import_descs->forwarder_chain = 0;
-        import_descs->time_date_stamp = lib.get_timestamp();
-        import_descs->name = section.get_virtual_address() + (import_names - section.get_section_data().data());
-        
-        bool need_build_iat_table = false;
-        bool need_build_oft_table = false;
-       
-
-        if (rebuild_tables) {
-            need_build_iat_table = true;
-            import_descs->first_thunk = section.get_virtual_address() + (import_thunks - section.get_section_data().data());
-
-            if (use_original_table) {
-                need_build_oft_table = true;
-                import_descs->original_first_thunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
-            }
-            else {
-                import_descs->original_first_thunk = 0;
-            }
-        }
-        else {
-            if (!lib.get_rva_iat()) {
-                need_build_iat_table = true;
-                import_descs->first_thunk = section.get_virtual_address() + (import_thunks - section.get_section_data().data());
-            }
-            else {
-                import_descs->first_thunk = lib.get_rva_iat();
-            }
-
-            if (use_original_table) {
-                if (!lib.get_rva_oft()) {
-                    need_build_oft_table = true;
-                    import_descs->original_first_thunk = section.get_virtual_address() + (import_original_thunks - section.get_section_data().data());
+                    if (func.is_import_by_name()) {
+                        names_size += ALIGN_UP(func.get_func_name().length() + 1 + sizeof(uint16_t), 0x2);
+                    }
+                    current_lib_thunk_size += sizeof(typename image_format::ptr_size);
                 }
-                else {
-                    import_descs->original_first_thunk = lib.get_rva_oft();
+                current_lib_thunk_size += sizeof(typename image_format::ptr_size);
+
+                if (build_items_ids & import_table_build_iat) {
+                    thunk_size += current_lib_thunk_size;
+                }
+                if (build_items_ids & import_table_build_oft) {
+                    original_thunk_size += current_lib_thunk_size;
                 }
             }
-        }
 
-        memcpy((char*)import_names, lib.get_library_name().c_str(), lib.get_library_name().length() + 1);
-        import_names += lib.get_library_name().length() + 1 + (((lib.get_library_name().length() + 1) & 1) ? 1 : 0);
-
-        if (need_build_iat_table || need_build_oft_table) {
-
-            for (auto& func : lib.get_items()) {
-                if (func.is_import_by_name()) {
-                    image_import_by_name* pimport_by_name = (image_import_by_name*)import_names;
-                    uint32_t thunk_rva = (section.get_virtual_address() + (import_names - section.get_section_data().data()));
-
-                    func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
-                    pimport_by_name->hint = func.get_hint();
-                    memcpy((char*)pimport_by_name->name, func.get_func_name().c_str(), func.get_func_name().length() + 1);
-
-                    import_names += sizeof(uint16_t) + func.get_func_name().length() + 1 + (((func.get_func_name().length() + 1) & 1) ? 1 : 0);
-
-                    if (image.is_x32_image()) {
-                        if (need_build_iat_table) {
-                            *(uint32_t*)import_thunks = thunk_rva;          import_thunks += sizeof(uint32_t);
-                        }
-                        if (need_build_oft_table) {
-                            *(uint32_t*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(uint32_t);
-                        }
-                    }
-                    else {
-                        if (need_build_iat_table) {
-                            *(uint64_t*)import_thunks = thunk_rva;          import_thunks += sizeof(uint64_t);
-                        }
-                        if (need_build_oft_table) {
-                            *(uint64_t*)import_original_thunks = thunk_rva; import_original_thunks += sizeof(uint64_t);
-                        }
-                    }
-                }
-                else {
-                    func.set_iat_rva(section.get_virtual_address() + (import_thunks - section.get_section_data().data()));
-
-                    if (image.is_x32_image()) {
-                        if (need_build_iat_table) {
-                            *(uint32_t*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32;          import_thunks += sizeof(uint32_t);
-                        }
-                        if (need_build_oft_table) {
-                            *(uint32_t*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG32; import_original_thunks += sizeof(uint32_t);
-                        }
-                    }
-                    else {
-                        if (need_build_iat_table) {
-                            *(uint64_t*)import_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64;          import_thunks += sizeof(uint64_t);
-                        }
-                        if (need_build_oft_table) {
-                            *(uint64_t*)import_original_thunks = func.get_ordinal() | IMAGE_ORDINAL_FLAG64; import_original_thunks += sizeof(uint64_t);
-                        }
-                    }
-                }
-            }
-            if (image.is_x32_image()) {
-                if (need_build_iat_table) { import_thunks += sizeof(uint32_t); }
-                if (need_build_oft_table) { import_original_thunks += sizeof(uint32_t); }
-            }
-            else {
-                if (need_build_iat_table) { import_thunks += sizeof(uint64_t); }
-                if (need_build_oft_table) { import_original_thunks += sizeof(uint64_t); }
+            if (build_items_ids & import_table_build_library_name) {
+                names_size += ALIGN_UP(library.get_library_name().length() + 1, 0x2);
             }
         }
 
-        lib.set_rva_iat(import_descs->first_thunk);
-        lib.set_rva_oft(import_descs->original_first_thunk);
+        uint32_t import_iat_virtual_address = import_io.get_section_offset();
+        uint32_t import_iat_virtual_size    = thunk_size;
 
-        import_descs++;
-    }
+        pe_section_io import_thunks_io(section, image, enma_io_mode_allow_expand);
+        pe_section_io import_original_thunks_io(section, image, enma_io_mode_allow_expand);
+        pe_section_io import_names_io(section, image, enma_io_mode_allow_expand);
+
+        import_thunks_io.set_section_offset(import_io.get_section_offset());
+        import_original_thunks_io.set_section_offset(import_io.get_section_offset() + thunk_size);
+        import_names_io.set_section_offset(import_io.get_section_offset() + thunk_size + original_thunk_size);
+
   
+        for (auto& library : imports.get_libraries()) {
 
-    image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT, import_desc_virtual_address);
-    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, desc_table_size);
-    image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IAT, import_iat_virtual_address);
-    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IAT, thunk_size);
+            bool is_bound_library = (library.get_timestamp() == -1 && bound_imports &&
+                bound_imports->has_library(library.get_library_name()));
+
+            if (library.size() && 
+                ((build_items_ids & import_table_build_iat) || (build_items_ids & import_table_build_oft))) {
+
+                std::vector<typename image_format::ptr_size> thunk_table;
+                std::vector<typename image_format::ptr_size> original_thunk_table;
+
+                uint32_t func_iat_rva = import_thunks_io.get_section_offset();
+
+                for (auto& func : library.get_items()) {
+                    typename image_format::ptr_size thunk_item;
+
+                    if (build_items_ids & import_table_build_iat) {
+                        func.set_iat_rva(func_iat_rva);
+                        func_iat_rva += sizeof(typename image_format::ptr_size);
+                    }
+
+                    if (!is_bound_library || (build_items_ids & import_table_build_oft)) {
+
+                        if (func.is_import_by_name()) {
+                            thunk_item = import_names_io.get_section_offset();
+
+                            uint16_t hint = func.get_hint();
+
+                            if (import_names_io.write(&hint, sizeof(hint)) != enma_io_success) {
+                                return false;
+                            }
+
+                            if (import_names_io.write(
+                                (void*)func.get_func_name().c_str(), func.get_func_name().length() + 1) != enma_io_success) {
+
+                                return false;
+                            }
+                            import_names_io.align_up_offset(0x2);
+                        }
+                        else {
+                            thunk_item = func.get_ordinal() | image_format::ordinal_flag;
+                        }
+                    }
+
+                    if (is_bound_library) {
+                        thunk_table.push_back(func.get_iat_item());
+                        original_thunk_table.push_back(thunk_item);
+                    }
+                    else {
+                        thunk_table.push_back(thunk_item);
+                        original_thunk_table.push_back(thunk_item);
+                    }
+                }
+
+
+                if (build_items_ids & import_table_build_iat) {
+                    library.set_rva_iat(import_thunks_io.get_section_offset());
+                    typename image_format::ptr_size null_item = 0;
+
+                    for (auto& item : thunk_table) {
+                        if (import_thunks_io.write(&item, sizeof(item)) != enma_io_success) {
+                            return false;
+                        }
+                    }
+                    
+                    if (import_thunks_io.write(&null_item, sizeof(null_item)) != enma_io_success) {
+                        return false;
+                    }
+                }
+
+                if (build_items_ids & import_table_build_oft) {
+                    library.set_rva_oft(import_original_thunks_io.get_section_offset());
+                    typename image_format::ptr_size null_item = 0;
+
+                    for (auto& item : original_thunk_table) {
+                        if (import_original_thunks_io.write(&item, sizeof(item)) != enma_io_success) {
+                            return false;
+                        }
+                    }
+
+                    if (import_original_thunks_io.write(&null_item, sizeof(null_item)) != enma_io_success) {
+                        return false;
+                    }
+                }
+            }
+
+            if (build_items_ids & import_table_build_library_name) {
+                library.set_rva_library_name(import_names_io.get_section_offset());
+
+                if (import_names_io.write(
+                    (void*)library.get_library_name().c_str(), library.get_library_name().length() + 1) != enma_io_success) {
+
+                    return false;
+                }
+                import_names_io.align_up_offset(0x2);
+            }
+        }
+       
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IAT, import_iat_virtual_address);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IAT, import_iat_virtual_size);
+    }
+    else {
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IAT, 0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IAT, 0);
+    }
+
+    return true;
 }
 
-bool get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+
+directory_code get_import_table(const pe_image &image, import_table& imports, const bound_import_table* bound_imports) {
+
+    if (image.is_x32_image()) {
+        return _get_import_table<image_32>(image, imports, bound_imports);
+    }
+    else {
+        return _get_import_table<image_64>(image, imports, bound_imports);
+    }
+}
+
+
+bool build_internal_import_data(pe_image &image, pe_section& section, import_table& imports,
+     uint32_t build_items_ids/*import_table_build_id*/,
+     const bound_import_table* bound_imports) {
+
+    if (image.is_x32_image()) {
+        return _build_internal_import_data<image_32>(image, section, imports, build_items_ids, bound_imports);
+    }
+    else {
+        return _build_internal_import_data<image_64>(image, section, imports, build_items_ids, bound_imports);
+    }
+}
+
+
+bool build_import_table_only(pe_image &image, pe_section& section, import_table& imports) {
+
+    if (imports.size()) {
+        pe_section_io import_io(section, image);
+        import_io.align_up(0x10).seek_to_end();
+
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT, import_io.get_section_offset());
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, imports.size()*sizeof(image_import_descriptor));
+
+        for (auto& library : imports.get_libraries()) {
+            image_import_descriptor import_desc;
+            import_desc.original_first_thunk = library.get_rva_oft();        
+            import_desc.time_date_stamp      = library.get_timestamp();
+            import_desc.forwarder_chain      = 0;
+            import_desc.name                 = library.get_rva_library_name();
+            import_desc.first_thunk          = library.get_rva_iat();
+
+
+            if (import_io.write(&import_desc, sizeof(import_desc)) != enma_io_success) {
+                return false;
+            }
+        }
+        image_import_descriptor null_desc;
+        memset(&null_desc,0,sizeof(null_desc));
+        if (import_io.write(&null_desc, sizeof(null_desc)) != enma_io_success) {
+            return false;
+        }
+    }
+    else {
+        image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT, 0);
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, 0);
+    }
+
+    return true;
+}
+
+bool build_import_table_full(pe_image &image,
+    pe_section& section, import_table& imports,
+    const bound_import_table* bound_imports) {
+
+    return build_internal_import_data(image, section, imports,
+        import_table_build_iat | import_table_build_oft | import_table_build_library_name, bound_imports) && 
+        build_import_table_only(image,section,imports);
+}
+
+directory_code get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
 	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
 
@@ -574,10 +687,8 @@ bool get_placement_import_table(const pe_image &image, std::vector<directory_pla
                 }
             }
             placement.push_back({ virtual_address ,imp_size,dp_id_import_desc });
-			return true;
+			return directory_code::directory_code_success;
 		}
 	}
-	return false;
+	return directory_code::directory_code_not_present;
 }
-
-

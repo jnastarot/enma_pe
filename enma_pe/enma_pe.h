@@ -1,6 +1,6 @@
 #pragma once
 
-#define ALIGN_UP(a, b) (((a + b - 1) / b) * b)
+#define ALIGN_UP(a, b) ((((a) + (b) - 1) / (b)) * (b))
 
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
@@ -52,7 +52,9 @@ enum directory_placment_id {
     dp_id_bound_import_ref_desc,
     dp_id_bound_import_names,
 
-    dp_id_delay_import,
+    dp_id_delay_import_desc,
+    dp_id_delay_import_table,
+    dp_id_delay_import_names,
 };
 
 struct directory_placement {

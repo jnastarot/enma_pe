@@ -112,6 +112,8 @@ public:
         uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize);
 public:
     pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end = true);
+    pe_section_io& pe_section_io::align_up_offset(uint32_t factor);
+
     pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end = true);
 
     pe_section_io& pe_section_io::set_mode(enma_io_mode mode);

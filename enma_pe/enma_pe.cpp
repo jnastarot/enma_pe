@@ -3,7 +3,7 @@
 
 
 pe_image_expanded::pe_image_expanded() {
-
+    this->code = directory_code::directory_code_not_present;
 }
 
 pe_image_expanded::pe_image_expanded(const pe_image_expanded& image_ex) {
@@ -11,6 +11,7 @@ pe_image_expanded::pe_image_expanded(const pe_image_expanded& image_ex) {
 }
 
 pe_image_expanded& pe_image_expanded::operator=(const pe_image_expanded& image_ex) {
+    this->code    = image_ex.code;
     this->exports = image_ex.exports;
     this->imports = image_ex.imports;
     this->resources = image_ex.resources;
@@ -37,7 +38,7 @@ void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &imag
 	get_tls_table(expanded_image.image, expanded_image.tls);
     get_load_config_table(expanded_image.image, expanded_image.load_config);//
     get_bound_import_table(expanded_image.image, expanded_image.bound_imports);
-	get_delay_import_table(expanded_image.image, expanded_image.delay_imports);
+	get_delay_import_table(expanded_image.image, expanded_image.delay_imports, &expanded_image.bound_imports);
 }
 
 directory_code get_directories_placement(pe_image &image, std::vector<directory_placement>& placement) {
@@ -80,13 +81,14 @@ void erase_directories_placement(pe_image &image, std::vector<directory_placemen
 		}
 	}
 
+    pe_image_io image_io(image);
 
     for (auto& item : placement) {
         if (relocs) {
             relocs->erase_all_items_in_zone(item.rva, item.size);
         }
-        //todo
-        
+
+        image_io.set_image_offset(item.rva).memory_set(item.size, 0);
     }
 
 
