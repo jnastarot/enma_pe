@@ -526,6 +526,122 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
 }
 
 
+template<typename image_format>
+directory_code _get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
+
+
+    if (virtual_address) {
+        pe_image_io import_io(image);
+        import_io.set_image_offset(virtual_address);
+
+        image_import_descriptor import_desc;
+
+        if (import_io.read(&import_desc, sizeof(import_desc)) != enma_io_success) {
+            return directory_code::directory_code_currupted;
+        }
+        uint32_t import_desc_table_size = sizeof(image_import_descriptor);
+
+        if (import_desc.first_thunk) {
+
+            do {
+                imported_library library;
+
+                std::string library_name;
+                if (pe_image_io(image).set_image_offset(import_desc.name).read_string(library_name) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+
+                placement.push_back({ import_desc.name ,ALIGN_UP(library_name.length()+1,0x2),dp_id_import_desc });
+
+                pe_image_io iat_io(image);
+                pe_image_io original_iat_io(image);
+                iat_io.set_image_offset(import_desc.first_thunk);
+                original_iat_io.set_image_offset(import_desc.original_first_thunk);
+
+
+                typename image_format::ptr_size iat_item = 0;
+
+                if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+
+                uint32_t iat_table_size = sizeof(typename image_format::ptr_size);
+
+                if (iat_item) {
+                    do {
+                        imported_func func;
+
+                        if (import_desc.original_first_thunk) {
+                            typename image_format::ptr_size original_iat_item = 0;
+                            if (original_iat_io.read(&original_iat_item, sizeof(original_iat_item)) != enma_io_success) {
+                                return directory_code::directory_code_currupted;
+                            }
+
+                            if (!(original_iat_item&image_format::ordinal_flag)) {
+
+                                pe_image_io import_func_name_io(image);
+                                import_func_name_io.set_image_offset(original_iat_item + sizeof(uint16_t));
+
+                                std::string func_name;
+
+                                if (import_func_name_io.read_string(func_name) != enma_io_success) {
+                                    return directory_code::directory_code_currupted;
+                                }
+
+                                placement.push_back({ (uint32_t)original_iat_item ,
+                                    ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t),0x2),dp_id_import_names });
+                            }
+                        }
+                        else {
+
+                            if (!(iat_item&image_format::ordinal_flag)) {
+
+                                pe_image_io import_func_name_io(image);
+                                import_func_name_io.set_image_offset(iat_item + sizeof(uint16_t));
+
+                                std::string func_name;
+
+                                if (import_func_name_io.read_string(func_name) == enma_io_success) {
+                                    placement.push_back({ (uint32_t)(iat_item + sizeof(uint16_t)) ,
+                                      ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t),0x2),dp_id_import_names });
+                                }
+                            }
+                        }
+
+                        iat_table_size += sizeof(typename image_format::ptr_size);
+
+                        if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
+                            return directory_code::directory_code_currupted;
+                        }
+                    } while (iat_item);
+                }
+
+                if (import_desc.original_first_thunk) {
+                    placement.push_back({ import_desc.original_first_thunk ,iat_table_size,dp_id_import_oft });
+                }
+                placement.push_back({ import_desc.first_thunk ,iat_table_size,dp_id_import_iat });
+
+
+                import_desc_table_size += sizeof(image_import_descriptor);
+
+                if (import_io.read(&import_desc, sizeof(import_desc)) != enma_io_success) {
+                    return directory_code::directory_code_currupted;
+                }
+            } while (import_desc.first_thunk);
+        }
+
+        placement.push_back({ virtual_address ,import_desc_table_size,dp_id_import_desc });
+
+        return directory_code::directory_code_success;
+    }
+
+
+    return directory_code::directory_code_not_present;
+}
+
+
 directory_code get_import_table(const pe_image &image, import_table& imports, const bound_import_table* bound_imports) {
 
     if (image.is_x32_image()) {
@@ -597,98 +713,10 @@ bool build_import_table_full(pe_image &image,
 
 directory_code get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
 
-	uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
-
-	if (virtual_address) {
-		
-		pe_section * imp_section = image.get_section_by_rva(virtual_address);
-        if (imp_section) {
-            uint8_t  * raw_import = &imp_section->get_section_data().data()[virtual_address - imp_section->get_virtual_address()];
-
-            size_t imp_size = 0;
-            image_import_descriptor* imp_description = (image_import_descriptor*)(&raw_import[imp_size]);
-            for (imp_size = 0; imp_description->first_thunk && imp_description->name; imp_size += sizeof(image_import_descriptor)) {
-                imp_description = (image_import_descriptor*)(&raw_import[imp_size]);
-
-                if (imp_description->first_thunk && imp_description->name) {
-
-                    pe_section * imp_name_section = image.get_section_by_rva(imp_description->name);
-                    pe_section * imp_ft_section = image.get_section_by_rva(imp_description->first_thunk);
-                    pe_section * imp_oft_section = image.get_section_by_rva(imp_description->original_first_thunk);
-
-
-                    placement.push_back({
-                        imp_description->name ,
-                        (uint32_t)strlen((char*)&imp_name_section->get_section_data().data()[
-                             (imp_description->name - imp_name_section->get_virtual_address())
-                        ]) + 1,
-                        dp_id_import_names
-                    });
-
-                    size_t thunk_items_count = 0;
-                    uint8_t * thunk_table = 0;
-
-                    if (imp_description->original_first_thunk && imp_oft_section) {
-                        thunk_table = &imp_oft_section->get_section_data().data()[
-                            (imp_description->original_first_thunk - imp_oft_section->get_virtual_address())
-                        ];
-                    }
-                    else {
-                        thunk_table = &imp_ft_section->get_section_data().data()[
-                            (imp_description->first_thunk - imp_ft_section->get_virtual_address())
-                        ];
-                    }
-
-
-                    if (image.is_x32_image()) {
-                        for (thunk_items_count = 0; *(uint32_t*)thunk_table; thunk_table += sizeof(uint32_t), thunk_items_count++) {
-                            if (!(*(uint32_t*)thunk_table&IMAGE_ORDINAL_FLAG32)) {
-                                pe_section * section_func_name = image.get_section_by_rva(*(uint32_t*)thunk_table);
-                                if (section_func_name) {
-                                    placement.push_back({
-                                      *(uint32_t*)thunk_table ,
-                                       (uint32_t)strlen((char*)&section_func_name->get_section_data().data()[
-                                         (*(uint32_t*)thunk_table - section_func_name->get_virtual_address()) + sizeof(uint16_t)
-                                       ]) + 2 + 2,
-                                        dp_id_import_names
-                                    });
-                                }
-                            }
-                        }
-
-                        if (imp_description->original_first_thunk && imp_oft_section) {
-                            placement.push_back({ imp_description->original_first_thunk , (thunk_items_count + 1) * sizeof(uint32_t) ,dp_id_import_oft });
-                        }
-
-                        placement.push_back({ imp_description->first_thunk , (thunk_items_count + 1) * sizeof(uint32_t),dp_id_import_iat });
-                    }
-                    else {
-                        for (thunk_items_count = 0; *(uint64_t*)thunk_table; thunk_table += sizeof(uint64_t), thunk_items_count++) {
-                            if (!(*(uint64_t*)thunk_table&IMAGE_ORDINAL_FLAG64)) {
-                                pe_section * section_func_name = image.get_section_by_rva((uint32_t)*(uint64_t*)thunk_table);
-                                if (section_func_name) {
-                                    placement.push_back({
-                                            (uint32_t)(*(uint64_t*)thunk_table) ,
-                                            (uint32_t)strlen((char*)&section_func_name->get_section_data().data()[
-                                                (*(uint64_t*)thunk_table - section_func_name->get_virtual_address()) + sizeof(uint16_t)
-                                            ]) + 2 + 2,
-                                        dp_id_import_names
-                                    });
-                                }
-                            }
-                        }
-
-                        if (imp_description->original_first_thunk && imp_oft_section) {
-                            placement.push_back({ imp_description->original_first_thunk , (thunk_items_count + 1) * sizeof(uint64_t) ,dp_id_import_oft });
-                        }
-
-                        placement.push_back({ imp_description->first_thunk , (thunk_items_count + 1) * sizeof(uint64_t),dp_id_import_iat });
-                    }
-                }
-            }
-            placement.push_back({ virtual_address ,imp_size,dp_id_import_desc });
-			return directory_code::directory_code_success;
-		}
-	}
-	return directory_code::directory_code_not_present;
+    if (image.is_x32_image()) {
+        return _get_placement_import_table<image_32>(image, placement);
+    }
+    else {
+        return _get_placement_import_table<image_64>(image, placement);
+    }
 }

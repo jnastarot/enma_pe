@@ -102,12 +102,10 @@ directory_code get_import_table(_In_ const pe_image &image,
     _Out_ import_table& imports,
     _In_opt_ const bound_import_table* bound_imports = 0);
 
-
 bool build_internal_import_data(_Inout_ pe_image &image,
     _Inout_ pe_section& section, _Inout_ import_table& imports,
     _In_ uint32_t build_items_ids/*import_table_build_id*/,
     _In_opt_ const bound_import_table* bound_imports = 0);
-
 bool build_import_table_only(_Inout_ pe_image &image,
 	_Inout_ pe_section& section, _Inout_ import_table& imports);
 

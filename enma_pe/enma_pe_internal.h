@@ -854,37 +854,37 @@ typedef struct _image_load_config_directory32 {
     uint32_t   critical_section_default_timeout;
     uint32_t   decommit_free_block_threshold;
     uint32_t   decommit_total_free_threshold;
-    uint32_t   lock_prefix_table;                       // VA
+    uint32_t   lock_prefix_table;                           // VA
     uint32_t   maximum_allocation_size;
     uint32_t   virtual_memory_threshold;
     uint32_t   process_heap_flags;
     uint32_t   process_affinity_mask;
     uint16_t   csd_version;
     uint16_t   dependent_load_flags;
-    uint32_t   edit_list;                               // VA
-    uint32_t   security_cookie;                          // VA
+    uint32_t   edit_list;                                   // VA
+    uint32_t   security_cookie;                             // VA
     /*end of LOADCONFIG V1*/
-    uint32_t   se_handler_table;                        // VA
+    uint32_t   se_handler_table;                            // VA
     uint32_t   se_handler_count;
     /*end of LOADCONFIG V2*/
-    uint32_t   guard_cf_check_function_pointer;         // VA
-    uint32_t   guard_cf_dispatch_function_pointer;      // VA
-    uint32_t   guard_cf_function_table;                 // VA
+    uint32_t   guard_cf_check_function_pointer;             // VA
+    uint32_t   guard_cf_dispatch_function_pointer;          // VA
+    uint32_t   guard_cf_function_table;                     // VA
     uint32_t   guard_cf_function_count;
     uint32_t   guard_flags;
     /*end of LOADCONFIG V3*/
     image_load_config_code_integrity code_integrity;
     /*end of LOADCONFIG V4*/
-    uint32_t   guard_address_taken_iat_entry_table;     // VA
+    uint32_t   guard_address_taken_iat_entry_table;         // VA
     uint32_t   guard_address_taken_iat_entry_count;
-    uint32_t   guard_long_jump_target_table;            // VA
+    uint32_t   guard_long_jump_target_table;                // VA
     uint32_t   guard_long_jump_target_count;
     /*end of LOADCONFIG V5*/
-    uint32_t   dynamic_value_reloc_table;               // VA
+    uint32_t   dynamic_value_reloc_table;                   // VA
     uint32_t   chpe_meta_data_pointer;
     /*end of LOADCONFIG V6*/
-    uint32_t   guard_rf_failure_routine;                // VA
-    uint32_t   guard_rf_failure_routine_function_pointer; // VA
+    uint32_t   guard_rf_failure_routine;                    // VA
+    uint32_t   guard_rf_failure_routine_function_pointer;   // VA
     uint32_t   dynamic_value_reloc_table_offset;
     uint16_t   dynamic_value_reloc_table_section;
     uint16_t   reserved2;
@@ -893,7 +893,7 @@ typedef struct _image_load_config_directory32 {
     uint32_t   hot_patch_table_offset;
     /*end of LOADCONFIG V8*/
     uint32_t   reserved3;
-    uint32_t   enclave_configuration_pointer;           // VA
+    uint32_t   enclave_configuration_pointer;               // VA
     /*end of LOADCONFIG V9*/
 } image_load_config_directory32, *pimage_load_config_directory32;
 

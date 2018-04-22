@@ -45,15 +45,12 @@ e.mail..: jnastarot@yandex.ru
 | `string finder` | finding ansi and unicode strings |
 ---
 
-| TODO list |
-| :-------: |
-| rewrite source on `pe_image_io` and `pe_section_io`   :arrow_backward: |
-| `pe_demangler` for `gcc`, `visual studio`, `delphi` mangled names|
-| do something for comfortable work with `TD32(.tds)`, `.pdb`, `.dbg`, `.map`|
----
  
-| credits |
+| helpful references |
 | ---------- |
-| pe rich comp id [richprint](https://github.com/dishather/richprint/) |
-| export and resources [pe bliss kaimi](http://kaimi.io/) |
-| tds parser [denisenkomik.narod.ru/main.cpp](http://denisenkomik.narod.ru/main.cpp) |
+| [richprint](https://github.com/dishather/richprint/) |
+| [pe bliss kaimi](https://kaimi.io/2012/09/portable-executable-library/) |
+| [tds parser](http://denisenkomik.narod.ru/main.cpp) |
+| [radare2](https://github.com/radare/radare2) |
+| [pharos](https://github.com/cmu-sei/pharos) |
+| [Manalyze](https://github.com/JusticeRage/Manalyze) |

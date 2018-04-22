@@ -4,7 +4,6 @@
 template<
     typename ptr_size_type,
     typename image_nt_headers_type,
-    typename image_thunk_data_type,
     typename image_tls_directory_type,
     typename image_load_config_directory_type,
     typename image_dynamic_relocation_type,
@@ -16,7 +15,6 @@ template<
 struct image_types{
     typedef ptr_size_type ptr_size; 
     typedef image_nt_headers_type image_nt_headers;
-    typedef image_thunk_data_type image_thunk_data;
     typedef image_tls_directory_type image_tls_directory;
 
     typedef image_load_config_directory_type image_load_config_directory;
@@ -32,7 +30,6 @@ struct image_types{
 typedef image_types<
     uint32_t,
     image_nt_headers32,
-    image_thunk_data32,
     image_tls_directory32,
     image_load_config_directory32,
     image_dynamic_relocation32,
@@ -44,7 +41,6 @@ typedef image_types<
 typedef image_types<
     uint64_t,
     image_nt_headers64,
-    image_thunk_data64,
     image_tls_directory64,
     image_load_config_directory64,
     image_dynamic_relocation64,
