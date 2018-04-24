@@ -45,6 +45,8 @@ class load_config_table{
 	std::vector<uint32_t> se_handlers;
 	std::vector<uint32_t> lock_prefixes_rva;
     std::vector<uint32_t> guard_cf_functions_rva;
+    std::vector<uint32_t> guard_iat_entries_rva;
+    std::vector<uint32_t> guard_long_jump_targets_rva;
 public:
 	load_config_table::load_config_table();
 	load_config_table::~load_config_table();
@@ -134,19 +136,25 @@ public:
 	std::vector<uint32_t >& load_config_table::get_se_handlers();   //x86 only
 	std::vector<uint32_t >& load_config_table::get_lock_prefixes(); //x86 only
     std::vector<uint32_t >& load_config_table::get_guard_cf_functions();
+    std::vector<uint32_t >& load_config_table::get_guard_iat_entries();
+    std::vector<uint32_t >& load_config_table::get_guard_long_jump_targets();
 };
 
 
 enum load_config_table_build_id {
-    load_config_table_build_se_handlers         = 1 << 1,
-    load_config_table_build_lock_prefixes       = 1 << 2,
-    load_config_table_build_guard_cf_functions  = 1 << 3,
+    load_config_table_build_se_handlers             = 1 << 1,
+    load_config_table_build_lock_prefixes           = 1 << 2,
+    load_config_table_build_guard_cf_functions      = 1 << 3,
+    load_config_table_build_guard_iat_entrys        = 1 << 4,
+    load_config_table_build_guard_long_jump_targets = 1 << 5,
 };
 
 directory_code get_load_config_table(_In_ const pe_image &image, _Out_ load_config_table& load_config);
 
 bool build_internal_load_config_data(_Inout_ pe_image &image, _Inout_ pe_section& section,
-    _Inout_ load_config_table& load_config, _Inout_ relocation_table& relocs);
+    _Inout_ load_config_table& load_config, _In_ uint32_t build_items_ids/*import_table_build_id*/,
+    _Inout_ relocation_table& relocs);
+
 bool build_load_config_table_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
     _Inout_ load_config_table& load_config, _Inout_ relocation_table& relocs);
 bool build_load_config_table_full(_Inout_ pe_image &image, _Inout_ pe_section& section,

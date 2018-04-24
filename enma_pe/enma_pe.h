@@ -14,6 +14,7 @@
 #include "enma_pe_properties.h"
 
 #include "pe_image.h"
+#include "pe_image_io.h"
 
 enum directory_placment_id {
     dp_id_export_desc,
@@ -46,6 +47,8 @@ enum directory_placment_id {
     dp_id_loadconfig_desc,
     dp_id_loadconfig_se_table,
     dp_id_loadconfig_cf_table,
+    dp_id_loadconfig_iat_table,
+    dp_id_loadconfig_long_jump_table,
 
 
     dp_id_bound_import_desc,

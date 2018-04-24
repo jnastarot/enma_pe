@@ -305,6 +305,54 @@ pe_image_io& pe_image_io::set_image_offset(uint32_t offset) {
     return *this;
 }
 
+pe_image_io& pe_image_io::seek_to_start() {
+
+    if (image->get_sections_number()) {
+        switch (addressing_type) {
+        case enma_io_addressing_type::enma_io_address_raw: {
+            this->image_offset = image->get_section_by_idx(0)->get_pointer_to_raw();
+            break;
+        }
+
+        case enma_io_addressing_type::enma_io_address_rva: {
+            this->image_offset = image->get_section_by_idx(0)->get_virtual_address();
+            break;
+        }
+
+        default: {this->image_offset = 0; break; }
+        }
+    }
+    else {
+        this->image_offset = 0;
+    }
+
+    return *this;
+}
+
+pe_image_io& pe_image_io::seek_to_end() {
+
+    if (image->get_sections_number()) {
+        switch (addressing_type) {
+        case enma_io_addressing_type::enma_io_address_raw: {
+            this->image_offset = image->get_last_section()->get_pointer_to_raw();
+            break;
+        }
+
+        case enma_io_addressing_type::enma_io_address_rva: {
+            this->image_offset = image->get_last_section()->get_virtual_address();
+            break;
+        }
+
+        default: {this->image_offset = 0; break; }
+        }
+    }
+    else {
+        this->image_offset = 0;
+    }
+
+    return *this;
+}
+
 enma_io_mode  pe_image_io::get_mode() const {
     return this->mode;
 }
@@ -316,6 +364,35 @@ enma_io_addressing_type pe_image_io::get_addressing_type() const {
 }
 uint32_t  pe_image_io::get_image_offset() const {
     return this->image_offset;
+}
+
+bool  pe_image_io::is_executable_rva(uint32_t rva) const {
+
+    pe_section * rva_section = image->get_section_by_rva(rva);
+
+    if (rva_section) {
+        return rva_section->is_executable();
+    }
+
+    return false;
+}
+bool  pe_image_io::is_writeable_rva(uint32_t rva) const {
+    pe_section * rva_section = image->get_section_by_rva(rva);
+
+    if (rva_section) {
+        return rva_section->is_writeable();
+    }
+
+    return false;
+}
+bool  pe_image_io::is_readable_rva(uint32_t rva) const {
+    pe_section * rva_section = image->get_section_by_rva(rva);
+
+    if (rva_section) {
+        return rva_section->is_readable();
+    }
+
+    return false;
 }
 
 pe_image*  pe_image_io::get_image() {

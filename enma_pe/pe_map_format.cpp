@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "pe_map_parser.h"
+#include "pe_map_format.h"
 
 
 map_parser::map_parser(std::string& filepath, pe_image& image, map_root& map, e_map_result &result) {
@@ -379,4 +379,13 @@ void map_parser::parse_line_visualstudio(uint32_t line_idx, std::vector<std::str
 
 
 
+
+e_map_result parse_map_file(
+    std::string& filepath, map_root& map,
+    pe_image* image,
+    e_map_compiller* compiller) {
+
+
+    return e_map_result::map_error_openfile;
+}
 

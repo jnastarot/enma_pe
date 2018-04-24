@@ -94,12 +94,20 @@ public:
     pe_image_io&   pe_image_io::set_mode(enma_io_mode mode);
     pe_image_io&   pe_image_io::set_addressing_type(enma_io_addressing_type type);
     pe_image_io&   pe_image_io::set_image_offset(uint32_t offset);
+
+    pe_image_io& pe_image_io::seek_to_start();
+    pe_image_io& pe_image_io::seek_to_end();
 public:
 
     enma_io_mode            pe_image_io::get_mode() const;
     enma_io_code            pe_image_io::get_last_code() const;
     enma_io_addressing_type pe_image_io::get_addressing_type() const;
     uint32_t                pe_image_io::get_image_offset() const;
+
+    bool                    pe_image_io::is_executable_rva(uint32_t rva) const;
+    bool                    pe_image_io::is_writeable_rva(uint32_t rva) const;
+    bool                    pe_image_io::is_readable_rva(uint32_t rva) const;
+
     pe_image*               pe_image_io::get_image();
 };
 

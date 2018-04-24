@@ -15,20 +15,8 @@
     <Filter Include="Заголовочные файлы\pe_helpers">
       <UniqueIdentifier>{e3f2cd7a-58ec-41b0-bedb-1e09e933aade}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_map_parser">
-      <UniqueIdentifier>{eee522b8-5c5b-4510-b73d-b93517728fd8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Заголовочные файлы\pe_helpers\pe_string_finder">
       <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_dbginfo_parser">
-      <UniqueIdentifier>{c33c624a-2c92-442e-b97f-3634e271fd62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_dbginfo_parser\tds_parser">
-      <UniqueIdentifier>{aa150d9d-1db7-4d13-bfce-8cb943207bb7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_dbginfo_parser\pdb_parser">
-      <UniqueIdentifier>{585aa7d7-8444-4665-8061-1b36d8a030d4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Заголовочные файлы\pe_image\pe_section">
       <UniqueIdentifier>{d33f4dd3-cf26-486f-aa10-bcc8eef25b19}</UniqueIdentifier>
@@ -87,14 +75,35 @@
     <Filter Include="Заголовочные файлы\pe_helpers\pe_demangler\gcc">
       <UniqueIdentifier>{ded62214-8109-484b-aa03-e22fcb40878b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_image\pe_io">
+    <Filter Include="Заголовочные файлы\pe_io">
       <UniqueIdentifier>{8cfc90d6-248b-4587-a8a6-c4b9c424ff24}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_image\pe_io\pe_section_io">
+    <Filter Include="Заголовочные файлы\pe_io\pe_section_io">
       <UniqueIdentifier>{75fd8c67-bd6d-439d-8f7a-935b3da586db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_image\pe_io\pe_image_io">
+    <Filter Include="Заголовочные файлы\pe_io\pe_image_io">
       <UniqueIdentifier>{c0009d24-c11d-4370-a4c8-5aba0e44c509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_dbg_format">
+      <UniqueIdentifier>{bddba371-7fa0-471c-a1f0-c38b7787f96a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_dbg_format\TD32">
+      <UniqueIdentifier>{aa150d9d-1db7-4d13-bfce-8cb943207bb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_dbg_format\PDB">
+      <UniqueIdentifier>{585aa7d7-8444-4665-8061-1b36d8a030d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_map_format">
+      <UniqueIdentifier>{a942dccd-0a5c-4020-8234-7402c8229481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_map_format\bolrand">
+      <UniqueIdentifier>{1f3c69be-d44d-4e46-8f20-8749aaf8eff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_map_format\msvc">
+      <UniqueIdentifier>{29a60e5c-acd8-41d4-bc23-8674c33db30e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_map_format\gcc">
+      <UniqueIdentifier>{66ba0a9f-31e5-455c-a6fd-d64f49c496b1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -137,9 +146,6 @@
     <ClInclude Include="pe_dotnet.h">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_dotnet</Filter>
     </ClInclude>
-    <ClInclude Include="pe_map_parser.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_map_parser</Filter>
-    </ClInclude>
     <ClInclude Include="pe_string_finder.h">
       <Filter>Заголовочные файлы\pe_helpers\pe_string_finder</Filter>
     </ClInclude>
@@ -147,7 +153,7 @@
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
     </ClInclude>
     <ClInclude Include="pe_tds_parser.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_dbginfo_parser\tds_parser</Filter>
+      <Filter>Заголовочные файлы\pe_helpers\pe_dbg_format\TD32</Filter>
     </ClInclude>
     <ClInclude Include="pe_helper.h">
       <Filter>Заголовочные файлы\pe_helpers</Filter>
@@ -177,13 +183,25 @@
       <Filter>Заголовочные файлы\pe_helpers\pe_demangler\gcc</Filter>
     </ClInclude>
     <ClInclude Include="pe_image_io.h">
-      <Filter>Заголовочные файлы\pe_image\pe_io\pe_image_io</Filter>
+      <Filter>Заголовочные файлы\pe_io\pe_image_io</Filter>
     </ClInclude>
     <ClInclude Include="pe_section_io.h">
-      <Filter>Заголовочные файлы\pe_image\pe_io\pe_section_io</Filter>
+      <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
     </ClInclude>
     <ClInclude Include="enma_pe_properties.h">
       <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_map_bolrand.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format\bolrand</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_map_msvc.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format\msvc</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_map_gcc.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format\gcc</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_map_format.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -226,9 +244,6 @@
     <ClCompile Include="pe_dotnet.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_dotnet</Filter>
     </ClCompile>
-    <ClCompile Include="pe_map_parser.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_map_parser</Filter>
-    </ClCompile>
     <ClCompile Include="pe_string_finder.cpp">
       <Filter>Заголовочные файлы\pe_helpers\pe_string_finder</Filter>
     </ClCompile>
@@ -236,7 +251,7 @@
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
     </ClCompile>
     <ClCompile Include="pe_tds_parser.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_dbginfo_parser\tds_parser</Filter>
+      <Filter>Заголовочные файлы\pe_helpers\pe_dbg_format\TD32</Filter>
     </ClCompile>
     <ClCompile Include="pe_helper.cpp">
       <Filter>Заголовочные файлы\pe_helpers</Filter>
@@ -263,10 +278,22 @@
       <Filter>Заголовочные файлы\pe_helpers\pe_demangler\gcc</Filter>
     </ClCompile>
     <ClCompile Include="pe_image_io.cpp">
-      <Filter>Заголовочные файлы\pe_image\pe_io\pe_image_io</Filter>
+      <Filter>Заголовочные файлы\pe_io\pe_image_io</Filter>
     </ClCompile>
     <ClCompile Include="pe_section_io.cpp">
-      <Filter>Заголовочные файлы\pe_image\pe_io\pe_section_io</Filter>
+      <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_map_bolrand.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format\bolrand</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_map_msvc.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format\msvc</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_map_gcc.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format\gcc</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_map_format.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_map_format</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
