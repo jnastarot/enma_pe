@@ -43,7 +43,7 @@ e.mail..: jnastarot@yandex.ru
 | `string finder` | finding ansi and unicode strings |
 ---
 
- 
+ <h3 align="center">Useful links</h3>
 
 [https://github.com/dishather/richprint/](https://github.com/dishather/richprint/)<br>
 [https://kaimi.io/2012/09/portable-executable-library/](https://kaimi.io/2012/09/portable-executable-library/)<br>
