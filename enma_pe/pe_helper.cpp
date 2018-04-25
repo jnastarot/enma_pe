@@ -2,179 +2,6 @@
 #include "pe_helper.h"
 
 
-void demangle(std::string name, std::string& demangled_name) {
-    demangled_name.clear();
-
-    char *p = (char*)name.c_str();
-    char pre_buffer[500];
-    size_t ch_idx = 0;
-    char last[2] = { 0 };
-    while (ch_idx < name.length()) {
-        size_t l = strcspn(p, " \n\t()\"\'");
-
-        if (last[0]) {
-            demangled_name += last;
-        }
-
-        last[0] = p[l];
-        p[l] = 0;
-
-        memset(pre_buffer,0, sizeof(pre_buffer));
-      //  if (p[0] && !UnDecorateSymbolName(p, pre_buffer, sizeof(pre_buffer), UNDNAME_COMPLETE)) {
-     //       demangled_name += p;
-     //   }
-      //  else {
-     //       demangled_name += pre_buffer;
-      //  }
-        p += l + 1;
-        ch_idx += l + 1;
-    }
-
-    if (last[0]) { demangled_name += last; }
-}
-
-
-void map_add_item(std::vector<std::string> &path, map_item& item, std::vector<map_dir>& map_dirs) {
-
-    for (size_t i = 0; i < map_dirs.size(); i++) {
-        if (path.size()) {
-            if (map_dirs[i].dir_name == path[0]) {
-                if (path.size() > 1) {
-                    path.erase(path.begin());
-                    map_add_item(path, item, map_dirs[i].dirs);
-                }
-                else {
-                    if (item._class == data_class_function) {
-                        map_dirs[i].code_items.push_back(item);
-                    }
-                    else {
-                        map_dirs[i].data_items.push_back(item);
-                    }
-                }
-                return;
-            }
-        }
-        else {
-            if (map_dirs[i].dir_name == "\\_(global)_/") {
-                if (item._class == data_class_function) {
-                    map_dirs[i].code_items.push_back(item);
-                }
-                else {
-                    map_dirs[i].data_items.push_back(item);
-                }
-                return;
-            }
-        }
-    }
-
-    map_dir dir;
-    if (path.size()) {
-        dir.dir_name = path[0];
-    }
-    else {
-        dir.dir_name = "\\_(global)_/";
-    }
-    map_dirs.push_back(dir);
-
-    if (path.size() > 1) {
-        path.erase(path.begin());
-        map_add_item(path, item, map_dirs[map_dirs.size() - 1].dirs);
-    }
-    else {
-        if (item._class == data_class_function) {
-            map_dirs[map_dirs.size() - 1].code_items.push_back(item);
-        }
-        else {
-            map_dirs[map_dirs.size() - 1].data_items.push_back(item);
-        }
-    }
-}
-
-#define is_value_in_bound(st,len,val) ((st) <= (val) && (val) < (st+(len)))
-
-void map_finalize_items(pe_image& image, std::vector<map_segment>& segments, std::vector<map_item_raw>& items_raw, map_root& map) {
-
-    std::vector<std::vector<map_item_raw>> items_by_section;
-
-    items_by_section.resize((size_t)segments[segments.size() - 1].section_number);
-
-    for (size_t i = 0; i < items_raw.size(); i++) { //push items by sections
-        if (items_raw[i].section_number) {
-            items_by_section[(size_t)items_raw[i].section_number - 1].push_back(items_raw[i]);
-        }
-    }
-
-    for (size_t item_sec = 0; item_sec < items_by_section.size(); item_sec++) { //sort items by offset
-
-        std::sort(items_by_section[item_sec].begin(), items_by_section[item_sec].end(), [](const map_item_raw& a, const map_item_raw& b) {
-            return a.offset < b.offset;
-        });
-
-    }
-
-    for (size_t item_sec = 0; item_sec < items_by_section.size(); item_sec++) {
-        for (size_t item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //calc lens
-            if (items_by_section[item_sec].size() >  item_idx + 1) {
-                if (items_by_section[item_sec][item_idx].offset == items_by_section[item_sec][item_idx + 1].offset) {
-                    items_by_section[item_sec].erase(items_by_section[item_sec].begin() + item_idx + 1);
-                    item_idx--;
-                    continue;
-                }
-
-                items_by_section[item_sec][item_idx].length = items_by_section[item_sec][item_idx + 1].offset - items_by_section[item_sec][item_idx].offset;
-
-                for (size_t seg_idx = 0; seg_idx < segments.size(); seg_idx++) {
-                    if (segments[seg_idx].section_number == items_by_section[item_sec][item_idx].section_number) {
-                        if (is_value_in_bound(
-                            segments[seg_idx].offset, segments[seg_idx].length, //if in bound of segment
-                            items_by_section[item_sec][item_idx].offset)) {
-
-                            if ((items_by_section[item_sec][item_idx].offset + items_by_section[item_sec][item_idx].length) > //if length climbs beyond border
-                                (segments[seg_idx].offset + segments[seg_idx].length)) {
-                                items_by_section[item_sec][item_idx].length =
-                                    (segments[seg_idx].offset + segments[seg_idx].length) - items_by_section[item_sec][item_idx].offset;
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                for (size_t seg_idx = 0; seg_idx < segments.size(); seg_idx++) {
-                    if (segments[seg_idx].section_number == items_by_section[item_sec][item_idx].section_number) {
-                        if (is_value_in_bound(
-                            segments[seg_idx].offset, segments[seg_idx].length, //if in bound of segment
-                            items_by_section[item_sec][item_idx].offset)) {
-
-                            if (items_by_section[item_sec][item_idx]._class == data_class_unknown) {
-                                if (segments[seg_idx]._class == segment_class_code) {
-                                    items_by_section[item_sec][item_idx]._class = data_class_function;
-                                }
-                                else {
-                                    items_by_section[item_sec][item_idx]._class = data_class_data;
-                                }
-                            }
-
-                            items_by_section[item_sec][item_idx].length =
-                                (segments[seg_idx].offset + segments[seg_idx].length) - items_by_section[item_sec][item_idx].offset;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (size_t item_sec = 0; item_sec < items_by_section.size(); item_sec++) {
-        for (size_t item_idx = 0; item_idx < items_by_section[item_sec].size(); item_idx++) { //push to rootmap
-
-            items_by_section[item_sec][item_idx].offset += //offset to rva
-                image.get_section_by_idx(items_by_section[item_sec][item_idx].section_number - 1)->get_virtual_address();
-
-            map_add_item(items_by_section[item_sec][item_idx].path, items_by_section[item_sec][item_idx], map.dirs);
-        }
-    }
-}
-
-
 double get_data_entropy(const std::vector<uint8_t> &data) {
 
     uint32_t bytes_count[256];
@@ -196,8 +23,12 @@ double get_data_entropy(const std::vector<uint8_t> &data) {
     return total_entropy;
 }
 
-uint32_t calculate_checksum(const std::vector<uint8_t> &file) {
-    image_dos_header* p_dos_header = (image_dos_header*)file.data();
+double   get_section_entropy(const pe_section& section) {
+    return get_data_entropy(section.get_section_data());
+}
+
+uint32_t calculate_checksum(const std::vector<uint8_t> &pe_image) {
+    image_dos_header* p_dos_header = (image_dos_header*)pe_image.data();
     if (p_dos_header->e_magic != IMAGE_DOS_SIGNATURE) { return 0; }
 
     uint32_t checksum_field_offset = p_dos_header->e_lfanew +
@@ -205,10 +36,10 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &file) {
 
     uint64_t checksum = 0;
 
-    for (size_t i = 0; i < file.size(); i += 4) {
+    for (size_t i = 0; i < pe_image.size(); i += 4) {
         if (i == checksum_field_offset) { continue; }
 
-        checksum = (checksum & 0xffffffff) + *(uint32_t*)&file.data()[i] + (checksum >> 32);
+        checksum = (checksum & 0xffffffff) + *(uint32_t*)&pe_image.data()[i] + (checksum >> 32);
 
         if (checksum > 0xffffffff) {
             checksum = (checksum & 0xffffffff) + (checksum >> 32);
@@ -218,7 +49,89 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &file) {
     checksum = (checksum & 0xffff) + (checksum >> 16);
     checksum = (checksum)+(checksum >> 16);
     checksum = checksum & 0xffff;
-    checksum += file.size();
+    checksum += pe_image.size();
 
     return uint32_t(checksum & 0xffffffff);
+}
+
+
+void erase_directories_placement(pe_image &image, std::vector<directory_placement>& placement, relocation_table* relocs, bool delete_empty_sections) {
+
+    std::sort(placement.begin(), placement.end(), [](directory_placement& lhs, directory_placement& rhs) {
+        return lhs.rva < rhs.rva;
+    });
+
+    std::vector<directory_placement> placement__ = placement;
+
+    for (size_t parent_zone_idx = 0; parent_zone_idx + 1 < placement.size(); parent_zone_idx++) { //link zones
+
+        if (placement[parent_zone_idx].rva <= placement[parent_zone_idx + 1].rva &&
+            (placement[parent_zone_idx].rva + placement[parent_zone_idx].size) >= placement[parent_zone_idx + 1].rva
+            ) {
+
+            if ((placement[parent_zone_idx + 1].rva +
+                placement[parent_zone_idx + 1].size) > (placement[parent_zone_idx].rva + placement[parent_zone_idx].size)) {
+
+                placement[parent_zone_idx].size =
+                    ((placement[parent_zone_idx + 1].rva + placement[parent_zone_idx + 1].size) - placement[parent_zone_idx].rva);
+            }
+
+            placement.erase(placement.begin() + parent_zone_idx + 1);
+            parent_zone_idx--;
+        }
+    }
+
+    pe_image_io image_io(image);
+
+    for (auto& item : placement) {
+        if (relocs) {
+            relocs->erase_all_items_in_zone(item.rva, item.size);
+        }
+
+        image_io.set_image_offset(item.rva).memory_set(item.size, 0);
+
+        item.id = db_id_none;
+    }
+
+
+    if (delete_empty_sections && image.get_sections().size()) {
+        for (size_t section_idx = image.get_sections().size() - 1; section_idx >= 0; section_idx--) {
+            auto _section = image.get_sections()[section_idx];
+
+            for (size_t zone_idx = 0; zone_idx < placement.size(); zone_idx++) {
+                
+                if (_section->get_virtual_address() >= placement[zone_idx].rva && //if it cover full section
+                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
+
+                    if (_section->get_virtual_address() == placement[zone_idx].rva &&
+                        (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
+                        placement.erase(placement.begin() + zone_idx);
+                    }
+                    else {
+                        placement[zone_idx].size = (placement[zone_idx].rva - _section->get_virtual_address());
+                    }
+
+                    image.get_sections().erase(image.get_sections().begin() + section_idx);
+                    goto go_next_;
+                }
+
+                if (_section->get_virtual_address() < placement[zone_idx].rva && //if it cover up part of the section
+                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
+                    uint32_t minus_size = (_section->get_virtual_address() + _section->get_virtual_size()) - placement[zone_idx].rva;
+                    
+                    if (minus_size < placement[zone_idx].size) {
+                        placement[zone_idx].size -= minus_size;
+                    }
+                    else {
+                        placement.erase(placement.begin() + zone_idx);
+                    }
+
+                    _section->set_size_of_raw_data(_section->get_size_of_raw_data() - minus_size);
+                }
+            }
+
+            return;
+        go_next_:;
+        }
+    }
 }

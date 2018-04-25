@@ -163,18 +163,18 @@ enma_io_code pe_section_io::internal_write(
             }        
         }
         else { //check if necessary add an emulated part
-            if (addressing_type == enma_io_addressing_type::enma_io_address_raw) {
+           // if (addressing_type == enma_io_addressing_type::enma_io_address_raw) {
                 if (real_offset + wrote_size > section->get_size_of_raw_data()) { //aligned by raw align
 
                     add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
                 }
-            }
+          /*  }
             else if (addressing_type == enma_io_addressing_type::enma_io_address_rva) {
                 if (real_offset + wrote_size > section->get_virtual_size()) {//aligned by virtual align
 
                     add_size((real_offset + wrote_size) - section->get_virtual_size(), false);
                 }
-            }
+            }*/
         }
 
         memcpy(&section->get_section_data().data()[real_offset], &((uint8_t*)buffer)[down_oversize], wrote_size);

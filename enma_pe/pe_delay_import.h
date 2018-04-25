@@ -68,5 +68,6 @@ public:
 
 
 directory_code get_delay_import_table(_In_ const pe_image &image, _Out_ delay_import_table& imports, 
-    _In_opt_ const bound_import_table* bound_imports = 0);
-directory_code get_placement_delay_import_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+    _In_ const bound_import_table& bound_imports);
+directory_code get_placement_delay_import_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement,
+    _In_ const bound_import_table& bound_imports);

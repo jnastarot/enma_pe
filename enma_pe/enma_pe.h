@@ -17,6 +17,8 @@
 #include "pe_image_io.h"
 
 enum directory_placment_id {
+    db_id_none,
+
     dp_id_export_desc,
     dp_id_export_func_table,
     dp_id_export_name_table,
@@ -108,10 +110,10 @@ struct pe_image_expanded {
 
 
 void do_expanded_pe_image(_Inout_ pe_image_expanded& expanded_image, _In_ const pe_image &image);
-directory_code get_directories_placement(_Inout_ pe_image &image, _Out_ std::vector<directory_placement>& placement);
+directory_code get_directories_placement(_Inout_ pe_image &image, _Out_ std::vector<directory_placement>& placement, 
+    _In_opt_ const bound_import_table* bound_imports = 0);
 
-void erase_directories_placement(_Inout_ pe_image &image, _In_ std::vector<directory_placement>& placement,
-    _Inout_opt_ relocation_table* relocs = 0,_In_opt_ bool delete_empty_sections = false);
+
 
 
 

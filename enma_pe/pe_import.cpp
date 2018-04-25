@@ -227,7 +227,7 @@ bool import_table::get_imported_func(const std::string& lib_name, uint16_t ordin
 }
 
 template<typename image_format>
-directory_code _get_import_table(const pe_image &image, import_table& imports,const bound_import_table* bound_imports) {
+directory_code _get_import_table(const pe_image &image, import_table& imports,const bound_import_table& bound_imports) {
     imports.clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -260,7 +260,7 @@ directory_code _get_import_table(const pe_image &image, import_table& imports,co
                 library.set_timestamp(import_desc.time_date_stamp);
 
                 bool is_bound_library = (import_desc.time_date_stamp &&
-                    bound_imports && bound_imports->has_library(library_name, import_desc.time_date_stamp));
+                    bound_imports.has_library(library_name, import_desc.time_date_stamp));
 
                 pe_image_io iat_io(image);
                 pe_image_io original_iat_io(image);
@@ -527,7 +527,8 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
 
 
 template<typename image_format>
-directory_code _get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code _get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement,
+    const bound_import_table& bound_imports) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
 
@@ -546,7 +547,6 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
         if (import_desc.first_thunk) {
 
             do {
-                imported_library library;
 
                 std::string library_name;
                 if (pe_image_io(image).set_image_offset(import_desc.name).read_string(library_name) != enma_io_success) {
@@ -555,12 +555,15 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
 
                 placement.push_back({ import_desc.name ,ALIGN_UP(library_name.length()+1,0x2),dp_id_import_desc });
 
+                bool is_bound_library = (import_desc.time_date_stamp == -1 &&
+                    bound_imports.has_library(library_name));
+
                 pe_image_io iat_io(image);
                 pe_image_io original_iat_io(image);
                 iat_io.set_image_offset(import_desc.first_thunk);
                 original_iat_io.set_image_offset(import_desc.original_first_thunk);
 
-
+              
                 typename image_format::ptr_size iat_item = 0;
 
                 if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
@@ -596,7 +599,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                         }
                         else {
 
-                            if (!(iat_item&image_format::ordinal_flag)) {
+                            if (!is_bound_library && !(iat_item&image_format::ordinal_flag)) {
 
                                 pe_image_io import_func_name_io(image);
                                 import_func_name_io.set_image_offset(iat_item + sizeof(uint16_t));
@@ -642,7 +645,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
 }
 
 
-directory_code get_import_table(const pe_image &image, import_table& imports, const bound_import_table* bound_imports) {
+directory_code get_import_table(const pe_image &image, import_table& imports, const bound_import_table& bound_imports) {
 
     if (image.is_x32_image()) {
         return _get_import_table<image_32>(image, imports, bound_imports);
@@ -711,12 +714,13 @@ bool build_import_table_full(pe_image &image,
         build_import_table_only(image,section,imports);
 }
 
-directory_code get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement,
+    const bound_import_table& bound_imports) {
 
     if (image.is_x32_image()) {
-        return _get_placement_import_table<image_32>(image, placement);
+        return _get_placement_import_table<image_32>(image, placement, bound_imports);
     }
     else {
-        return _get_placement_import_table<image_64>(image, placement);
+        return _get_placement_import_table<image_64>(image, placement, bound_imports);
     }
 }

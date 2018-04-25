@@ -7,7 +7,9 @@
 void get_strings_from_image_by_locale(const pe_image& image, string_base_table& string_table,
     char * locale,
     bool find_in_clean_image,
-    bool find_in_execute_sections) {
+    bool find_in_execute_sections,
+    uint32_t min_string_size,
+    uint32_t max_string_size) {
 
     pe_image current_image = image;
 

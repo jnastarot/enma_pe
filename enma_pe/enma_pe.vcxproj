@@ -73,6 +73,10 @@
     <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir)\demangler;$(IncludePath)</IncludePath>
+    <SourcePath>$(ProjectDir)\demangler;$(SourcePath)</SourcePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -136,14 +140,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="bolrand_demangler.h" />
     <ClInclude Include="enma_pe_internal.h" />
     <ClInclude Include="enma_pe.h" />
     <ClInclude Include="enma_pe_properties.h" />
-    <ClInclude Include="gcc_demangler.h" />
-    <ClInclude Include="msvc_demangler.h" />
     <ClInclude Include="pe_bound_import.h" />
-    <ClInclude Include="pe_demangler.h" />
     <ClInclude Include="pe_helper.h" />
     <ClInclude Include="pe_debug.h" />
     <ClInclude Include="pe_delay_import.h" />
@@ -154,10 +154,6 @@
     <ClInclude Include="pe_image_io.h" />
     <ClInclude Include="pe_import.h" />
     <ClInclude Include="pe_loadconfig.h" />
-    <ClInclude Include="pe_map_bolrand.h" />
-    <ClInclude Include="pe_map_gcc.h" />
-    <ClInclude Include="pe_map_msvc.h" />
-    <ClInclude Include="pe_map_format.h" />
     <ClInclude Include="pe_relocations.h" />
     <ClInclude Include="pe_resources.h" />
     <ClInclude Include="pe_rich_dos.h" />
@@ -167,15 +163,10 @@
     <ClInclude Include="pe_string_finder.h" />
     <ClInclude Include="pe_tls.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="pe_tds_parser.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bolrand_demangler.cpp" />
     <ClCompile Include="enma_pe.cpp" />
-    <ClCompile Include="gcc_demangler.cpp" />
-    <ClCompile Include="msvc_demangler.cpp" />
     <ClCompile Include="pe_bound_import.cpp" />
-    <ClCompile Include="pe_demangler.cpp" />
     <ClCompile Include="pe_helper.cpp" />
     <ClCompile Include="pe_debug.cpp" />
     <ClCompile Include="pe_delay_import.cpp" />
@@ -186,10 +177,6 @@
     <ClCompile Include="pe_image_io.cpp" />
     <ClCompile Include="pe_import.cpp" />
     <ClCompile Include="pe_loadconfig.cpp" />
-    <ClCompile Include="pe_map_bolrand.cpp" />
-    <ClCompile Include="pe_map_gcc.cpp" />
-    <ClCompile Include="pe_map_msvc.cpp" />
-    <ClCompile Include="pe_map_format.cpp" />
     <ClCompile Include="pe_relocations.cpp" />
     <ClCompile Include="pe_resources.cpp" />
     <ClCompile Include="pe_rich_dos.cpp" />
@@ -204,7 +191,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="pe_tds_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.travis.yml" />

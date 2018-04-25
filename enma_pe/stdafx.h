@@ -15,15 +15,10 @@
 #include <iostream>
 #include <iostream>
 #include <stdarg.h> 
-
-//#include <dbghelp.h>
-//#pragma comment(lib,"dbghelp.lib")
-
 #include <cstdint>
 
 using namespace std;
 
 
 #include "enma_pe.h"
-
 

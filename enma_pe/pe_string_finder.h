@@ -24,4 +24,7 @@ struct string_base_table {
 void get_strings_from_image_by_locale(_In_ const pe_image& image,_Out_ string_base_table& string_table,
     _In_ char * locale = 0,//by default is en-EN
     _In_ bool find_in_clean_image = true,//search without directories data
-    _In_ bool find_in_execute_sections = false);//search without sections with executable flag
+    _In_ bool find_in_execute_sections = false,//search without sections with executable flag
+    _In_ uint32_t min_string_size = MIN_STRING_SIZE,
+    _In_ uint32_t max_string_size = MAX_STRING_SIZE
+    );

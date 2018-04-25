@@ -149,7 +149,7 @@ std::vector<delay_imported_library>& delay_import_table::get_libraries() {
 
 template<typename image_format>
 directory_code _get_delay_import_table(const pe_image &image, delay_import_table& imports,
-     const bound_import_table* bound_imports) {
+     const bound_import_table& bound_imports) {
 
     imports.clear();
 
@@ -202,7 +202,7 @@ directory_code _get_delay_import_table(const pe_image &image, delay_import_table
                 delay_import_bound_iat_io.set_image_offset(import_desc.bound_import_address_table_rva);
 
                 bool is_used_bound_table = (import_desc.time_date_stamp &&
-                    bound_imports && bound_imports->has_library(library_name, import_desc.time_date_stamp));
+                    bound_imports.has_library(library_name, import_desc.time_date_stamp));
 
                 for (uint32_t iat_func_address = import_desc.import_address_table_rva;; //get funcs
                     iat_func_address += sizeof(typename image_format::ptr_size)) {
@@ -266,7 +266,8 @@ directory_code _get_delay_import_table(const pe_image &image, delay_import_table
 
 
 template<typename image_format>
-directory_code _get_placement_delay_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code _get_placement_delay_import_table(const pe_image &image, std::vector<directory_placement>& placement,
+    const bound_import_table& bound_imports) {
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
 
@@ -333,7 +334,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, std::vec
                             }
 
                             placement.push_back({ (uint32_t)name_item,
-                               sizeof(uint16_t) + ALIGN_UP((lib_name.length() + 1),0x2),dp_id_delay_import_names });
+                               sizeof(uint16_t) + ALIGN_UP((func_name.length() + 1),0x2),dp_id_delay_import_names });
                         }
                     }
                     else {
@@ -380,7 +381,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, std::vec
     return directory_code::directory_code_not_present;
 }
 
-directory_code get_delay_import_table(const pe_image &image, delay_import_table& imports, const bound_import_table* bound_imports) {
+directory_code get_delay_import_table(const pe_image &image, delay_import_table& imports, const bound_import_table& bound_imports) {
 	
     if (image.is_x32_image()) {
         return _get_delay_import_table<image_32>(image, imports, bound_imports);
@@ -390,12 +391,13 @@ directory_code get_delay_import_table(const pe_image &image, delay_import_table&
     }
 }
 
-directory_code get_placement_delay_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_delay_import_table(const pe_image &image, std::vector<directory_placement>& placement,
+    const bound_import_table& bound_imports) {
 
     if (image.is_x32_image()) {
-        return _get_placement_delay_import_table<image_32>(image, placement);
+        return _get_placement_delay_import_table<image_32>(image, placement, bound_imports);
     }
     else {
-        return _get_placement_delay_import_table<image_64>(image, placement);
+        return _get_placement_delay_import_table<image_64>(image, placement, bound_imports);
     }
 }
