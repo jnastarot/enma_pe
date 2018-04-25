@@ -45,8 +45,8 @@ e.mail..: jnastarot@yandex.ru
 
  
 
-[https://github.com/dishather/richprint/](https://github.com/dishather/richprint/)
-[https://kaimi.io/2012/09/portable-executable-library/](https://kaimi.io/2012/09/portable-executable-library/)
-[https://github.com/radare/radare2](https://github.com/radare/radare2)
-[https://github.com/cmu-sei/pharos](https://github.com/cmu-sei/pharos)
-[https://github.com/JusticeRage/Manalyze](https://github.com/JusticeRage/Manalyze)
+[https://github.com/dishather/richprint/](https://github.com/dishather/richprint/)<br>
+[https://kaimi.io/2012/09/portable-executable-library/](https://kaimi.io/2012/09/portable-executable-library/)<br>
+[https://github.com/radare/radare2](https://github.com/radare/radare2)<br>
+[https://github.com/cmu-sei/pharos](https://github.com/cmu-sei/pharos)<br>
+[https://github.com/JusticeRage/Manalyze](https://github.com/JusticeRage/Manalyze)<br>
