@@ -498,7 +498,7 @@ typedef struct _win_certificate {
     uint32_t   length;
     uint16_t   w_revision;
     uint16_t   w_certificate_type;
-    uint8_t    b_certificate[1];
+   // uint8_t    b_certificate[1];
 } win_certificate, *pwin_certificate;
 
 

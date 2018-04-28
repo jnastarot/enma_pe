@@ -95,12 +95,13 @@ directory_code get_security_table(const pe_image &image, security_table& securit
         pe_image_io security_io(image, enma_io_address_raw);
         
         uint32_t total_size = 0;
+        security_io.set_image_offset(raw_address);
 
         do {
             win_certificate win_cert;
             std::vector<BYTE> data;
 
-            if (security_io.set_image_offset(raw_address + total_size).read(&win_cert, sizeof(win_cert)) != enma_io_success) {
+            if (security_io.read(&win_cert, sizeof(win_cert)) != enma_io_success) {
                 return directory_code::directory_code_currupted;
             }
             

@@ -116,10 +116,29 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
         if (addressing_type == enma_io_addressing_type::enma_io_address_raw &&
             total_up_oversize && image->get_overlay_data().size()) { //take up size from overlay
 
-            memcpy(&((uint8_t*)buffer)[down_oversize + total_readed_size], image->get_overlay_data().data(),
-                min(image->get_overlay_data().size(), total_up_oversize));
+            uint32_t top_section_raw = 0;
 
-            total_up_oversize -= min(image->get_overlay_data().size(), total_up_oversize);
+            uint32_t overlay_readed_size = 0;
+            uint32_t overlay_down_oversize = 0;
+            uint32_t overlay_up_oversize = 0;
+
+            if (image->get_sections_number()) {
+                top_section_raw = 
+                    ALIGN_UP(image->get_last_section()->get_pointer_to_raw() + image->get_last_section()->get_size_of_raw_data(),0x200);
+            }
+
+            b_view = view_data(
+                data_offset, size,
+                real_offset, overlay_readed_size, overlay_down_oversize, overlay_up_oversize,
+                top_section_raw, image->get_overlay_data().size());
+            
+            if (b_view) {
+                memcpy(&((uint8_t*)buffer)[down_oversize], &image->get_overlay_data().data()[real_offset],overlay_readed_size);
+
+
+                total_readed_size += overlay_readed_size;
+                total_up_oversize = overlay_up_oversize;
+            }
         }
 
         readed_size = total_readed_size;
