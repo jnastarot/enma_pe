@@ -4,10 +4,10 @@ class security_item {
     uint16_t   revision;
     uint16_t   certificate_type;
 
-    std::vector<BYTE> certificate_data;
+    std::vector<uint8_t> certificate_data;
 public:
     security_item::security_item();
-    security_item::security_item(uint16_t revision, uint16_t certificate_type, std::vector<BYTE>& certificate_data);
+    security_item::security_item(uint16_t revision, uint16_t certificate_type, std::vector<uint8_t>& certificate_data);
     security_item::security_item(const security_item& item);
     security_item::~security_item();
 
@@ -16,13 +16,13 @@ public:
     void   security_item::set_revision(uint16_t revision);
     void   security_item::set_certificate_type(uint16_t type);
 
-    void security_item::set_certificate_data(std::vector<BYTE>& data);
+    void security_item::set_certificate_data(std::vector<uint8_t>& data);
 
 public:
     uint16_t   security_item::get_revision() const;
     uint16_t   security_item::get_certificate_type() const;
 
-    std::vector<BYTE>& security_item::get_certificate_data();
+    std::vector<uint8_t>& security_item::get_certificate_data();
 };
 
 

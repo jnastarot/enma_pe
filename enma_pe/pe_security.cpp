@@ -7,7 +7,7 @@ security_item::security_item() {
     certificate_type = 0;
 }
 
-security_item::security_item(uint16_t revision, uint16_t certificate_type, std::vector<BYTE>& certificate_data)
+security_item::security_item(uint16_t revision, uint16_t certificate_type, std::vector<uint8_t>& certificate_data)
 :revision(revision), certificate_type(certificate_type), certificate_data(certificate_data){}
 
 security_item::security_item(const security_item& item) {
@@ -33,7 +33,7 @@ void   security_item::set_certificate_type(uint16_t type) {
     this->certificate_type = type;
 }
 
-void security_item::set_certificate_data(std::vector<BYTE>& data) {
+void security_item::set_certificate_data(std::vector<uint8_t>& data) {
     this->certificate_data = data;
 }
 
@@ -45,7 +45,7 @@ uint16_t   security_item::get_certificate_type() const {
     return this->certificate_type;
 }
 
-std::vector<BYTE>& security_item::get_certificate_data() {
+std::vector<uint8_t>& security_item::get_certificate_data() {
     return this->certificate_data;
 }
 
@@ -99,7 +99,7 @@ directory_code get_security_table(const pe_image &image, security_table& securit
 
         do {
             win_certificate win_cert;
-            std::vector<BYTE> data;
+            std::vector<uint8_t> data;
 
             if (security_io.read(&win_cert, sizeof(win_cert)) != enma_io_success) {
                 return directory_code::directory_code_currupted;
