@@ -94,6 +94,7 @@ struct pe_image_expanded {
     import_table        imports;
     resource_directory  resources;
     exceptions_table    exceptions;
+    security_table      security;
     relocation_table    relocations;
     debug_table         debug;
     tls_table           tls;

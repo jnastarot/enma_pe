@@ -27,7 +27,7 @@ e.mail..: jnastarot@yandex.ru
 | `import delay` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `resources` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `exceptions` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| `security` | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_check_mark: |
+| `security` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `relocations` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `debug` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `tls` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |

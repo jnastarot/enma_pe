@@ -2,7 +2,8 @@
 
 #define WIN32_LEAN_AND_MEAN   
 
-
+#include <Windows.h>
+#include <Wintrust.h>
 #include <vector>
 #include <list>
 #include <string>

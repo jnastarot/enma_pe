@@ -484,6 +484,16 @@ typedef struct _image_ia64_runtime_function_entry {
 //
 // Win certificate format.
 //
+
+#define WIN_CERT_REVISION_1_0               (0x0100)
+#define WIN_CERT_REVISION_2_0               (0x0200)
+
+#define WIN_CERT_TYPE_X509                  (0x0001)   // bCertificate contains an X.509 Certificate
+#define WIN_CERT_TYPE_PKCS_SIGNED_DATA      (0x0002)   // bCertificate contains a PKCS SignedData structure
+#define WIN_CERT_TYPE_RESERVED_1            (0x0003)   // Reserved
+#define WIN_CERT_TYPE_TS_STACK_SIGNED       (0x0004)   // Terminal Server Protocol Stack Certificate signing
+#define WIN_CERT_TYPE_PKCS1_SIGN            (0x0009)   // Certificate is PKCS1 signature.
+
 typedef struct _win_certificate {
     uint32_t   length;
     uint16_t   w_revision;

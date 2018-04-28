@@ -16,6 +16,7 @@ pe_image_expanded& pe_image_expanded::operator=(const pe_image_expanded& image_e
     this->imports = image_ex.imports;
     this->resources = image_ex.resources;
     this->exceptions = image_ex.exceptions;
+    this->security  = image_ex.security;
     this->relocations = image_ex.relocations;
     this->debug = image_ex.debug;
     this->tls = image_ex.tls;
@@ -41,6 +42,7 @@ void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &imag
 	
     code |= get_resources_table(expanded_image.image, expanded_image.resources);
     code |= get_exception_table(expanded_image.image, expanded_image.exceptions);
+    code |= get_security_table(expanded_image.image, expanded_image.security);
     code |= get_relocation_table(expanded_image.image, expanded_image.relocations);
     code |= get_debug_table(expanded_image.image, expanded_image.debug);
     code |= get_tls_table(expanded_image.image, expanded_image.tls);
@@ -66,6 +68,7 @@ directory_code get_directories_placement(pe_image &image, std::vector<directory_
     get_placement_import_table(image, placement, *bound_imports);
     get_placement_resources_table(image, placement);
     get_placement_exceptions_table(image, placement);
+    get_placement_security_table(image, placement);
     get_placement_relocation_table(image, placement);
     get_placement_debug_table(image, placement);
     get_placement_tls_table(image, placement);

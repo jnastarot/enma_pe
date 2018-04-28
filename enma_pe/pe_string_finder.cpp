@@ -70,7 +70,7 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
 
         wchar_t image_byte;
         uint32_t pre_string_rva;
-        std::string pre_string;
+        std::wstring pre_string;
 
         while (wide_string_io.read(&image_byte, sizeof(image_byte)) == enma_io_success) {
             if ((!find_in_execute_sections || wide_string_io.is_executable_rva(wide_string_io.get_image_offset() - 1)) &&
@@ -86,7 +86,7 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
                 if (image_byte == 0 &&
                     pre_string.size() >= MIN_STRING_SIZE && pre_string.size() <= MAX_STRING_SIZE) {
 
-                    string_table.ansi_base.push_back({ pre_string_rva , pre_string });
+                    string_table.wide_base.push_back({ pre_string_rva , pre_string });
                     pre_string.clear();
                 }
                 else {
