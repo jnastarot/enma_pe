@@ -95,7 +95,7 @@ void erase_directories_placement(pe_image &image, std::vector<directory_placemen
 
 
     if (delete_empty_sections && image.get_sections().size()) {
-        for (size_t section_idx = image.get_sections().size() - 1; section_idx >= 0; section_idx--) {
+        for (int section_idx = image.get_sections().size() - 1; section_idx >= 0; section_idx--) {
             auto _section = image.get_sections()[section_idx];
 
             for (size_t zone_idx = 0; zone_idx < placement.size(); zone_idx++) {

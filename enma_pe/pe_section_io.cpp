@@ -125,7 +125,7 @@ enma_io_code pe_section_io::internal_read(
 
 enma_io_code pe_section_io::internal_write(
     uint32_t data_offset,
-    void * buffer, uint32_t size,
+    const void * buffer, uint32_t size,
     uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize) {
 
 
@@ -163,18 +163,11 @@ enma_io_code pe_section_io::internal_write(
             }        
         }
         else { //check if necessary add an emulated part
-           // if (addressing_type == enma_io_addressing_type::enma_io_address_raw) {
-                if (real_offset + wrote_size > section->get_size_of_raw_data()) { //aligned by raw align
+           
+            if (real_offset + wrote_size > section->get_size_of_raw_data()) { //aligned by raw align
 
-                    add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
-                }
-          /*  }
-            else if (addressing_type == enma_io_addressing_type::enma_io_address_rva) {
-                if (real_offset + wrote_size > section->get_virtual_size()) {//aligned by virtual align
-
-                    add_size((real_offset + wrote_size) - section->get_virtual_size(), false);
-                }
-            }*/
+                add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
+            }
         }
 
         memcpy(&section->get_section_data().data()[real_offset], &((uint8_t*)buffer)[down_oversize], wrote_size);
@@ -208,7 +201,7 @@ enma_io_code pe_section_io::read(void * data, uint32_t size) {
     return code;
 }
 
-enma_io_code pe_section_io::write(void * data, uint32_t size) {
+enma_io_code pe_section_io::write(const void * data, uint32_t size) {
 
     uint32_t wrote_size;
     uint32_t down_oversize;

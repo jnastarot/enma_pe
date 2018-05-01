@@ -158,7 +158,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 }
 
 enma_io_code pe_image_io::internal_write(uint32_t data_offset,
-    void * buffer, uint32_t size,
+    const void * buffer, uint32_t size,
     uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
 ) {
 
@@ -227,7 +227,7 @@ enma_io_code pe_image_io::read(void * data, uint32_t size) {
     return code;
 }
 
-enma_io_code pe_image_io::write(void * data, uint32_t size) {
+enma_io_code pe_image_io::write(const void * data, uint32_t size) {
 
     uint32_t wrote_size;
     uint32_t down_oversize;
