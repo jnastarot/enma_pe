@@ -8,7 +8,7 @@ resource_data_entry::resource_data_entry()
 {}
 
 
-resource_data_entry::resource_data_entry(void * data, uint32_t data_size, uint32_t codepage)
+resource_data_entry::resource_data_entry(const void * data, uint32_t data_size, uint32_t codepage)
 	: codepage(codepage) {
 	this->data.resize(data_size);
 	memcpy(this->data.data(), data, data_size);
@@ -20,7 +20,7 @@ void resource_data_entry::set_codepage(uint32_t codepage) {
 	this->codepage = codepage;
 }
 
-void resource_data_entry::set_data(void * data, uint32_t data_size) {
+void resource_data_entry::set_data(const void * data, uint32_t data_size) {
 	this->data.resize(data_size);
 	memcpy(this->data.data(), data, data_size);
 }
@@ -28,7 +28,9 @@ void resource_data_entry::set_data(void * data, uint32_t data_size) {
 uint32_t resource_data_entry::get_codepage() const{
 	return this->codepage;
 }
-
+std::vector<uint8_t>	resource_data_entry::get_data() const {
+    return data;
+}
 std::vector<uint8_t>&	resource_data_entry::get_data() {
 	return data;
 }
@@ -111,7 +113,7 @@ void resource_directory_entry::set_id(uint32_t id) {
 	this->name.clear();
 }
 
-void resource_directory_entry::add_data_entry(resource_data_entry& entry) {
+void resource_directory_entry::add_data_entry(const resource_data_entry& entry) {
 	release();
 	_ptr.data = new resource_data_entry();
 	_ptr.data->set_codepage(entry.get_codepage());
@@ -204,7 +206,7 @@ void resource_directory::set_major_version(uint16_t major_version) {
 void resource_directory::set_minor_version(uint16_t minor_version) {
 	this->minor_version = minor_version;
 }
-void resource_directory::add_resource_directory_entry(resource_directory_entry& entry) {
+void resource_directory::add_resource_directory_entry(const resource_directory_entry& entry) {
 	entries.push_back(entry);
 	if (entry.is_named()) {
 		++number_of_named_entries;

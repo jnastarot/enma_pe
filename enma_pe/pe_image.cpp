@@ -22,12 +22,12 @@ pe_image::pe_image(bool _pe32) {
 	image_status = pe_image_status_ok;
 }
 
-pe_image::pe_image(uint8_t* pe_image, uint32_t size) {
+pe_image::pe_image(const uint8_t* pe_image, uint32_t size) {
 	clear_image();
 	init_from_file(pe_image, size);
 }
 
-pe_image::pe_image(std::string& file_path) {
+pe_image::pe_image(const std::string& file_path) {
 	clear_image();
 
     FILE* hfile = fopen(file_path.c_str(), "rb");
@@ -167,7 +167,7 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
 }
 
 
-void pe_image::init_from_file(uint8_t * image, uint32_t size) {
+void pe_image::init_from_file(const uint8_t * image, uint32_t size) {
 	if (size < sizeof(image_dos_header)) {this->image_status = pe_image_status_bad_format;return;};
 
 	if (get_image_dos_header(image, dos_header)) { //check MZ sign
@@ -419,13 +419,13 @@ uint32_t    pe_image::raw_to_rva(uint32_t raw) const {
 void    pe_image::set_image_status(pe_image_status status) {
 	this->image_status = status;
 }
-void    pe_image::set_dos_header(pe_dos_header& header) {
+void    pe_image::set_dos_header(const pe_dos_header& header) {
     this->dos_header = header;
 }
-void    pe_image::set_dos_stub(pe_dos_stub& dos_stub) {
+void    pe_image::set_dos_stub(const pe_dos_stub& dos_stub) {
     this->dos_stub = dos_stub;
 }
-void    pe_image::set_rich_data(pe_rich_data& rich_data) {
+void    pe_image::set_rich_data(const pe_rich_data& rich_data) {
     this->rich_data = rich_data;
 }
 void    pe_image::set_machine(uint16_t machine) {

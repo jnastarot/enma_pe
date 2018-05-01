@@ -131,7 +131,7 @@ public:
     pe_dos_header::pe_dos_header();
     pe_dos_header::~pe_dos_header();
 public:
-    void pe_dos_header::set_header(image_dos_header * header);
+    void pe_dos_header::set_header(const image_dos_header * header);
 
 public:
     image_dos_header& pe_dos_header::get_header();
@@ -144,7 +144,7 @@ public:
     pe_dos_stub::pe_dos_stub();
     pe_dos_stub::~pe_dos_stub();
 public:
-    void pe_dos_stub::set_stub(std::vector<uint8_t>& stub);
+    void pe_dos_stub::set_stub(const std::vector<uint8_t>& stub);
 
 public:
     std::vector<uint8_t> pe_dos_stub::get_stub() const;

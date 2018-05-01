@@ -5,7 +5,7 @@
 pe_dos_header::pe_dos_header() { memset(&dos_h, 0, sizeof(image_dos_header)); }
 pe_dos_header::~pe_dos_header() {}
 
-void pe_dos_header::set_header(image_dos_header * header) {
+void pe_dos_header::set_header(const image_dos_header * header) {
     memcpy(&dos_h, header, sizeof(image_dos_header));
 }
 
@@ -17,7 +17,7 @@ image_dos_header& pe_dos_header::get_header() {
 pe_dos_stub::pe_dos_stub() {}
 pe_dos_stub::~pe_dos_stub() {}
 
-void pe_dos_stub::set_stub(std::vector<uint8_t>& stub) {
+void pe_dos_stub::set_stub(const std::vector<uint8_t>& stub) {
     this->dos_stub = stub;
 }
 std::vector<uint8_t> pe_dos_stub::get_stub() const {

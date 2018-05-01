@@ -33,7 +33,7 @@ void   security_item::set_certificate_type(uint16_t type) {
     this->certificate_type = type;
 }
 
-void security_item::set_certificate_data(std::vector<uint8_t>& data) {
+void security_item::set_certificate_data(const std::vector<uint8_t>& data) {
     this->certificate_data = data;
 }
 

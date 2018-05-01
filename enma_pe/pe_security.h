@@ -16,7 +16,7 @@ public:
     void   security_item::set_revision(uint16_t revision);
     void   security_item::set_certificate_type(uint16_t type);
 
-    void security_item::set_certificate_data(std::vector<uint8_t>& data);
+    void security_item::set_certificate_data(const std::vector<uint8_t>& data);
 
 public:
     uint16_t   security_item::get_revision() const;

@@ -52,13 +52,13 @@ class pe_image{
 
     std::vector<uint8_t> overlay_data;
 
-	void pe_image::init_from_file(uint8_t * image,uint32_t size);
+	void pe_image::init_from_file(const uint8_t * image,uint32_t size);
 public:
 	pe_image::pe_image();
     pe_image::pe_image(const pe_image& image);
 	pe_image::pe_image(bool _pe32);
-	pe_image::pe_image(uint8_t* pe_image,uint32_t size);
-	pe_image::pe_image(std::string& file_path);
+	pe_image::pe_image(const uint8_t* pe_image,uint32_t size);
+	pe_image::pe_image(const std::string& file_path);
 
 	pe_image::~pe_image();
 
@@ -92,9 +92,9 @@ public:// data/sections helpers
 
 public:
     void        pe_image::set_image_status(pe_image_status status);
-    void        pe_image::set_dos_header(pe_dos_header& header);
-    void        pe_image::set_dos_stub(pe_dos_stub& dos_stub);
-    void        pe_image::set_rich_data(pe_rich_data& rich_data);
+    void        pe_image::set_dos_header(const pe_dos_header& header);
+    void        pe_image::set_dos_stub(const pe_dos_stub& dos_stub);
+    void        pe_image::set_rich_data(const pe_rich_data& rich_data);
 	void        pe_image::set_machine(uint16_t machine);
 	void        pe_image::set_timestamp(uint32_t timestamp);
 	void        pe_image::set_characteristics(uint16_t characteristics);
