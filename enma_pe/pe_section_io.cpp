@@ -162,12 +162,10 @@ enma_io_code pe_section_io::internal_write(
                 return enma_io_code::enma_io_data_not_present;//unk addressing_type
             }        
         }
-        else { //check if necessary add an emulated part
-           
-            if (real_offset + wrote_size > section->get_size_of_raw_data()) { //aligned by raw align
+    
+        if (real_offset + wrote_size > section->get_size_of_raw_data()) { //aligned by raw align
 
-                add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
-            }
+            add_size((real_offset + wrote_size) - section->get_size_of_raw_data(), false);
         }
 
         memcpy(&section->get_section_data().data()[real_offset], &((uint8_t*)buffer)[down_oversize], wrote_size);
