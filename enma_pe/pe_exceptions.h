@@ -37,10 +37,11 @@ public:
     void exceptions_table::add_item(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data);
     void exceptions_table::add_item(const exceptions_item& item);
     void exceptions_table::add_item(const image_ia64_runtime_function_entry& exc_entry);
-    
+    void exceptions_table::clear();
 public:
     size_t exceptions_table::size() const;
 
+    const std::vector<exceptions_item>& exceptions_table::get_items() const;
     std::vector<exceptions_item>& exceptions_table::get_items();
 };
 

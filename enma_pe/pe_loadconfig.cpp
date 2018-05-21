@@ -238,6 +238,23 @@ uint32_t	    load_config_table::get_guard_cf_function_count() const {
 uint32_t		load_config_table::get_guard_flags() const {
 	return this->guard_flags;
 }
+
+const std::vector<uint32_t >& load_config_table::get_se_handlers() const {
+    return this->se_handlers;
+}
+const std::vector<uint32_t >& load_config_table::get_lock_prefixes() const {
+    return this->lock_prefixes_rva;
+}
+const std::vector<uint32_t >& load_config_table::get_guard_cf_functions() const {
+    return this->guard_cf_functions_rva;
+}
+const std::vector<uint32_t >& load_config_table::get_guard_iat_entries() const {
+    return this->guard_iat_entries_rva;
+}
+const std::vector<uint32_t >& load_config_table::get_guard_long_jump_targets() const {
+    return this->guard_long_jump_targets_rva;
+}
+
 std::vector<uint32_t>& load_config_table::get_se_handlers() {
 	return this->se_handlers;
 }
@@ -426,7 +443,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 }
             }
         }
-        load_config.set_se_handler_count(load_config_desc.se_handler_count);
+        load_config.set_se_handler_count(uint32_t(load_config_desc.se_handler_count));
 
         if (offsetof(typename image_format::image_load_config_directory, guard_cf_check_function_pointer) >= desc_size) {
             return directory_code::directory_code_success;
@@ -454,7 +471,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 load_config.get_guard_cf_functions().push_back(cf_function_va);
             }
         }
-        load_config.set_guard_cf_function_count(load_config_desc.guard_cf_function_count);
+        load_config.set_guard_cf_function_count(uint32_t(load_config_desc.guard_cf_function_count));
 
         load_config.set_guard_flags(load_config_desc.guard_flags);
         
@@ -484,7 +501,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 load_config.get_guard_iat_entries().push_back(address_taken_iat);
             }
         }
-        load_config.set_guard_address_taken_iat_entry_count(load_config_desc.guard_address_taken_iat_entry_count);
+        load_config.set_guard_address_taken_iat_entry_count(uint32_t(load_config_desc.guard_address_taken_iat_entry_count));
 
 
         if (load_config_desc.guard_long_jump_target_table) {
@@ -502,7 +519,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 load_config.get_guard_long_jump_targets().push_back(guard_long_jump_target);
             }
         }
-        load_config.set_guard_long_jump_target_count(load_config_desc.guard_long_jump_target_count);
+        load_config.set_guard_long_jump_target_count(uint32_t(load_config_desc.guard_long_jump_target_count));
 
 
         if (offsetof(typename image_format::image_load_config_directory, dynamic_value_reloc_table) >= desc_size) {
@@ -574,40 +591,44 @@ bool _build_load_config_table_only(pe_image &image, pe_section& section, load_co
         load_config_desc.global_flags_clear             = load_config.get_global_flagsclear();
         load_config_desc.global_flags_set               = load_config.get_global_flagsset();
         load_config_desc.critical_section_default_timeout = load_config.get_criticalsection_default_timeout();
-        load_config_desc.decommit_free_block_threshold  = load_config.get_decommit_freeblock_threshold();
-        load_config_desc.decommit_total_free_threshold  = load_config.get_decommit_totalfree_threshold();
+        load_config_desc.decommit_free_block_threshold  = typename image_format::ptr_size(load_config.get_decommit_freeblock_threshold());
+        load_config_desc.decommit_total_free_threshold  = typename image_format::ptr_size(load_config.get_decommit_totalfree_threshold());
 
         if (load_config.get_lock_prefix_table()) {
-            load_config_desc.lock_prefix_table = image.rva_to_va(load_config.get_lock_prefix_table());
+            load_config_desc.lock_prefix_table = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_lock_prefix_table()));
         }
         
-        load_config_desc.maximum_allocation_size        = load_config.get_maximum_allocation_size();
-        load_config_desc.virtual_memory_threshold       = load_config.get_virtual_memory_threshold();
-        load_config_desc.process_affinity_mask          = load_config.get_process_affinity_mask();
+        load_config_desc.maximum_allocation_size        = typename image_format::ptr_size(load_config.get_maximum_allocation_size());
+        load_config_desc.virtual_memory_threshold       = typename image_format::ptr_size(load_config.get_virtual_memory_threshold());
+        load_config_desc.process_affinity_mask          = typename image_format::ptr_size(load_config.get_process_affinity_mask());
         load_config_desc.process_heap_flags             = load_config.get_process_heap_flags();
         load_config_desc.csd_version                    = load_config.get_csd_version();
         load_config_desc.dependent_load_flags           = load_config.get_dependent_load_flags();
 
         if (load_config.get_editlist()) {
-            load_config_desc.edit_list = image.rva_to_va(load_config.get_editlist());
+            load_config_desc.edit_list = typename image_format::ptr_size(image.rva_to_va(load_config.get_editlist()));
         }
         if (load_config.get_security_cookie()) {
-            load_config_desc.security_cookie = image.rva_to_va(load_config.get_security_cookie());
+            load_config_desc.security_cookie = typename image_format::ptr_size(image.rva_to_va(load_config.get_security_cookie()));
         }
         if (load_config.get_se_handler_table()) {
-            load_config_desc.se_handler_table = image.rva_to_va(load_config.get_se_handler_table());
+            load_config_desc.se_handler_table = typename image_format::ptr_size(image.rva_to_va(load_config.get_se_handler_table()));
         }
         load_config_desc.se_handler_count               = load_config.get_se_handler_count();
         if (load_config.get_guard_cf_check_function_pointer()) {
-            load_config_desc.guard_cf_check_function_pointer = image.rva_to_va(load_config.get_guard_cf_check_function_pointer());
+            load_config_desc.guard_cf_check_function_pointer = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_cf_check_function_pointer()));
         }
 
         if (load_config.get_guard_cf_dispatch_function_pointer()) {
-            load_config_desc.guard_cf_dispatch_function_pointer = image.rva_to_va(load_config.get_guard_cf_dispatch_function_pointer());
+            load_config_desc.guard_cf_dispatch_function_pointer = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_cf_dispatch_function_pointer()));
         }
 
         if (load_config.get_guard_cf_function_table()) {
-            load_config_desc.guard_cf_function_table = image.rva_to_va(load_config.get_guard_cf_function_table());
+            load_config_desc.guard_cf_function_table = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_cf_function_table()));
         }
 
         load_config_desc.guard_cf_function_count        = load_config.get_guard_cf_function_count();
@@ -615,44 +636,51 @@ bool _build_load_config_table_only(pe_image &image, pe_section& section, load_co
         load_config_desc.code_integrity                 = load_config.get_code_integrity();
 
         if (load_config.get_guard_address_taken_iat_entry_table()) {
-            load_config_desc.guard_address_taken_iat_entry_table = image.rva_to_va(load_config.get_guard_address_taken_iat_entry_table());
+            load_config_desc.guard_address_taken_iat_entry_table = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_address_taken_iat_entry_table()));
         }
 
         load_config_desc.guard_address_taken_iat_entry_count = load_config.get_guard_address_taken_iat_entry_count();
 
         if (load_config.get_guard_long_jump_target_table()) {
-            load_config_desc.guard_long_jump_target_table = image.rva_to_va(load_config.get_guard_long_jump_target_table());
+            load_config_desc.guard_long_jump_target_table = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_long_jump_target_table()));
         }
 
-        load_config_desc.guard_long_jump_target_count   = image.rva_to_va(load_config.get_guard_long_jump_target_count());
+        load_config_desc.guard_long_jump_target_count   = 
+            typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_long_jump_target_count()));
 
         if (load_config.get_dynamic_value_reloc_table()) {
-            load_config_desc.dynamic_value_reloc_table = image.rva_to_va(load_config.get_dynamic_value_reloc_table());
+            load_config_desc.dynamic_value_reloc_table = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_dynamic_value_reloc_table()));
         }
 
         if (load_config.get_chpe_meta_data_pointer()) {
-            load_config_desc.chpe_meta_data_pointer = image.rva_to_va(load_config.get_chpe_meta_data_pointer());
+            load_config_desc.chpe_meta_data_pointer = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_chpe_meta_data_pointer()));
         }
 
         if (load_config.get_guard_rf_failure_routine()) {
-            load_config_desc.guard_rf_failure_routine = image.rva_to_va(load_config.get_guard_rf_failure_routine());
+            load_config_desc.guard_rf_failure_routine = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_rf_failure_routine()));
         }
 
         if (load_config.get_guard_rf_failure_routine_function_pointer()) {
             load_config_desc.guard_rf_failure_routine_function_pointer = 
-                image.rva_to_va(load_config.get_guard_rf_failure_routine_function_pointer());
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_rf_failure_routine_function_pointer()));
         }
         load_config_desc.dynamic_value_reloc_table_offset  = load_config.get_dynamic_value_reloc_table_offset();
         load_config_desc.dynamic_value_reloc_table_section = load_config.get_dynamic_value_reloc_table_section();
 
         if (load_config.get_guard_rf_verify_stack_pointer_function_pointer()) {
             load_config_desc.guard_rf_verify_stack_pointer_function_pointer = 
-                image.rva_to_va(load_config.get_guard_rf_verify_stack_pointer_function_pointer());
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_guard_rf_verify_stack_pointer_function_pointer()));
         }
         load_config_desc.hot_patch_table_offset         = load_config.get_hot_patch_table_offset();
 
         if (load_config.get_enclave_configuration_pointer()) {
-            load_config_desc.enclave_configuration_pointer = image.rva_to_va(load_config.get_enclave_configuration_pointer());
+            load_config_desc.enclave_configuration_pointer = 
+                typename image_format::ptr_size(image.rva_to_va(load_config.get_enclave_configuration_pointer()));
         }
 
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG, load_config_io.get_section_offset());
@@ -808,7 +836,7 @@ bool build_internal_load_config_data(pe_image &image, pe_section& section,
                 load_config.set_se_handler_table(lock_prefixes_io.get_section_offset());
 
                 for (auto& item : load_config.get_lock_prefixes()) {
-                    uint32_t lock_pref_va = image.rva_to_va(item);//uint32 bacause used only in x86 
+                    uint32_t lock_pref_va = uint32_t(image.rva_to_va(item));//uint32 bacause used only in x86 
 
                     if (lock_prefixes_io.write(&lock_pref_va, sizeof(lock_pref_va)) != enma_io_success) {
                         return false;

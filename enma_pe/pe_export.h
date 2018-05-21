@@ -70,6 +70,8 @@ public:
 	uint32_t    export_table::get_number_of_functions() const;
 	uint32_t    export_table::get_number_of_names() const;
 	std::string	export_table::get_library_name() const;
+    const std::vector<export_table_item>& export_table::get_items() const;
+
 	std::vector<export_table_item>& export_table::get_items();
 
 	bool export_table::get_exported_function(const std::string& func_name, export_table_item * &item);

@@ -100,9 +100,13 @@ uint32_t  debug_item::get_address_of_raw_data() const {
 uint32_t  debug_item::get_pointer_to_raw_data() const {
     return this->pointer_to_raw_data;
 }
+const std::vector<uint8_t>& debug_item::get_item_data() const {
+    return this->item_data;
+}
 std::vector<uint8_t>& debug_item::get_item_data() {
     return this->item_data;
 }
+
 
 debug_table::debug_table() {
 
@@ -122,6 +126,19 @@ debug_table& debug_table::operator=(const debug_table& debug) {
 void debug_table::add_item(const debug_item& item) {
     items.push_back(item);
 }
+
+void debug_table::clear() {
+    this->items.clear();
+}
+
+size_t debug_table::size() const {
+    return items.size();
+}
+
+const std::vector<debug_item>& debug_table::get_items() const {
+    return items;
+}
+
 std::vector<debug_item>& debug_table::get_items() {
     return items;
 }

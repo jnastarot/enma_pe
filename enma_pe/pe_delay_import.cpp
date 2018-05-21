@@ -94,6 +94,12 @@ uint32_t delay_imported_library::get_unload_info_table_rva() const {
 uint32_t delay_imported_library::get_timestamp() const {
     return this->timestamp;
 }
+const std::vector<imported_func>& delay_imported_library::get_items() const {
+    return this->imported_items;
+}
+std::vector<imported_func>& delay_imported_library::get_items() {
+    return this->imported_items;
+}
 
 imported_library delay_imported_library::convert_to_imported_library() const {
     imported_library lib;
@@ -142,6 +148,9 @@ import_table delay_import_table::convert_to_import_table() const {
         imports.add_library(lib.convert_to_imported_library());
     }
     return imports;
+}
+const std::vector<delay_imported_library>& delay_import_table::get_libraries() const {
+    return libraries;
 }
 std::vector<delay_imported_library>& delay_import_table::get_libraries() {
     return libraries;
@@ -223,14 +232,14 @@ directory_code _get_delay_import_table(const pe_image &image, delay_import_table
 
                     if (name_item) {
                         if (name_item&image_format::ordinal_flag) {
-                            lib.add_item(imported_func(iat_func_address, name_item^image_format::ordinal_flag, bound_item));
+                            lib.add_item(imported_func(iat_func_address, uint16_t(name_item^image_format::ordinal_flag), bound_item));
                         }
                         else {
                             uint16_t hint;
                             std::string func_name;
 
                             pe_image_io delay_import_func_name_io(image);
-                            delay_import_func_name_io.set_image_offset(name_item);
+                            delay_import_func_name_io.set_image_offset(uint32_t(name_item));
 
                             if (delay_import_func_name_io.read(&hint, sizeof(hint)) != enma_io_success) {
                                 return directory_code::directory_code_currupted;
@@ -324,7 +333,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, std::vec
                             std::string func_name;
 
                             pe_image_io delay_import_func_name_io(image);
-                            delay_import_func_name_io.set_image_offset(name_item);
+                            delay_import_func_name_io.set_image_offset(uint32_t(name_item));
 
                             if (delay_import_func_name_io.read(&hint, sizeof(hint)) != enma_io_success) {
                                 return directory_code::directory_code_currupted;

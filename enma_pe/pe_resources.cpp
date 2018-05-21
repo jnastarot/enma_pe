@@ -28,7 +28,7 @@ void resource_data_entry::set_data(const void * data, uint32_t data_size) {
 uint32_t resource_data_entry::get_codepage() const{
 	return this->codepage;
 }
-std::vector<uint8_t>	resource_data_entry::get_data() const {
+const std::vector<uint8_t>&	resource_data_entry::get_data() const {
     return data;
 }
 std::vector<uint8_t>&	resource_data_entry::get_data() {
@@ -141,6 +141,15 @@ bool resource_directory_entry::is_named() const {
 
 bool resource_directory_entry::is_includes_data() const {
 	return this->includes_data;
+}
+
+
+const resource_directory&     resource_directory_entry::get_resource_directory() const {
+    return (const resource_directory&)(*this->_ptr.data);
+}
+
+const resource_data_entry&    resource_directory_entry::get_data_entry() const {
+    return (const resource_data_entry&)(*this->_ptr.dir);
 }
 
 resource_data_entry& resource_directory_entry::get_data_entry() {

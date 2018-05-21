@@ -143,6 +143,9 @@ uint32_t imported_library::get_rva_library_name() const {
     return this->library_name_rva;
 }
 
+const std::vector<imported_func>& imported_library::get_items() const {
+    return this->imported_items;
+}
 
 std::vector<imported_func>& imported_library::get_items() {
 	return this->imported_items;
@@ -287,11 +290,11 @@ directory_code _get_import_table(const pe_image &image, import_table& imports,co
                             if (original_iat_item&image_format::ordinal_flag) {
 
                                 library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
-                                    original_iat_item^image_format::ordinal_flag, iat_item));
+                                    uint16_t(original_iat_item^image_format::ordinal_flag), iat_item));
                             }
                             else {
                                 pe_image_io import_func_name_io(image);
-                                import_func_name_io.set_image_offset(original_iat_item);
+                                import_func_name_io.set_image_offset(uint32_t(original_iat_item));
 
                                 uint16_t hint;
                                 std::string func_name;
@@ -318,11 +321,11 @@ directory_code _get_import_table(const pe_image &image, import_table& imports,co
 
                                 if (iat_item&image_format::ordinal_flag) {
                                     library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
-                                        iat_item^image_format::ordinal_flag, iat_item));
+                                        uint16_t(iat_item^image_format::ordinal_flag), iat_item));
                                 }
                                 else {
                                     pe_image_io import_func_name_io(image);
-                                    import_func_name_io.set_image_offset(iat_item);
+                                    import_func_name_io.set_image_offset(uint32_t(iat_item));
 
                                     uint16_t hint;
                                     std::string func_name;
@@ -461,7 +464,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
                     }
 
                     if (is_bound_library) {
-                        thunk_table.push_back(func.get_iat_item());
+                        thunk_table.push_back(typename image_format::ptr_size(func.get_iat_item()));
                         original_thunk_table.push_back(thunk_item);
                     }
                     else {
@@ -585,7 +588,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                             if (!(original_iat_item&image_format::ordinal_flag)) {
 
                                 pe_image_io import_func_name_io(image);
-                                import_func_name_io.set_image_offset(original_iat_item + sizeof(uint16_t));
+                                import_func_name_io.set_image_offset(uint32_t(original_iat_item + sizeof(uint16_t)));
 
                                 std::string func_name;
 
@@ -602,7 +605,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                             if (!is_bound_library && !(iat_item&image_format::ordinal_flag)) {
 
                                 pe_image_io import_func_name_io(image);
-                                import_func_name_io.set_image_offset(iat_item + sizeof(uint16_t));
+                                import_func_name_io.set_image_offset(uint32_t(iat_item + sizeof(uint16_t)));
 
                                 std::string func_name;
 

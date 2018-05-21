@@ -137,6 +137,10 @@ bool relocation_table::get_item_id(uint32_t rva, uint32_t& relocation_id) const 
     return false;
 }
 
+const std::vector<relocation_item>& relocation_table::get_items() const {
+    return items;
+}
+
 std::vector<relocation_item>& relocation_table::get_items() {
     return items;
 }

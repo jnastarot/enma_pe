@@ -106,7 +106,7 @@ directory_code _get_tls_table(const pe_image &image, tls_table& tls) {
 
                 tls_io.set_image_offset(image.va_to_rva(tls_directory.start_address_of_raw_data));
 
-                tls.get_raw_data().resize(tls_directory.end_address_of_raw_data - tls_directory.start_address_of_raw_data);
+                tls.get_raw_data().resize( size_t(tls_directory.end_address_of_raw_data - tls_directory.start_address_of_raw_data));
 
                 if (tls_io.read(tls.get_raw_data().data(), tls.get_raw_data().size()) != enma_io_success) {
                     return directory_code::directory_code_currupted;
@@ -225,20 +225,20 @@ bool _build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls,
     memset(&tls_directory, 0, sizeof(tls_directory));
 
     if (tls.get_start_address_raw_data()) {
-        tls_directory.start_address_of_raw_data = image.rva_to_va(tls.get_start_address_raw_data());
-        tls_directory.end_address_of_raw_data   = image.rva_to_va(tls.get_end_address_raw_data());
+        tls_directory.start_address_of_raw_data = typename image_format::ptr_size(image.rva_to_va(tls.get_start_address_raw_data()));
+        tls_directory.end_address_of_raw_data   = typename image_format::ptr_size(image.rva_to_va(tls.get_end_address_raw_data()));
 
         relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, start_address_of_raw_data), 0);
         relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, end_address_of_raw_data),   0);
     }
 
     if (tls.get_address_of_index()) {
-        tls_directory.address_of_index = image.rva_to_va(tls.get_address_of_index());
+        tls_directory.address_of_index = typename image_format::ptr_size(image.rva_to_va(tls.get_address_of_index()));
         relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, address_of_index), 0);
     }
 
     if (tls.get_address_of_callbacks()) {
-        tls_directory.address_of_callbacks = image.rva_to_va(tls.get_address_of_callbacks());
+        tls_directory.address_of_callbacks = typename image_format::ptr_size(image.rva_to_va(tls.get_address_of_callbacks()));
         relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, address_of_callbacks), 0);
     }
     

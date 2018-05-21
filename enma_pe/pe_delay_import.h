@@ -44,6 +44,9 @@ public:
     uint32_t delay_imported_library::get_bound_table_iat_rva() const;
     uint32_t delay_imported_library::get_unload_info_table_rva() const;
     uint32_t delay_imported_library::get_timestamp() const;
+    const std::vector<imported_func>& delay_imported_library::get_items() const;
+
+    std::vector<imported_func>& delay_imported_library::get_items();
 
     imported_library delay_imported_library::convert_to_imported_library() const;
 };
@@ -62,6 +65,8 @@ public:
 public:
     size_t delay_import_table::size() const;
     import_table delay_import_table::convert_to_import_table() const;
+    const std::vector<delay_imported_library>& delay_import_table::get_libraries() const;
+
     std::vector<delay_imported_library>& delay_import_table::get_libraries();
 };
 

@@ -32,6 +32,7 @@ public:
     bool relocation_table::has_item_id(uint32_t relocation_id) const;
     bool relocation_table::get_item_id(uint32_t rva, uint32_t& relocation_id) const;
 
+    const std::vector<relocation_item>& relocation_table::get_items() const;
     std::vector<relocation_item>& relocation_table::get_items();
 };
 

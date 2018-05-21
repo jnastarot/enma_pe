@@ -66,6 +66,8 @@ public:
 	uint32_t imported_library::get_rva_iat() const;
     uint32_t imported_library::get_rva_oft() const;
     uint32_t imported_library::get_rva_library_name() const;
+    const std::vector<imported_func>& imported_library::get_items() const;
+
 
 	std::vector<imported_func>& imported_library::get_items();
 };

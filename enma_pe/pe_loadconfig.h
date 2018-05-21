@@ -132,6 +132,11 @@ public:
     uint32_t        load_config_table::get_hot_patch_table_offset() const;
     uint32_t        load_config_table::get_enclave_configuration_pointer() const;
 
+    const std::vector<uint32_t >& load_config_table::get_se_handlers() const;   //x86 only
+    const std::vector<uint32_t >& load_config_table::get_lock_prefixes() const; //x86 only
+    const std::vector<uint32_t >& load_config_table::get_guard_cf_functions() const;
+    const std::vector<uint32_t >& load_config_table::get_guard_iat_entries() const;
+    const std::vector<uint32_t >& load_config_table::get_guard_long_jump_targets() const;
 
 	std::vector<uint32_t >& load_config_table::get_se_handlers();   //x86 only
 	std::vector<uint32_t >& load_config_table::get_lock_prefixes(); //x86 only

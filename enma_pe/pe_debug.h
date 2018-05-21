@@ -40,6 +40,7 @@ public:
     uint32_t  debug_item::get_address_of_raw_data() const;
     uint32_t  debug_item::get_pointer_to_raw_data() const;
 
+    const std::vector<uint8_t>& debug_item::get_item_data() const;
     std::vector<uint8_t>& debug_item::get_item_data();
 };
 
@@ -54,8 +55,11 @@ public:
     debug_table& debug_table::operator=(const debug_table& debug);
 public:
     void debug_table::add_item(const debug_item& item);
+    void debug_table::clear();
 public:
+    size_t debug_table::size() const;
 
+    const std::vector<debug_item>& debug_table::get_items() const;
     std::vector<debug_item>& debug_table::get_items();
 };
 

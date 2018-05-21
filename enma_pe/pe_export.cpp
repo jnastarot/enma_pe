@@ -166,10 +166,13 @@ uint32_t	export_table::get_number_of_names() const {
 std::string		export_table::get_library_name() const {
 	return this->library_name;
 }
-
+const std::vector<export_table_item>& export_table::get_items() const {
+    return this->export_items;
+}
 std::vector<export_table_item>& export_table::get_items() {
 	return this->export_items;
 }
+
 bool export_table::get_exported_function(const std::string& func_name, export_table_item * &_item) {
 
 	for (auto &item : export_items) {

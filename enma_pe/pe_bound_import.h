@@ -40,6 +40,7 @@ public:
     uint32_t  bound_imported_library::get_timestamp() const;
     size_t bound_imported_library::get_number_of_forwarder_refs() const;
 
+    const std::vector<bound_imported_ref>& bound_imported_library::get_refs() const;
     std::vector<bound_imported_ref>& bound_imported_library::get_refs();
 };
 
@@ -58,7 +59,8 @@ public:
     bool bound_import_table::has_library(const std::string& library_name, uint32_t timestamp) const;
     bool bound_import_table::has_library(const std::string& library_name) const;
 
-    size_t bound_import_table::size();
+    size_t bound_import_table::size() const;
+    const std::vector<bound_imported_library>& bound_import_table::get_libraries() const;
 
     std::vector<bound_imported_library>& bound_import_table::get_libraries();
 };

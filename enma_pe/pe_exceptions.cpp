@@ -71,9 +71,16 @@ void exceptions_table::add_item(const exceptions_item& item) {
 void exceptions_table::add_item(const image_ia64_runtime_function_entry& exc_entry) {
     items.push_back(exceptions_item(exc_entry.begin_address, exc_entry.end_address, exc_entry.unwind_info_address));
 }
+void exceptions_table::clear() {
+    this->items.clear();
+}
 
 size_t exceptions_table::size() const {
     return items.size();
+}
+
+const std::vector<exceptions_item>& exceptions_table::get_items() const {
+    return items;
 }
 
 std::vector<exceptions_item>& exceptions_table::get_items() {

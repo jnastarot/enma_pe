@@ -14,7 +14,7 @@ public:
 	void resource_data_entry::set_data(const void * data, uint32_t data_size);
 public:
 	uint32_t		resource_data_entry::get_codepage() const;
-    std::vector<uint8_t>	resource_data_entry::get_data() const;
+    const std::vector<uint8_t>&	resource_data_entry::get_data() const;
 	std::vector<uint8_t>&	resource_data_entry::get_data();
 };
 
@@ -52,6 +52,10 @@ public:
 	uint32_t			    resource_directory_entry::get_id() const;
 	const std::wstring&     resource_directory_entry::get_name() const;
 	bool                    resource_directory_entry::is_includes_data() const;
+
+    const resource_directory&     resource_directory_entry::get_resource_directory() const;
+    const resource_data_entry&    resource_directory_entry::get_data_entry() const;
+
 	resource_directory&     resource_directory_entry::get_resource_directory();
 	resource_data_entry&    resource_directory_entry::get_data_entry();
 };
