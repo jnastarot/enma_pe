@@ -89,6 +89,21 @@ void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>&
         }
     }
 }
+
+void relocation_table::get_items_by_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size) {
+
+    relocs.clear();
+
+    for (auto& item : items) {
+        if (item.relative_virtual_address >= segment_rva + segment_size) { return; }
+
+        if (item.relative_virtual_address >= segment_rva &&
+            item.relative_virtual_address < segment_rva + segment_size) {
+            relocs.push_back(item);
+        }
+    }
+}
+
 void relocation_table::clear() {
     items.clear();
 }
