@@ -132,7 +132,7 @@ uint32_t pe_section::get_virtual_address() const {
 	return virtual_address;
 }
 uint32_t pe_section::get_size_of_raw_data() const {
-	return section_data.size();
+	return uint32_t(section_data.size());
 }
 uint32_t pe_section::get_pointer_to_raw() const {
 	return pointer_to_raw;

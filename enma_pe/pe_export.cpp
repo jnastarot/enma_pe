@@ -375,14 +375,13 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
         return false;
     }
 
-    if (export_io.write((void*)exports.get_library_name().c_str(), exports.get_library_name().length() + 1) != enma_io_success) {
+    if (export_io.write((void*)exports.get_library_name().c_str(), uint32_t(exports.get_library_name().length() + 1)) != enma_io_success) {
         return false;
     }
     export_io.align_up(0x2);
 
 
-	typedef std::map<std::string, uint16_t> funclist;
-	funclist funcs;
+	std::map<std::string, uint16_t> funcs;
 
 	uint32_t last_ordinal = ordinal_base;
 	for (export_table_item &func : exports.get_items()) {
@@ -416,7 +415,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
             current_pos_of_function_addresses += sizeof(uint32_t);
 
             if (export_io.set_section_offset(current_pos_of_function_forwards).write(
-                (void*)func.get_forward_name().c_str(), func.get_forward_name().length() + 1) != enma_io_success) {
+                (void*)func.get_forward_name().c_str(), uint32_t(func.get_forward_name().length() + 1)) != enma_io_success) {
 
                 return false;
             }
@@ -436,7 +435,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 		}
 	}
 
-	for (funclist::const_iterator it = funcs.begin(); it != funcs.end(); ++it){
+	for (auto& func : funcs){
 
 
         if (export_io.set_section_offset(current_pos_of_function_names_rvas).write(
@@ -448,16 +447,16 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 		current_pos_of_function_names_rvas += sizeof(uint32_t);
 
         if (export_io.set_section_offset(current_pos_of_function_names).write(
-           (void*) (*it).first.c_str(), (*it).first.length() + 1) != enma_io_success) {
+           (void*) func.first.c_str(), uint32_t(func.first.length() + 1)) != enma_io_success) {
 
             return false;
         }
 
-		current_pos_of_function_names += static_cast<uint32_t>((*it).first.length() + 1);
+		current_pos_of_function_names += static_cast<uint32_t>(func.first.length() + 1);
 
 
         if (export_io.set_section_offset(current_pos_of_function_name_ordinals).write(
-            (void*)&((*it).second), sizeof((*it).second)) != enma_io_success) {
+            (void*)&(func.second), sizeof(func.second)) != enma_io_success) {
 
             return false;
         }

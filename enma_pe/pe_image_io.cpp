@@ -55,7 +55,7 @@ bool pe_image_io::view_image( //-> return like in view_data
                 first_->get_pointer_to_raw(), ALIGN_UP(
                     last_->get_pointer_to_raw() + last_->get_size_of_raw_data() - first_->get_pointer_to_raw(),
                     image->get_file_align())
-                + image->get_overlay_data().size());
+                + uint32_t(image->get_overlay_data().size()));
         }
 
         case enma_io_addressing_type::enma_io_address_rva: {
@@ -130,7 +130,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
             b_view = view_data(
                 data_offset, size,
                 real_offset, overlay_readed_size, overlay_down_oversize, overlay_up_oversize,
-                top_section_raw, image->get_overlay_data().size());
+                top_section_raw, uint32_t(image->get_overlay_data().size()));
             
             if (b_view) {
                 memcpy(&((uint8_t*)buffer)[down_oversize], &image->get_overlay_data().data()[real_offset],overlay_readed_size);
@@ -245,12 +245,12 @@ enma_io_code pe_image_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
 
     if (buffer.size() < size) { buffer.resize(size); }
 
-    return read(buffer.data(), buffer.size());
+    return read(buffer.data(), uint32_t(buffer.size()));
 }
 
 enma_io_code pe_image_io::write(std::vector<uint8_t>& buffer) {
 
-    return write(buffer.data(), buffer.size());
+    return write(buffer.data(), uint32_t(buffer.size()));
 }
 
 enma_io_code pe_image_io::memory_set(uint32_t size, uint8_t data) {

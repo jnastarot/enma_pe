@@ -52,7 +52,7 @@ class pe_image{
 
     std::vector<uint8_t> overlay_data;
 
-	void pe_image::init_from_file(const uint8_t * image,uint32_t size);
+	void pe_image::init_from_file(const uint8_t * image, size_t size);
 public:
 	pe_image::pe_image();
     pe_image::pe_image(const pe_image& image);

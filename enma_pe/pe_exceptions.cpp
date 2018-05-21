@@ -134,7 +134,7 @@ bool build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
 
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION, exc_virtual_address);
         image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION, 
-            exceptions.get_items().size() * sizeof(image_ia64_runtime_function_entry));
+            uint32_t(exceptions.get_items().size() * sizeof(image_ia64_runtime_function_entry)));
     }
     else {
 

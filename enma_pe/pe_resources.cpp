@@ -117,7 +117,7 @@ void resource_directory_entry::add_data_entry(const resource_data_entry& entry) 
 	release();
 	_ptr.data = new resource_data_entry();
 	_ptr.data->set_codepage(entry.get_codepage());
-	_ptr.data->set_data(entry.get_data().data(), entry.get_data().size());
+	_ptr.data->set_data(entry.get_data().data(), uint32_t(entry.get_data().size()));
 	includes_data = true;
 }
 
@@ -334,7 +334,7 @@ void calculate_resource_data_space(resource_directory& root,//taken from pe bles
 		needed_size_for_structures += sizeof(image_resource_directory_entry);
 
 		if (root.get_entry_list()[entry_idx].is_named()) {
-			needed_size_for_strings += ((root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + sizeof(uint16_t));
+			needed_size_for_strings += (uint32_t(root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + sizeof(uint16_t));
 		}
 
 		if (!root.get_entry_list()[entry_idx].is_includes_data()) {
@@ -389,7 +389,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
             
 
 			if (rsrc_io.set_image_offset(
-                res_rva + sizeof(image_resource_directory) + (i * sizeof(image_resource_directory_entry)) + offset_to_directory
+                res_rva + sizeof(image_resource_directory) + uint32_t(i * sizeof(image_resource_directory_entry)) + offset_to_directory
             ).read(&dir_entry, sizeof(dir_entry)) == enma_io_success) {
 
 				//Create directory entry structure
@@ -447,7 +447,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 
                         if (rsrc_io.set_image_offset(data_entry.offset_to_data).read(entry_data, data_entry.size) == enma_io_success) {
 
-                            entry.add_data_entry(resource_data_entry(entry_data.data(), entry_data.size(), data_entry.code_page));
+                            entry.add_data_entry(resource_data_entry(entry_data.data(), uint32_t(entry_data.size()), data_entry.code_page));
                         }
                         else {
                             return directory_code::directory_code_currupted;
@@ -522,7 +522,7 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
 			current_strings_pos += sizeof(unicode_length);
 
             if (section_io.set_section_offset(resource_section.get_virtual_address() + current_strings_pos).write(
-                (void*)entry_item.get_name().c_str(), entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t)
+                (void*)entry_item.get_name().c_str(), uint32_t(entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t))
             ) != enma_io_success) {
                 return false;
             }

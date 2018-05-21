@@ -217,12 +217,12 @@ enma_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
 
     if (buffer.size() < size) { buffer.resize(size); }
 
-    return read(buffer.data(), buffer.size());
+    return read(buffer.data(), uint32_t(buffer.size()));
 }
 
 enma_io_code pe_section_io::write(std::vector<uint8_t>& buffer) {
 
-    return write(buffer.data(), buffer.size());
+    return write(buffer.data(), uint32_t(buffer.size()));
 }
 
 enma_io_code pe_section_io::memory_set(uint32_t size, uint8_t data) {

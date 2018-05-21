@@ -167,7 +167,7 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
 }
 
 
-void pe_image::init_from_file(const uint8_t * image, uint32_t size) {
+void pe_image::init_from_file(const uint8_t * image, size_t size) {
 	if (size < sizeof(image_dos_header)) {this->image_status = pe_image_status_bad_format;return;};
 
 	if (get_image_dos_header(image, dos_header)) { //check MZ sign

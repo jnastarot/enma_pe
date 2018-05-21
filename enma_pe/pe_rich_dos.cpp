@@ -166,13 +166,13 @@ bool has_image_rich_data(const uint8_t * pimage,uint32_t * rich_data_offset,
                 rich_start < (dos_header->e_lfanew - 8); rich_start += 4) {//get rich offset
 
                 if ((*(uint32_t*)(&pimage[rich_start]) ^ xor_key) == 0x536E6144) { //'DanS'
-                    rich_offset = rich_start;
+                    rich_offset = uint32_t(rich_start);
 
                     if (rich_data_offset) {
-                        *rich_data_offset = rich_start;
+                        *rich_data_offset = uint32_t(rich_start);
                     }
                     if (rich_data_size) {
-                        *rich_data_size = rich_end-rich_start;
+                        *rich_data_size = uint32_t(rich_end-rich_start);
                     }
                     if (rich_xor_key) {
                         *rich_xor_key = xor_key;

@@ -108,7 +108,7 @@ directory_code _get_tls_table(const pe_image &image, tls_table& tls) {
 
                 tls.get_raw_data().resize( size_t(tls_directory.end_address_of_raw_data - tls_directory.start_address_of_raw_data));
 
-                if (tls_io.read(tls.get_raw_data().data(), tls.get_raw_data().size()) != enma_io_success) {
+                if (tls_io.read(tls.get_raw_data().data(), uint32_t(tls.get_raw_data().size())) != enma_io_success) {
                     return directory_code::directory_code_currupted;
                 }
             }
@@ -159,9 +159,9 @@ bool _build_internal_tls_data(const pe_image &image, pe_section& section,
             tls_io.align_up(0x10);
 
             tls.set_start_address_raw_data(tls_io.get_section_offset());
-            tls.set_end_address_raw_data(tls_io.get_section_offset() + tls.get_raw_data().size());
+            tls.set_end_address_raw_data(tls_io.get_section_offset() + uint32_t(tls.get_raw_data().size()));
 
-            if (tls_io.write(tls.get_raw_data().data(), tls.get_raw_data().size()) != enma_io_success) {
+            if (tls_io.write(tls.get_raw_data().data(), uint32_t(tls.get_raw_data().size())) != enma_io_success) {
                 return false; //err
             }
         }

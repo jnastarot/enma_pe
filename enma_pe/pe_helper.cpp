@@ -85,17 +85,17 @@ void erase_directories_placement(pe_image &image, std::vector<directory_placemen
 
     for (auto& item : placement) {
         if (relocs) {
-            relocs->erase_all_items_in_zone(item.rva, item.size);
+            relocs->erase_all_items_in_zone(item.rva, uint32_t(item.size));
         }
 
-        image_io.set_image_offset(item.rva).memory_set(item.size, 0);
+        image_io.set_image_offset(item.rva).memory_set(uint32_t(item.size), 0);
 
         item.id = db_id_none;
     }
 
 
     if (delete_empty_sections && image.get_sections().size()) {
-        for (int section_idx = image.get_sections().size() - 1; section_idx >= 0; section_idx--) {
+        for (int32_t section_idx = int32_t(image.get_sections().size() - 1); section_idx >= 0; section_idx--) {
             auto _section = image.get_sections()[section_idx];
 
             for (size_t zone_idx = 0; zone_idx < placement.size(); zone_idx++) {

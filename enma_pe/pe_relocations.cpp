@@ -223,7 +223,7 @@ bool build_relocation_table(pe_image &image, pe_section& section, relocation_tab
         for (auto& reloc_table : reloc_tables) {
             image_base_relocation reloc_base = { 
                 reloc_table[0] & 0xFFFFF000 ,
-                sizeof(image_base_relocation) + reloc_table.size()*sizeof(uint16_t) + (reloc_table.size() & 1 ? sizeof(uint16_t) : 0)
+                uint32_t(sizeof(image_base_relocation) + reloc_table.size()*sizeof(uint16_t) + (reloc_table.size() & 1 ? sizeof(uint16_t) : 0))
             };
 
             if (reloc_section.write(&reloc_base, sizeof(reloc_base)) != enma_io_success) { return false; }

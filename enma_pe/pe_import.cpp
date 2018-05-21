@@ -374,9 +374,9 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
         pe_section_io import_io(section, image, enma_io_mode_allow_expand);
         import_io.align_up(0x10).seek_to_end();
 
-        size_t names_size = 0;
-        size_t thunk_size = 0;
-        size_t original_thunk_size = 0;
+        uint32_t names_size = 0;
+        uint32_t thunk_size = 0;
+        uint32_t original_thunk_size = 0;
 
         for (auto& library : imports.get_libraries()) {
             if (!library.size()) { continue; }
@@ -388,7 +388,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
                 for (auto& func : library.get_items()) {
 
                     if (func.is_import_by_name()) {
-                        names_size += ALIGN_UP(func.get_func_name().length() + 1 + sizeof(uint16_t), 0x2);
+                        names_size += uint32_t(ALIGN_UP(func.get_func_name().length() + 1 + sizeof(uint16_t), 0x2));
                     }
                     current_lib_thunk_size += sizeof(typename image_format::ptr_size);
                 }
@@ -403,7 +403,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
             }
 
             if (build_items_ids & import_table_build_library_name) {
-                names_size += ALIGN_UP(library.get_library_name().length() + 1, 0x2);
+                names_size += uint32_t(ALIGN_UP(library.get_library_name().length() + 1, 0x2));
             }
         }
 
@@ -452,7 +452,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
                             }
 
                             if (import_names_io.write(
-                                (void*)func.get_func_name().c_str(), func.get_func_name().length() + 1) != enma_io_success) {
+                                (void*)func.get_func_name().c_str(), uint32_t(func.get_func_name().length() + 1)) != enma_io_success) {
 
                                 return false;
                             }
@@ -509,7 +509,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
                 library.set_rva_library_name(import_names_io.get_section_offset());
 
                 if (import_names_io.write(
-                    (void*)library.get_library_name().c_str(), library.get_library_name().length() + 1) != enma_io_success) {
+                    (void*)library.get_library_name().c_str(), uint32_t(library.get_library_name().length() + 1)) != enma_io_success) {
 
                     return false;
                 }
@@ -679,7 +679,7 @@ bool build_import_table_only(pe_image &image, pe_section& section, import_table&
         import_io.align_up(0x10).seek_to_end();
 
         image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT, import_io.get_section_offset());
-        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, imports.size()*sizeof(image_import_descriptor));
+        image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_IMPORT, uint32_t(imports.size()*sizeof(image_import_descriptor)));
 
         for (auto& library : imports.get_libraries()) {
             image_import_descriptor import_desc;

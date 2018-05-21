@@ -812,7 +812,7 @@ bool build_internal_load_config_data(pe_image &image, pe_section& section,
                 se_handlers_io.align_up(0x4).seek_to_end();
 
                 load_config.set_se_handler_table(se_handlers_io.get_section_offset());
-                load_config.set_se_handler_count(load_config.get_se_handlers().size());
+                load_config.set_se_handler_count(uint32_t(load_config.get_se_handlers().size()));
 
                 for (auto& item : load_config.get_se_handlers()) {
 
@@ -859,7 +859,7 @@ bool build_internal_load_config_data(pe_image &image, pe_section& section,
             guard_cf_functions_io.align_up(0x4).seek_to_end();
 
             load_config.set_guard_cf_function_table(guard_cf_functions_io.get_section_offset());
-            load_config.set_guard_cf_function_count(load_config.get_guard_cf_functions().size());
+            load_config.set_guard_cf_function_count(uint32_t(load_config.get_guard_cf_functions().size()));
 
             for (auto& item : load_config.get_guard_cf_functions()) {
 
@@ -880,7 +880,7 @@ bool build_internal_load_config_data(pe_image &image, pe_section& section,
             guard_iat_io.align_up(0x4).seek_to_end();
 
             load_config.set_guard_address_taken_iat_entry_table(guard_iat_io.get_section_offset());
-            load_config.set_guard_address_taken_iat_entry_count(load_config.get_guard_iat_entries().size());
+            load_config.set_guard_address_taken_iat_entry_count(uint32_t(load_config.get_guard_iat_entries().size()));
 
             for (auto& item : load_config.get_guard_iat_entries()) {
 
@@ -901,7 +901,7 @@ bool build_internal_load_config_data(pe_image &image, pe_section& section,
             guard_long_jump_io.align_up(0x4).seek_to_end();
 
             load_config.set_guard_long_jump_target_table(guard_long_jump_io.get_section_offset());
-            load_config.set_guard_long_jump_target_count(load_config.get_guard_long_jump_targets().size());
+            load_config.set_guard_long_jump_target_count(uint32_t(load_config.get_guard_long_jump_targets().size()));
 
             for (auto& item : load_config.get_guard_long_jump_targets()) {
 

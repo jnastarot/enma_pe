@@ -233,7 +233,7 @@ bool build_bound_import_table(pe_image &image,pe_section& section,
         descs_size = ALIGN_UP(descs_size, 0x10);
 
         uint32_t virtual_address = bnd_import_desc_io.get_section_offset();
-        bnd_import_names_io.set_section_offset(bnd_import_desc_io.get_section_offset() + descs_size);
+        bnd_import_names_io.set_section_offset( uint32_t(bnd_import_desc_io.get_section_offset() + descs_size));
 
         
         for (auto& bound_desc : imports.get_libraries()) {
@@ -247,7 +247,7 @@ bool build_bound_import_table(pe_image &image,pe_section& section,
             }
 
             if (bnd_import_names_io.write(
-                (void*)bound_desc.get_library_name().c_str(), bound_desc.get_library_name().length() + 1) != enma_io_success) {
+                (void*)bound_desc.get_library_name().c_str(), uint32_t(bound_desc.get_library_name().length() + 1)) != enma_io_success) {
 
                 return false;
             }
@@ -263,7 +263,7 @@ bool build_bound_import_table(pe_image &image,pe_section& section,
                 }
 
                 if (bnd_import_names_io.write(
-                    (void*)bound_ref.get_ref_name().c_str(), bound_ref.get_ref_name().length() + 1) != enma_io_success) {
+                    (void*)bound_ref.get_ref_name().c_str(), uint32_t(bound_ref.get_ref_name().length() + 1)) != enma_io_success) {
 
                     return false;
                 }
