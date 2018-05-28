@@ -62,16 +62,22 @@ bool relocation_table::erase_all_items_by_id(uint32_t relocation_id) {
     return ret;
 }
 
-bool relocation_table::erase_all_items_in_zone(uint32_t rva, uint32_t size) {
+bool relocation_table::erase_all_items_in_zone(uint32_t segment_rva, uint32_t segment_size) {
 
     bool ret = false;
 
     for (size_t item_idx = 0; item_idx < items.size(); item_idx++) {
-        if (items[item_idx].relative_virtual_address >= rva &&
-            items[item_idx].relative_virtual_address < rva + size) {
-            items.erase(items.begin() + item_idx);
-            item_idx--;
-            ret = true;
+        auto& relitem = items[item_idx];
+
+        if (relitem.relative_virtual_address >= segment_rva) {
+            if (relitem.relative_virtual_address < segment_rva + segment_size) {
+                items.erase(items.begin() + item_idx);
+                item_idx--;
+                ret = true;
+            }
+            else {
+                return ret;
+            }
         }
     }
 

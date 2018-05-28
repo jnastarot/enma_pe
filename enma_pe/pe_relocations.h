@@ -20,12 +20,15 @@ public:
     bool relocation_table::erase_item(uint32_t rva);
     bool relocation_table::erase_first_item_by_id(uint32_t relocation_id);
     bool relocation_table::erase_all_items_by_id(uint32_t relocation_id);
-    bool relocation_table::erase_all_items_in_zone(uint32_t rva, uint32_t size);
+    
 
     void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>& found_relocs, uint32_t relocation_id);
 
-    //using it only items was sorted
+    //using it only if items was sorted
     void relocation_table::get_items_by_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size);
+    //using it only if items was sorted
+    bool relocation_table::erase_all_items_in_zone(uint32_t segment_rva, uint32_t segment_size);
+
 
     void relocation_table::clear();
     void relocation_table::sort();  
