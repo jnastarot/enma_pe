@@ -24,10 +24,8 @@ public:
 
     void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>& found_relocs, uint32_t relocation_id);
 
-    //using it only if items was sorted
-    void relocation_table::get_items_by_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size);
-    //using it only if items was sorted
-    bool relocation_table::erase_all_items_in_zone(uint32_t segment_rva, uint32_t segment_size);
+    void relocation_table::get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size);
+    bool relocation_table::erase_items_in_segment(uint32_t segment_rva, uint32_t segment_size);
 
 
     void relocation_table::clear();

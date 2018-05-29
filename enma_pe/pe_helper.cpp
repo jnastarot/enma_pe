@@ -85,7 +85,7 @@ void erase_directories_placement(pe_image &image, std::vector<directory_placemen
 
     for (auto& item : placement) {
         if (relocs) {
-            relocs->erase_all_items_in_zone(item.rva, uint32_t(item.size));
+            relocs->erase_items_in_segment(item.rva, uint32_t(item.size));
         }
 
         image_io.set_image_offset(item.rva).memory_set(uint32_t(item.size), 0);

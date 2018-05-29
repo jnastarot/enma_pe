@@ -62,22 +62,19 @@ bool relocation_table::erase_all_items_by_id(uint32_t relocation_id) {
     return ret;
 }
 
-bool relocation_table::erase_all_items_in_zone(uint32_t segment_rva, uint32_t segment_size) {
+bool relocation_table::erase_items_in_segment(uint32_t segment_rva, uint32_t segment_size) {
 
     bool ret = false;
 
     for (size_t item_idx = 0; item_idx < items.size(); item_idx++) {
         auto& relitem = items[item_idx];
 
-        if (relitem.relative_virtual_address >= segment_rva) {
-            if (relitem.relative_virtual_address < segment_rva + segment_size) {
-                items.erase(items.begin() + item_idx);
-                item_idx--;
-                ret = true;
-            }
-            else {
-                return ret;
-            }
+        if (relitem.relative_virtual_address >= segment_rva &&
+            relitem.relative_virtual_address < segment_rva + segment_size) {
+
+            items.erase(items.begin() + item_idx);
+            item_idx--;
+            ret = true;
         }
     }
 
@@ -96,13 +93,11 @@ void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>&
     }
 }
 
-void relocation_table::get_items_by_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size) {
+void relocation_table::get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size) {
 
     relocs.clear();
 
     for (auto& item : items) {
-        if (item.relative_virtual_address >= segment_rva + segment_size) { return; }
-
         if (item.relative_virtual_address >= segment_rva &&
             item.relative_virtual_address < segment_rva + segment_size) {
             relocs.push_back(item);
