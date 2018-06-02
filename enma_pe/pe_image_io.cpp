@@ -197,6 +197,7 @@ enma_io_code pe_image_io::internal_write(uint32_t data_offset,
             if (!total_up_oversize) { break; }
         }
         up_oversize = total_up_oversize;
+        wrote_size  = total_wroted_size;
 
         if (down_oversize || up_oversize) {
 
