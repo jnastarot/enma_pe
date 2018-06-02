@@ -354,7 +354,7 @@ pe_image_io& pe_image_io::seek_to_end() {
         switch (addressing_type) {
         case enma_io_addressing_type::enma_io_address_raw: {
             this->image_offset = ALIGN_UP(
-                image->get_last_section()->get_pointer_to_raw(),
+                image->get_last_section()->get_pointer_to_raw() + image->get_last_section()->get_size_of_raw_data(),
                 image->get_file_align()
             );
             break;
@@ -362,7 +362,7 @@ pe_image_io& pe_image_io::seek_to_end() {
 
         case enma_io_addressing_type::enma_io_address_rva: {
             this->image_offset = ALIGN_UP(
-                image->get_last_section()->get_virtual_address(),
+                image->get_last_section()->get_virtual_address() + image->get_last_section()->get_virtual_size(),
                 image->get_section_align()
             );
             break;
