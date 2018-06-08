@@ -214,7 +214,7 @@ directory_code get_placement_debug_table(const pe_image &image, std::vector<dire
 
         debug_io.set_image_offset(virtual_address);
         while (debug_io.get_image_offset() < virtual_address + virtual_size) {
-            total_desc_size += sizeof(image_debug_directory);
+            total_desc_size += (uint32_t)sizeof(image_debug_directory);
 
             image_debug_directory debug_desc;
 

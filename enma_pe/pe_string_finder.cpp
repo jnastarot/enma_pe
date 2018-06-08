@@ -5,7 +5,7 @@
 
 
 void get_strings_from_image_by_locale(const pe_image& image, string_base_table& string_table,
-    char * locale,
+    const char * locale,
     bool find_in_clean_image,
     bool find_in_execute_sections,
     uint32_t min_string_size,
@@ -27,6 +27,7 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
     string_table.ansi_base.clear();
     string_table.wide_base.clear();
 
+    /*
     _locale_t loc = _create_locale(LC_CTYPE, locale);
 
 
@@ -98,5 +99,6 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
     }
 
     _free_locale(loc);
+    */
 }
 

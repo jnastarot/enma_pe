@@ -191,10 +191,10 @@ directory_code get_relocation_table(const pe_image &image, relocation_table& rel
                     return directory_code::directory_code_currupted;
                 }
 
-                if (rel >> 12 == IMAGE_REL_BASED_ABSOLUTE) { current_block_size += sizeof(uint16_t);  continue; }
+                if (rel >> 12 == IMAGE_REL_BASED_ABSOLUTE) { current_block_size += INT16_SIZE;  continue; }
 
                 relocs.add_item((rel & 0x0FFF) | reloc_base.virtual_address, 0);
-                current_block_size += sizeof(uint16_t);
+                current_block_size += INT16_SIZE;
             }
         }
         return directory_code::directory_code_success;
@@ -245,7 +245,7 @@ bool build_relocation_table(pe_image &image, pe_section& section, relocation_tab
             if (reloc_section.write(&reloc_base, sizeof(reloc_base)) != enma_io_success) { return false; }
 
             for (auto& reloc : reloc_table) {
-                uint16_t reloc_ = reloc & 0xFFF | reloc_type;
+                uint16_t reloc_ = uint16_t(reloc & 0xFFF) | reloc_type;
                 if (reloc_section.write(&reloc_, sizeof(reloc_)) != enma_io_success) { return false; }
             }
 

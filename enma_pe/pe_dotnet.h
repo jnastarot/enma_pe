@@ -17,36 +17,36 @@ class dotnet_table {
     image_data_directory   vtable_fixups;
     image_data_directory   export_address_table_jumps;
 public:
-    dotnet_table::dotnet_table();
-    dotnet_table::~dotnet_table();
+    dotnet_table();
+    ~dotnet_table();
 
 
 public:
-    void dotnet_table::set_major_version(uint16_t major_version);
-    void dotnet_table::set_minor_version(uint16_t minor_version);
+    void set_major_version(uint16_t major_version);
+    void set_minor_version(uint16_t minor_version);
 
-    void dotnet_table::set_flags(uint32_t flags);
-    void dotnet_table::set_entry_point(uint32_t entry_point);
+    void set_flags(uint32_t flags);
+    void set_entry_point(uint32_t entry_point);
 
-    void dotnet_table::set_meta_data(image_data_directory meta_data);
-    void dotnet_table::set_resources(image_data_directory resources);
-    void dotnet_table::set_strong_name_signature(image_data_directory strong_name_signature);
-    void dotnet_table::set_code_manager_table(image_data_directory code_manager_table);
-    void dotnet_table::set_vtable_fixups(image_data_directory vtable_fixups);
-    void dotnet_table::set_export_address_table_jumps(image_data_directory export_address_table_jumps);
+    void set_meta_data(image_data_directory meta_data);
+    void set_resources(image_data_directory resources);
+    void set_strong_name_signature(image_data_directory strong_name_signature);
+    void set_code_manager_table(image_data_directory code_manager_table);
+    void set_vtable_fixups(image_data_directory vtable_fixups);
+    void set_export_address_table_jumps(image_data_directory export_address_table_jumps);
 public:
-    uint16_t dotnet_table::get_major_version() const;
-    uint16_t dotnet_table::get_minor_version() const;
+    uint16_t get_major_version() const;
+    uint16_t get_minor_version() const;
 
-    uint32_t dotnet_table::get_flags() const;
-    uint32_t dotnet_table::get_entry_point() const;
+    uint32_t get_flags() const;
+    uint32_t get_entry_point() const;
 
-    image_data_directory dotnet_table::get_meta_data() const;
-    image_data_directory dotnet_table::get_resources() const;
-    image_data_directory dotnet_table::get_strong_name_signature() const;
-    image_data_directory dotnet_table::get_code_manager_table() const;
-    image_data_directory dotnet_table::get_vtable_fixups() const;
-    image_data_directory dotnet_table::get_export_address_table_jumps() const;
+    image_data_directory get_meta_data() const;
+    image_data_directory get_resources() const;
+    image_data_directory get_strong_name_signature() const;
+    image_data_directory get_code_manager_table() const;
+    image_data_directory get_vtable_fixups() const;
+    image_data_directory get_export_address_table_jumps() const;
 };
 
 directory_code get_dotnet_table(_In_ const pe_image &image, _Out_ dotnet_table& dotnet);

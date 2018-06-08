@@ -228,18 +228,18 @@ bool _build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls,
         tls_directory.start_address_of_raw_data = typename image_format::ptr_size(image.rva_to_va(tls.get_start_address_raw_data()));
         tls_directory.end_address_of_raw_data   = typename image_format::ptr_size(image.rva_to_va(tls.get_end_address_raw_data()));
 
-        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, start_address_of_raw_data), 0);
-        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, end_address_of_raw_data),   0);
+        relocs.add_item(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, start_address_of_raw_data), 0);
+        relocs.add_item(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, end_address_of_raw_data),   0);
     }
 
     if (tls.get_address_of_index()) {
         tls_directory.address_of_index = typename image_format::ptr_size(image.rva_to_va(tls.get_address_of_index()));
-        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, address_of_index), 0);
+        relocs.add_item(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, address_of_index), 0);
     }
 
     if (tls.get_address_of_callbacks()) {
         tls_directory.address_of_callbacks = typename image_format::ptr_size(image.rva_to_va(tls.get_address_of_callbacks()));
-        relocs.add_item(tls_io.get_section_offset() + offsetof(typename image_format::image_tls_directory, address_of_callbacks), 0);
+        relocs.add_item(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, address_of_callbacks), 0);
     }
     
     tls_directory.size_of_zero_fill     = tls.get_size_of_zero_fill();

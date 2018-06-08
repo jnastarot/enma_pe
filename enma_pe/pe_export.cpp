@@ -244,7 +244,7 @@ directory_code get_export_table(const pe_image &image, export_table& exports) {
 
             export_table_item func;
 
-            if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * sizeof(uint32_t)).read(
+            if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * INT32_SIZE).read(
                 &func_rva, sizeof(func_rva)) != enma_io_success) {
                 return directory_code::directory_code_currupted;
             }
@@ -259,7 +259,7 @@ directory_code get_export_table(const pe_image &image, export_table& exports) {
 
                 uint16_t ordinal2;
 
-                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * sizeof(uint16_t)).read(
+                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * INT16_SIZE).read(
                     &ordinal2, sizeof(ordinal2)) != enma_io_success) {
                     return directory_code::directory_code_currupted;
                 }
@@ -269,7 +269,7 @@ directory_code get_export_table(const pe_image &image, export_table& exports) {
 
                     uint32_t function_name_rva;
 
-                    if (export_io.set_image_offset(export_desc.address_of_names + i * sizeof(uint32_t)).read(
+                    if (export_io.set_image_offset(export_desc.address_of_names + i * INT32_SIZE).read(
                         &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
                         return directory_code::directory_code_currupted;
                     }
@@ -346,9 +346,9 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 
 	needed_size_for_strings += needed_size_for_function_names;
 	needed_size_for_strings += needed_size_for_function_forwards;
-	uint32_t needed_size_for_function_name_ordinals = number_of_names * sizeof(uint16_t);
-	uint32_t needed_size_for_function_name_rvas     = number_of_names * sizeof(uint32_t);
-	uint32_t needed_size_for_function_addresses     = (max_ordinal - ordinal_base + 1) * sizeof(uint32_t);
+	uint32_t needed_size_for_function_name_ordinals = number_of_names * INT16_SIZE;
+	uint32_t needed_size_for_function_name_rvas     = number_of_names * INT32_SIZE;
+	uint32_t needed_size_for_function_addresses     = (max_ordinal - ordinal_base + 1) * INT32_SIZE;
     
     uint32_t directory_pos = export_io.get_section_offset();
 	uint32_t current_pos_of_function_names = uint32_t(ALIGN_UP(exports.get_library_name().length() + 1,0x2) + directory_pos + sizeof(image_export_directory));
@@ -369,7 +369,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
     export_desc.address_of_functions    = current_pos_of_function_addresses;
     export_desc.address_of_name_ordinals= current_pos_of_function_name_ordinals;
     export_desc.address_of_names        = current_pos_of_function_names_rvas;
-    export_desc.name                    = directory_pos + sizeof(image_export_directory);
+    export_desc.name                    = directory_pos + (uint32_t)sizeof(image_export_directory);
 
     if (export_io.write(&export_desc, sizeof(export_desc)) != enma_io_success) {
         return false;
@@ -387,7 +387,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
 	for (export_table_item &func : exports.get_items()) {
 		if (func.get_ordinal() > last_ordinal){
 
-			uint32_t len = sizeof(uint32_t) * (func.get_ordinal() - last_ordinal - 1);
+			uint32_t len = INT32_SIZE * (func.get_ordinal() - last_ordinal - 1);
 			if (len){
                 if (export_io.set_section_offset(current_pos_of_function_addresses).memory_set(len,0) != enma_io_success) {
                     return false;
@@ -412,7 +412,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
                 return false;
             }
             
-            current_pos_of_function_addresses += sizeof(uint32_t);
+            current_pos_of_function_addresses += INT32_SIZE;
 
             if (export_io.set_section_offset(current_pos_of_function_forwards).write(
                 (void*)func.get_forward_name().c_str(), uint32_t(func.get_forward_name().length() + 1)) != enma_io_success) {
@@ -431,7 +431,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
                 return false;
             }
 
-			current_pos_of_function_addresses += sizeof(function_rva);
+			current_pos_of_function_addresses += INT32_SIZE;
 		}
 	}
 
@@ -444,7 +444,7 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
             return false;
         }
 
-		current_pos_of_function_names_rvas += sizeof(uint32_t);
+		current_pos_of_function_names_rvas += INT32_SIZE;
 
         if (export_io.set_section_offset(current_pos_of_function_names).write(
            (void*) func.first.c_str(), uint32_t(func.first.length() + 1)) != enma_io_success) {
@@ -461,13 +461,13 @@ bool build_export_table(pe_image &image, pe_section& section, export_table& expo
             return false;
         }
 
-		current_pos_of_function_name_ordinals += sizeof(uint16_t);
+		current_pos_of_function_name_ordinals += INT16_SIZE;
 	}
 
 
 	image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT, directory_pos);
 	image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT, 
-        sizeof(image_export_directory) +
+        (uint32_t)sizeof(image_export_directory) +
         needed_size_for_function_name_ordinals + 
         needed_size_for_function_addresses +
         needed_size_for_strings +
@@ -509,7 +509,7 @@ directory_code get_placement_export_table(const pe_image &image, std::vector<dir
 
             uint32_t func_rva;
 
-            if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * sizeof(uint32_t)).read(
+            if (export_io.set_image_offset(export_desc.address_of_functions + ordinal * INT32_SIZE).read(
                 &func_rva, sizeof(func_rva)) != enma_io_success) {
                 return directory_code::directory_code_currupted;
             }
@@ -521,7 +521,7 @@ directory_code get_placement_export_table(const pe_image &image, std::vector<dir
 
                 uint16_t ordinal2;
 
-                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * sizeof(uint16_t)).read(
+                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * INT16_SIZE).read(
                     &ordinal2, sizeof(ordinal2)) != enma_io_success) {
                     return directory_code::directory_code_currupted;
                 }
@@ -530,7 +530,7 @@ directory_code get_placement_export_table(const pe_image &image, std::vector<dir
 
                     uint32_t function_name_rva;
 
-                    if (export_io.set_image_offset(export_desc.address_of_names + i * sizeof(uint32_t)).read(
+                    if (export_io.set_image_offset(export_desc.address_of_names + i * INT32_SIZE).read(
                         &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
                         return directory_code::directory_code_currupted;
                     }

@@ -1,14 +1,6 @@
 #pragma once
 
-#define ALIGN_UP(a, b) ((((a) + (b) - 1) / (b)) * (b))
 
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif
 
 #include "enma_pe_internal.h"
 #include "enma_pe_properties.h"
@@ -104,9 +96,9 @@ struct pe_image_expanded {
 
     pe_image image;
 
-    pe_image_expanded::pe_image_expanded();
-    pe_image_expanded::pe_image_expanded(const pe_image_expanded& image_ex);
-    pe_image_expanded& pe_image_expanded::operator=(const pe_image_expanded& image_ex);
+    pe_image_expanded();
+    pe_image_expanded(const pe_image_expanded& image_ex);
+    pe_image_expanded& operator=(const pe_image_expanded& image_ex);
 };
 
 

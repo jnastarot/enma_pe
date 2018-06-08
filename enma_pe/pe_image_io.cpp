@@ -6,14 +6,13 @@ pe_image_io::pe_image_io(
     pe_image& image,
     enma_io_mode mode,
     enma_io_addressing_type type
-):image(&image),mode(mode), addressing_type(type),image_offset(0),last_code(enma_io_success){}
+):image(&image), image_offset(0), last_code(enma_io_success), mode(mode), addressing_type(type){}
 
 
 pe_image_io::pe_image_io(
     const pe_image& image,
     enma_io_addressing_type type
-): image((pe_image*)&image), mode(enma_io_mode_default), addressing_type(type), 
-    image_offset(0), last_code(enma_io_success) {}
+): image((pe_image*)&image), image_offset(0), last_code(enma_io_success), mode(enma_io_mode_default), addressing_type(type){}
 
 pe_image_io::pe_image_io(const pe_image_io& image_io) {
     operator=(image_io);
@@ -92,7 +91,6 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 
     if (b_view && readed_size) {
         uint32_t total_readed_size    = 0;
-        uint32_t total_down_oversize  = 0;
         uint32_t total_up_oversize    = 0;
 
         for (auto &section : image->get_sections()) {
@@ -101,7 +99,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
             uint32_t sec_down_oversize = 0;
             uint32_t sec_up_oversize   = 0;
 
-            enma_io_code code = pe_section_io(*section, *image, mode, addressing_type).internal_read(
+            pe_section_io(*section, *image, mode, addressing_type).internal_read(
                 data_offset, buffer, size, sec_readed_size, sec_down_oversize, sec_up_oversize
             );
 
@@ -173,7 +171,6 @@ enma_io_code pe_image_io::internal_write(uint32_t data_offset,
         (wrote_size || (up_oversize && mode == enma_io_mode::enma_io_mode_allow_expand))) {
 
         uint32_t total_wroted_size   = 0;
-        uint32_t total_down_oversize = 0;
         uint32_t total_up_oversize   = 0;
 
         for (size_t section_idx = 0; section_idx < image->get_sections().size(); section_idx++) {
@@ -427,74 +424,3 @@ pe_image*  pe_image_io::get_image() {
 
 
 
-bool view_data(
-    uint32_t  required_offset, uint32_t required_size, uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-    uint32_t present_offset, uint32_t present_size) {
-
-
-    //         ...............
-    //  .............................
-    //  |    | |             |      |
-    //  v    v |             |      |
-    // (down_oversize)       |      |
-    //         |             |      |
-    //         v             v      |
-    //         (available_size)     |
-    //                       |      |
-    //                       v      v
-    //                       (up_oversize)
-
-    real_offset = 0;
-    available_size = 0;
-    down_oversize = 0;
-    up_oversize = 0;
-
-    if (required_offset < present_offset) {
-        down_oversize = (present_offset - required_offset);
-
-        if (down_oversize >= required_size) {
-
-            return false; //not in bounds
-        }
-        else {
-            available_size = (required_size - down_oversize);
-
-            if (available_size > present_size) {
-                up_oversize = (available_size - present_size);
-                available_size = present_size;
-
-                return true;//partially in bounds
-            }
-
-            return true;//partially in bounds
-        }
-    }
-    else {//if(required_offset >= present_offset)
-
-        if (required_offset <= (present_offset + present_size)) {
-            real_offset = (required_offset - present_offset);
-
-            if (required_size + required_offset >(present_offset + present_size)) {
-                up_oversize = (required_size + required_offset) - (present_offset + present_size);
-                available_size = required_size - up_oversize;
-
-                return true; //partially in bounds
-            }
-            else {
-                available_size = required_size;
-
-                return true; //full in bounds
-            }
-        }
-        else {
-            real_offset = (required_offset - present_offset + present_size);
-            up_oversize = (required_size + required_offset) - (present_offset + present_size);
-            available_size = 0;
-
-            return true; //trough full adding size 
-        }
-    }
-
-    return true;
-}

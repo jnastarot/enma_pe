@@ -214,7 +214,7 @@ directory_code _get_delay_import_table(const pe_image &image, delay_import_table
                     bound_imports.has_library(library_name, import_desc.time_date_stamp));
 
                 for (uint32_t iat_func_address = import_desc.import_address_table_rva;; //get funcs
-                    iat_func_address += sizeof(typename image_format::ptr_size)) {
+                    iat_func_address += (uint32_t)sizeof(typename image_format::ptr_size)) {
 
 
                     typename image_format::ptr_size name_item = 0;
@@ -319,7 +319,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, std::vec
 
 
                 for (iat_func_address = import_desc.import_address_table_rva;; //get funcs
-                    iat_func_address += sizeof(typename image_format::ptr_size)) {
+                    iat_func_address += (uint32_t)sizeof(typename image_format::ptr_size)) {
 
                     typename image_format::ptr_size name_item = 0;
 
@@ -352,24 +352,24 @@ directory_code _get_placement_delay_import_table(const pe_image &image, std::vec
 
                 }
 
-                placement.push_back({ delay_import_desc_io.get_image_offset() - sizeof(image_delayload_descriptor),
+                placement.push_back({ delay_import_desc_io.get_image_offset() - (uint32_t)sizeof(image_delayload_descriptor),
                     sizeof(image_delayload_descriptor), dp_id_delay_import_desc });
 
                 placement.push_back({ import_desc.import_name_table_rva,
-                     (delay_import_names_io.get_image_offset() - iat_func_address) + sizeof(typename image_format::ptr_size),
+                     (delay_import_names_io.get_image_offset() - iat_func_address) + (uint32_t)sizeof(typename image_format::ptr_size),
                     dp_id_delay_import_table });
                 placement.push_back({ import_desc.bound_import_address_table_rva,
-                    (delay_import_names_io.get_image_offset() - iat_func_address) + sizeof(typename image_format::ptr_size),
+                    (delay_import_names_io.get_image_offset() - iat_func_address) + (uint32_t)sizeof(typename image_format::ptr_size),
                     dp_id_delay_import_table });
 
                 if (import_desc.bound_import_address_table_rva) {
                     placement.push_back({ import_desc.bound_import_address_table_rva,
-                        (delay_import_names_io.get_image_offset() - iat_func_address) + sizeof(typename image_format::ptr_size),
+                        (delay_import_names_io.get_image_offset() - iat_func_address) + (uint32_t)sizeof(typename image_format::ptr_size),
                         dp_id_delay_import_table });
                 }
                 if (import_desc.unload_information_table_rva) {
                     placement.push_back({ import_desc.unload_information_table_rva,
-                        (delay_import_names_io.get_image_offset() - iat_func_address) + sizeof(typename image_format::ptr_size),
+                        (delay_import_names_io.get_image_offset() - iat_func_address) + (uint32_t)sizeof(typename image_format::ptr_size),
                         dp_id_delay_import_table });
                 }
 
@@ -381,7 +381,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, std::vec
             } while (import_desc.dll_name_rva && import_desc.import_address_table_rva);
         }
 
-        placement.push_back({ delay_import_desc_io.get_image_offset() - sizeof(image_delayload_descriptor),
+        placement.push_back({ delay_import_desc_io.get_image_offset() - (uint32_t)sizeof(image_delayload_descriptor),
             sizeof(image_delayload_descriptor),dp_id_delay_import_desc });
 
         return directory_code::directory_code_success;

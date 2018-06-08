@@ -270,56 +270,32 @@ bool entry_sorter::operator()(resource_directory_entry& entry1, resource_directo
 		return entry1.is_named();
 	}
 }
-resource_directory::id_entry_finder::id_entry_finder(uint32_t id)
-	:id_(id)
-{}
-bool resource_directory::id_entry_finder::operator()(resource_directory_entry& entry) {
-	return !entry.is_named() && entry.get_id() == id_;
+
+bool resource_directory::entry_by_id(const resource_directory_entry * &entry, uint32_t id) {
+
+    for (auto& entry_item : entries) {
+
+        if (!entry_item.is_named() && entry_item.get_id() == id) {
+            entry = (resource_directory_entry *)&(entry_item);
+
+            return true;
+        }
+    }
+
+    return false;
 }
-resource_directory::name_entry_finder::name_entry_finder(const std::wstring& name)
-	:name_(name)
-{}
-bool resource_directory::name_entry_finder::operator()(resource_directory_entry& entry) {
-	return entry.is_named() && entry.get_name() == name_;
-}
-resource_directory::entry_finder::entry_finder(const std::wstring& name)
-	:name_(name), named_(true), id_(0)
-{}
-resource_directory::entry_finder::entry_finder(uint32_t id)
-	: id_(id), named_(false), name_(L"")
-{}
-bool resource_directory::entry_finder::operator()(resource_directory_entry& entry) {
-	if (named_) {
-		return entry.is_named() && entry.get_name() == name_;
-	}
-	else {
-		return !entry.is_named() && entry.get_id() == id_;
-	}
-}
-bool resource_directory::entry_by_id(resource_directory_entry * &entry, uint32_t id) {
-	auto& found_entry = std::find_if(entries.begin(), entries.end(), id_entry_finder(id));
+bool resource_directory::entry_by_name(const resource_directory_entry * &entry, const std::wstring& name) {
 
+    for (auto& entry_item : entries) {
 
-	if (found_entry == entries.end()) {
-		return false;
-	}
+        if (entry_item.is_named() && entry_item.get_name() == name) {
+            entry = (resource_directory_entry *)&(entry_item);
 
-	entry = (resource_directory_entry *)&(*found_entry);
+            return true;
+        }
+    }
 
-	return true;
-}
-bool resource_directory::entry_by_name(resource_directory_entry * &entry, const std::wstring& name) {
-	auto& found_entry = std::find_if(entries.begin(), entries.end(), name_entry_finder(name));
-
-
-	if (found_entry == entries.end()) {
-		return false;
-	}
-
-	entry = (resource_directory_entry *)&(*found_entry);
-
-
-	return true;
+    return false;
 }
 
 
@@ -327,14 +303,14 @@ bool resource_directory::entry_by_name(resource_directory_entry * &entry, const 
 void calculate_resource_data_space(resource_directory& root,//taken from pe bless
 	uint32_t aligned_offset_from_section_start, uint32_t& needed_size_for_structures, uint32_t& needed_size_for_strings) {
 
-	needed_size_for_structures += sizeof(image_resource_directory);
+	needed_size_for_structures += (uint32_t)sizeof(image_resource_directory);
 
 	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
 
-		needed_size_for_structures += sizeof(image_resource_directory_entry);
+		needed_size_for_structures += (uint32_t)sizeof(image_resource_directory_entry);
 
 		if (root.get_entry_list()[entry_idx].is_named()) {
-			needed_size_for_strings += (uint32_t(root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + sizeof(uint16_t));
+			needed_size_for_strings += (uint32_t(root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + INT16_SIZE);
 		}
 
 		if (!root.get_entry_list()[entry_idx].is_includes_data()) {
@@ -389,7 +365,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
             
 
 			if (rsrc_io.set_image_offset(
-                res_rva + sizeof(image_resource_directory) + uint32_t(i * sizeof(image_resource_directory_entry)) + offset_to_directory
+                res_rva + (uint32_t)sizeof(image_resource_directory) + uint32_t(i * (uint32_t)sizeof(image_resource_directory_entry)) + offset_to_directory
             ).read(&dir_entry, sizeof(dir_entry)) == enma_io_success) {
 
 				//Create directory entry structure
@@ -406,8 +382,8 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
                         std::wstring name;
                         name.resize(directory_name.length);
                         
-                        if (rsrc_io.set_image_offset(res_rva + dir_entry.name_offset + offsetof(image_resource_dir_string_u, name_string)).read(
-                            (void*)name.data(), directory_name.length * sizeof(wchar_t)) == enma_io_success) {
+                        if (rsrc_io.set_image_offset(res_rva + dir_entry.name_offset + (uint32_t)offsetof(image_resource_dir_string_u, name_string)).read(
+                            (void*)name.data(), directory_name.length * WCHAR_SIZE) == enma_io_success) {
 
                             //Set entry UNICODE name
                             entry.set_name(name);
@@ -495,15 +471,11 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
 
     section_io.set_section_offset(resource_section.get_virtual_address() + current_structures_pos).write(&dir, sizeof(dir));
 
-
-	uint8_t* raw_data = resource_section.get_section_data().data();
-
-
-	current_structures_pos += sizeof(dir);
+	current_structures_pos += (uint32_t)sizeof(dir);
 
 	uint32_t this_current_structures_pos = current_structures_pos;
 
-	current_structures_pos += sizeof(image_resource_directory_entry) * (dir.number_of_named_entries + dir.number_of_id_entries);
+	current_structures_pos += (uint32_t)sizeof(image_resource_directory_entry) * (dir.number_of_named_entries + dir.number_of_id_entries);
 
 	for (auto& entry_item : root.get_entry_list()) {
 
@@ -519,7 +491,7 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
                 return false;
             }
 
-			current_strings_pos += sizeof(unicode_length);
+			current_strings_pos += INT16_SIZE;
 
             if (section_io.set_section_offset(resource_section.get_virtual_address() + current_strings_pos).write(
                 (void*)entry_item.get_name().c_str(), uint32_t(entry_item.get_name().length() * sizeof(wchar_t) + sizeof(wchar_t))
@@ -534,11 +506,11 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
 		}
 
 		if (entry_item.is_includes_data()){
-			current_data_pos = ALIGN_UP(current_data_pos, sizeof(uint32_t));
+			current_data_pos = ALIGN_UP(current_data_pos, INT32_SIZE);
             image_resource_data_entry data_entry = { 0 };
 			data_entry.code_page = entry_item.get_data_entry().get_codepage();
 			data_entry.size = uint32_t(entry_item.get_data_entry().get_data().size());
-			data_entry.offset_to_data = resource_section.get_virtual_address() + current_data_pos + sizeof(data_entry);
+			data_entry.offset_to_data = resource_section.get_virtual_address() + current_data_pos + (uint32_t)sizeof(data_entry);
 
 			entry.offset_to_data = current_data_pos - offset_from_section_start;
 
@@ -548,7 +520,7 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
                 return false;
             }
 
-			current_data_pos += sizeof(data_entry);
+			current_data_pos += (uint32_t)sizeof(data_entry);
 
             if (section_io.set_section_offset(resource_section.get_virtual_address() + current_data_pos).write(
                 entry_item.get_data_entry().get_data().data(), data_entry.size
@@ -564,7 +536,7 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
                 return false;
             }
 
-			this_current_structures_pos += sizeof(entry);
+			this_current_structures_pos += (uint32_t)sizeof(entry);
 		}
 		else{
 			entry.offset_to_data = 0x80000000 | (current_structures_pos - offset_from_section_start);
@@ -575,7 +547,7 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
                 return false;
             }
 
-			this_current_structures_pos += sizeof(entry);
+			this_current_structures_pos += (uint32_t)sizeof(entry);
 
             if (!rebuild_resource_directory(image, resource_section, entry_item.get_resource_directory(), 
                 current_structures_pos, current_data_pos, current_strings_pos, offset_from_section_start)) {
@@ -609,7 +581,7 @@ bool build_resources_table(pe_image &image, pe_section& section, resource_direct
 		return true;
 	}
 
-	uint32_t aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), sizeof(uint32_t));
+	uint32_t aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), INT32_SIZE);
 	uint32_t needed_size_for_structures = aligned_offset_from_section_start - section.get_size_of_raw_data();
 	uint32_t needed_size_for_strings = 0;
 	uint32_t needed_size_for_data = 0;

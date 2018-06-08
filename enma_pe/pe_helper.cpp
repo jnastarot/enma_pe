@@ -14,7 +14,7 @@ double get_data_entropy(const std::vector<uint8_t> &data) {
     double total_entropy = 0.;
 
     for (size_t i = 0; i < 256; i++) {
-        double temp = (double)bytes_count[i] / data.size();
+        double temp = (double)bytes_count[i] / (double)data.size();
         if (temp > 0.) {
             total_entropy += fabs(temp * (log(temp) * 1.44269504088896340736));
         }
@@ -32,7 +32,7 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &pe_image) {
     if (p_dos_header->e_magic != IMAGE_DOS_SIGNATURE) { return 0; }
 
     uint32_t checksum_field_offset = p_dos_header->e_lfanew +
-        offsetof(image_nt_headers32, optional_header.checksum);
+        (uint32_t)offsetof(image_nt_headers32, optional_header.checksum);
 
     uint64_t checksum = 0;
 
@@ -103,8 +103,7 @@ void erase_directories_placement(pe_image &image, std::vector<directory_placemen
                 if (_section->get_virtual_address() >= placement[zone_idx].rva && //if it cover full section
                     (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
 
-                    if (_section->get_virtual_address() == placement[zone_idx].rva &&
-                        (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
+                    if ((_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
                         placement.erase(placement.begin() + zone_idx);
                     }
                     else {

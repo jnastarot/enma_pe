@@ -105,7 +105,7 @@ directory_code get_security_table(const pe_image &image, security_table& securit
                 return directory_code::directory_code_currupted;
             }
             
-            if (security_io.read(data, win_cert.length - sizeof(win_certificate)) != enma_io_success) {
+            if (security_io.read(data, win_cert.length - (uint32_t)sizeof(win_certificate)) != enma_io_success) {
                 return directory_code::directory_code_currupted;
             }
 

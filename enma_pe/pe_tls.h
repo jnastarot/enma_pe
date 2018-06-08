@@ -14,30 +14,30 @@ class tls_table {
 	};
 
 	std::vector<uint8_t> raw_data;
-	std::vector<tls_table::tls_callback> callbacks;
+	std::vector<tls_callback> callbacks;
 public:
-	tls_table::tls_table();
-    tls_table::tls_table(const tls_table& tls);
-	tls_table::~tls_table();
+	tls_table();
+    tls_table(const tls_table& tls);
+	~tls_table();
 
-	tls_table& tls_table::operator=(const tls_table& tls);
+	tls_table& operator=(const tls_table& tls);
 public:
-	void tls_table::set_start_address_raw_data(uint32_t   start_address_raw_data);
-	void tls_table::set_end_address_raw_data(uint32_t   end_address_raw_data);
-	void tls_table::set_address_of_index(uint32_t   address_of_index);
-	void tls_table::set_address_of_callbacks(uint32_t   address_of_callbacks);
-    void tls_table::set_size_of_zero_fill(uint32_t   size_of_zero_fill);
-	void tls_table::set_characteristics(uint32_t   characteristics);
+	void set_start_address_raw_data(uint32_t   start_address_raw_data);
+	void set_end_address_raw_data(uint32_t   end_address_raw_data);
+	void set_address_of_index(uint32_t   address_of_index);
+	void set_address_of_callbacks(uint32_t   address_of_callbacks);
+    void set_size_of_zero_fill(uint32_t   size_of_zero_fill);
+	void set_characteristics(uint32_t   characteristics);
 public:
-    uint32_t tls_table::get_start_address_raw_data() const;
-    uint32_t tls_table::get_end_address_raw_data() const;
-    uint32_t tls_table::get_address_of_index() const;
-    uint32_t tls_table::get_address_of_callbacks() const;
-    uint32_t tls_table::get_size_of_zero_fill() const;
-    uint32_t tls_table::get_characteristics() const;
+    uint32_t get_start_address_raw_data() const;
+    uint32_t get_end_address_raw_data() const;
+    uint32_t get_address_of_index() const;
+    uint32_t get_address_of_callbacks() const;
+    uint32_t get_size_of_zero_fill() const;
+    uint32_t get_characteristics() const;
 
-	std::vector<uint8_t>&				  tls_table::get_raw_data();
-	std::vector<tls_table::tls_callback>& tls_table::get_callbacks();
+	std::vector<uint8_t>&				  get_raw_data();
+	std::vector<tls_callback>& get_callbacks();
 };
 
 enum tls_table_build_id {

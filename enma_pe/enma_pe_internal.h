@@ -1,9 +1,9 @@
 #pragma once
 
-#pragma warning(push)  
+//#pragma warning(push)  
 #pragma pack(push,1)
 
-#pragma warning(disable:4005)
+//#pragma warning(disable:4005)
 
 //
 // Image Format
@@ -589,11 +589,13 @@ typedef struct _image_base_relocation {
 
 #define IMAGE_DEBUG_MISC_EXENAME    1
 
-#define IMAGE_SEPARATE_DEBUG_SIGNATURE 0x4944
-#define NON_PAGED_DEBUG_SIGNATURE      0x494E
-
-#define IMAGE_SEPARATE_DEBUG_SIGNATURE 0x4449  // DI
-#define NON_PAGED_DEBUG_SIGNATURE      0x4E49  // NI
+#ifndef _MAC
+    #define IMAGE_SEPARATE_DEBUG_SIGNATURE 0x4944
+    #define NON_PAGED_DEBUG_SIGNATURE      0x494E
+#else
+    #define IMAGE_SEPARATE_DEBUG_SIGNATURE 0x4449  // DI
+    #define NON_PAGED_DEBUG_SIGNATURE      0x4E49  // NI
+#endif
 
 #define IMAGE_SEPARATE_DEBUG_FLAGS_MASK 0x8000
 #define IMAGE_SEPARATE_DEBUG_MISMATCH   0x8000  // when DBG was updated, the
@@ -678,7 +680,7 @@ typedef struct _non_paged_debug_info {
 // Thread Local Storage
 //
 
-typedef void(__stdcall *pimage_tls_callback) (void* dll_handle, uint32_t reason, void * reserved);
+typedef void(*pimage_tls_callback) (void* dll_handle, uint32_t reason, void * reserved);
 
 typedef struct _image_tls_directory64 {
     uint64_t start_address_of_raw_data;
@@ -1007,4 +1009,4 @@ typedef struct image_cor20_header
 } image_cor20_header, *pimage_cor20_header;
 
 #pragma pack(pop)
-#pragma warning(pop) 
+//#pragma warning(pop) 

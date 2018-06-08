@@ -177,7 +177,7 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
 
 
 		if (*(uint32_t*)(&image[dos_header.get_header().e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
-			uint32_t section_offset = dos_header.get_header().e_lfanew + sizeof(uint32_t) + sizeof(image_file_header);
+			uint32_t section_offset = dos_header.get_header().e_lfanew + INT32_SIZE + (uint32_t)sizeof(image_file_header);
 			uint32_t number_of_sections = 0;
 			
             if (size < section_offset + sizeof(image_nt_headers32)) { this->image_status = pe_image_status_bad_format; return; };
@@ -212,7 +212,7 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
 				memcpy(section_data.data(), &image[section_image->pointer_to_raw_data], section_image->size_of_raw_data);
 
 				add_section(pe_section(*section_image, section_data));
-				section_offset += sizeof(image_section_header);
+				section_offset += (uint16_t)sizeof(image_section_header);
 
                 image_top_size = ALIGN_UP((section_image->pointer_to_raw_data + section_image->size_of_raw_data),this->file_align);
 			}

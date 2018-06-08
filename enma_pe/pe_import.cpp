@@ -13,12 +13,13 @@ imported_func::imported_func() {
 imported_func::imported_func(const imported_func& func) {
     this->operator=(func);
 }
+
 imported_func::imported_func(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item):
-    iat_rva(iat_rva), func_name(func_name), hint(hint), ordinal(0), b_import_by_name(true), iat_item(iat_item){
+    iat_rva(iat_rva),  hint(hint), func_name(func_name), ordinal(0), iat_item(iat_item), b_import_by_name(true){
 
 }
 imported_func::imported_func(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item):
-    iat_rva(iat_rva), ordinal(ordinal), hint(0), b_import_by_name(false), iat_item(iat_item){
+    iat_rva(iat_rva), hint(0), func_name(""), ordinal(ordinal), iat_item(iat_item), b_import_by_name(false){
 }
 
 imported_func::~imported_func() {
@@ -289,7 +290,7 @@ directory_code _get_import_table(const pe_image &image, import_table& imports,co
 
                             if (original_iat_item&image_format::ordinal_flag) {
 
-                                library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                library.add_item(imported_func(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
                                     uint16_t(original_iat_item^image_format::ordinal_flag), iat_item));
                             }
                             else {
@@ -307,20 +308,20 @@ directory_code _get_import_table(const pe_image &image, import_table& imports,co
                                     return directory_code::directory_code_currupted;
                                 }
 
-                                library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                library.add_item(imported_func(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
                                     func_name, hint, iat_item));
                             }
                         }
                         else {
 
                             if (is_bound_library) {
-                                library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size), "",
+                                library.add_item(imported_func(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size), "",
                                     0, iat_item));
                             }
                             else {
 
                                 if (iat_item&image_format::ordinal_flag) {
-                                    library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                    library.add_item(imported_func(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
                                         uint16_t(iat_item^image_format::ordinal_flag), iat_item));
                                 }
                                 else {
@@ -338,7 +339,7 @@ directory_code _get_import_table(const pe_image &image, import_table& imports,co
                                         return directory_code::directory_code_currupted;
                                     }
 
-                                    library.add_item(imported_func(iat_io.get_image_offset() - sizeof(typename image_format::ptr_size),
+                                    library.add_item(imported_func(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
                                         func_name, hint, iat_item));
                                 }
                             }
@@ -388,11 +389,11 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
                 for (auto& func : library.get_items()) {
 
                     if (func.is_import_by_name()) {
-                        names_size += uint32_t(ALIGN_UP(func.get_func_name().length() + 1 + sizeof(uint16_t), 0x2));
+                        names_size += uint32_t(ALIGN_UP(func.get_func_name().length() + 1 + INT16_SIZE, 0x2));
                     }
-                    current_lib_thunk_size += sizeof(typename image_format::ptr_size);
+                    current_lib_thunk_size += (uint32_t)sizeof(typename image_format::ptr_size);
                 }
-                current_lib_thunk_size += sizeof(typename image_format::ptr_size);
+                current_lib_thunk_size += (uint32_t)sizeof(typename image_format::ptr_size);
 
                 if (build_items_ids & import_table_build_iat) {
                     thunk_size += current_lib_thunk_size;
@@ -421,7 +422,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
   
         for (auto& library : imports.get_libraries()) {
 
-            bool is_bound_library = (library.get_timestamp() == -1 && bound_imports &&
+            bool is_bound_library = (library.get_timestamp() == UINT32_MAX && bound_imports &&
                 bound_imports->has_library(library.get_library_name()));
 
             if (library.size() && 
@@ -437,7 +438,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
 
                     if (build_items_ids & import_table_build_iat) {
                         func.set_iat_rva(func_iat_rva);
-                        func_iat_rva += sizeof(typename image_format::ptr_size);
+                        func_iat_rva += (uint32_t)sizeof(typename image_format::ptr_size);
                     }
 
                     if (!is_bound_library || (build_items_ids & import_table_build_oft)) {
@@ -558,7 +559,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
 
                 placement.push_back({ import_desc.name ,ALIGN_UP(library_name.length()+1,0x2),dp_id_import_desc });
 
-                bool is_bound_library = (import_desc.time_date_stamp == -1 &&
+                bool is_bound_library = (import_desc.time_date_stamp == UINT32_MAX &&
                     bound_imports.has_library(library_name));
 
                 pe_image_io iat_io(image);
@@ -616,7 +617,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                             }
                         }
 
-                        iat_table_size += sizeof(typename image_format::ptr_size);
+                        iat_table_size += (uint32_t)sizeof(typename image_format::ptr_size);
 
                         if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
                             return directory_code::directory_code_currupted;
@@ -630,7 +631,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                 placement.push_back({ import_desc.first_thunk ,iat_table_size,dp_id_import_iat });
 
 
-                import_desc_table_size += sizeof(image_import_descriptor);
+                import_desc_table_size += (uint32_t)sizeof(image_import_descriptor);
 
                 if (import_io.read(&import_desc, sizeof(import_desc)) != enma_io_success) {
                     return directory_code::directory_code_currupted;

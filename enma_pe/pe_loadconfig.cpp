@@ -26,6 +26,7 @@ load_config_table::load_config_table() {
 	guard_cf_check_function_pointer = 0; // VA
     guard_cf_dispatch_function_pointer = 0;//VA
 	guard_cf_function_table			= 0; // VA
+    guard_cf_function_count         = 0;
 	guard_flags						= 0;
     code_integrity                  = {0}; 
     guard_address_taken_iat_entry_table = 0; // VA
