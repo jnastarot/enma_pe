@@ -1,11 +1,19 @@
 #include "stdafx.h"
-#include "pe_string_finder.h"
+#include "pe_string_extractor.h"
+
+inline bool ascii_is_valid(uint8_t c) {
+    
+    return (
+        (c >= '0' && c <= '9') ||                                                           //dig
+        (c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r' || c == ' ') ||      //space
+        (c >= ' ' && c <= '~') ||                                                           //printable
+        ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) ||                               //en
+        (((c >= 0xE0 && c <= 0xFF) || c == 0xB8)|| ((c >= 0xC0 && c <= 0xDF) || c == 0xA8)) //ru
+        );
+}
 
 
-
-
-void get_strings_from_image_by_locale(const pe_image& image, string_base_table& string_table,
-    const char * locale,
+void get_strings_from_image(const pe_image& image, string_base_table& string_table,
     bool find_in_clean_image,
     bool find_in_execute_sections,
     uint32_t min_string_size,
@@ -19,19 +27,12 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
         erase_directories_placement(current_image, placement, 0, true);
     }
 
-    if (!locale) {
-        locale = "en-EN";
-    }
-
-    string_table.locale_name = locale;
     string_table.ansi_base.clear();
     string_table.wide_base.clear();
 
-    /*
-    _locale_t loc = _create_locale(LC_CTYPE, locale);
-
 
     //find ansi strings
+    
     {
         pe_image_io ansi_string_io(current_image);
         ansi_string_io.seek_to_start();
@@ -40,9 +41,10 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
         uint32_t pre_string_rva;
         std::string pre_string;
         while (ansi_string_io.read(&image_byte, sizeof(image_byte)) == enma_io_success) {
-            if ( (!find_in_execute_sections || ansi_string_io.is_executable_rva(ansi_string_io.get_image_offset() - 1)) &&
-                _isprint_l(image_byte, loc) || _isblank_l(image_byte, loc)) {
-
+ 
+            if ( (find_in_execute_sections || !ansi_string_io.is_executable_rva(ansi_string_io.get_image_offset() - 1)) &&
+                ascii_is_valid(image_byte) ) {
+                
                 if (!pre_string.size()) {
                     pre_string_rva = ansi_string_io.get_image_offset() - 1;
                 }
@@ -74,8 +76,8 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
         std::wstring pre_string;
 
         while (wide_string_io.read(&image_byte, sizeof(image_byte)) == enma_io_success) {
-            if ((!find_in_execute_sections || wide_string_io.is_executable_rva(wide_string_io.get_image_offset() - 1)) &&
-                _iswprint_l(image_byte, loc) || _iswblank_l(image_byte, loc)) {
+            if ( (find_in_execute_sections || !wide_string_io.is_executable_rva(wide_string_io.get_image_offset() - 1)) &&
+                (iswprint(image_byte) || iswblank(image_byte)) ) {
 
                 if (!pre_string.size()) {
                     pre_string_rva = wide_string_io.get_image_offset() - 1;
@@ -97,8 +99,5 @@ void get_strings_from_image_by_locale(const pe_image& image, string_base_table& 
         }
 
     }
-
-    _free_locale(loc);
-    */
 }
 

@@ -65,9 +65,9 @@ pe_image::~pe_image() {
 pe_image& pe_image::operator=(const pe_image& image) {
 	clear_image();
 
+    headers_data = image.headers_data;
+
     dos_header = image.dos_header;
-    dos_stub   = image.dos_stub;
-    rich_data  = image.rich_data;
 
 	image_status        = image.image_status;
 	machine	            = image.machine;
@@ -170,25 +170,23 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
 void pe_image::init_from_file(const uint8_t * image, size_t size) {
 	if (size < sizeof(image_dos_header)) {this->image_status = pe_image_status_bad_format;return;};
 
-	if (get_image_dos_header(image, dos_header)) { //check MZ sign
+    memcpy(&dos_header, image, sizeof(image_dos_header));
 
-        get_image_dos_stub(image,dos_stub);
-        get_image_rich_data(image, rich_data);
+	if (dos_header.e_magic == IMAGE_DOS_SIGNATURE) { //check MZ sign
 
-
-		if (*(uint32_t*)(&image[dos_header.get_header().e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
-			uint32_t section_offset = dos_header.get_header().e_lfanew + INT32_SIZE + (uint32_t)sizeof(image_file_header);
+		if (*(uint32_t*)(&image[dos_header.e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
+			uint32_t section_offset = dos_header.e_lfanew + INT32_SIZE + (uint32_t)sizeof(image_file_header);
 			uint32_t number_of_sections = 0;
 			
             if (size < section_offset + sizeof(image_nt_headers32)) { this->image_status = pe_image_status_bad_format; return; };
 
-            if (init_nt_header<image_32>(*this, (void*)&image[dos_header.get_header().e_lfanew], section_offset, number_of_sections)) {
-                set_base_of_data(pimage_nt_headers32(&image[dos_header.get_header().e_lfanew])->optional_header.base_of_data);
+            if (init_nt_header<image_32>(*this, (void*)&image[dos_header.e_lfanew], section_offset, number_of_sections)) {
+                set_base_of_data(pimage_nt_headers32(&image[dos_header.e_lfanew])->optional_header.base_of_data);
             }
             else {
                 if (size < section_offset + sizeof(image_nt_headers64)) { this->image_status = pe_image_status_bad_format; return; };
 
-                if (!init_nt_header<image_64>(*this, (void*)&image[dos_header.get_header().e_lfanew], section_offset, number_of_sections)) {
+                if (!init_nt_header<image_64>(*this, (void*)&image[dos_header.e_lfanew], section_offset, number_of_sections)) {
                     this->image_status = pe_image_status_bad_format;
                     return;
                 }
@@ -196,30 +194,37 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
                 set_base_of_data(0);
             }
 
-            uint32_t image_top_size = 0;
-			for (size_t i = 0; i < number_of_sections; i++) {
-				image_section_header* section_image = (image_section_header*)(&image[section_offset]);
-				
-				if (size < section_offset + sizeof(image_section_header) ||
-					size < section_image->pointer_to_raw_data + section_image->size_of_raw_data
-					) {
+            headers_data.resize(this->headers_size);
+            memcpy(headers_data.data(), image, this->headers_size);
 
-					this->image_status = pe_image_status_bad_format; return; 
-				};
+            {
+                uint32_t image_top_size = 0;
+                for (size_t i = 0; i < number_of_sections; i++) {
+                    image_section_header* section_image = (image_section_header*)(&image[section_offset]);
 
-				std::vector<uint8_t> section_data;
-				section_data.resize(section_image->size_of_raw_data);
-				memcpy(section_data.data(), &image[section_image->pointer_to_raw_data], section_image->size_of_raw_data);
+                    if (size < section_offset + sizeof(image_section_header) ||
+                        size < section_image->pointer_to_raw_data + section_image->size_of_raw_data
+                        ) {
 
-				add_section(pe_section(*section_image, section_data));
-				section_offset += (uint16_t)sizeof(image_section_header);
+                        this->image_status = pe_image_status_bad_format; return;
+                    };
 
-                image_top_size = ALIGN_UP((section_image->pointer_to_raw_data + section_image->size_of_raw_data),this->file_align);
-			}
+                    std::vector<uint8_t> section_data;
+                    section_data.resize(section_image->size_of_raw_data);
+                    memcpy(section_data.data(), &image[section_image->pointer_to_raw_data], section_image->size_of_raw_data);
 
-            if (image_top_size < size) {
-                overlay_data.resize(size - image_top_size);
-                memcpy(overlay_data.data(), &image[image_top_size], size - image_top_size);
+                    add_section(pe_section(*section_image, section_data));
+                    section_offset += (uint16_t)sizeof(image_section_header);
+
+                    image_top_size = ALIGN_UP((section_image->pointer_to_raw_data + section_image->size_of_raw_data), this->file_align);
+                }
+
+                
+
+                if (image_top_size < size) {
+                    overlay_data.resize(size - image_top_size);
+                    memcpy(overlay_data.data(), &image[image_top_size], size - image_top_size);
+                }
             }
 
 			this->image_status = pe_image_status_ok;
@@ -288,6 +293,8 @@ void pe_image::clear_image() {
     }
 
 	while (sections.size()) { delete sections[sections.size() - 1]; sections.pop_back(); }
+
+    headers_data.clear();
 }
 
 
@@ -419,14 +426,11 @@ uint32_t    pe_image::raw_to_rva(uint32_t raw) const {
 void    pe_image::set_image_status(pe_image_status status) {
 	this->image_status = status;
 }
-void    pe_image::set_dos_header(const pe_dos_header& header) {
-    this->dos_header = header;
+void    pe_image::set_headers_data(const std::vector<uint8_t>& headers_data) {
+    this->headers_data = headers_data;
 }
-void    pe_image::set_dos_stub(const pe_dos_stub& dos_stub) {
-    this->dos_stub = dos_stub;
-}
-void    pe_image::set_rich_data(const pe_rich_data& rich_data) {
-    this->rich_data = rich_data;
+void    pe_image::set_dos_header(const image_dos_header& header) {
+    memcpy(&dos_header, &header, sizeof(image_dos_header));
 }
 void    pe_image::set_machine(uint16_t machine) {
 	this->machine = machine;
@@ -536,11 +540,8 @@ void    pe_image::set_directory_virtual_size(uint32_t directory_idx, uint32_t vi
 pe_image_status pe_image::get_image_status() const {
 	return image_status;
 }
-bool        pe_image::has_dos_stub() const {
-    return dos_stub.get_stub().size() != 0;
-}
-bool        pe_image::has_rich_data() const {
-    return rich_data.is_present();
+const std::vector<uint8_t>& pe_image::get_headers_data() const {
+    return headers_data;
 }
 uint16_t    pe_image::get_machine() const {
 	return machine;
@@ -659,13 +660,9 @@ bool        pe_image::has_directory(uint32_t directory_idx) const {
 	return false;
 }
 
-pe_dos_header&  pe_image::get_dos_header() {
+image_dos_header&  pe_image::get_dos_header() {
     return dos_header;
 }
-pe_dos_stub& pe_image::get_dos_stub() {
-    return dos_stub;
+const image_dos_header&  pe_image::get_dos_header() const{
+    return dos_header;
 }
-pe_rich_data& pe_image::get_rich_data() {
-    return rich_data;
-}
-

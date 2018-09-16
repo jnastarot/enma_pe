@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pe_rich_dos.h"
 #include "pe_section.h"
 
 enum pe_image_status {
@@ -12,9 +11,9 @@ enum pe_image_status {
 class pe_image{
 	pe_image_status image_status;
 
-    pe_dos_header  dos_header;
-    pe_dos_stub    dos_stub;
-    pe_rich_data   rich_data;
+    std::vector<uint8_t> headers_data;
+
+    image_dos_header dos_header;
 
 	uint16_t   machine;
 	uint32_t   timestamp;
@@ -77,7 +76,7 @@ public:// data/sections helpers
 	std::vector<pe_section*>& get_sections();
 
     size_t get_sections_number() const;
-	pe_section*	 get_section_by_rva(uint32_t rva) const;/*0 - failed \ not 0 - success*/
+	pe_section*	 get_section_by_rva(uint32_t rva) const;/*0 - failed, else - success*/
 	pe_section*	 get_section_by_va(uint64_t va) const;
 	pe_section*	 get_section_by_raw(uint32_t raw) const;
 	pe_section*	 get_section_by_idx(uint32_t idx) const;
@@ -92,9 +91,8 @@ public:// data/sections helpers
 
 public:
     void        set_image_status(pe_image_status status);
-    void        set_dos_header(const pe_dos_header& header);
-    void        set_dos_stub(const pe_dos_stub& dos_stub);
-    void        set_rich_data(const pe_rich_data& rich_data);
+    void        set_headers_data(const std::vector<uint8_t>& headers_data);
+    void        set_dos_header(const image_dos_header& header);
 	void        set_machine(uint16_t machine);
 	void        set_timestamp(uint32_t timestamp);
 	void        set_characteristics(uint16_t characteristics);
@@ -134,12 +132,11 @@ public:
 public://getter
 	pe_image_status		       get_image_status() const;
 
-    pe_dos_header&  get_dos_header();
-    pe_dos_stub&    get_dos_stub();
-    pe_rich_data&   get_rich_data();
+    const std::vector<uint8_t>& get_headers_data() const;
 
-    bool        has_dos_stub() const;
-    bool        has_rich_data() const;
+    image_dos_header&  get_dos_header();
+    const image_dos_header&  get_dos_header() const;
+
 	uint16_t    get_machine() const;
 	uint32_t    get_timestamp() const;
 	uint16_t    get_characteristics() const;
@@ -180,7 +177,3 @@ public://getter
 public://util
 	void				clear_image();
 };
-
-//void save_pe_image(_In_ const pe_image &image, _Out_ std::vector<uint8_t>& image_out);
-//void load_pe_image(_In_ std::vector<uint8_t>& image_out , _Out_ pe_image &image);
-

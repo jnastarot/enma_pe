@@ -21,7 +21,7 @@ public:
 public:
     uint16_t   get_revision() const;
     uint16_t   get_certificate_type() const;
-
+    const std::vector<uint8_t>& get_certificate_data() const;
     std::vector<uint8_t>& get_certificate_data();
 };
 
@@ -39,7 +39,7 @@ public:
     void clear();
 public:
     size_t get_certificates_count() const;
-
+    const std::vector<security_item>& get_certificates() const;
     std::vector<security_item>& get_certificates();
 };
 

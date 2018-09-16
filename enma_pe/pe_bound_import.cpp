@@ -174,7 +174,8 @@ directory_code get_bound_import_table(const pe_image &image, bound_import_table&
                     return directory_code::directory_code_currupted;
                 }
 
-
+                bound_lib.set_library_name(lib_name);
+                
                 for (size_t ref_idx = 0; ref_idx < bound_imp_description.number_of_module_forwarder_refs; ref_idx++) {
                     image_bound_forwarded_ref ref_description;
 

@@ -55,6 +55,9 @@ void imported_func::set_import_by_name(bool b) {
 void imported_func::set_iat_rva(uint32_t rva) {
 	this->iat_rva = rva;
 }
+void imported_func::set_iat_item(uint64_t iat_item) {
+    this->iat_item = iat_item;
+}
 uint16_t imported_func::get_hint() const {
 	return this->hint;
 }

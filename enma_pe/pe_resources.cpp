@@ -248,6 +248,9 @@ uint32_t resource_directory::get_number_of_named_entries() const {
 uint32_t resource_directory::get_number_of_id_entries() const {
 	return this->number_of_id_entries;
 }
+const std::vector<resource_directory_entry>& resource_directory::get_entry_list() const {
+    return this->entries;
+}
 std::vector<resource_directory_entry>& resource_directory::get_entry_list() {
 	return this->entries;
 }

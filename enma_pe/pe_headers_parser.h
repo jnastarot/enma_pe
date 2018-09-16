@@ -1,5 +1,6 @@
 #pragma once
 
+
 enum e_rich_type {
   rich_type_unknown  = 0,
   rich_type_total_import = 1,
@@ -125,19 +126,6 @@ enum e_rich_type {
 };
 
 
-class pe_dos_header {
-    image_dos_header dos_h;
-public:
-    pe_dos_header();
-    ~pe_dos_header();
-public:
-    void set_header(const image_dos_header * header);
-
-public:
-    image_dos_header& get_header();
-};
-
-
 class pe_dos_stub {
     std::vector<uint8_t> dos_stub;
 public:
@@ -149,8 +137,6 @@ public:
 public:
     std::vector<uint8_t> get_stub() const;
 };
-
-
 
 class pe_rich_item {
     e_rich_type type;
@@ -199,14 +185,14 @@ public:
     uint32_t get_rich_correct_xorkey() const;
     bool     is_valid_rich() const;
     bool     is_present() const;
+    const std::vector<pe_rich_item>& get_items() const;
+
     std::vector<pe_rich_item>& get_items();
 };
 
+bool get_image_dos_stub(_In_ const std::vector<uint8_t>& image_headers, _Out_ pe_dos_stub& dos_stub);
+bool get_image_rich_data(_In_ const std::vector<uint8_t>& image_headers, _Out_ pe_rich_data& rich_data);
 
-bool get_image_dos_header(_In_ const uint8_t * pimage, _Out_ pe_dos_header& dos_header);
-bool get_image_dos_stub(_In_ const uint8_t * pimage,   _Out_ pe_dos_stub& dos_stub);
-bool get_image_rich_data(_In_ const uint8_t * pimage,  _Out_ pe_rich_data& rich_data);
-
-bool has_image_rich_data(_In_ const uint8_t * pimage ,
+bool has_image_rich_data(_In_ const std::vector<uint8_t>& image_headers,
     _Out_opt_ uint32_t * rich_data_offset = 0, _Out_opt_ uint32_t * rich_data_size = 0, _Out_opt_ uint32_t * rich_xor_key = 0);
-bool checksum_rich(_In_ const uint8_t * pimage, _Out_opt_ uint32_t * correct_rich_xor_key = 0);
+bool checksum_rich(_In_ const std::vector<uint8_t>& image_headers, _Out_opt_ uint32_t * correct_rich_xor_key = 0);

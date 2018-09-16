@@ -9,4 +9,5 @@ uint32_t calculate_checksum(_In_ const std::vector<uint8_t> &pe_image);
 void erase_directories_placement(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement,
     _Inout_opt_ relocation_table* relocs = 0, _In_opt_ bool delete_empty_sections = false);
 
-#include "pe_string_finder.h"
+#include "pe_headers_parser.h"
+#include "pe_string_extractor.h"

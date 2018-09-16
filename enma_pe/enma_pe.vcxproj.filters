@@ -15,9 +15,6 @@
     <Filter Include="Заголовочные файлы\pe_helpers">
       <UniqueIdentifier>{e3f2cd7a-58ec-41b0-bedb-1e09e933aade}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_string_finder">
-      <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Заголовочные файлы\pe_image\pe_section">
       <UniqueIdentifier>{d33f4dd3-cf26-486f-aa10-bcc8eef25b19}</UniqueIdentifier>
     </Filter>
@@ -60,9 +57,6 @@
     <Filter Include="Заголовочные файлы\pe_image\pe_directories\pe_security">
       <UniqueIdentifier>{bf4fe633-1378-4023-ba7d-dada3986621e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_image\pe_rich_dos">
-      <UniqueIdentifier>{a30b2f81-5af2-470d-8619-0e6737a000bc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Заголовочные файлы\pe_io">
       <UniqueIdentifier>{8cfc90d6-248b-4587-a8a6-c4b9c424ff24}</UniqueIdentifier>
     </Filter>
@@ -71,6 +65,12 @@
     </Filter>
     <Filter Include="Заголовочные файлы\pe_io\pe_image_io">
       <UniqueIdentifier>{c0009d24-c11d-4370-a4c8-5aba0e44c509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_headers_parser">
+      <UniqueIdentifier>{dfa26933-359a-49ea-9883-097619fca73b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_string_extractor">
+      <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,9 +113,6 @@
     <ClInclude Include="pe_dotnet.h">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_dotnet</Filter>
     </ClInclude>
-    <ClInclude Include="pe_string_finder.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_string_finder</Filter>
-    </ClInclude>
     <ClInclude Include="pe_bound_import.h">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
     </ClInclude>
@@ -128,9 +125,6 @@
     <ClInclude Include="pe_security.h">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
     </ClInclude>
-    <ClInclude Include="pe_rich_dos.h">
-      <Filter>Заголовочные файлы\pe_image\pe_rich_dos</Filter>
-    </ClInclude>
     <ClInclude Include="enma_pe_internal.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
@@ -142,6 +136,12 @@
     </ClInclude>
     <ClInclude Include="enma_pe_properties.h">
       <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_headers_parser.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_headers_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_string_extractor.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_string_extractor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -184,9 +184,6 @@
     <ClCompile Include="pe_dotnet.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_dotnet</Filter>
     </ClCompile>
-    <ClCompile Include="pe_string_finder.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_string_finder</Filter>
-    </ClCompile>
     <ClCompile Include="pe_bound_import.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
     </ClCompile>
@@ -196,9 +193,6 @@
     <ClCompile Include="pe_security.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
     </ClCompile>
-    <ClCompile Include="pe_rich_dos.cpp">
-      <Filter>Заголовочные файлы\pe_image\pe_rich_dos</Filter>
-    </ClCompile>
     <ClCompile Include="enma_pe.cpp">
       <Filter>Заголовочные файлы</Filter>
     </ClCompile>
@@ -207,6 +201,12 @@
     </ClCompile>
     <ClCompile Include="pe_section_io.cpp">
       <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_headers_parser.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_headers_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_string_extractor.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_string_extractor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

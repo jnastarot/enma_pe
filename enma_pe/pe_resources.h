@@ -95,7 +95,9 @@ public:
 	uint32_t	get_number_of_id_entries() const;
 	uint16_t	get_major_version() const;
 	uint16_t	get_minor_version() const;
-	std::vector<resource_directory_entry>&		get_entry_list();
+    const std::vector<resource_directory_entry>& get_entry_list() const;
+
+	std::vector<resource_directory_entry>& get_entry_list();
 };
 
 

@@ -45,6 +45,10 @@ uint16_t   security_item::get_certificate_type() const {
     return this->certificate_type;
 }
 
+const std::vector<uint8_t>& security_item::get_certificate_data() const {
+    return this->certificate_data;
+}
+
 std::vector<uint8_t>& security_item::get_certificate_data() {
     return this->certificate_data;
 }
@@ -79,6 +83,10 @@ void security_table::clear() {
 
 size_t security_table::get_certificates_count() const {
     return this->certificates.size();
+}
+
+const std::vector<security_item>& security_table::get_certificates() const {
+    return this->certificates;
 }
 
 std::vector<security_item>& security_table::get_certificates() {

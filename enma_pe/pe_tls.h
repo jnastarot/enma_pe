@@ -36,7 +36,10 @@ public:
     uint32_t get_size_of_zero_fill() const;
     uint32_t get_characteristics() const;
 
-	std::vector<uint8_t>&				  get_raw_data();
+    const std::vector<uint8_t>& get_raw_data() const;
+    const std::vector<tls_callback>& get_callbacks() const;
+
+	std::vector<uint8_t>& get_raw_data();
 	std::vector<tls_callback>& get_callbacks();
 };
 

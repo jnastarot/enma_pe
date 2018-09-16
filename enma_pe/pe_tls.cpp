@@ -72,6 +72,12 @@ uint32_t tls_table::get_size_of_zero_fill() const {
 uint32_t tls_table::get_characteristics() const {
 	return this->characteristics;
 }
+const std::vector<uint8_t>& tls_table::get_raw_data() const {
+    return raw_data;
+}
+const std::vector<tls_table::tls_callback>& tls_table::get_callbacks() const {
+    return callbacks;
+}
 std::vector<uint8_t>& tls_table::get_raw_data() {
 	return raw_data;
 }

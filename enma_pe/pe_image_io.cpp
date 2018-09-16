@@ -47,12 +47,12 @@ bool pe_image_io::view_image( //-> return like in view_data
             pe_section * first_ = image->get_sections()[0];
             pe_section * last_ = image->get_last_section();
 
-            
+
             return view_data(
                 required_offset, required_size,
                 real_offset, available_size, down_oversize, up_oversize,
-                first_->get_pointer_to_raw(), ALIGN_UP(
-                    last_->get_pointer_to_raw() + last_->get_size_of_raw_data() - first_->get_pointer_to_raw(),
+                0, ALIGN_UP(
+                    last_->get_pointer_to_raw() + last_->get_size_of_raw_data(),
                     image->get_file_align())
                 + uint32_t(image->get_overlay_data().size()));
         }
@@ -64,8 +64,8 @@ bool pe_image_io::view_image( //-> return like in view_data
             return view_data(
                 required_offset, required_size,
                 real_offset, available_size, down_oversize, up_oversize,
-                first_->get_virtual_address(), ALIGN_UP(
-                    last_->get_virtual_address() + last_->get_virtual_size() - first_->get_virtual_address(),
+                0, ALIGN_UP(
+                    last_->get_virtual_address() + last_->get_virtual_size(),
                     image->get_section_align())
             );
         }
@@ -93,7 +93,56 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
         uint32_t total_readed_size    = 0;
         uint32_t total_up_oversize    = 0;
 
+        uint32_t available_headers_size = image->get_headers_data().size();
+        uint32_t view_headers_size = addressing_type == enma_io_addressing_type::enma_io_address_raw ?
+            ALIGN_UP(available_headers_size, image->get_file_align()) : ALIGN_UP(available_headers_size, image->get_section_align());
+
+
+        if (data_offset < view_headers_size) {
+            
+            uint32_t header_readed_size = 0;
+            uint32_t header_down_oversize = 0;
+            uint32_t header_up_oversize = 0;
+
+            
+            b_view = view_data(
+                data_offset, size,
+                real_offset, header_readed_size, header_down_oversize, header_up_oversize,
+                0, view_headers_size);
+
+            if (b_view) {
+                
+                if (available_headers_size) {
+
+                    if (available_headers_size >= (header_readed_size + real_offset) ) {
+                        memcpy(&((uint8_t*)buffer)[header_down_oversize], &image->get_headers_data().data()[real_offset], header_readed_size);
+                    }
+                    else {
+                        if (available_headers_size > real_offset) {
+                            memcpy(&((uint8_t*)buffer)[header_down_oversize], &image->get_headers_data().data()[real_offset], 
+                                (header_readed_size + real_offset) - available_headers_size
+                            );
+
+                            memset(&((uint8_t*)buffer)[header_down_oversize + (header_readed_size + real_offset) - available_headers_size], 0,
+                                header_readed_size - ((header_readed_size + real_offset) - available_headers_size) );
+                        }
+                        else {
+                            memset(&((uint8_t*)buffer)[header_down_oversize], 0, header_readed_size);
+                        }                  
+                    }
+                }
+                else {
+                    memset(&((uint8_t*)buffer)[header_down_oversize], 0, header_readed_size);
+                }
+
+                total_readed_size += header_readed_size;
+                total_up_oversize = header_up_oversize;
+            }
+        }
+
         for (auto &section : image->get_sections()) {
+
+            if (total_readed_size == readed_size) { break; }
 
             uint32_t sec_readed_size   = 0;
             uint32_t sec_down_oversize = 0;
@@ -106,9 +155,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
             total_readed_size += sec_readed_size;
             total_up_oversize = sec_up_oversize;
 
-            if (!total_up_oversize || total_readed_size == readed_size) {
-                break;
-            }
+            if (!total_up_oversize) { break; }
         }
 
         if (addressing_type == enma_io_addressing_type::enma_io_address_raw &&
@@ -122,7 +169,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 
             if (image->get_sections_number()) {
                 top_section_raw = 
-                    ALIGN_UP(image->get_last_section()->get_pointer_to_raw() + image->get_last_section()->get_size_of_raw_data(),0x200);
+                    ALIGN_UP(image->get_last_section()->get_pointer_to_raw() + image->get_last_section()->get_size_of_raw_data(), image->get_file_align());
             }
 
             b_view = view_data(
@@ -324,24 +371,7 @@ pe_image_io& pe_image_io::set_image_offset(uint32_t offset) {
 
 pe_image_io& pe_image_io::seek_to_start() {
 
-    if (image->get_sections_number()) {
-        switch (addressing_type) {
-        case enma_io_addressing_type::enma_io_address_raw: {
-            this->image_offset = image->get_section_by_idx(0)->get_pointer_to_raw();
-            break;
-        }
-
-        case enma_io_addressing_type::enma_io_address_rva: {
-            this->image_offset = image->get_section_by_idx(0)->get_virtual_address();
-            break;
-        }
-
-        default: {this->image_offset = 0; break; }
-        }
-    }
-    else {
-        this->image_offset = 0;
-    }
+    this->image_offset = 0;
 
     return *this;
 }
