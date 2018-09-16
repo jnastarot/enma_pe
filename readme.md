@@ -40,13 +40,14 @@ e.mail..: jnastarot@yandex.ru
 
 | feature name | description |
 | :------: | :-----------: |
-| `string finder` | finding ansi and unicode strings |
+| `string extractor` | extracting ansi and unicode strings |
+| `rich data parser` | geting and building rich data|
 ---
 
- <h3 align="center">Useful links</h3>
+ <h3 align="center">References</h3>
 
 [https://github.com/dishather/richprint/](https://github.com/dishather/richprint/)<br>
-[https://kaimi.io/2012/09/portable-executable-library/](https://kaimi.io/2012/09/portable-executable-library/)<br>
 [https://github.com/radare/radare2](https://github.com/radare/radare2)<br>
 [https://github.com/cmu-sei/pharos](https://github.com/cmu-sei/pharos)<br>
 [https://github.com/JusticeRage/Manalyze](https://github.com/JusticeRage/Manalyze)<br>
+[https://kaimi.io/2012/09/portable-executable-library/](https://kaimi.io/2012/09/portable-executable-library/)<br>
