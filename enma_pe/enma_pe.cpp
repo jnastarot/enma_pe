@@ -28,7 +28,7 @@ pe_image_expanded& pe_image_expanded::operator=(const pe_image_expanded& image_e
 }
 
 
-void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &image) {
+void get_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &image) {
     
     expanded_image.image = image;
 	
@@ -56,7 +56,7 @@ void do_expanded_pe_image(pe_image_expanded& expanded_image,const pe_image &imag
     }
 }
 
-directory_code get_directories_placement(pe_image &image, std::vector<directory_placement>& placement,
+directory_code get_directories_placement(pe_image &image, pe_directory_placement& placement,
     const bound_import_table* bound_imports) {
 
     placement.clear();

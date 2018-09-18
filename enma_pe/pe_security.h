@@ -44,4 +44,4 @@ public:
 };
 
 directory_code get_security_table(_In_ const pe_image &image,_Out_ security_table& security);
-directory_code get_placement_security_table(_Inout_ pe_image &image,_Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_security_table(_Inout_ const pe_image &image,_Inout_ pe_directory_placement& placement);

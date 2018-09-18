@@ -203,10 +203,11 @@ directory_code get_relocation_table(const pe_image &image, relocation_table& rel
 	return directory_code::directory_code_not_present;
 }
 
-bool build_relocation_table(pe_image &image, pe_section& section, relocation_table& relocs) {
+bool build_relocation_table(pe_image &image, pe_section& section, const relocation_table& relocs) {
 
+    auto reloc_items = relocs.get_items();
 
-    if (relocs.get_items().size()) {
+    if (reloc_items.size()) {
         pe_section_io reloc_section = pe_section_io(section, image, enma_io_mode::enma_io_mode_allow_expand);
         reloc_section.align_up(0x10).seek_to_end();
 
@@ -220,12 +221,14 @@ bool build_relocation_table(pe_image &image, pe_section& section, relocation_tab
             reloc_type = IMAGE_REL_BASED_DIR64 << 12;
         }
 
-        relocs.sort();
+        std::sort(reloc_items.begin(), reloc_items.end(), [](relocation_item& lhs, relocation_item& rhs) {
+            return lhs.relative_virtual_address < rhs.relative_virtual_address;
+        });
 
         std::vector<std::vector<uint32_t>> reloc_tables;
 
         uint32_t reloc_last_hi = 0;
-        for (auto& reloc : relocs.get_items()) {
+        for (auto& reloc : reloc_items) {
             if (!reloc_tables.size() ||
                 reloc_last_hi != (reloc.relative_virtual_address & 0xFFFFF000)) {
 
@@ -268,34 +271,47 @@ bool build_relocation_table(pe_image &image, pe_section& section, relocation_tab
 }
 
 
-directory_code get_placement_relocation_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_relocation_table(const pe_image &image, pe_directory_placement& placement) {
 
-    uint32_t virtual_address  = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
-    uint32_t virtual_size	  = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);
 
-	if (virtual_address && virtual_size) {
-	
+    uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
+    uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_BASERELOC);
+
+    if (virtual_address && virtual_size) {
         pe_image_io reloc_io(image);
+        reloc_io.set_image_offset(virtual_address);
 
-        uint32_t _offset_real = 0;
-        uint32_t available_size = 0;
-        uint32_t down_oversize = 0;
-        uint32_t up_oversize = 0;
 
-        reloc_io.view_image(
-            virtual_address, ALIGN_UP(virtual_size,0x10),
-            _offset_real,
-            available_size, down_oversize, up_oversize
-        );
+        while (reloc_io.get_image_offset() < virtual_address + virtual_size) {
+            image_base_relocation reloc_base;
 
-        placement.push_back({ virtual_address ,available_size ,dp_id_relocations_desc });
+            if (reloc_io.read(&reloc_base, sizeof(image_base_relocation)) != enma_io_success) {
+                return directory_code::directory_code_currupted;
+            }
 
-        if (!down_oversize && !up_oversize) {
-            return directory_code::directory_code_success;
+            placement[virtual_address] = directory_placement(sizeof(image_base_relocation), id_pe_relocations_descriptor, "");
+
+
+            uint32_t _offset_real = 0;
+            uint32_t available_size = 0;
+            uint32_t down_oversize = 0;
+            uint32_t up_oversize = 0;
+
+            reloc_io.view_image(
+                reloc_io.get_image_offset(), reloc_base.size_of_block - sizeof(image_base_relocation),
+                _offset_real,
+                available_size, down_oversize, up_oversize
+            );
+
+            available_size = min(reloc_io.get_image_offset() + available_size, virtual_address + virtual_size);
+
+            placement[reloc_io.get_image_offset()] = directory_placement(available_size, id_pe_relocations_block, "");
+
+            reloc_io.set_image_offset(reloc_io.get_image_offset() + available_size);
         }
 
-        return directory_code::directory_code_currupted;
-	}
+        return directory_code::directory_code_success;
+    }
 
-	return directory_code::directory_code_not_present;
+    return directory_code::directory_code_not_present;
 }

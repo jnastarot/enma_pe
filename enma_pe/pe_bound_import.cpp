@@ -282,7 +282,7 @@ bool build_bound_import_table(pe_image &image,pe_section& section,
 }
 
 
-directory_code get_placement_bound_import_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_bound_import_table(const pe_image &image, pe_directory_placement& placement) {
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
@@ -310,10 +310,8 @@ directory_code get_placement_bound_import_table(const pe_image &image, std::vect
                     return directory_code::directory_code_currupted;
                 }
 
-                placement.push_back({ virtual_address + bound_imp_description.offset_module_name ,ALIGN_UP((lib_name.length() + 1) , 0x2) ,
-                    dp_id_bound_import_names
-                });
-
+                placement[virtual_address + bound_imp_description.offset_module_name] = 
+                    directory_placement(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, lib_name);
 
                 for (size_t ref_idx = 0; ref_idx < bound_imp_description.number_of_module_forwarder_refs; ref_idx++) {
                     image_bound_forwarded_ref ref_description;
@@ -331,9 +329,8 @@ directory_code get_placement_bound_import_table(const pe_image &image, std::vect
                     }
 
 
-                    placement.push_back({ virtual_address + ref_description.offset_module_name ,ALIGN_UP((ref_name.length() + 1) , 0x2) ,
-                        dp_id_bound_import_names
-                    });
+                    placement[virtual_address + bound_imp_description.offset_module_name] =
+                        directory_placement(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, ref_name);
                 }
 
                 if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
@@ -341,8 +338,9 @@ directory_code get_placement_bound_import_table(const pe_image &image, std::vect
                 }
             } while (bound_imp_description.time_date_stamp && bound_imp_description.offset_module_name);
 
-            placement.push_back({ virtual_address ,
-                ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address) ,0x10), dp_id_bound_import_desc });
+
+            placement[virtual_address] =
+                directory_placement(ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address), 0x10), id_pe_bound_import_descriptor, "");
         }
 
         return directory_code::directory_code_success;

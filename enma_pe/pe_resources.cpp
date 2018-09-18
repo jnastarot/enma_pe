@@ -255,13 +255,6 @@ std::vector<resource_directory_entry>& resource_directory::get_entry_list() {
 	return this->entries;
 }
 
-
-
-struct entry_sorter
-{
-public:
-	bool operator()(resource_directory_entry& entry1, resource_directory_entry& entry2);
-};
 bool entry_sorter::operator()(resource_directory_entry& entry1, resource_directory_entry& entry2) {
 	if (entry1.is_named() && entry2.is_named()) {
 		return entry1.get_name() < entry2.get_name();
@@ -303,7 +296,7 @@ bool resource_directory::entry_by_name(const resource_directory_entry * &entry, 
 
 
 
-void calculate_resource_data_space(resource_directory& root,//taken from pe bless
+void calculate_resource_data_space(const resource_directory& root,//taken from pe bless
 	uint32_t aligned_offset_from_section_start, uint32_t& needed_size_for_structures, uint32_t& needed_size_for_strings) {
 
 	needed_size_for_structures += (uint32_t)sizeof(image_resource_directory);
@@ -322,7 +315,7 @@ void calculate_resource_data_space(resource_directory& root,//taken from pe bles
 	}
 }
 
-void calculate_resource_data_space(resource_directory& root, uint32_t needed_size_for_structures, //taken from pe bless
+void calculate_resource_data_space(const resource_directory& root, uint32_t needed_size_for_structures, //taken from pe bless
 	uint32_t needed_size_for_strings, uint32_t& needed_size_for_data, uint32_t& current_data_pos) {
 
 	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
@@ -353,7 +346,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 
 
     image_resource_directory directory;
-    pe_image_io rsrc_io((pe_image &)image);
+    pe_image_io rsrc_io(image);
     
 
 	if (rsrc_io.set_image_offset(res_rva + offset_to_directory).read(&directory, sizeof(directory)) == enma_io_success) {
@@ -369,7 +362,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 
 			if (rsrc_io.set_image_offset(
                 res_rva + (uint32_t)sizeof(image_resource_directory) + uint32_t(i * (uint32_t)sizeof(image_resource_directory_entry)) + offset_to_directory
-            ).read(&dir_entry, sizeof(dir_entry)) == enma_io_success) {
+            ).read(&dir_entry, sizeof(image_resource_directory_entry)) == enma_io_success) {
 
 				//Create directory entry structure
 				resource_directory_entry entry;
@@ -380,7 +373,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
                     
                     image_resource_dir_string_u directory_name;
                     if (rsrc_io.set_image_offset(res_rva + dir_entry.name_offset).read(
-                        &directory_name, sizeof(directory_name)) == enma_io_success) {
+                        &directory_name, sizeof(image_resource_dir_string_u)) == enma_io_success) {
 
                         std::wstring name;
                         name.resize(directory_name.length);
@@ -420,7 +413,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 					//If directory entry has data
                     image_resource_data_entry data_entry;
                     
-					if (rsrc_io.set_image_offset(res_rva + dir_entry.offset_to_data).read(&data_entry, sizeof(data_entry)) == enma_io_success) {
+					if (rsrc_io.set_image_offset(res_rva + dir_entry.offset_to_data).read(&data_entry, sizeof(image_resource_data_entry)) == enma_io_success) {
 
                         std::vector<uint8_t> entry_data;
 
@@ -446,7 +439,6 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 	}
 	return directory_code::directory_code_success;
 }
-
 
 bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, resource_directory& root, //taken from pe bless
 	uint32_t& current_structures_pos, uint32_t& current_data_pos, uint32_t& current_strings_pos, uint32_t offset_from_section_start){
@@ -576,6 +568,7 @@ directory_code get_resources_table(const pe_image &image, resource_directory& re
 
 	return process_resource_directory(image, image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE), 0, processed, resources);
 }
+
 bool build_resources_table(pe_image &image, pe_section& section, resource_directory& resources) {//taken from pe bless
 
 	if (resources.get_entry_list().empty()) {
@@ -613,7 +606,7 @@ bool build_resources_table(pe_image &image, pe_section& section, resource_direct
 	return rebuild_resource_directory(image, section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
 }
 
-directory_code get_placement_resources_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_resources_table(const pe_image &image, pe_directory_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE);
@@ -632,7 +625,8 @@ directory_code get_placement_resources_table(const pe_image &image, std::vector<
             available_size, down_oversize, up_oversize
         );
 
-        placement.push_back({ virtual_address ,available_size, dp_id_resources_desc });
+
+        placement[virtual_address] = directory_placement(available_size, id_pe_resources, "");
 
         if (!down_oversize && !up_oversize) {
             return directory_code::directory_code_success;
@@ -641,6 +635,7 @@ directory_code get_placement_resources_table(const pe_image &image, std::vector<
         return directory_code::directory_code_currupted;
     }
     else {
+
         return directory_code::directory_code_not_present;
     }
 }

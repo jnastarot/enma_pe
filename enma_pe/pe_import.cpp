@@ -534,7 +534,7 @@ bool _build_internal_import_data(pe_image &image, pe_section& section, import_ta
 
 
 template<typename image_format>
-directory_code _get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement,
+directory_code _get_placement_import_table(const pe_image &image, pe_directory_placement& placement,
     const bound_import_table& bound_imports) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -551,6 +551,9 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
         }
         uint32_t import_desc_table_size = sizeof(image_import_descriptor);
 
+        placement[virtual_address] =
+            directory_placement(import_desc_table_size, id_pe_import_descriptor, "");
+
         if (import_desc.first_thunk) {
 
             do {
@@ -560,7 +563,8 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                     return directory_code::directory_code_currupted;
                 }
 
-                placement.push_back({ import_desc.name ,ALIGN_UP(library_name.length()+1,0x2),dp_id_import_desc });
+                placement[import_desc.name] =
+                    directory_placement(ALIGN_UP(library_name.length() + 1, 0x2), id_pe_import_library_name, library_name);
 
                 bool is_bound_library = (import_desc.time_date_stamp == UINT32_MAX &&
                     bound_imports.has_library(library_name));
@@ -600,8 +604,9 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                                     return directory_code::directory_code_currupted;
                                 }
 
-                                placement.push_back({ (uint32_t)original_iat_item ,
-                                    ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t),0x2),dp_id_import_names });
+
+                                placement[(uint32_t)original_iat_item] =
+                                    directory_placement(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
                             }
                         }
                         else {
@@ -614,8 +619,9 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                                 std::string func_name;
 
                                 if (import_func_name_io.read_string(func_name) == enma_io_success) {
-                                    placement.push_back({ (uint32_t)(iat_item + sizeof(uint16_t)) ,
-                                      ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t),0x2),dp_id_import_names });
+
+                                    placement[(uint32_t)(iat_item + sizeof(uint16_t))] =
+                                        directory_placement(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
                                 }
                             }
                         }
@@ -629,10 +635,10 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
                 }
 
                 if (import_desc.original_first_thunk) {
-                    placement.push_back({ import_desc.original_first_thunk ,iat_table_size,dp_id_import_oft });
+                    placement[import_desc.original_first_thunk] = directory_placement(iat_table_size, id_pe_import_original_first_think, "");
                 }
-                placement.push_back({ import_desc.first_thunk ,iat_table_size,dp_id_import_iat });
 
+                placement[import_desc.first_thunk] = directory_placement(iat_table_size, id_pe_import_first_think, "");
 
                 import_desc_table_size += (uint32_t)sizeof(image_import_descriptor);
 
@@ -642,7 +648,7 @@ directory_code _get_placement_import_table(const pe_image &image, std::vector<di
             } while (import_desc.first_thunk);
         }
 
-        placement.push_back({ virtual_address ,import_desc_table_size,dp_id_import_desc });
+        
 
         return directory_code::directory_code_success;
     }
@@ -721,7 +727,7 @@ bool build_import_table_full(pe_image &image,
         build_import_table_only(image,section,imports);
 }
 
-directory_code get_placement_import_table(const pe_image &image, std::vector<directory_placement>& placement,
+directory_code get_placement_import_table(const pe_image &image, pe_directory_placement& placement,
     const bound_import_table& bound_imports) {
 
     if (image.is_x32_image()) {

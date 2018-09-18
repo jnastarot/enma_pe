@@ -203,7 +203,7 @@ directory_code get_debug_table(const pe_image &image, debug_table& debug) {
     return directory_code::directory_code_not_present;
 }
 
-directory_code get_placement_debug_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_debug_table(const pe_image &image, pe_directory_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
@@ -237,11 +237,13 @@ directory_code get_placement_debug_table(const pe_image &image, std::vector<dire
                 if (down_oversize || up_oversize) {
                     return directory_code::directory_code_currupted;
                 }
-                placement.push_back({ debug_desc.address_of_raw_data ,available_size , dp_id_debug_item_data });
+
+
+                placement[debug_desc.address_of_raw_data] = directory_placement(available_size, id_pe_debug_item_data, "");
             }
         }
 
-        placement.push_back({ virtual_address,ALIGN_UP(total_desc_size,0x10),dp_id_debug_desc });
+        placement[virtual_address] = directory_placement(ALIGN_UP(total_desc_size, 0x10), id_pe_debug_descriptor, "");
 
         return directory_code::directory_code_success;
     }

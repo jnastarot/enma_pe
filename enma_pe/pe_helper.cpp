@@ -55,13 +55,14 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &pe_image) {
 }
 
 
-void erase_directories_placement(pe_image &image, std::vector<directory_placement>& placement, relocation_table* relocs, bool delete_empty_sections) {
+void erase_directories_placement(pe_image &image, pe_directory_placement& placement, relocation_table* relocs, bool delete_empty_sections) {
 
+    /*
     std::sort(placement.begin(), placement.end(), [](directory_placement& lhs, directory_placement& rhs) {
         return lhs.rva < rhs.rva;
     });
 
-    std::vector<directory_placement> placement__ = placement;
+    pe_directory_placement placement__ = placement;
 
     for (size_t parent_zone_idx = 0; parent_zone_idx + 1 < placement.size(); parent_zone_idx++) { //link zones
 
@@ -133,4 +134,5 @@ void erase_directories_placement(pe_image &image, std::vector<directory_placemen
         go_next_:;
         }
     }
+    */
 }

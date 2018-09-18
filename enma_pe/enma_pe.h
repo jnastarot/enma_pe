@@ -8,57 +8,72 @@
 #include "pe_image.h"
 #include "pe_image_io.h"
 
-enum directory_placment_id {
-    db_id_none,
+enum id_pe_placement {
+    id_pe_none,
 
-    dp_id_export_desc,
-    dp_id_export_func_table,
-    dp_id_export_name_table,
-    dp_id_export_ordinal_table,
-    dp_id_export_names,
+    id_pe_export_descriptor,
+    id_pe_export_functions_table,
+    id_pe_export_names_table,
+    id_pe_export_ordinals_table,
+    id_pe_export_name,
+    id_pe_export_function_name,
+    id_pe_export_function_forwarded_name,
 
-    dp_id_import_desc,
-    dp_id_import_oft,
-    dp_id_import_iat,
-    dp_id_import_names,
+    id_pe_import_descriptor,
+    id_pe_import_original_first_think,
+    id_pe_import_first_think,
+    id_pe_import_library_name,
+    id_pe_import_function_name,
 
-    dp_id_resources_desc,
+    id_pe_bound_import_descriptor,
+    id_pe_bound_import_ref_desc,
+    id_pe_bound_import_library_name,
 
-    dp_id_exceptions_desc,
+    id_pe_delay_import_descriptor,
+    id_pe_delay_import_name_table,
+    id_pe_delay_import_bound_table,
+    id_pe_delay_import_unload_table,
+    id_pe_delay_import_library_name,
+    id_pe_delay_import_function_name,
 
-    dp_id_security_desc,
+    id_pe_resources,
 
-    dp_id_relocations_desc,
+    id_pe_exceptions_descriptor,
 
-    dp_id_debug_desc,
-    dp_id_debug_item_data,
+    id_pe_security_descriptor,
+    id_pe_security_certificate,
+
+    id_pe_relocations_descriptor,
+    id_pe_relocations_block,
+
+    id_pe_debug_descriptor,
+    id_pe_debug_item_data,
     
-    dp_id_tls_desc,
-    dp_id_tls_raw_data,
-    dp_id_tls_index,
-    dp_id_tls_callbacks,
+    id_pe_tls_descriptor,
+    id_pe_tls_raw_data,
+    id_pe_tls_index,
+    id_pe_tls_callbacks,
 
-    dp_id_loadconfig_desc,
-    dp_id_loadconfig_se_table,
-    dp_id_loadconfig_cf_table,
-    dp_id_loadconfig_iat_table,
-    dp_id_loadconfig_long_jump_table,
-
-
-    dp_id_bound_import_desc,
-    dp_id_bound_import_ref_desc,
-    dp_id_bound_import_names,
-
-    dp_id_delay_import_desc,
-    dp_id_delay_import_table,
-    dp_id_delay_import_names,
+    id_pe_loadconfig_descriptor,
+    id_pe_loadconfig_se_table,
+    id_pe_loadconfig_lock_table,
+    id_pe_loadconfig_cf_table,
+    id_pe_loadconfig_iat_table,
+    id_pe_loadconfig_long_jump_table,   
 };
 
 struct directory_placement {
-    uint32_t rva; 
-    size_t size; 
-    directory_placment_id id;
+    uint32_t size; 
+    id_pe_placement id;
+    std::string name;
+
+    directory_placement::directory_placement()
+        :size(0), id(id_pe_none), name("") {};
+    directory_placement::directory_placement(uint32_t size, id_pe_placement id, std::string name)
+        :size(size), id(id), name(name) {};
 };
+
+typedef std::map<uint32_t, directory_placement> pe_directory_placement;
 
 enum directory_code {
     directory_code_success,
@@ -102,8 +117,8 @@ struct pe_image_expanded {
 };
 
 
-void do_expanded_pe_image(_Inout_ pe_image_expanded& expanded_image, _In_ const pe_image &image);
-directory_code get_directories_placement(_Inout_ pe_image &image, _Out_ std::vector<directory_placement>& placement, 
+void get_expanded_pe_image(_Inout_ pe_image_expanded& expanded_image, _In_ const pe_image &image);
+directory_code get_directories_placement(_Inout_ pe_image &image, _Out_ pe_directory_placement& placement,
     _In_opt_ const bound_import_table* bound_imports = 0);
 
 

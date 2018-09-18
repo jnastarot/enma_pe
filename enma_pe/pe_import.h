@@ -115,5 +115,5 @@ bool build_import_table_full(_Inout_ pe_image &image,
     _Inout_ pe_section& section, _Inout_ import_table& imports,
     _In_opt_ const bound_import_table* bound_imports = 0);
 
-directory_code get_placement_import_table(_In_ const pe_image &image,_Inout_ std::vector<directory_placement>& placement,
+directory_code get_placement_import_table(_In_ const pe_image &image,_Inout_ pe_directory_placement& placement,
     _In_ const bound_import_table& bound_imports);

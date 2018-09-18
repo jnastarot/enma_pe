@@ -115,7 +115,7 @@ directory_code get_exception_table(const pe_image &image, exceptions_table& exce
 	return directory_code::directory_code_not_present;
 }
 
-bool build_exceptions_table(pe_image &image, pe_section& section, exceptions_table& exceptions) {
+bool build_exceptions_table(pe_image &image, pe_section& section, const exceptions_table& exceptions) {
 
 
     if (exceptions.get_items().size()) {
@@ -145,7 +145,7 @@ bool build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
     return true;
 }
 
-directory_code get_placement_exceptions_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_exceptions_table(const pe_image &image, pe_directory_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
@@ -164,7 +164,8 @@ directory_code get_placement_exceptions_table(const pe_image &image, std::vector
             available_size, down_oversize, up_oversize
         );
 
-        placement.push_back({ virtual_address ,available_size, dp_id_exceptions_desc });
+
+        placement[virtual_address] = directory_placement(available_size, id_pe_exceptions_descriptor, "");
 
         if (!down_oversize && !up_oversize) {          
             return directory_code::directory_code_success;

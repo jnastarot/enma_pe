@@ -700,7 +700,7 @@ bool _build_load_config_table_only(pe_image &image, pe_section& section, load_co
 }
 
 template <typename image_format>
-directory_code _get_placement_load_config_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code _get_placement_load_config_table(const pe_image &image, pe_directory_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -719,15 +719,15 @@ directory_code _get_placement_load_config_table(pe_image &image, std::vector<dir
             return directory_code::directory_code_currupted;
         }
 
+        placement[virtual_address] = directory_placement(desc_size, id_pe_loadconfig_descriptor, "");
+
         if (image.is_x32_image()) {
             if (offsetof(typename image_format::image_load_config_directory, se_handler_table) < desc_size &&
                 load_config_desc.se_handler_count &&
                 load_config_desc.se_handler_table) {
 
-                placement.push_back({ (uint32_t)image.va_to_rva(load_config_desc.se_handler_table) ,
-                    (uint32_t)(load_config_desc.se_handler_count * sizeof(uint32_t)),
-                    dp_id_loadconfig_se_table
-                });
+                placement[(uint32_t)image.va_to_rva(load_config_desc.se_handler_table)] = 
+                    directory_placement((uint32_t)(load_config_desc.se_handler_count * sizeof(uint32_t)), id_pe_loadconfig_se_table, "");
             }
 
             if (offsetof(typename image_format::image_load_config_directory, lock_prefix_table) < desc_size &&
@@ -746,10 +746,8 @@ directory_code _get_placement_load_config_table(pe_image &image, std::vector<dir
                     }
                 }
 
-                placement.push_back({ image.va_to_rva(load_config_desc.lock_prefix_table) ,
-                    (uint32_t)((lock_prefix_count + 1) * sizeof(uint32_t)),
-                    dp_id_loadconfig_se_table
-                });
+                placement[image.va_to_rva(load_config_desc.lock_prefix_table)] = 
+                    directory_placement((uint32_t)((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_loadconfig_lock_table, "");
             }
         }
 
@@ -757,33 +755,27 @@ directory_code _get_placement_load_config_table(pe_image &image, std::vector<dir
             load_config_desc.guard_cf_function_count &&
             load_config_desc.guard_cf_function_table) {
 
-            placement.push_back({ image.va_to_rva(load_config_desc.guard_cf_function_table) ,
-                (uint32_t)(load_config_desc.guard_cf_function_count * sizeof(uint32_t)),
-                dp_id_loadconfig_cf_table
-            });
+            placement[image.va_to_rva(load_config_desc.guard_cf_function_table)] =
+                directory_placement((uint32_t)(load_config_desc.guard_cf_function_count * sizeof(uint32_t)), id_pe_loadconfig_cf_table, "");
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_address_taken_iat_entry_table) < desc_size &&
             load_config_desc.guard_address_taken_iat_entry_count &&
             load_config_desc.guard_address_taken_iat_entry_table) {
 
-            placement.push_back({ image.va_to_rva(load_config_desc.guard_address_taken_iat_entry_table) ,
-                (uint32_t)(load_config_desc.guard_address_taken_iat_entry_count * sizeof(uint32_t)),
-                dp_id_loadconfig_iat_table
-            });
+            placement[image.va_to_rva(load_config_desc.guard_address_taken_iat_entry_table)] =
+                directory_placement((uint32_t)(load_config_desc.guard_address_taken_iat_entry_count * sizeof(uint32_t)), id_pe_loadconfig_iat_table, "");
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_long_jump_target_table) < desc_size &&
             load_config_desc.guard_long_jump_target_count &&
             load_config_desc.guard_long_jump_target_table) {
 
-            placement.push_back({ image.va_to_rva(load_config_desc.guard_long_jump_target_table) ,
-                (uint32_t)(load_config_desc.guard_long_jump_target_count * sizeof(uint32_t)),
-                dp_id_loadconfig_cf_table
-            });
+            placement[image.va_to_rva(load_config_desc.guard_long_jump_target_table)] =
+                directory_placement((uint32_t)(load_config_desc.guard_long_jump_target_count * sizeof(uint32_t)), id_pe_loadconfig_long_jump_table, "");
         }
 
-        placement.push_back({ virtual_address , desc_size ,dp_id_loadconfig_desc });
+        
     }
 
     return directory_code::directory_code_not_present;
@@ -941,7 +933,7 @@ bool build_load_config_table_full(pe_image &image, pe_section& section,
         build_load_config_table_only(image, section, load_config, relocs);
 }
 
-directory_code get_placement_load_config_table(pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_load_config_table(const pe_image &image, pe_directory_placement& placement) {
 
     if (image.is_x32_image()) {
         return _get_placement_load_config_table<image_32>(image,placement);

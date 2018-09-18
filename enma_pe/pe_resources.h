@@ -61,6 +61,12 @@ public:
 };
 
 
+struct entry_sorter
+{
+public:
+    bool operator()(resource_directory_entry& entry1, resource_directory_entry& entry2);
+};
+
 class resource_directory {
 	uint32_t	characteristics;
 	uint32_t	timestamp;
@@ -104,5 +110,5 @@ public:
 directory_code get_resources_table(_In_ const pe_image &image,
 	_Out_ resource_directory& resources);						
 bool build_resources_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
-	_In_ resource_directory& resources);
-directory_code get_placement_resources_table(_In_ const pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+    _Inout_ resource_directory& resources);
+directory_code get_placement_resources_table(_In_ const pe_image &image, _Inout_ pe_directory_placement& placement);

@@ -166,4 +166,4 @@ bool build_load_config_table_full(_Inout_ pe_image &image, _Inout_ pe_section& s
     _Inout_ load_config_table& load_config, _Inout_ relocation_table& relocs);
 
 
-directory_code get_placement_load_config_table(_Inout_ pe_image &image, _Inout_ std::vector<directory_placement>& placement);
+directory_code get_placement_load_config_table(_Inout_ const pe_image &image, _Inout_ pe_directory_placement& placement);

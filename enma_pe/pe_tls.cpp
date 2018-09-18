@@ -265,38 +265,29 @@ bool _build_tls_table_only(pe_image &image, pe_section& section, tls_table& tls,
 
 
 template<typename image_format>
-directory_code _get_placement_tls_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code _get_placement_tls_table(const pe_image &image, pe_directory_placement& placement) {
 
     tls_table tls;
 
     directory_code code = get_tls_table(image, tls);
 
     if (code == directory_code::directory_code_success) {
-        placement.push_back({ 
-            image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS) ,
-            ALIGN_UP(sizeof(typename image_format::image_tls_directory),0x10),dp_id_tls_desc
-        });
+
+        placement[image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS)] = 
+            directory_placement(ALIGN_UP(sizeof(typename image_format::image_tls_directory), 0x10), id_pe_tls_descriptor, "");
 
         if (tls.get_start_address_raw_data()) {
-            placement.push_back({
-                tls.get_start_address_raw_data() ,
-                tls.get_raw_data().size(),dp_id_tls_raw_data
-            });
+            placement[tls.get_start_address_raw_data()] = directory_placement(tls.get_raw_data().size(), id_pe_tls_raw_data, "");
         }
 
         if (tls.get_address_of_index()) {
-            placement.push_back({
-                tls.get_address_of_index() ,
-                sizeof(uint32_t),dp_id_tls_index
-            });
+            placement[tls.get_address_of_index()] = directory_placement(sizeof(uint32_t), id_pe_tls_index, "");
         }
 
         if (tls.get_address_of_callbacks()) {
-            placement.push_back({
-                tls.get_address_of_callbacks() ,
-                (tls.get_callbacks().size() + 1 ) * sizeof(typename image_format::ptr_size),dp_id_tls_callbacks
-            });
-            
+
+            placement[tls.get_address_of_callbacks()] = 
+                directory_placement((tls.get_callbacks().size() + 1) * sizeof(typename image_format::ptr_size), id_pe_tls_callbacks, "");
         }
         
         return directory_code::directory_code_success;
@@ -344,7 +335,7 @@ bool build_tls_full(pe_image &image,pe_section& section,
 }
 
 
-directory_code get_placement_tls_table(const pe_image &image, std::vector<directory_placement>& placement) {
+directory_code get_placement_tls_table(const pe_image &image, pe_directory_placement& placement) {
 
     if (image.is_x32_image()) {
         return _get_placement_tls_table<image_32>(image, placement);
