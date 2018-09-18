@@ -57,41 +57,44 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &pe_image) {
 
 void erase_directories_placement(pe_image &image, pe_directory_placement& placement, relocation_table* relocs, bool delete_empty_sections) {
 
-    /*
-    std::sort(placement.begin(), placement.end(), [](directory_placement& lhs, directory_placement& rhs) {
-        return lhs.rva < rhs.rva;
-    });
+    struct placement_item{
+        uint32_t rva;
+        uint32_t size;
+    };
 
-    pe_directory_placement placement__ = placement;
+    std::vector<placement_item> placement_items;
 
-    for (size_t parent_zone_idx = 0; parent_zone_idx + 1 < placement.size(); parent_zone_idx++) { //link zones
+    for (auto& place_item : placement) {
+        placement_items.push_back({ place_item.first, place_item.second.size });
+    }
 
-        if (placement[parent_zone_idx].rva <= placement[parent_zone_idx + 1].rva &&
-            (placement[parent_zone_idx].rva + placement[parent_zone_idx].size) >= placement[parent_zone_idx + 1].rva
+
+    for (size_t parent_zone_idx = 0; parent_zone_idx + 1 < placement_items.size(); parent_zone_idx++) { //link zones
+        
+        if (placement_items[parent_zone_idx].rva <= placement_items[parent_zone_idx + 1].rva &&
+            (placement_items[parent_zone_idx].rva + placement_items[parent_zone_idx].size) >= placement_items[parent_zone_idx + 1].rva
             ) {
 
-            if ((placement[parent_zone_idx + 1].rva +
-                placement[parent_zone_idx + 1].size) > (placement[parent_zone_idx].rva + placement[parent_zone_idx].size)) {
+            if ((placement_items[parent_zone_idx + 1].rva +
+                placement_items[parent_zone_idx + 1].size) > (placement_items[parent_zone_idx].rva + placement_items[parent_zone_idx].size)) {
 
-                placement[parent_zone_idx].size =
-                    ((placement[parent_zone_idx + 1].rva + placement[parent_zone_idx + 1].size) - placement[parent_zone_idx].rva);
+                placement_items[parent_zone_idx].size =
+                    ((placement_items[parent_zone_idx + 1].rva + placement_items[parent_zone_idx + 1].size) - placement_items[parent_zone_idx].rva);
             }
 
-            placement.erase(placement.begin() + parent_zone_idx + 1);
+            placement_items.erase(placement_items.begin() + parent_zone_idx + 1);
             parent_zone_idx--;
         }
     }
 
     pe_image_io image_io(image);
 
-    for (auto& item : placement) {
+    for (auto& item : placement_items) {
         if (relocs) {
             relocs->erase_items_in_segment(item.rva, uint32_t(item.size));
         }
 
         image_io.set_image_offset(item.rva).memory_set(uint32_t(item.size), 0);
-
-        item.id = db_id_none;
     }
 
 
@@ -99,31 +102,31 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
         for (int32_t section_idx = int32_t(image.get_sections().size() - 1); section_idx >= 0; section_idx--) {
             auto _section = image.get_sections()[section_idx];
 
-            for (size_t zone_idx = 0; zone_idx < placement.size(); zone_idx++) {
+            for (size_t zone_idx = 0; zone_idx < placement_items.size(); zone_idx++) {
                 
-                if (_section->get_virtual_address() >= placement[zone_idx].rva && //if it cover full section
-                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
+                if (_section->get_virtual_address() >= placement_items[zone_idx].rva && //if it cover full section
+                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
 
-                    if ((_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
-                        placement.erase(placement.begin() + zone_idx);
+                    if ((_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
+                        placement_items.erase(placement_items.begin() + zone_idx);
                     }
                     else {
-                        placement[zone_idx].size = (placement[zone_idx].rva - _section->get_virtual_address());
+                        placement_items[zone_idx].size = (placement_items[zone_idx].rva - _section->get_virtual_address());
                     }
 
                     image.get_sections().erase(image.get_sections().begin() + section_idx);
                     goto go_next_;
                 }
 
-                if (_section->get_virtual_address() < placement[zone_idx].rva && //if it cover up part of the section
-                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement[zone_idx].rva + placement[zone_idx].size)) {
-                    uint32_t minus_size = (_section->get_virtual_address() + _section->get_virtual_size()) - placement[zone_idx].rva;
+                if (_section->get_virtual_address() < placement_items[zone_idx].rva && //if it cover up part of the section
+                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
+                    uint32_t minus_size = (_section->get_virtual_address() + _section->get_virtual_size()) - placement_items[zone_idx].rva;
                     
-                    if (minus_size < placement[zone_idx].size) {
-                        placement[zone_idx].size -= minus_size;
+                    if (minus_size < placement_items[zone_idx].size) {
+                        placement_items[zone_idx].size -= minus_size;
                     }
                     else {
-                        placement.erase(placement.begin() + zone_idx);
+                        placement_items.erase(placement_items.begin() + zone_idx);
                     }
 
                     _section->set_size_of_raw_data(_section->get_size_of_raw_data() - minus_size);
@@ -134,5 +137,10 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
         go_next_:;
         }
     }
-    */
+    
+    placement.clear();
+
+    for (auto& place_item : placement_items) {
+        placement[place_item.rva] = directory_placement(place_item.size, id_pe_none, "");
+    }
 }

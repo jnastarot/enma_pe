@@ -42,6 +42,10 @@ e.mail..: jnastarot@yandex.ru
 | :------: | :-----------: |
 | `string extractor` | extracting ansi and unicode strings |
 | `rich data parser` | geting and building rich data|
+| `entropy sections calc` | calculating entropy of section |
+| `checksum calc` | calculating checksum of `pe image` |
+
+
 ---
 
  <h3 align="center">References</h3>
