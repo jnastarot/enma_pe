@@ -93,7 +93,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
         uint32_t total_readed_size    = 0;
         uint32_t total_up_oversize    = 0;
 
-        uint32_t available_headers_size = image->get_headers_data().size();
+        uint32_t available_headers_size = (uint32_t)image->get_headers_data().size();
         uint32_t view_headers_size = addressing_type == enma_io_addressing_type::enma_io_address_raw ?
             ALIGN_UP(available_headers_size, image->get_file_align()) : ALIGN_UP(available_headers_size, image->get_section_align());
 

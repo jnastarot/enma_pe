@@ -274,10 +274,10 @@ directory_code _get_placement_tls_table(const pe_image &image, pe_directory_plac
     if (code == directory_code::directory_code_success) {
 
         placement[image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS)] = 
-            directory_placement(ALIGN_UP(sizeof(typename image_format::image_tls_directory), 0x10), id_pe_tls_descriptor, "");
+            directory_placement((uint32_t)ALIGN_UP(sizeof(typename image_format::image_tls_directory), 0x10), id_pe_tls_descriptor, "");
 
         if (tls.get_start_address_raw_data()) {
-            placement[tls.get_start_address_raw_data()] = directory_placement(tls.get_raw_data().size(), id_pe_tls_raw_data, "");
+            placement[tls.get_start_address_raw_data()] = directory_placement((uint32_t)tls.get_raw_data().size(), id_pe_tls_raw_data, "");
         }
 
         if (tls.get_address_of_index()) {
@@ -287,7 +287,7 @@ directory_code _get_placement_tls_table(const pe_image &image, pe_directory_plac
         if (tls.get_address_of_callbacks()) {
 
             placement[tls.get_address_of_callbacks()] = 
-                directory_placement((tls.get_callbacks().size() + 1) * sizeof(typename image_format::ptr_size), id_pe_tls_callbacks, "");
+                directory_placement((uint32_t)(tls.get_callbacks().size() + 1) * sizeof(typename image_format::ptr_size), id_pe_tls_callbacks, "");
         }
         
         return directory_code::directory_code_success;

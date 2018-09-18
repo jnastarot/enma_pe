@@ -502,7 +502,7 @@ directory_code get_placement_export_table(const pe_image &image, pe_directory_pl
             }
 
 
-            placement[export_desc.name] = directory_placement(ALIGN_UP(lib_name.length() + 1, 0x2), id_pe_export_name, lib_name);
+            placement[export_desc.name] = directory_placement((uint32_t)ALIGN_UP(lib_name.length() + 1, 0x2), id_pe_export_name, lib_name);
         }
 
 
@@ -543,7 +543,7 @@ directory_code get_placement_export_table(const pe_image &image, pe_directory_pl
                     }
 
                     placement[function_name_rva] =
-                        directory_placement(ALIGN_UP(func_name.length() + 1, 0x2), id_pe_export_function_name, func_name);
+                        directory_placement((uint32_t)ALIGN_UP(func_name.length() + 1, 0x2), id_pe_export_function_name, func_name);
 
                     if (func_rva >= virtual_address + sizeof(image_export_directory) &&
                         func_rva < virtual_address + virtual_size) {
@@ -556,7 +556,7 @@ directory_code get_placement_export_table(const pe_image &image, pe_directory_pl
 
 
                         placement[func_rva] =
-                            directory_placement(ALIGN_UP(forwarded_func_name.length() + 1, 0x2), id_pe_export_function_forwarded_name, forwarded_func_name);
+                            directory_placement((uint32_t)ALIGN_UP(forwarded_func_name.length() + 1, 0x2), id_pe_export_function_forwarded_name, forwarded_func_name);
                     }
 
                     break;

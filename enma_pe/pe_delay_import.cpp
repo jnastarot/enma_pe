@@ -311,7 +311,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, pe_direc
 
 
                 placement[import_desc.dll_name_rva] =
-                    directory_placement(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_delay_import_library_name, lib_name);
+                    directory_placement((uint32_t)ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_delay_import_library_name, lib_name);
 
                 pe_image_io delay_import_names_io(image);
                 delay_import_names_io.set_image_offset(import_desc.import_name_table_rva);
@@ -344,7 +344,7 @@ directory_code _get_placement_delay_import_table(const pe_image &image, pe_direc
                             }
 
                             placement[(uint32_t)name_item] =
-                                directory_placement(sizeof(uint16_t) + ALIGN_UP((func_name.length() + 1), 0x2), id_pe_delay_import_function_name, func_name);
+                                directory_placement(sizeof(uint16_t) + (uint32_t)ALIGN_UP((func_name.length() + 1), 0x2), id_pe_delay_import_function_name, func_name);
                         }
                     }
                     else {
