@@ -13,8 +13,6 @@ class pe_image{
 
     std::vector<uint8_t> headers_data;
 
-    image_dos_header dos_header;
-
 	uint16_t   machine;
 	uint32_t   timestamp;
 	uint16_t   characteristics;
@@ -133,9 +131,7 @@ public://getter
 	pe_image_status		       get_image_status() const;
 
     const std::vector<uint8_t>& get_headers_data() const;
-
-    image_dos_header&  get_dos_header();
-    const image_dos_header&  get_dos_header() const;
+    void  get_dos_header(image_dos_header &header) const;
 
 	uint16_t    get_machine() const;
 	uint32_t    get_timestamp() const;

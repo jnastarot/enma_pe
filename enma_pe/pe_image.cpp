@@ -67,8 +67,6 @@ pe_image& pe_image::operator=(const pe_image& image) {
 
     headers_data = image.headers_data;
 
-    dos_header = image.dos_header;
-
 	image_status        = image.image_status;
 	machine	            = image.machine;
 	timestamp           = image.timestamp;
@@ -169,6 +167,8 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
 
 void pe_image::init_from_file(const uint8_t * image, size_t size) {
 	if (size < sizeof(image_dos_header)) {this->image_status = pe_image_status_bad_format;return;};
+
+    image_dos_header dos_header;
 
     memcpy(&dos_header, image, sizeof(image_dos_header));
 
@@ -430,7 +430,12 @@ void    pe_image::set_headers_data(const std::vector<uint8_t>& headers_data) {
     this->headers_data = headers_data;
 }
 void    pe_image::set_dos_header(const image_dos_header& header) {
-    memcpy(&dos_header, &header, sizeof(image_dos_header));
+
+    if (headers_data.size() < sizeof(image_dos_header)) {
+        headers_data.resize(sizeof(image_dos_header));
+    }
+
+    memcpy(headers_data.data(), &header, sizeof(image_dos_header));
 }
 void    pe_image::set_machine(uint16_t machine) {
 	this->machine = machine;
@@ -660,9 +665,14 @@ bool        pe_image::has_directory(uint32_t directory_idx) const {
 	return false;
 }
 
-image_dos_header&  pe_image::get_dos_header() {
-    return dos_header;
-}
-const image_dos_header&  pe_image::get_dos_header() const{
-    return dos_header;
+void  pe_image::get_dos_header(image_dos_header &header) const {
+
+    memset(&header, 0, sizeof(image_dos_header));
+
+    if (headers_data.size() < sizeof(image_dos_header)) {
+        memcpy(&header, headers_data.data(), headers_data.size());
+    }
+    else {
+        memcpy(&header, headers_data.data(), sizeof(image_dos_header));
+    }
 }
