@@ -303,7 +303,7 @@ directory_code get_placement_relocation_table(const pe_image &image, pe_director
                 available_size, down_oversize, up_oversize
             );
 
-            available_size = min(reloc_io.get_image_offset() + available_size, virtual_address + virtual_size);
+            available_size = min(available_size, virtual_size);
 
             placement[reloc_io.get_image_offset()] = directory_placement(available_size, id_pe_relocations_block, "");
 
