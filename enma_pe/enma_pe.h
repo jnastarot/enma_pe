@@ -67,9 +67,9 @@ struct directory_placement {
     id_pe_placement id;
     std::string name;
 
-    directory_placement::directory_placement()
-        :size(0), id(id_pe_none), name("") {};
-    directory_placement::directory_placement(uint32_t size, id_pe_placement id, std::string name)
+    directory_placement()
+        :size(0), id(id_pe_none), name() {};
+    directory_placement(uint32_t size, id_pe_placement id, std::string name)
         :size(size), id(id), name(name) {};
 };
 

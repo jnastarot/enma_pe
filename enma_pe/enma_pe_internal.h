@@ -326,11 +326,18 @@ typedef struct _image_export_directory {
 
 #define IMAGE_ORDINAL_FLAG64 0x8000000000000000
 #define IMAGE_ORDINAL_FLAG32 0x80000000
+#ifndef IMAGE_ORDINAL64
 #define IMAGE_ORDINAL64(Ordinal) ((Ordinal) & 0xffff)
+#endif
+#ifndef IMAGE_ORDINAL32
 #define IMAGE_ORDINAL32(Ordinal) ((Ordinal) & 0xffff)
+#endif
+#ifndef IMAGE_SNAP_BY_ORDINAL64
 #define IMAGE_SNAP_BY_ORDINAL64(Ordinal) (((Ordinal) & IMAGE_ORDINAL_FLAG64) != 0)
+#endif
+#ifndef IMAGE_SNAP_BY_ORDINAL32
 #define IMAGE_SNAP_BY_ORDINAL32(Ordinal) (((Ordinal) & IMAGE_ORDINAL_FLAG32) != 0)
-
+#endif
 
 typedef struct _image_import_by_name {
     uint16_t    hint;
