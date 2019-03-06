@@ -73,6 +73,10 @@ void exception_unwind_info::set_unwind_info_rva(uint32_t rva) {
     this->unwind_info_rva = rva;
 }
 
+void exception_unwind_info::set_custom_parameter(void * custom_parameter) {
+    this->custom_parameter = custom_parameter;
+}
+
 void exception_unwind_info::set_handler_rva(uint32_t rva) {
     this->handler_rva = rva;
 }
@@ -100,6 +104,13 @@ uint8_t exception_unwind_info::get_frame_offset() const {
     return this->frame_offset;
 }
 
+void * exception_unwind_info::get_custom_parameter(void * custom_parameter) {
+    return this->custom_parameter;
+}
+
+void * exception_unwind_info::get_custom_parameter(void * custom_parameter) const {
+    return this->custom_parameter;
+}
 
 const exception_entry * exception_unwind_info::get_chained_item() const {
     return this->chained_item;

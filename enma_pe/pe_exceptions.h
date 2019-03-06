@@ -40,6 +40,8 @@ public:
     void set_chained_item(exception_entry * chained_item);
     void set_handler_rva(uint32_t rva);
     void set_unwind_info_rva(uint32_t rva);
+
+    void set_custom_parameter(void * custom_parameter);
 public: 
 
     uint8_t get_version() const;
@@ -48,6 +50,9 @@ public:
     uint8_t get_count_of_codes() const;
     uint8_t get_frame_register() const;
     uint8_t get_frame_offset() const;
+
+    void * get_custom_parameter(void * custom_parameter);
+    void * get_custom_parameter(void * custom_parameter) const;
 
     exception_entry * get_chained_item();
     const exception_entry * get_chained_item() const;
