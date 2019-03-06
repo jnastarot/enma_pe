@@ -38,7 +38,8 @@ enum id_pe_placement {
 
     id_pe_resources,
 
-    id_pe_exceptions_descriptor,
+    id_pe_exception_descriptors,
+    id_pe_exception_unwindinfo,
 
     id_pe_security_descriptor,
     id_pe_security_certificate,

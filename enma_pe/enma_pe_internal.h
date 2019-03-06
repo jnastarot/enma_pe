@@ -475,14 +475,50 @@ typedef struct _image_resource_data_entry {
 //  Exception table format
 //
 
-typedef struct _image_ia64_runtime_function_entry {
+typedef enum _unwind_op_codes {
+    UWOP_PUSH_NONVOL = 0, /* info == register number */
+    UWOP_ALLOC_LARGE,     /* no info, alloc size in next 2 slots */
+    UWOP_ALLOC_SMALL,     /* info == size of allocation / 8 - 1 */
+    UWOP_SET_FPREG,       /* no info, FP = RSP + UNWIND_INFO.FPRegOffset*16 */
+    UWOP_SAVE_NONVOL,     /* info == register number, offset in next slot */
+    UWOP_SAVE_NONVOL_FAR, /* info == register number, offset in next 2 slots */
+    UWOP_SAVE_XMM128 = 8, /* info == XMM reg number, offset in next slot */
+    UWOP_SAVE_XMM128_FAR, /* info == XMM reg number, offset in next 2 slots */
+    UWOP_PUSH_MACHFRAME   /* info == 0: no error-code, 1: error-code */
+} unwind_code_ops;
+
+typedef union _unwind_code {
+    struct {
+        uint8_t code_offset;
+        uint8_t unwind_op : 4;
+        uint8_t op_info : 4;
+    };
+    uint16_t frame_offset;
+} unwind_code, *punwind_code;
+
+#define UNW_FLAG_EHANDLER  0x01
+#define UNW_FLAG_UHANDLER  0x02
+#define UNW_FLAG_CHAININFO 0x04
+
+
+typedef struct _unwind_info {
+    uint8_t version : 3;
+    uint8_t flags   : 5;
+    uint8_t size_of_prolog;
+    uint8_t count_of_codes;
+    uint8_t frame_register : 4;
+    uint8_t frame_offset   : 4;
+    //unwind_code code_entries[]
+} unwind_info, *punwind_info;
+
+typedef struct _runtime_function_entry {
     uint32_t begin_address;
     uint32_t end_address;
     union {
         uint32_t unwind_info_address;
         uint32_t unwind_data;
     };
-} image_ia64_runtime_function_entry, *pimage_ia64_runtime_function_entry;
+} runtime_function_entry, *pruntime_function_entry;
 
 
 //
