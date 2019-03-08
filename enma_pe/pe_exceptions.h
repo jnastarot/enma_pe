@@ -9,7 +9,6 @@ enum unwind_parameter_type {
 };
 
 struct unwind_parameter {
-    uint32_t custom_id;
     unwind_parameter_type type;
     std::vector<uint8_t> param_data;
 };
@@ -31,6 +30,7 @@ class exception_unwind_info {
 
     std::vector<unwind_parameter> params;
 
+    uint32_t custom_id;
     void * custom_parameter;
 public:
     exception_unwind_info();
@@ -58,6 +58,7 @@ public:
     void set_codes(std::vector<unwind_code> &codes);
     void set_params(std::vector<unwind_parameter> &params);
     void set_custom_parameter(void * custom_parameter);
+    void set_custom_id(uint32_t custom_id);
 public: 
 
     uint8_t get_version() const;
@@ -75,6 +76,7 @@ public:
 
     void * get_custom_parameter();
     const void * get_custom_parameter() const;
+    uint32_t get_custom_id() const;
 
     exception_entry * get_chained_entry();
     const exception_entry * get_chained_entry() const;

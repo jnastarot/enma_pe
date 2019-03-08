@@ -11,7 +11,7 @@ exception_unwind_info::exception_unwind_info(uint32_t unwind_info_rva, uint8_t v
     uint8_t flags, uint8_t size_of_prolog, uint8_t count_of_codes, uint8_t frame_register, uint8_t frame_offset) 
     :unwind_info_rva(unwind_info_rva), version(version), flags(flags), size_of_prolog(size_of_prolog), 
     count_of_codes(count_of_codes), frame_register(frame_register), frame_offset(frame_offset), 
-    handler_rva(0), chained_entry(0), custom_parameter(0){}
+    handler_rva(0), chained_entry(0), custom_parameter(0), custom_id(0) {}
 
 exception_unwind_info::exception_unwind_info(const exception_unwind_info& item) {
     this->operator=(item);
@@ -89,6 +89,10 @@ void exception_unwind_info::set_custom_parameter(void * custom_parameter) {
     this->custom_parameter = custom_parameter;
 }
 
+void exception_unwind_info::set_custom_id(uint32_t custom_id) {
+    this->custom_id = custom_id;
+}
+
 void exception_unwind_info::set_handler_rva(uint32_t rva) {
     this->handler_rva = rva;
 }
@@ -138,6 +142,10 @@ void * exception_unwind_info::get_custom_parameter() {
 
 const void * exception_unwind_info::get_custom_parameter() const {
     return this->custom_parameter;
+}
+
+uint32_t exception_unwind_info::get_custom_id() const {
+    return this->custom_id;
 }
 
 const exception_entry * exception_unwind_info::get_chained_entry() const {
