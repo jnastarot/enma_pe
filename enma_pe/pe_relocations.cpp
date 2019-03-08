@@ -62,7 +62,7 @@ bool relocation_table::erase_all_items_by_id(uint32_t relocation_id) {
     return ret;
 }
 
-bool relocation_table::erase_items_in_segment(uint32_t segment_rva, uint32_t segment_size) {
+bool relocation_table::erase_items_in_segment(uint32_t segment_rva, size_t segment_size) {
 
     bool ret = false;
 
@@ -93,7 +93,7 @@ void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>&
     }
 }
 
-void relocation_table::get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, uint32_t segment_size) {
+void relocation_table::get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, size_t segment_size) {
 
     relocs.clear();
 
@@ -292,10 +292,10 @@ directory_code get_placement_relocation_table(const pe_image &image, pe_director
             placement[virtual_address] = directory_placement(sizeof(image_base_relocation), id_pe_relocations_descriptor, "");
 
 
-            uint32_t _offset_real = 0;
-            uint32_t available_size = 0;
-            uint32_t down_oversize = 0;
-            uint32_t up_oversize = 0;
+            size_t _offset_real = 0;
+            size_t available_size = 0;
+            size_t down_oversize = 0;
+            size_t up_oversize = 0;
 
             reloc_io.view_image(
                 reloc_io.get_image_offset(), reloc_base.size_of_block - sizeof(image_base_relocation),
@@ -307,7 +307,7 @@ directory_code get_placement_relocation_table(const pe_image &image, pe_director
 
             placement[reloc_io.get_image_offset()] = directory_placement(available_size, id_pe_relocations_block, "");
 
-            reloc_io.set_image_offset(reloc_io.get_image_offset() + available_size);
+            reloc_io.set_image_offset( uint32_t(reloc_io.get_image_offset() + available_size) );
         }
 
         return directory_code::directory_code_success;

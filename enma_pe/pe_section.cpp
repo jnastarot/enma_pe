@@ -117,7 +117,7 @@ pe_section& pe_section::set_executable(bool flag) {
 }
 
 
-void pe_section::add_data(const uint8_t * data, uint32_t data_size) {
+void pe_section::add_data(const uint8_t * data, size_t data_size) {
 	section_data.resize(section_data.size() + data_size);
 	memcpy(section_data.data() + section_data.size() - data_size, data, data_size);
 }

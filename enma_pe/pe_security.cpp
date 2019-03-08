@@ -146,7 +146,7 @@ directory_code get_placement_security_table(const pe_image &image, pe_directory_
             win_certificate win_cert;
             std::vector<uint8_t> data;
       
-            if (security_io.read(&win_cert, (uint32_t)sizeof(win_certificate)) != enma_io_success) {
+            if (security_io.read(&win_cert, sizeof(win_certificate)) != enma_io_success) {
                 return directory_code::directory_code_currupted;
             }
 

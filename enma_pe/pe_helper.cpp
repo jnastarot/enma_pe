@@ -59,7 +59,7 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
 
     struct placement_item{
         uint32_t rva;
-        uint32_t size;
+        size_t size;
     };
 
     std::vector<placement_item> placement_items;
@@ -91,10 +91,10 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
 
     for (auto& item : placement_items) {
         if (relocs) {
-            relocs->erase_items_in_segment(item.rva, uint32_t(item.size));
+            relocs->erase_items_in_segment(item.rva, item.size);
         }
 
-        image_io.set_image_offset(item.rva).memory_set(uint32_t(item.size), 0);
+        image_io.set_image_offset(item.rva).memory_set(item.size, 0);
     }
 
 
@@ -120,7 +120,7 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
 
                 if (_section->get_virtual_address() < placement_items[zone_idx].rva && //if it cover up part of the section
                     (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
-                    uint32_t minus_size = (_section->get_virtual_address() + _section->get_virtual_size()) - placement_items[zone_idx].rva;
+                    size_t minus_size = (_section->get_virtual_address() + _section->get_virtual_size()) - placement_items[zone_idx].rva;
                     
                     if (minus_size < placement_items[zone_idx].size) {
                         placement_items[zone_idx].size -= minus_size;
@@ -129,7 +129,7 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
                         placement_items.erase(placement_items.begin() + zone_idx);
                     }
 
-                    _section->set_size_of_raw_data(_section->get_size_of_raw_data() - minus_size);
+                    _section->set_size_of_raw_data( uint32_t(_section->get_size_of_raw_data() - minus_size) );
                 }
             }
 

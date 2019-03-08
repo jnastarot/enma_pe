@@ -747,7 +747,7 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
                 }
 
                 placement[image.va_to_rva(load_config_desc.lock_prefix_table)] = 
-                    directory_placement((uint32_t)((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_loadconfig_lock_table, "");
+                    directory_placement(((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_loadconfig_lock_table, "");
             }
         }
 

@@ -311,7 +311,7 @@ directory_code get_placement_bound_import_table(const pe_image &image, pe_direct
                 }
 
                 placement[virtual_address + bound_imp_description.offset_module_name] = 
-                    directory_placement((uint32_t)ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, lib_name);
+                    directory_placement(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, lib_name);
 
                 for (size_t ref_idx = 0; ref_idx < bound_imp_description.number_of_module_forwarder_refs; ref_idx++) {
                     image_bound_forwarded_ref ref_description;
@@ -330,7 +330,7 @@ directory_code get_placement_bound_import_table(const pe_image &image, pe_direct
 
 
                     placement[virtual_address + bound_imp_description.offset_module_name] =
-                        directory_placement((uint32_t)ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, ref_name);
+                        directory_placement(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, ref_name);
                 }
 
                 if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {

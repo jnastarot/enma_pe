@@ -173,10 +173,10 @@ directory_code get_debug_table(const pe_image &image, debug_table& debug) {
 
            
             if (debug_desc.size_of_data && debug_desc.address_of_raw_data) {
-                uint32_t _offset_real = 0;
-                uint32_t available_size = 0;
-                uint32_t down_oversize = 0;
-                uint32_t up_oversize = 0;
+                size_t _offset_real = 0;
+                size_t available_size = 0;
+                size_t down_oversize = 0;
+                size_t up_oversize = 0;
 
                 debug_io.view_image(
                     debug_desc.address_of_raw_data, debug_desc.size_of_data,
@@ -223,10 +223,10 @@ directory_code get_placement_debug_table(const pe_image &image, pe_directory_pla
             }
 
             if (debug_desc.size_of_data && debug_desc.address_of_raw_data) {
-                uint32_t _offset_real = 0;
-                uint32_t available_size = 0;
-                uint32_t down_oversize = 0;
-                uint32_t up_oversize = 0;
+                size_t _offset_real = 0;
+                size_t available_size = 0;
+                size_t down_oversize = 0;
+                size_t up_oversize = 0;
 
                 debug_io.view_image(
                     debug_desc.address_of_raw_data, ALIGN_UP(debug_desc.size_of_data, 0x10),

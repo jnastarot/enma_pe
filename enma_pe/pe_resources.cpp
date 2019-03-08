@@ -297,16 +297,16 @@ bool resource_directory::entry_by_name(const resource_directory_entry * &entry, 
 
 
 void calculate_resource_data_space(const resource_directory& root,//taken from pe bless
-	uint32_t aligned_offset_from_section_start, uint32_t& needed_size_for_structures, uint32_t& needed_size_for_strings) {
+    uint32_t aligned_offset_from_section_start, size_t& needed_size_for_structures, size_t& needed_size_for_strings) {
 
-	needed_size_for_structures += (uint32_t)sizeof(image_resource_directory);
+	needed_size_for_structures += sizeof(image_resource_directory);
 
 	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
 
-		needed_size_for_structures += (uint32_t)sizeof(image_resource_directory_entry);
+		needed_size_for_structures += sizeof(image_resource_directory_entry);
 
 		if (root.get_entry_list()[entry_idx].is_named()) {
-			needed_size_for_strings += (uint32_t(root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + INT16_SIZE);
+			needed_size_for_strings += (root.get_entry_list()[entry_idx].get_name().length() + 1) * 2 + INT16_SIZE;
 		}
 
 		if (!root.get_entry_list()[entry_idx].is_includes_data()) {
@@ -315,8 +315,8 @@ void calculate_resource_data_space(const resource_directory& root,//taken from p
 	}
 }
 
-void calculate_resource_data_space(const resource_directory& root, uint32_t needed_size_for_structures, //taken from pe bless
-	uint32_t needed_size_for_strings, uint32_t& needed_size_for_data, uint32_t& current_data_pos) {
+void calculate_resource_data_space(const resource_directory& root, size_t needed_size_for_structures, //taken from pe bless
+    size_t needed_size_for_strings, size_t& needed_size_for_data, size_t& current_data_pos) {
 
 	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
 
@@ -361,7 +361,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
             
 
 			if (rsrc_io.set_image_offset(
-                res_rva + (uint32_t)sizeof(image_resource_directory) + uint32_t(i * (uint32_t)sizeof(image_resource_directory_entry)) + offset_to_directory
+                uint32_t(res_rva + sizeof(image_resource_directory) + (i * sizeof(image_resource_directory_entry)) + offset_to_directory)
             ).read(&dir_entry, sizeof(image_resource_directory_entry)) == enma_io_success) {
 
 				//Create directory entry structure
@@ -577,30 +577,30 @@ bool build_resources_table(pe_image &image, pe_section& section, resource_direct
 		return true;
 	}
 
-	uint32_t aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), INT32_SIZE);
-	uint32_t needed_size_for_structures = aligned_offset_from_section_start - section.get_size_of_raw_data();
-	uint32_t needed_size_for_strings = 0;
-	uint32_t needed_size_for_data = 0;
+    uint32_t aligned_offset_from_section_start = ALIGN_UP(section.get_size_of_raw_data(), INT32_SIZE);
+    size_t needed_size_for_structures = aligned_offset_from_section_start - section.get_size_of_raw_data();
+    size_t needed_size_for_strings = 0;
+    size_t needed_size_for_data = 0;
 
 	calculate_resource_data_space(resources, aligned_offset_from_section_start, needed_size_for_structures, needed_size_for_strings);
 
 	{
-		uint32_t current_data_pos = aligned_offset_from_section_start + needed_size_for_structures + needed_size_for_strings;
+        size_t current_data_pos = aligned_offset_from_section_start + needed_size_for_structures + needed_size_for_strings;
 		calculate_resource_data_space(resources, needed_size_for_structures, needed_size_for_strings, needed_size_for_data, current_data_pos);
 	}
 
-	uint32_t needed_size = needed_size_for_structures + needed_size_for_strings + needed_size_for_data;
+    size_t needed_size = needed_size_for_structures + needed_size_for_strings + needed_size_for_data;
 
-	if (section.get_size_of_raw_data() < needed_size + aligned_offset_from_section_start) {
+	if (section.get_size_of_raw_data() < uint32_t(needed_size + aligned_offset_from_section_start) ) {
         pe_section_io(section, image).add_size(needed_size + aligned_offset_from_section_start);
 	}
 
 	uint32_t current_structures_pos = aligned_offset_from_section_start;
-	uint32_t current_strings_pos = current_structures_pos + needed_size_for_structures;
-	uint32_t current_data_pos = current_strings_pos + needed_size_for_strings;
+	uint32_t current_strings_pos = uint32_t( current_structures_pos + needed_size_for_structures );
+	uint32_t current_data_pos = uint32_t( current_strings_pos + needed_size_for_strings );
 
     image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, section.get_virtual_address() + aligned_offset_from_section_start);
-    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE, needed_size);
+    image.set_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE, uint32_t( needed_size ));
 
 
 	return rebuild_resource_directory(image, section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
@@ -614,10 +614,10 @@ directory_code get_placement_resources_table(const pe_image &image, pe_directory
 	if (virtual_address && virtual_size) {
         pe_image_io rsrc_io(image);
 
-        uint32_t _offset_real = 0;
-        uint32_t available_size = 0;
-        uint32_t down_oversize = 0;
-        uint32_t up_oversize = 0;
+        size_t _offset_real = 0;
+        size_t available_size = 0;
+        size_t down_oversize = 0;
+        size_t up_oversize = 0;
 
         rsrc_io.view_image(
             virtual_address, virtual_size,

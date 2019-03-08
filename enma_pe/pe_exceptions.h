@@ -2,6 +2,18 @@
 
 class exception_entry;
 
+enum unwind_parameter_type {
+    unwind_parameter_raw,
+    unwind_parameter_rva,
+    unwind_parameter_va
+};
+
+struct unwind_parameter {
+    uint32_t custom_id;
+    unwind_parameter_type type;
+    std::vector<uint8_t> param_data;
+};
+
 class exception_unwind_info {
     uint32_t unwind_info_rva;
     
@@ -13,9 +25,11 @@ class exception_unwind_info {
     uint8_t frame_offset;
 
     uint32_t handler_rva;
-    exception_entry * chained_item;
+    exception_entry * chained_entry;
 
     std::vector<unwind_code> codes;
+
+    std::vector<unwind_parameter> params;
 
     void * custom_parameter;
 public:
@@ -37,10 +51,12 @@ public:
     void set_frame_register(uint8_t frame_register);
     void set_frame_offset(uint8_t frame_offset);
 
-    void set_chained_item(exception_entry * chained_item);
+    void set_chained_entry(exception_entry * chained_entry);
     void set_handler_rva(uint32_t rva);
     void set_unwind_info_rva(uint32_t rva);
 
+    void set_codes(std::vector<unwind_code> &codes);
+    void set_params(std::vector<unwind_parameter> &params);
     void set_custom_parameter(void * custom_parameter);
 public: 
 
@@ -51,11 +67,17 @@ public:
     uint8_t get_frame_register() const;
     uint8_t get_frame_offset() const;
 
-    void * get_custom_parameter(void * custom_parameter);
-    void * get_custom_parameter(void * custom_parameter) const;
+    std::vector<unwind_code>& get_codes();
+    const std::vector<unwind_code>& get_codes() const;
 
-    exception_entry * get_chained_item();
-    const exception_entry * get_chained_item() const;
+    std::vector<unwind_parameter>& get_params();
+    const std::vector<unwind_parameter>& get_params() const;
+
+    void * get_custom_parameter();
+    const void * get_custom_parameter() const;
+
+    exception_entry * get_chained_entry();
+    const exception_entry * get_chained_entry() const;
     uint32_t get_handler_rva() const;
     uint32_t get_unwind_info_rva() const;
 };
@@ -111,5 +133,5 @@ public:
 
 directory_code get_exception_table(_In_ const pe_image &image, _Out_ exceptions_table& exceptions);
 bool build_exceptions_table(_Inout_ pe_image &image, _Inout_ pe_section& section,
-    _In_ const exceptions_table& exceptions);
+    _Inout_ exceptions_table& exceptions, _Inout_ relocation_table& relocs, _In_ bool build_unwindinfo = false);
 directory_code get_placement_exceptions_table(_In_ const pe_image &image, _Inout_ pe_directory_placement& placement);

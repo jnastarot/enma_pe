@@ -44,8 +44,8 @@ pe_section_io& pe_section_io::operator=(const pe_section_io& io_section) {
 
 
 bool pe_section_io::view_section(
-    uint32_t required_offset, uint32_t required_size,uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize) {
+    size_t required_offset, size_t required_size, size_t& real_offset,
+    size_t& available_size, size_t& down_oversize, size_t& up_oversize) {
 
  
     switch (addressing_type) {
@@ -81,11 +81,11 @@ uint32_t pe_section_io::get_present_size(uint32_t required_offset) {
 }
 
 enma_io_code pe_section_io::internal_read(
-    uint32_t data_offset,
-    void * buffer, uint32_t size,
-    uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize) {
+    size_t data_offset,
+    void * buffer, size_t size,
+    size_t& readed_size, size_t& down_oversize, size_t& up_oversize) {
 
-    uint32_t real_offset    = 0;
+    size_t real_offset    = 0;
 
     bool b_view = view_section(data_offset, size,
         real_offset,
@@ -93,7 +93,7 @@ enma_io_code pe_section_io::internal_read(
 
 
     if (b_view && readed_size) {
-        uint32_t present_size = get_present_size(real_offset);
+        size_t present_size = get_present_size((uint32_t)real_offset);
 
         if (present_size) {
 
@@ -124,12 +124,12 @@ enma_io_code pe_section_io::internal_read(
 }
 
 enma_io_code pe_section_io::internal_write(
-    uint32_t data_offset,
-    const void * buffer, uint32_t size,
-    uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize) {
+    size_t data_offset,
+    const void * buffer, size_t size,
+    size_t& wrote_size, size_t& down_oversize, size_t& up_oversize) {
 
 
-    uint32_t real_offset = 0;
+    size_t real_offset = 0;
 
     bool b_view = view_section(data_offset, size,
         real_offset,
@@ -184,48 +184,48 @@ enma_io_code pe_section_io::internal_write(
     return enma_io_code::enma_io_data_not_present;
 }
 
-enma_io_code pe_section_io::read(void * data, uint32_t size) {
+enma_io_code pe_section_io::read(void * data, size_t size) {
 
-    uint32_t readed_size;
-    uint32_t down_oversize;
-    uint32_t up_oversize;
+    size_t readed_size;
+    size_t down_oversize;
+    size_t up_oversize;
 
 
     enma_io_code code = internal_read(section_offset, data, size,
         readed_size, down_oversize, up_oversize);
 
-    section_offset += readed_size;
+    section_offset += (uint32_t)readed_size;
 
     return code;
 }
 
-enma_io_code pe_section_io::write(const void * data, uint32_t size) {
+enma_io_code pe_section_io::write(const void * data, size_t size) {
 
-    uint32_t wrote_size;
-    uint32_t down_oversize;
-    uint32_t up_oversize;
+    size_t wrote_size;
+    size_t down_oversize;
+    size_t up_oversize;
 
     enma_io_code code = internal_write(section_offset, data, size,
         wrote_size, down_oversize, up_oversize);
 
-    section_offset += wrote_size;
+    section_offset += (uint32_t)wrote_size;
 
     return code;
 }
 
-enma_io_code pe_section_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
+enma_io_code pe_section_io::read(std::vector<uint8_t>& buffer, size_t size) {
 
     if (buffer.size() < size) { buffer.resize(size); }
 
     return read(buffer.data(), uint32_t(buffer.size()));
 }
 
-enma_io_code pe_section_io::write(std::vector<uint8_t>& buffer) {
+enma_io_code pe_section_io::write(const std::vector<uint8_t>& buffer) {
 
     return write(buffer.data(), uint32_t(buffer.size()));
 }
 
-enma_io_code pe_section_io::memory_set(uint32_t size, uint8_t data) {
+enma_io_code pe_section_io::memory_set(size_t size, uint8_t data) {
 
     std::vector<uint8_t> set_buffer;
     set_buffer.resize(size);
@@ -276,18 +276,18 @@ enma_io_code pe_section_io::read_wstring(std::wstring& _wstring) {
     return enma_io_code::enma_io_success;
 }
 
-pe_section_io& pe_section_io::align_up(uint32_t factor, bool offset_to_end) {
+pe_section_io& pe_section_io::align_up(size_t factor, bool offset_to_end) {
     add_size(ALIGN_UP(section->get_size_of_raw_data(), factor) - section->get_size_of_raw_data(), offset_to_end);
 
     return *this;
 }
-pe_section_io& pe_section_io::align_up_offset(uint32_t factor) {
-    this->section_offset = ALIGN_UP(this->section_offset, factor);
+pe_section_io& pe_section_io::align_up_offset(size_t factor) {
+    this->section_offset = (uint32_t)ALIGN_UP(this->section_offset, factor);
 
     return *this;
 }
 
-pe_section_io& pe_section_io::add_size(uint32_t size, bool offset_to_end) {
+pe_section_io& pe_section_io::add_size(size_t size, bool offset_to_end) {
     if (size) {
         section->get_section_data().resize(section->get_size_of_raw_data() + size);
     }

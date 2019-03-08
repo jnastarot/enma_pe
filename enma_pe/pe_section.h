@@ -30,7 +30,7 @@ public:
 	pe_section& set_writeable(bool flag);
 	pe_section& set_executable(bool flag);
 
-	void add_data(const uint8_t * data,uint32_t data_size);
+	void add_data(const uint8_t * data, size_t data_size);
 public:
 	std::string get_section_name() const;
 	uint32_t get_virtual_size() const;

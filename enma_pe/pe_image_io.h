@@ -17,9 +17,9 @@ enum enma_io_code {
 };
 
 inline bool view_data(//-> true if data or path of data is available or can be used trought adding size
-    uint32_t  required_offset, uint32_t required_size, uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-    uint32_t present_offset, uint32_t present_size);
+    size_t  required_offset, size_t required_size, size_t& real_offset,
+    size_t& available_size, size_t& down_oversize, size_t& up_oversize,
+    size_t present_offset, size_t present_size);
 
 
 #include "pe_section_io.h"
@@ -67,29 +67,29 @@ public:
 
 
 
-    enma_io_code read(void * data, uint32_t size);
-    enma_io_code write(const void * data, uint32_t size);
+    enma_io_code read(void * data, size_t size);
+    enma_io_code write(const void * data, size_t size);
 
-    enma_io_code read(std::vector<uint8_t>& buffer, uint32_t size);
+    enma_io_code read(std::vector<uint8_t>& buffer, size_t size);
     enma_io_code write(std::vector<uint8_t>& buffer);
 
-    enma_io_code memory_set(uint32_t size,uint8_t data);
+    enma_io_code memory_set(size_t size,uint8_t data);
 
     enma_io_code read_string(std::string& _string);
     enma_io_code read_wstring(std::wstring& _wstring);
 
-    enma_io_code internal_read(uint32_t data_offset,
-        void * buffer, uint32_t size,
-        uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize
+    enma_io_code internal_read(size_t data_offset,
+        void * buffer, size_t size,
+        size_t& readed_size, size_t& down_oversize, size_t& up_oversize
     );
-    enma_io_code internal_write(uint32_t data_offset,
-        const void * buffer, uint32_t size,
-        uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
+    enma_io_code internal_write(size_t data_offset,
+        const void * buffer, size_t size,
+        size_t& wrote_size, size_t& down_oversize, size_t& up_oversize
     );
 
     bool view_image( //-> return like in view_data
-        uint32_t required_offset, uint32_t required_size, uint32_t& real_offset,
-        uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize);
+        size_t required_offset, size_t required_size, size_t& real_offset,
+        size_t& available_size, size_t& down_oversize, size_t& up_oversize);
 public:
     pe_image_io&   set_mode(enma_io_mode mode);
     pe_image_io&   set_addressing_type(enma_io_addressing_type type);
@@ -112,9 +112,9 @@ public:
 };
 
 inline bool view_data(
-    uint32_t  required_offset, uint32_t required_size, uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize,
-    uint32_t present_offset, uint32_t present_size) {
+    size_t  required_offset, size_t required_size, size_t& real_offset,
+    size_t& available_size, size_t& down_oversize, size_t& up_oversize,
+    size_t present_offset, size_t present_size) {
 
 
     //         ...............

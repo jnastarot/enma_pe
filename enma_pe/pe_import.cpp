@@ -564,7 +564,7 @@ directory_code _get_placement_import_table(const pe_image &image, pe_directory_p
                 }
 
                 placement[import_desc.name] =
-                    directory_placement((uint32_t)ALIGN_UP(library_name.length() + 1, 0x2), id_pe_import_library_name, library_name);
+                    directory_placement(ALIGN_UP(library_name.length() + 1, 0x2), id_pe_import_library_name, library_name);
 
                 bool is_bound_library = (import_desc.time_date_stamp == UINT32_MAX &&
                     bound_imports.has_library(library_name));
@@ -606,7 +606,7 @@ directory_code _get_placement_import_table(const pe_image &image, pe_directory_p
 
 
                                 placement[(uint32_t)original_iat_item] =
-                                    directory_placement((uint32_t)ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
+                                    directory_placement(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
                             }
                         }
                         else {
@@ -621,7 +621,7 @@ directory_code _get_placement_import_table(const pe_image &image, pe_directory_p
                                 if (import_func_name_io.read_string(func_name) == enma_io_success) {
 
                                     placement[(uint32_t)(iat_item + sizeof(uint16_t))] =
-                                        directory_placement((uint32_t)ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
+                                        directory_placement(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
                                 }
                             }
                         }

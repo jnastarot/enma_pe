@@ -37,8 +37,8 @@ pe_image_io& pe_image_io::operator=(const pe_image_io& image_io) {
 
 
 bool pe_image_io::view_image( //-> return like in view_data
-    uint32_t required_offset, uint32_t required_size, uint32_t& real_offset,
-    uint32_t& available_size, uint32_t& down_oversize, uint32_t& up_oversize) {
+    size_t required_offset, size_t required_size, size_t& real_offset,
+    size_t& available_size, size_t& down_oversize, size_t& up_oversize) {
 
 
     if (image->get_sections_number()) {
@@ -78,11 +78,11 @@ bool pe_image_io::view_image( //-> return like in view_data
 }
 
 
-enma_io_code pe_image_io::internal_read(uint32_t data_offset,
-    void * buffer, uint32_t size,
-    uint32_t& readed_size, uint32_t& down_oversize, uint32_t& up_oversize
+enma_io_code pe_image_io::internal_read(size_t data_offset,
+    void * buffer, size_t size,
+    size_t& readed_size, size_t& down_oversize, size_t& up_oversize
 ) {
-    uint32_t real_offset = 0;
+    size_t real_offset = 0;
 
     bool b_view = view_image(data_offset, size,
         real_offset,
@@ -90,8 +90,8 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 
 
     if (b_view && readed_size) {
-        uint32_t total_readed_size    = 0;
-        uint32_t total_up_oversize    = 0;
+        size_t total_readed_size    = 0;
+        size_t total_up_oversize    = 0;
 
         uint32_t available_headers_size = (uint32_t)image->get_headers_data().size();
         uint32_t view_headers_size = addressing_type == enma_io_addressing_type::enma_io_address_raw ?
@@ -100,9 +100,9 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 
         if (data_offset < view_headers_size) {
             
-            uint32_t header_readed_size = 0;
-            uint32_t header_down_oversize = 0;
-            uint32_t header_up_oversize = 0;
+            size_t header_readed_size = 0;
+            size_t header_down_oversize = 0;
+            size_t header_up_oversize = 0;
 
             
             b_view = view_data(
@@ -144,9 +144,9 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
 
             if (total_readed_size == readed_size) { break; }
 
-            uint32_t sec_readed_size   = 0;
-            uint32_t sec_down_oversize = 0;
-            uint32_t sec_up_oversize   = 0;
+            size_t sec_readed_size   = 0;
+            size_t sec_down_oversize = 0;
+            size_t sec_up_oversize   = 0;
 
             pe_section_io(*section, *image, mode, addressing_type).internal_read(
                 data_offset, buffer, size, sec_readed_size, sec_down_oversize, sec_up_oversize
@@ -161,11 +161,11 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
         if (addressing_type == enma_io_addressing_type::enma_io_address_raw &&
             total_up_oversize && image->get_overlay_data().size()) { //take up size from overlay
 
-            uint32_t top_section_raw = 0;
+            size_t top_section_raw = 0;
 
-            uint32_t overlay_readed_size = 0;
-            uint32_t overlay_down_oversize = 0;
-            uint32_t overlay_up_oversize = 0;
+            size_t overlay_readed_size = 0;
+            size_t overlay_down_oversize = 0;
+            size_t overlay_up_oversize = 0;
 
             if (image->get_sections_number()) {
                 top_section_raw = 
@@ -175,7 +175,7 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
             b_view = view_data(
                 data_offset, size,
                 real_offset, overlay_readed_size, overlay_down_oversize, overlay_up_oversize,
-                top_section_raw, uint32_t(image->get_overlay_data().size()));
+                top_section_raw, image->get_overlay_data().size());
             
             if (b_view) {
                 memcpy(&((uint8_t*)buffer)[down_oversize], &image->get_overlay_data().data()[real_offset],overlay_readed_size);
@@ -202,12 +202,12 @@ enma_io_code pe_image_io::internal_read(uint32_t data_offset,
     return enma_io_code::enma_io_data_not_present;
 }
 
-enma_io_code pe_image_io::internal_write(uint32_t data_offset,
-    const void * buffer, uint32_t size,
-    uint32_t& wrote_size, uint32_t& down_oversize, uint32_t& up_oversize
+enma_io_code pe_image_io::internal_write(size_t data_offset,
+    const void * buffer, size_t size,
+    size_t& wrote_size, size_t& down_oversize, size_t& up_oversize
 ) {
 
-    uint32_t real_offset = 0;
+    size_t real_offset = 0;
 
     bool b_view = view_image(data_offset, size,
         real_offset,
@@ -217,14 +217,14 @@ enma_io_code pe_image_io::internal_write(uint32_t data_offset,
     if (b_view &&
         (wrote_size || (up_oversize && mode == enma_io_mode::enma_io_mode_allow_expand))) {
 
-        uint32_t total_wroted_size   = 0;
-        uint32_t total_up_oversize   = 0;
+        size_t total_wroted_size   = 0;
+        size_t total_up_oversize   = 0;
 
         for (size_t section_idx = 0; section_idx < image->get_sections().size(); section_idx++) {
 
-            uint32_t sec_wroted_size   = 0;
-            uint32_t sec_down_oversize = 0;
-            uint32_t sec_up_oversize   = 0;
+            size_t sec_wroted_size   = 0;
+            size_t sec_down_oversize = 0;
+            size_t sec_up_oversize   = 0;
 
             pe_section_io section_io(*image->get_sections()[section_idx], *image,
                 (section_idx == (image->get_sections().size()-1) &&
@@ -257,48 +257,48 @@ enma_io_code pe_image_io::internal_write(uint32_t data_offset,
     return enma_io_code::enma_io_data_not_present;
 }
 
-enma_io_code pe_image_io::read(void * data, uint32_t size) {
+enma_io_code pe_image_io::read(void * data, size_t size) {
 
-    uint32_t readed_size;
-    uint32_t down_oversize;
-    uint32_t up_oversize;
+    size_t readed_size;
+    size_t down_oversize;
+    size_t up_oversize;
 
 
     enma_io_code code = internal_read(image_offset, data, size,
         readed_size, down_oversize, up_oversize);
 
-    image_offset += readed_size;
+    image_offset += (uint32_t)readed_size;
 
     return code;
 }
 
-enma_io_code pe_image_io::write(const void * data, uint32_t size) {
+enma_io_code pe_image_io::write(const void * data, size_t size) {
 
-    uint32_t wrote_size;
-    uint32_t down_oversize;
-    uint32_t up_oversize;
+    size_t wrote_size;
+    size_t down_oversize;
+    size_t up_oversize;
 
     enma_io_code code = internal_write(image_offset, data, size,
         wrote_size, down_oversize, up_oversize);
 
-    image_offset += wrote_size;
+    image_offset += (uint32_t)wrote_size;
 
     return code;
 }
 
-enma_io_code pe_image_io::read(std::vector<uint8_t>& buffer, uint32_t size) {
+enma_io_code pe_image_io::read(std::vector<uint8_t>& buffer, size_t size) {
 
     if (buffer.size() < size) { buffer.resize(size); }
 
-    return read(buffer.data(), uint32_t(buffer.size()));
+    return read(buffer.data(), buffer.size());
 }
 
 enma_io_code pe_image_io::write(std::vector<uint8_t>& buffer) {
 
-    return write(buffer.data(), uint32_t(buffer.size()));
+    return write(buffer.data(), buffer.size());
 }
 
-enma_io_code pe_image_io::memory_set(uint32_t size, uint8_t data) {
+enma_io_code pe_image_io::memory_set(size_t size, uint8_t data) {
 
     std::vector<uint8_t> set_buffer;
     set_buffer.resize(size);

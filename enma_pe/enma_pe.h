@@ -64,13 +64,13 @@ enum id_pe_placement {
 };
 
 struct directory_placement {
-    uint32_t size; 
+    size_t size;
     id_pe_placement id;
     std::string name;
 
     directory_placement()
         :size(0), id(id_pe_none), name() {};
-    directory_placement(uint32_t size, id_pe_placement id, std::string name)
+    directory_placement(size_t size, id_pe_placement id, std::string name)
         :size(size), id(id), name(name) {};
 };
 
@@ -82,13 +82,13 @@ enum directory_code {
     directory_code_currupted,
 };
 
+#include "pe_relocations.h"
 #include "pe_export.h"
 #include "pe_bound_import.h"
 #include "pe_import.h"
 #include "pe_resources.h"
 #include "pe_exceptions.h"
 #include "pe_security.h"
-#include "pe_relocations.h"
 #include "pe_debug.h"
 #include "pe_tls.h"
 #include "pe_loadconfig.h"
