@@ -34,9 +34,19 @@ exception_unwind_info& exception_unwind_info::operator=(const exception_unwind_i
     this->frame_register = item.frame_register;
     this->frame_offset = item.frame_offset;
     this->handler_rva = item.handler_rva;
-    this->chained_entry = item.chained_entry;
+
+    if (item.chained_entry) {
+        this->chained_entry = new exception_entry(*item.chained_entry);
+    }
+    else {
+        this->chained_entry = 0;
+    }
+    
     this->codes = item.codes;
     this->params = item.params;
+
+    this->custom_parameter = 0;
+    this->custom_id = 0;
 
     return *this;
 }
