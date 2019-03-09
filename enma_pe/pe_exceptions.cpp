@@ -3,9 +3,10 @@
 #include "pe_exceptions.h"
 
 
-exception_unwind_info::exception_unwind_info() {
-
-}
+exception_unwind_info::exception_unwind_info() 
+    :unwind_info_rva(0), version(0), flags(0), size_of_prolog(0),
+    count_of_codes(0), frame_register(0), frame_offset(0),
+    handler_rva(0), chained_entry(0), custom_parameter(0), custom_id(0) {}
 
 exception_unwind_info::exception_unwind_info(uint32_t unwind_info_rva, uint8_t version,
     uint8_t flags, uint8_t size_of_prolog, uint8_t count_of_codes, uint8_t frame_register, uint8_t frame_offset) 
