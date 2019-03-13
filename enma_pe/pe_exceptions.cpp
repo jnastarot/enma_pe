@@ -230,6 +230,7 @@ exceptions_table::~exceptions_table() {
 
 exceptions_table& exceptions_table::operator=(const exceptions_table& exceptions) {
     this->exception_entries = exceptions.exception_entries;
+    this->unwind_entries = exceptions.unwind_entries;
 
     return *this;
 }
