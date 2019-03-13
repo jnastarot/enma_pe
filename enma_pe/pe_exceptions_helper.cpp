@@ -1735,3 +1735,69 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
         }
     }
 }
+
+
+void copy_extended_exceptions_info(_Inout_ pe_image_expanded& dst_expanded_image, _In_ const pe_image_expanded& src_expanded_image) {
+
+
+    for (size_t unwind_idx = 0; unwind_idx < src_expanded_image.exceptions.get_unwind_entries().size(); unwind_idx++) {
+        auto& src_unwind_data = src_expanded_image.exceptions.get_unwind_entries()[unwind_idx];
+        auto& dst_unwind_data = dst_expanded_image.exceptions.get_unwind_entries()[unwind_idx];
+
+        dst_unwind_data.set_custom_id(src_unwind_data.get_custom_id());
+        dst_unwind_data.set_custom_parameter(0);
+
+        if (src_unwind_data.get_custom_parameter()) {
+ 
+            switch (src_unwind_data.get_custom_id()) {
+
+            case unknown_handler: {
+                break;
+            }
+
+            case __c_specific_handler: {
+                auto* data_ = ((c_specific_handler_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new c_specific_handler_parameters_data(*data_));
+
+                break;
+            }
+            case __delphi_specific_handler: {
+                auto* data_ = ((delphi_specific_handler_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new delphi_specific_handler_parameters_data(*data_));
+
+                break;
+            }
+            case __llvm_specific_handler: {
+                auto* data_ = ((llvm_specific_handler_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new llvm_specific_handler_parameters_data(*data_));
+
+                break;
+            }
+            case __gs_handler_check: {
+                auto* data_ = ((gs_handler_check_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new gs_handler_check_parameters_data(*data_));
+
+                break;
+            }
+            case __gs_handler_check_seh: {
+                auto* data_ = ((gs_handler_check_seh_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new gs_handler_check_seh_parameters_data(*data_));
+
+                break;
+            }
+            case __cxx_frame_handler3: {
+                auto* data_ = ((cxx_frame_handler3_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new cxx_frame_handler3_parameters_data(*data_));
+
+                break;
+            }
+            case __gs_handler_check_eh: {
+                auto* data_ = ((gs_handler_check_eh_parameters_data*)src_unwind_data.get_custom_parameter());
+                dst_unwind_data.set_custom_parameter(new gs_handler_check_eh_parameters_data(*data_));
+
+                break;
+            }
+            }
+        }
+    }
+}
