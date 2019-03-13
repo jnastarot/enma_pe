@@ -24,7 +24,7 @@ public:
 
     void get_items_by_relocation_id(std::vector<relocation_item*>& found_relocs, uint32_t relocation_id);
 
-    void get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, size_t segment_size);
+    void get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, size_t segment_size) const;
     bool erase_items_in_segment(uint32_t segment_rva, size_t segment_size);
 
 

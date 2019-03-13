@@ -72,6 +72,9 @@
     <Filter Include="Заголовочные файлы\pe_helpers\pe_string_extractor">
       <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_exceptions_helper">
+      <UniqueIdentifier>{660c532b-c578-45cc-b02e-6096a76311de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -143,6 +146,9 @@
     <ClInclude Include="pe_string_extractor.h">
       <Filter>Заголовочные файлы\pe_helpers\pe_string_extractor</Filter>
     </ClInclude>
+    <ClInclude Include="pe_exceptions_helper.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -207,6 +213,9 @@
     </ClCompile>
     <ClCompile Include="pe_string_extractor.cpp">
       <Filter>Заголовочные файлы\pe_helpers\pe_string_extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_exceptions_helper.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

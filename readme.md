@@ -40,6 +40,7 @@ e.mail..: jnastarot@yandex.ru
 
 | feature name | description |
 | :------: | :-----------: |
+| `exceptions helper` | parsing and building of extended variables for x64 exceptions |
 | `string extractor` | extracting ansi and unicode strings |
 | `rich data parser` | geting and building rich data|
 | `entropy sections calc` | calculating entropy of section |

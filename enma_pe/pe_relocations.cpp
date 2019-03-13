@@ -93,7 +93,7 @@ void relocation_table::get_items_by_relocation_id(std::vector<relocation_item*>&
     }
 }
 
-void relocation_table::get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, size_t segment_size) {
+void relocation_table::get_items_in_segment(std::vector<relocation_item>& relocs, uint32_t segment_rva, size_t segment_size) const {
 
     relocs.clear();
 

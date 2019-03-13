@@ -515,6 +515,7 @@ bool build_exceptions_table(pe_image &image, pe_section& section, exceptions_tab
     return true;
 }
 
+
 directory_code get_placement_exceptions_table(const pe_image &image, pe_directory_placement& placement) {
 
     exceptions_table _exceptions;
@@ -531,13 +532,17 @@ directory_code get_placement_exceptions_table(const pe_image &image, pe_director
         directory_placement(virtual_size, id_pe_exception_descriptors, "");
 
     for (auto& unwind_entry : _exceptions.get_unwind_entries()) {
-        placement[unwind_entry.get_unwind_info_rva()] =
-            directory_placement( ALIGN_UP(
-                sizeof(unwind_info) + 
-                (unwind_entry.get_count_of_codes() * 2) + 
-                unwind_entry.get_handler_rva() ? sizeof(uint32_t) : 0                
-                , 4 ) , 
-                id_pe_exception_unwindinfo, "");
+
+        directory_placement dsp = directory_placement(ALIGN_UP(
+            sizeof(unwind_info) +
+            (unwind_entry.get_count_of_codes() * sizeof(unwind_code)) +
+            ((unwind_entry.get_flags() & (UNW_FLAG_EHANDLER | UNW_FLAG_UHANDLER)) ? sizeof(uint32_t) : 0) +
+            ((unwind_entry.get_flags() & UNW_FLAG_CHAININFO) ? sizeof(runtime_function_entry) : 0)
+            , 4),
+            id_pe_exception_unwindinfo, "");
+
+            placement[unwind_entry.get_unwind_info_rva()] = dsp;
+            
     }
     
 
