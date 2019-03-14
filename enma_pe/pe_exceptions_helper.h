@@ -19,7 +19,7 @@ enum exception_handler_type {
 
 #pragma pack(push, 1)
 
-typedef struct cxx_scope_table_entry {
+struct cxx_scope_table_entry {
     uint32_t begin_address;
     uint32_t end_address;
     uint32_t handler_address;
@@ -41,7 +41,7 @@ struct cxx_scope_table {
 struct cxx_type_descriptor {
     const void * pVFTable; // vtable of type_info class    
     void* spare; // used to keep the demangled name returned by type_info::name()
-    char name[0]; // mangled type name, e.g. ".H" = "int", ".?AUA@@" = "struct A", ".?AVA@@" = "class A"
+    char name[1]; // mangled type name, e.g. ".H" = "int", ".?AUA@@" = "struct A", ".?AVA@@" = "class A"
 };
 
 struct cxx_handler_type {

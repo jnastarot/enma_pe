@@ -219,7 +219,7 @@ const std::vector<cxx_ip_to_state_map_entry> &cxx_exception_func_info::get_ip_to
 
 
 #define GET_EXCEPTION_PARAMS_RVA(unwind_entry) \
-        (unwind_entry.get_unwind_info_rva() +\
+        uint32_t(unwind_entry.get_unwind_info_rva() +\
         sizeof(unwind_info) +\
         ALIGN_UP(sizeof(unwind_code) * unwind_entry.get_codes().size(), 4) +\
         sizeof(uint32_t))
@@ -1403,7 +1403,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
             data = new cxx_frame_handler3_parameters_data({ func_desc });
 
             unwind_entry.set_custom_parameter(data);
-            unwind_entry.set_custom_id(__gs_handler_check_eh);
+            unwind_entry.set_custom_id(__cxx_frame_handler3);
 
             if(func_desc.max_state) {
 
@@ -1473,10 +1473,10 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
 uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& func_info) {
 
     
-    func_info_io.seek_to_end();
+    
 
     if (func_info.get_unwind_map_entries().size()) {
-        func_info.set_max_state(func_info.get_unwind_map_entries().size());
+        func_info.set_max_state((uint32_t)func_info.get_unwind_map_entries().size());
         func_info.set_p_unwind_map(func_info_io.get_image_offset());
 
         func_info_io.write(
@@ -1493,7 +1493,7 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
 
         for (auto& try_entry : func_info.get_try_block_map_entries()) {
 
-            try_entry.set_catches(try_entry.get_handler_entries().size());
+            try_entry.set_catches((uint32_t)try_entry.get_handler_entries().size());
             try_entry.set_p_handler_array(func_info_io.get_image_offset());
             
             func_info_io.write(
@@ -1502,7 +1502,7 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
             );
         }
 
-        func_info.set_max_state(func_info.get_try_block_map_entries().size());
+        func_info.set_max_state((uint32_t)func_info.get_try_block_map_entries().size());
         func_info.set_p_unwind_map(func_info_io.get_image_offset());
 
         for (auto& try_entry : func_info.get_try_block_map_entries()) {
@@ -1513,7 +1513,7 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
             try_block_info.catches      = try_entry.get_catches();
             try_block_info.p_handler_array = try_entry.get_p_handler_array();
 
-            try_entry.set_catches(try_entry.get_handler_entries().size());
+            try_entry.set_catches((uint32_t)try_entry.get_handler_entries().size());
             try_entry.set_p_handler_array(func_info_io.get_image_offset());
 
             func_info_io.write(&try_block_info,sizeof(try_block_info));
@@ -1527,7 +1527,7 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
 
     if (func_info.get_ip_to_state_map_entries().size()) {
 
-        func_info.set_ip_map_entries(func_info.get_ip_to_state_map_entries().size());
+        func_info.set_ip_map_entries((uint32_t)func_info.get_ip_to_state_map_entries().size());
         func_info.set_p_ip_to_state_map(func_info_io.get_image_offset()); 
 
         func_info_io.write(
@@ -1564,6 +1564,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
     if (expanded_image.image.is_x32_image()) { return; }
 
     pe_image_io ex_info_io(expanded_image.image, enma_io_mode_allow_expand);
+    ex_info_io.seek_to_end();
 
     for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
 
@@ -1585,7 +1586,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                     scope_count_parameter.type = unwind_parameter_raw;
                     scope_count_parameter.param_data.resize(sizeof(uint32_t));
 
-                    uint32_t scope_count = data->table.size();
+                    uint32_t scope_count = (uint32_t)data->table.size();
                     *(uint32_t*)&scope_count_parameter.param_data.data()[0] = scope_count;
 
                     params.push_back(scope_count_parameter);
@@ -1615,7 +1616,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                     scope_count_parameter.type = unwind_parameter_raw;
                     scope_count_parameter.param_data.resize(sizeof(uint32_t));
 
-                    uint32_t scope_count = data->table.size();
+                    uint32_t scope_count = (uint32_t)data->table.size();
                     *(uint32_t*)&scope_count_parameter.param_data.data()[0] = scope_count;
 
                     params.push_back(scope_count_parameter);
@@ -1668,7 +1669,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                     scope_count_parameter.type = unwind_parameter_raw;
                     scope_count_parameter.param_data.resize(sizeof(uint32_t));
 
-                    uint32_t scope_count = data->table.size();
+                    uint32_t scope_count = (uint32_t)data->table.size();
                     *(uint32_t*)&scope_count_parameter.param_data.data()[0] = scope_count;
 
                     params.push_back(scope_count_parameter);
