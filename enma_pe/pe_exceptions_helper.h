@@ -179,35 +179,81 @@ public:
     const std::vector<cxx_ip_to_state_map_entry> &get_ip_to_state_map_entries() const;
 };
 
-typedef struct {
+struct c_specific_handler_parameters_data {
     std::vector<cxx_scope_table_entry> table;
-}c_specific_handler_parameters_data;
 
-typedef struct {
+    c_specific_handler_parameters_data(){}
+    c_specific_handler_parameters_data(const std::vector<cxx_scope_table_entry>& table)
+        : table(table) {}
+    c_specific_handler_parameters_data(const c_specific_handler_parameters_data& data)
+        : table(data.table){}
+};
+
+struct delphi_specific_handler_parameters_data {
     std::vector<delphi_scope_table_entry> table;
-}delphi_specific_handler_parameters_data;
 
-typedef struct {
+    delphi_specific_handler_parameters_data() {}
+    delphi_specific_handler_parameters_data(const std::vector<delphi_scope_table_entry>& table)
+        : table(table) {}
+    delphi_specific_handler_parameters_data(const delphi_specific_handler_parameters_data& data)
+        : table(data.table) {}
+};
+
+struct llvm_specific_handler_parameters_data {
     uint32_t data_rva;
-}llvm_specific_handler_parameters_data;
 
-typedef struct {
+    llvm_specific_handler_parameters_data() 
+        : data_rva(0){}
+    llvm_specific_handler_parameters_data(uint32_t data_rva)
+        : data_rva(data_rva) {}
+    llvm_specific_handler_parameters_data(const llvm_specific_handler_parameters_data& data)
+        : data_rva(data.data_rva) {}
+};
+
+struct gs_handler_check_parameters_data {
     uint32_t gs_data;
-}gs_handler_check_parameters_data;
 
-typedef struct {
+    gs_handler_check_parameters_data()
+        : gs_data(0){}
+    gs_handler_check_parameters_data(uint32_t gs_data)
+        : gs_data(gs_data) {}
+    gs_handler_check_parameters_data(const gs_handler_check_parameters_data& data)
+        : gs_data(data.gs_data) {}
+};
+
+struct gs_handler_check_seh_parameters_data {
     std::vector<cxx_scope_table_entry> table;
     uint32_t gs_data;
-}gs_handler_check_seh_parameters_data;
 
-typedef struct {
+    gs_handler_check_seh_parameters_data()
+        : gs_data(0){}
+    gs_handler_check_seh_parameters_data(const std::vector<cxx_scope_table_entry>& table, uint32_t gs_data)
+        : table(table), gs_data(gs_data) {}
+    gs_handler_check_seh_parameters_data(const gs_handler_check_seh_parameters_data& data)
+        : table(data.table), gs_data(data.gs_data) {};
+};
+
+struct cxx_frame_handler3_parameters_data {
     cxx_exception_func_info func_info;
-}cxx_frame_handler3_parameters_data;
 
-typedef struct {
+    cxx_frame_handler3_parameters_data() {}
+    cxx_frame_handler3_parameters_data(const cxx_exception_func_info& func_info)
+        : func_info(func_info) {}
+    cxx_frame_handler3_parameters_data(const cxx_frame_handler3_parameters_data& data) 
+        : func_info(data.func_info) {}
+};
+
+struct gs_handler_check_eh_parameters_data {
     cxx_exception_func_info func_info;
     uint32_t gs_data;
-}gs_handler_check_eh_parameters_data;
+
+    gs_handler_check_eh_parameters_data()
+        : gs_data(0) {}
+    gs_handler_check_eh_parameters_data(const cxx_exception_func_info& func_info, uint32_t gs_data)
+        : func_info(func_info), gs_data(gs_data) {}
+    gs_handler_check_eh_parameters_data(const gs_handler_check_eh_parameters_data& data)
+        : func_info(data.func_info), gs_data(data.gs_data) {};
+};
 
 
 enum ex_exceptions_info_result {

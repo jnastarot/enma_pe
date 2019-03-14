@@ -536,43 +536,43 @@ ex_exceptions_info_result get_extended_exception_info(pe_image_expanded& expande
         }
         case __c_specific_handler: {
             if (!init_data___c_specific_handler_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __delphi_specific_handler: {
             if (!init_data___delphi_specific_handler_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __llvm_specific_handler: {
             if (!init_data__llvm_specific_handler_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check: {
             if (!init_data__gs_handler_check_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_seh: {
             if (!init_data__gs_handler_check_seh_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __cxx_frame_handler3: {
             if (!init_data__cxx_frame_handler3_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_eh: {
             if (!init_data__gs_handler_check_eh_data(expanded_image, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
@@ -637,43 +637,43 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_e
         }
         case __c_specific_handler: {
             if (!get_placement___c_specific_handler_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __delphi_specific_handler: {
             if (!get_placement___delphi_specific_handler_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return  ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __llvm_specific_handler: {
             if (!get_placement__llvm_specific_handler_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check: {
             if (!get_placement__gs_handler_check_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_seh: {
             if (!get_placement__gs_handler_check_seh_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __cxx_frame_handler3: {
             if (!get_placement__cxx_frame_handler3_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_eh: {
             if (!get_placement__gs_handler_check_eh_data(expanded_image, placement, handler_desc_entry.first)) {
-                ex_exceptions_info_result::ex_exceptions_info_has_error;
+                return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
@@ -1470,9 +1470,9 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
 }
 
 
-uint32_t build_func_info(pe_image& image, cxx_exception_func_info& func_info) {
+uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& func_info) {
 
-    pe_image_io func_info_io(image, enma_io_mode_allow_expand);
+    
     func_info_io.seek_to_end();
 
     if (func_info.get_unwind_map_entries().size()) {
@@ -1562,6 +1562,8 @@ uint32_t build_func_info(pe_image& image, cxx_exception_func_info& func_info) {
 
 void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
     if (expanded_image.image.is_x32_image()) { return; }
+
+    pe_image_io ex_info_io(expanded_image.image, enma_io_mode_allow_expand);
 
     for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
 
@@ -1702,7 +1704,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                     func_info_parameter.type = unwind_parameter_raw;
                     func_info_parameter.param_data.resize(sizeof(uint32_t));
 
-                    *(uint32_t*)&func_info_parameter.param_data.data()[0] = build_func_info(expanded_image.image, data->func_info);
+                    *(uint32_t*)&func_info_parameter.param_data.data()[0] = build_func_info(ex_info_io, data->func_info);
 
                     params.push_back(func_info_parameter);
                 }
@@ -1717,7 +1719,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                     func_info_parameter.type = unwind_parameter_raw;
                     func_info_parameter.param_data.resize(sizeof(uint32_t));
 
-                    *(uint32_t*)&func_info_parameter.param_data.data()[0] = build_func_info(expanded_image.image, data->func_info);
+                    *(uint32_t*)&func_info_parameter.param_data.data()[0] = build_func_info(ex_info_io, data->func_info);
 
                     params.push_back(func_info_parameter);
                 }
