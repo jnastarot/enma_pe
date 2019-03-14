@@ -1,15 +1,15 @@
 #include "stdafx.h"
 #include "pe_exceptions_helper.h"
 
-cxx_try_block_map_info::cxx_try_block_map_info() 
+cxx_try_block_map_info::cxx_try_block_map_info()
     :try_low(0), try_high(0), catch_high(0), catches(0), p_handler_array(0) {}
 
 cxx_try_block_map_info::cxx_try_block_map_info(const cxx_try_block_map_info& info) {
     this->operator=(info);
 }
 
-cxx_try_block_map_info::cxx_try_block_map_info(const cxx_try_block_map_entry& info) 
- :try_low(info.try_low), try_high(info.try_high), catch_high(info.catch_high), catches(info.catches), p_handler_array(info.p_handler_array) {}
+cxx_try_block_map_info::cxx_try_block_map_info(const cxx_try_block_map_entry& info)
+    :try_low(info.try_low), try_high(info.try_high), catch_high(info.catch_high), catches(info.catches), p_handler_array(info.p_handler_array) {}
 
 cxx_try_block_map_info::~cxx_try_block_map_info() {}
 
@@ -74,16 +74,16 @@ const std::vector<cxx_handler_type>& cxx_try_block_map_info::get_handler_entries
 }
 
 
-cxx_exception_func_info::cxx_exception_func_info() 
- :magic_number(0), max_state(0), p_unwind_map(0), try_blocks(0),
- p_try_block_map(0), ip_map_entries(0), p_ip_to_state_map(0), unwind_help(0),
- p_es_type_list(0), eh_flags(0) {}
+cxx_exception_func_info::cxx_exception_func_info()
+    :magic_number(0), max_state(0), p_unwind_map(0), try_blocks(0),
+    p_try_block_map(0), ip_map_entries(0), p_ip_to_state_map(0), unwind_help(0),
+    p_es_type_list(0), eh_flags(0) {}
 
 cxx_exception_func_info::cxx_exception_func_info(const cxx_exception_func_info& info) {
     this->operator=(info);
 }
 
-cxx_exception_func_info::cxx_exception_func_info(const cxx_function_desc& desc) 
+cxx_exception_func_info::cxx_exception_func_info(const cxx_function_desc& desc)
     : magic_number(desc.magic_number), max_state(desc.max_state), p_unwind_map(desc.p_unwind_map), try_blocks(desc.try_blocks),
     p_try_block_map(desc.p_try_block_map), ip_map_entries(desc.ip_map_entries), p_ip_to_state_map(desc.p_ip_to_state_map), unwind_help(desc.unwind_help),
     p_es_type_list(desc.p_es_type_list), eh_flags(desc.eh_flags) {}
@@ -925,7 +925,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                 return false;
             }
 
-            if(func_desc.max_state) {
+            if (func_desc.max_state) {
 
                 image_io.set_image_offset(func_desc.p_unwind_map);
                 rva_start = image_io.get_image_offset();
@@ -941,7 +941,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                 placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
-            if(func_desc.try_blocks) {
+            if (func_desc.try_blocks) {
 
                 image_io.set_image_offset(func_desc.p_try_block_map);
                 rva_start = image_io.get_image_offset();
@@ -962,7 +962,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                         cth_image_io.set_image_offset(try_map_entry.p_handler_array);
 
                         uint32_t cth_rva_start = cth_image_io.get_image_offset();
-                        
+
                         for (uint32_t cache_handler_idx = 0; cache_handler_idx < try_map_entry.catches; cache_handler_idx++) {
 
                             if (cth_image_io.read(&cache_handler, sizeof(cache_handler)) != enma_io_success) {
@@ -977,7 +977,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                 placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
-            if(func_desc.ip_map_entries) {
+            if (func_desc.ip_map_entries) {
 
                 image_io.set_image_offset(func_desc.p_ip_to_state_map);
                 rva_start = image_io.get_image_offset();
@@ -1026,7 +1026,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                 return false;
             }
 
-            if(func_desc.max_state) {
+            if (func_desc.max_state) {
 
                 image_io.set_image_offset(func_desc.p_unwind_map);
                 rva_start = image_io.get_image_offset();
@@ -1042,7 +1042,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                 placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
-            if(func_desc.try_blocks) {
+            if (func_desc.try_blocks) {
 
                 image_io.set_image_offset(func_desc.p_try_block_map);
                 rva_start = image_io.get_image_offset();
@@ -1078,7 +1078,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                 placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
-            if(func_desc.ip_map_entries) {
+            if (func_desc.ip_map_entries) {
 
                 image_io.set_image_offset(func_desc.p_ip_to_state_map);
                 rva_start = image_io.get_image_offset();
@@ -1308,7 +1308,7 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
             unwind_entry.set_custom_parameter(data);
             unwind_entry.set_custom_id(__gs_handler_check_eh);
 
-            if(func_desc.max_state) {
+            if (func_desc.max_state) {
 
                 image_io.set_image_offset(func_desc.p_unwind_map);
                 for (uint32_t ip_state_idx = 0; ip_state_idx < func_desc.max_state; ip_state_idx++) {
@@ -1322,7 +1322,7 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
                 }
             }
 
-            if(func_desc.try_blocks) {
+            if (func_desc.try_blocks) {
 
                 image_io.set_image_offset(func_desc.p_try_block_map);
                 for (uint32_t try_block_idx = 0; try_block_idx < func_desc.try_blocks; try_block_idx++) {
@@ -1352,7 +1352,7 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
                 }
             }
 
-            if(func_desc.ip_map_entries) {
+            if (func_desc.ip_map_entries) {
 
                 image_io.set_image_offset(func_desc.p_ip_to_state_map);
                 for (uint32_t ip_to_state_idx = 0; ip_to_state_idx < func_desc.ip_map_entries; ip_to_state_idx++) {
@@ -1405,7 +1405,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
             unwind_entry.set_custom_parameter(data);
             unwind_entry.set_custom_id(__cxx_frame_handler3);
 
-            if(func_desc.max_state) {
+            if (func_desc.max_state) {
 
                 image_io.set_image_offset(func_desc.p_unwind_map);
                 for (uint32_t ip_state_idx = 0; ip_state_idx < func_desc.max_state; ip_state_idx++) {
@@ -1419,7 +1419,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
                 }
             }
 
-            if(func_desc.try_blocks) {
+            if (func_desc.try_blocks) {
 
                 image_io.set_image_offset(func_desc.p_try_block_map);
                 for (uint32_t try_block_idx = 0; try_block_idx < func_desc.try_blocks; try_block_idx++) {
@@ -1449,7 +1449,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
                 }
             }
 
-            if(func_desc.ip_map_entries) {
+            if (func_desc.ip_map_entries) {
 
                 image_io.set_image_offset(func_desc.p_ip_to_state_map);
                 for (uint32_t ip_to_state_idx = 0; ip_to_state_idx < func_desc.ip_map_entries; ip_to_state_idx++) {
@@ -1472,9 +1472,6 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
 
 uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& func_info) {
 
-    
-    
-
     if (func_info.get_unwind_map_entries().size()) {
         func_info.set_max_state((uint32_t)func_info.get_unwind_map_entries().size());
         func_info.set_p_unwind_map(func_info_io.get_image_offset());
@@ -1495,28 +1492,25 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
 
             try_entry.set_catches((uint32_t)try_entry.get_handler_entries().size());
             try_entry.set_p_handler_array(func_info_io.get_image_offset());
-            
+
             func_info_io.write(
                 try_entry.get_handler_entries().data(),
                 try_entry.get_handler_entries().size() * sizeof(cxx_handler_type)
             );
         }
 
-        func_info.set_max_state((uint32_t)func_info.get_try_block_map_entries().size());
-        func_info.set_p_unwind_map(func_info_io.get_image_offset());
+        func_info.set_try_blocks((uint32_t)func_info.get_try_block_map_entries().size());
+        func_info.set_p_try_block_map(func_info_io.get_image_offset());
 
         for (auto& try_entry : func_info.get_try_block_map_entries()) {
             cxx_try_block_map_entry try_block_info;
-            try_block_info.try_low      = try_entry.get_try_low();
-            try_block_info.try_high     = try_entry.get_try_high();
-            try_block_info.catch_high   = try_entry.get_catch_high();
-            try_block_info.catches      = try_entry.get_catches();
+            try_block_info.try_low = try_entry.get_try_low();
+            try_block_info.try_high = try_entry.get_try_high();
+            try_block_info.catch_high = try_entry.get_catch_high();
+            try_block_info.catches = try_entry.get_catches();
             try_block_info.p_handler_array = try_entry.get_p_handler_array();
 
-            try_entry.set_catches((uint32_t)try_entry.get_handler_entries().size());
-            try_entry.set_p_handler_array(func_info_io.get_image_offset());
-
-            func_info_io.write(&try_block_info,sizeof(try_block_info));
+            func_info_io.write(&try_block_info, sizeof(try_block_info));
         }
 
     }
@@ -1528,10 +1522,10 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
     if (func_info.get_ip_to_state_map_entries().size()) {
 
         func_info.set_ip_map_entries((uint32_t)func_info.get_ip_to_state_map_entries().size());
-        func_info.set_p_ip_to_state_map(func_info_io.get_image_offset()); 
+        func_info.set_p_ip_to_state_map(func_info_io.get_image_offset());
 
         func_info_io.write(
-            func_info.get_ip_to_state_map_entries().data(), 
+            func_info.get_ip_to_state_map_entries().data(),
             func_info.get_ip_to_state_map_entries().size() * sizeof(cxx_ip_to_state_map_entry)
         );
     }
@@ -1543,16 +1537,16 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
     uint32_t func_info_rva = func_info_io.get_image_offset();
 
     cxx_function_desc func_desc;
-    func_desc.magic_number      = func_info.get_magic_number();
-    func_desc.max_state         = func_info.get_max_state();
-    func_desc.p_unwind_map      = func_info.get_p_unwind_map();
-    func_desc.try_blocks        = func_info.get_try_blocks();
-    func_desc.p_try_block_map   = func_info.get_p_try_block_map();
-    func_desc.ip_map_entries    = func_info.get_ip_map_entries();
+    func_desc.magic_number = func_info.get_magic_number();
+    func_desc.max_state = func_info.get_max_state();
+    func_desc.p_unwind_map = func_info.get_p_unwind_map();
+    func_desc.try_blocks = func_info.get_try_blocks();
+    func_desc.p_try_block_map = func_info.get_p_try_block_map();
+    func_desc.ip_map_entries = func_info.get_ip_map_entries();
     func_desc.p_ip_to_state_map = func_info.get_p_ip_to_state_map();
-    func_desc.unwind_help       = func_info.get_unwind_help();
-    func_desc.p_es_type_list    = func_info.get_p_es_type_list();
-    func_desc.eh_flags          = func_info.get_eh_flags();
+    func_desc.unwind_help = func_info.get_unwind_help();
+    func_desc.p_es_type_list = func_info.get_p_es_type_list();
+    func_desc.eh_flags = func_info.get_eh_flags();
 
     func_info_io.write(&func_desc, sizeof(func_desc));
 
@@ -1580,7 +1574,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
             case __c_specific_handler: {
                 auto* data = ((c_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
 
-                           
+
                 {
                     unwind_parameter scope_count_parameter;
                     scope_count_parameter.type = unwind_parameter_raw;
@@ -1591,7 +1585,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
 
                     params.push_back(scope_count_parameter);
                 }
-                
+
                 for (auto& entry : data->table) {
                     unwind_parameter scope_entry_parameter;
                     scope_entry_parameter.type = unwind_parameter_raw;
@@ -1605,7 +1599,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
 
                     params.push_back(scope_entry_parameter);
                 }
-             
+
                 break;
             }
             case __delphi_specific_handler: {
@@ -1651,7 +1645,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
             }
             case __gs_handler_check: {
                 auto* data = ((gs_handler_check_parameters_data*)unwind_entry.get_custom_parameter());
-  
+
                 unwind_parameter gs_data_parameter;
                 gs_data_parameter.type = unwind_parameter_raw;
                 gs_data_parameter.param_data.resize(sizeof(uint32_t));
@@ -1751,7 +1745,7 @@ void copy_extended_exceptions_info(_Inout_ pe_image_expanded& dst_expanded_image
         dst_unwind_data.set_custom_parameter(0);
 
         if (src_unwind_data.get_custom_parameter()) {
- 
+
             switch (src_unwind_data.get_custom_id()) {
 
             case unknown_handler: {
