@@ -1367,7 +1367,7 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
                 }
             }
 
-
+            image_io.set_image_offset(GET_EXCEPTION_PARAMS_RVA(unwind_entry) + 4);
             if (image_io.read(&data->gs_data, sizeof(data->gs_data)) != enma_io_success) {
                 return false;
             }
@@ -1515,8 +1515,8 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
 
     }
     else {
-        func_info.set_max_state(0);
-        func_info.set_p_unwind_map(0);
+        func_info.set_try_blocks(0);
+        func_info.set_p_try_block_map(0);
     }
 
     if (func_info.get_ip_to_state_map_entries().size()) {
