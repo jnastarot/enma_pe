@@ -163,6 +163,7 @@
     <ClInclude Include="pe_loadconfig.h" />
     <ClInclude Include="pe_relocations.h" />
     <ClInclude Include="pe_resources.h" />
+    <ClInclude Include="pe_rtti_helper.h" />
     <ClInclude Include="pe_section.h" />
     <ClInclude Include="pe_section_io.h" />
     <ClInclude Include="pe_security.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="pe_loadconfig.cpp" />
     <ClCompile Include="pe_relocations.cpp" />
     <ClCompile Include="pe_resources.cpp" />
+    <ClCompile Include="pe_rtti_helper.cpp" />
     <ClCompile Include="pe_section.cpp" />
     <ClCompile Include="pe_section_io.cpp" />
     <ClCompile Include="pe_security.cpp" />

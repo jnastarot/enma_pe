@@ -75,6 +75,9 @@
     <Filter Include="Заголовочные файлы\pe_helpers\pe_exceptions_helper">
       <UniqueIdentifier>{660c532b-c578-45cc-b02e-6096a76311de}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_rtti_helper">
+      <UniqueIdentifier>{a4f78c24-5ebc-41cf-a34a-25bc7dec0cc9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -149,6 +152,9 @@
     <ClInclude Include="pe_exceptions_helper.h">
       <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
     </ClInclude>
+    <ClInclude Include="pe_rtti_helper.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_rtti_helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -216,6 +222,9 @@
     </ClCompile>
     <ClCompile Include="pe_exceptions_helper.cpp">
       <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_rtti_helper.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_rtti_helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

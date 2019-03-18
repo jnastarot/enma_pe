@@ -38,12 +38,6 @@ struct cxx_scope_table {
     //scope_table_entry entries[count]
 };
 
-struct cxx_type_descriptor {
-    const void * pVFTable; // vtable of type_info class    
-    void* spare; // used to keep the demangled name returned by type_info::name()
-    char name[1]; // mangled type name, e.g. ".H" = "int", ".?AUA@@" = "struct A", ".?AVA@@" = "class A"
-};
-
 struct cxx_handler_type {
     uint32_t adjectives; // 0x01: const, 0x02: volatile, 0x08: reference
     uint32_t p_type; //rva type_descriptor RTTI descriptor of the exception type. 0=any (ellipsis)
