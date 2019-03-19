@@ -87,6 +87,7 @@ public:
     size_t size();
 
 	std::vector<imported_library>& get_libraries();
+    const std::vector<imported_library>& get_libraries() const;
 	bool get_imported_lib(const std::string& lib_name, imported_library * &lib);
 	bool get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, imported_func * &func);
 	bool get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, imported_func * &func);

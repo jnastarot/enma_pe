@@ -189,6 +189,10 @@ std::vector<imported_library>& import_table::get_libraries() {
 	return this->libraries;
 }
 
+const std::vector<imported_library>& import_table::get_libraries() const {
+    return this->libraries;
+}
+
 bool import_table::get_imported_lib(const std::string& lib_name, imported_library * &lib) {
 
     for (auto& library : libraries) {
