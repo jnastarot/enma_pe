@@ -1,5 +1,8 @@
 #pragma once
 
+struct pe_image_expanded;
+class pe_image;
+class pe_section;
 
 
 #include "enma_pe_internal.h"
@@ -121,10 +124,6 @@ struct pe_image_expanded {
 void get_expanded_pe_image(_Inout_ pe_image_expanded& expanded_image, _In_ const pe_image &image);
 directory_code get_directories_placement(_Inout_ pe_image &image, _Out_ pe_directory_placement& placement,
     _In_opt_ const bound_import_table* bound_imports = 0);
-
-
-
-
 
 
 #include "pe_helper.h"

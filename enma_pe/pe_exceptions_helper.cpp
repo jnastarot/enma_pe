@@ -218,6 +218,213 @@ const std::vector<cxx_ip_to_state_map_entry> &cxx_exception_func_info::get_ip_to
 }
 
 
+exceptions_handler_specific_data::exceptions_handler_specific_data() 
+ : data(0), data_type(unknown_handler) {}
+
+exceptions_handler_specific_data::exceptions_handler_specific_data(const exceptions_handler_specific_data& data) {
+    this->operator=(data);
+}
+
+exceptions_handler_specific_data::~exceptions_handler_specific_data() {
+
+    switch (data_type) {
+
+    case __c_specific_handler: {
+        delete this->get_c_specific_handler_parameters_data(); break;
+    }
+    case __delphi_specific_handler: {
+        delete this->get_delphi_specific_handler_parameters_data(); break;
+    }
+    case __llvm_specific_handler: {
+        delete this->get_llvm_specific_handler_parameters_data(); break;
+    }
+    case __gs_handler_check: {
+        delete this->get_gs_handler_check_parameters_data(); break;
+    }
+    case __gs_handler_check_seh: {
+        delete this->get_gs_handler_check_seh_parameters_data(); break;
+    }
+    case __cxx_frame_handler3: {
+        delete this->get_cxx_frame_handler3_parameters_data(); break;
+    }
+    case __gs_handler_check_eh: {
+        delete this->get_gs_handler_check_eh_parameters_data(); break;
+    }
+    }
+
+    this->data = 0;
+    this->data_type = unknown_handler;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const exceptions_handler_specific_data& data) {
+
+    switch (data_type) {
+
+    case __c_specific_handler: {
+        set_c_specific_handler_parameters_data(*data.get_c_specific_handler_parameters_data());
+        return *this;
+    }
+    case __delphi_specific_handler: {
+        set_delphi_specific_handler_parameters_data(*data.get_delphi_specific_handler_parameters_data());
+        return *this;
+    }
+    case __llvm_specific_handler: {
+        set_llvm_specific_handler_parameters_data(*data.get_llvm_specific_handler_parameters_data());
+        return *this;
+    }
+    case __gs_handler_check: {
+        set_gs_handler_check_parameters_data(*data.get_gs_handler_check_parameters_data());
+        return *this;
+    }
+    case __gs_handler_check_seh: {
+        set_gs_handler_check_seh_parameters_data(*data.get_gs_handler_check_seh_parameters_data());
+        return *this;
+    }
+    case __cxx_frame_handler3: {
+        set_cxx_frame_handler3_parameters_data(*data.get_cxx_frame_handler3_parameters_data());
+        return *this;
+    }
+    case __gs_handler_check_eh: {
+        set_gs_handler_check_eh_parameters_data(*data.get_gs_handler_check_eh_parameters_data());
+        return *this;
+    }
+    }
+
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const c_specific_handler_parameters_data& data) {   
+    set_c_specific_handler_parameters_data(data);
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const delphi_specific_handler_parameters_data& data) {
+    set_delphi_specific_handler_parameters_data(data);
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const llvm_specific_handler_parameters_data& data) {
+    set_llvm_specific_handler_parameters_data(data);
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const gs_handler_check_parameters_data& data) {
+    set_gs_handler_check_parameters_data(data);
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const gs_handler_check_seh_parameters_data& data) {
+    set_gs_handler_check_seh_parameters_data(data);
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const cxx_frame_handler3_parameters_data& data) {
+    set_cxx_frame_handler3_parameters_data(data);
+    return *this;
+}
+
+exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const gs_handler_check_eh_parameters_data& data) {
+    set_gs_handler_check_eh_parameters_data(data);
+    return *this;
+}
+
+void exceptions_handler_specific_data::set_c_specific_handler_parameters_data(const  c_specific_handler_parameters_data& data) {
+    this->data = new c_specific_handler_parameters_data(data);
+    this->data_type = __c_specific_handler;
+}
+
+void exceptions_handler_specific_data::set_delphi_specific_handler_parameters_data(const  delphi_specific_handler_parameters_data& data) {
+    this->data = new delphi_specific_handler_parameters_data(data);
+    this->data_type = __delphi_specific_handler;
+}
+
+void exceptions_handler_specific_data::set_llvm_specific_handler_parameters_data(const  llvm_specific_handler_parameters_data& data) {
+    this->data = new llvm_specific_handler_parameters_data(data);
+    this->data_type = __llvm_specific_handler;
+}
+
+void exceptions_handler_specific_data::set_gs_handler_check_parameters_data(const  gs_handler_check_parameters_data& data) {
+    this->data = new gs_handler_check_parameters_data(data);
+    this->data_type = __gs_handler_check;
+}
+
+void exceptions_handler_specific_data::set_gs_handler_check_seh_parameters_data(const  gs_handler_check_seh_parameters_data& data) {
+    this->data = new gs_handler_check_seh_parameters_data(data);
+    this->data_type = __gs_handler_check_seh;
+}
+
+void exceptions_handler_specific_data::set_cxx_frame_handler3_parameters_data(const  cxx_frame_handler3_parameters_data& data) {
+    this->data = new cxx_frame_handler3_parameters_data(data);
+    this->data_type = __cxx_frame_handler3;
+}
+
+void exceptions_handler_specific_data::set_gs_handler_check_eh_parameters_data(const  gs_handler_check_eh_parameters_data& data) {
+    this->data = new gs_handler_check_eh_parameters_data(data);
+    this->data_type = __gs_handler_check_eh;
+}
+
+
+const c_specific_handler_parameters_data* exceptions_handler_specific_data::get_c_specific_handler_parameters_data() const {
+    return (const c_specific_handler_parameters_data*)this->data;
+}
+
+const delphi_specific_handler_parameters_data* exceptions_handler_specific_data::get_delphi_specific_handler_parameters_data() const {
+    return (const delphi_specific_handler_parameters_data*)this->data;
+}
+
+const llvm_specific_handler_parameters_data* exceptions_handler_specific_data::get_llvm_specific_handler_parameters_data() const {
+    return (const llvm_specific_handler_parameters_data*)this->data;
+}
+
+const gs_handler_check_parameters_data* exceptions_handler_specific_data::get_gs_handler_check_parameters_data() const {
+    return (const gs_handler_check_parameters_data*)this->data;
+}
+
+const gs_handler_check_seh_parameters_data* exceptions_handler_specific_data::get_gs_handler_check_seh_parameters_data() const {
+    return (const gs_handler_check_seh_parameters_data*)this->data;
+}
+
+const cxx_frame_handler3_parameters_data* exceptions_handler_specific_data::get_cxx_frame_handler3_parameters_data() const {
+    return (const cxx_frame_handler3_parameters_data*)this->data;
+}
+
+const gs_handler_check_eh_parameters_data* exceptions_handler_specific_data::get_gs_handler_check_eh_parameters_data() const {
+    return (const gs_handler_check_eh_parameters_data*)this->data;
+}
+
+c_specific_handler_parameters_data* exceptions_handler_specific_data::get_c_specific_handler_parameters_data() {
+    return (c_specific_handler_parameters_data*)this->data;
+}
+
+delphi_specific_handler_parameters_data* exceptions_handler_specific_data::get_delphi_specific_handler_parameters_data() {
+    return (delphi_specific_handler_parameters_data*)this->data;
+}
+
+llvm_specific_handler_parameters_data* exceptions_handler_specific_data::get_llvm_specific_handler_parameters_data() {
+    return (llvm_specific_handler_parameters_data*)this->data;
+}
+
+gs_handler_check_parameters_data* exceptions_handler_specific_data::get_gs_handler_check_parameters_data() {
+    return (gs_handler_check_parameters_data*)this->data;
+}
+
+gs_handler_check_seh_parameters_data* exceptions_handler_specific_data::get_gs_handler_check_seh_parameters_data() {
+    return (gs_handler_check_seh_parameters_data*)this->data;
+}
+
+cxx_frame_handler3_parameters_data* exceptions_handler_specific_data::get_cxx_frame_handler3_parameters_data() {
+    return (cxx_frame_handler3_parameters_data*)this->data;
+}
+
+gs_handler_check_eh_parameters_data* exceptions_handler_specific_data::get_gs_handler_check_eh_parameters_data() {
+    return (gs_handler_check_eh_parameters_data*)this->data;
+}
+
+exception_handler_type exceptions_handler_specific_data::get_data_type() const {
+    return this->data_type;
+}
+
+
 #define GET_EXCEPTION_PARAMS_RVA(unwind_entry) \
         uint32_t(unwind_entry.get_unwind_info_rva() +\
         sizeof(unwind_info) +\
@@ -684,51 +891,6 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_e
 }
 
 
-void free_extended_exception_info(pe_image_expanded& expanded_image) {
-
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
-
-        if (unwind_entry.get_custom_parameter()) {
-
-            switch (unwind_entry.get_custom_id()) {
-
-            case unknown_handler: {
-                break;
-            }
-
-            case __c_specific_handler: {
-                delete ((c_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            case __delphi_specific_handler: {
-                delete ((delphi_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            case __llvm_specific_handler: {
-                delete ((llvm_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            case __gs_handler_check: {
-                delete ((gs_handler_check_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            case __gs_handler_check_seh: {
-                delete ((gs_handler_check_seh_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            case __cxx_frame_handler3: {
-                delete ((cxx_frame_handler3_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            case __gs_handler_check_eh: {
-                delete ((gs_handler_check_eh_parameters_data*)unwind_entry.get_custom_parameter());
-                break;
-            }
-            }
-        }
-    }
-}
-
 bool get_placement___c_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
 
     pe_image_io image_io(expanded_image.image);
@@ -1111,9 +1273,6 @@ bool init_data___c_specific_handler_data(pe_image_expanded& expanded_image, uint
 
             c_specific_handler_parameters_data *data = new c_specific_handler_parameters_data;
 
-            unwind_entry.set_custom_id(__c_specific_handler);
-            unwind_entry.set_custom_parameter(data);
-
             cxx_scope_table_entry scope_entry;
 
             image_io.set_image_offset(
@@ -1134,6 +1293,8 @@ bool init_data___c_specific_handler_data(pe_image_expanded& expanded_image, uint
 
                 data->table.push_back(scope_entry);
             }
+
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1148,9 +1309,6 @@ bool init_data___delphi_specific_handler_data(pe_image_expanded& expanded_image,
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             delphi_specific_handler_parameters_data *data = new delphi_specific_handler_parameters_data;
-
-            unwind_entry.set_custom_id(__delphi_specific_handler);
-            unwind_entry.set_custom_parameter(data);
 
             delphi_scope_table_entry scope_entry;
 
@@ -1173,6 +1331,7 @@ bool init_data___delphi_specific_handler_data(pe_image_expanded& expanded_image,
                 data->table.push_back(scope_entry);
             }
 
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1188,9 +1347,6 @@ bool init_data__llvm_specific_handler_data(pe_image_expanded& expanded_image, ui
 
             llvm_specific_handler_parameters_data *data = new llvm_specific_handler_parameters_data;
 
-            unwind_entry.set_custom_id(__llvm_specific_handler);
-            unwind_entry.set_custom_parameter(data);
-
             image_io.set_image_offset(
                 GET_EXCEPTION_PARAMS_RVA(unwind_entry)
             );
@@ -1202,6 +1358,8 @@ bool init_data__llvm_specific_handler_data(pe_image_expanded& expanded_image, ui
             }
 
             data->data_rva = expanded_image.image.va_to_rva(llvm_ptr);
+
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1217,10 +1375,6 @@ bool init_data__gs_handler_check_data(pe_image_expanded& expanded_image, uint32_
 
             gs_handler_check_parameters_data *data = new gs_handler_check_parameters_data;
 
-            unwind_entry.set_custom_id(__gs_handler_check);
-            unwind_entry.set_custom_parameter(data);
-
-
             image_io.set_image_offset(
                 GET_EXCEPTION_PARAMS_RVA(unwind_entry)
             );
@@ -1232,6 +1386,8 @@ bool init_data__gs_handler_check_data(pe_image_expanded& expanded_image, uint32_
             }
 
             data->gs_data = gs_data;
+
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1246,9 +1402,6 @@ bool init_data__gs_handler_check_seh_data(pe_image_expanded& expanded_image, uin
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             gs_handler_check_seh_parameters_data *data = new gs_handler_check_seh_parameters_data;
-
-            unwind_entry.set_custom_id(__gs_handler_check_seh);
-            unwind_entry.set_custom_parameter(data);
 
             cxx_scope_table_entry scope_entry;
 
@@ -1274,6 +1427,8 @@ bool init_data__gs_handler_check_seh_data(pe_image_expanded& expanded_image, uin
             if (image_io.read(&data->gs_data, sizeof(data->gs_data)) != enma_io_success) {
                 return false;
             }
+
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1304,9 +1459,6 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
             }
 
             data = new gs_handler_check_eh_parameters_data({ func_desc , 0 });
-
-            unwind_entry.set_custom_parameter(data);
-            unwind_entry.set_custom_id(__gs_handler_check_eh);
 
             if (func_desc.max_state) {
 
@@ -1371,6 +1523,8 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
             if (image_io.read(&data->gs_data, sizeof(data->gs_data)) != enma_io_success) {
                 return false;
             }
+
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1401,9 +1555,6 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
             }
 
             data = new cxx_frame_handler3_parameters_data({ func_desc });
-
-            unwind_entry.set_custom_parameter(data);
-            unwind_entry.set_custom_id(__cxx_frame_handler3);
 
             if (func_desc.max_state) {
 
@@ -1463,6 +1614,8 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
                     data->func_info.get_ip_to_state_map_entries().push_back(state_map_entry);
                 }
             }
+
+            unwind_entry.get_custom_parameter() = *data;
         }
     }
 
@@ -1562,17 +1715,17 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
 
     for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
 
-        if (unwind_entry.get_custom_parameter()) {
+        if (unwind_entry.get_custom_parameter().get_data_type() != unknown_handler) {
             auto& params = unwind_entry.get_params(); params.clear();
 
-            switch (unwind_entry.get_custom_id()) {
+            switch (unwind_entry.get_custom_parameter().get_data_type()) {
 
             case unknown_handler: {
                 break;
             }
 
             case __c_specific_handler: {
-                auto* data = ((c_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_c_specific_handler_parameters_data();
 
 
                 {
@@ -1603,7 +1756,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 break;
             }
             case __delphi_specific_handler: {
-                auto* data = ((delphi_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_delphi_specific_handler_parameters_data();
 
                 {
                     unwind_parameter scope_count_parameter;
@@ -1633,7 +1786,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 break;
             }
             case __llvm_specific_handler: {
-                auto* data = ((llvm_specific_handler_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_llvm_specific_handler_parameters_data();
 
                 unwind_parameter ptr_parameter;
                 ptr_parameter.type = unwind_parameter_va;
@@ -1644,7 +1797,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 break;
             }
             case __gs_handler_check: {
-                auto* data = ((gs_handler_check_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_gs_handler_check_parameters_data();
 
                 unwind_parameter gs_data_parameter;
                 gs_data_parameter.type = unwind_parameter_raw;
@@ -1655,7 +1808,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 break;
             }
             case __gs_handler_check_seh: {
-                auto* data = ((gs_handler_check_seh_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_gs_handler_check_seh_parameters_data();
 
 
                 {
@@ -1692,7 +1845,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 break;
             }
             case __cxx_frame_handler3: {
-                auto* data = ((cxx_frame_handler3_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_cxx_frame_handler3_parameters_data();
 
                 {
                     unwind_parameter func_info_parameter;
@@ -1707,7 +1860,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 break;
             }
             case __gs_handler_check_eh: {
-                auto* data = ((gs_handler_check_eh_parameters_data*)unwind_entry.get_custom_parameter());
+                auto* data = unwind_entry.get_custom_parameter().get_gs_handler_check_eh_parameters_data();
 
                 {
                     unwind_parameter func_info_parameter;
@@ -1725,72 +1878,6 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 *(uint32_t*)&gs_data_parameter.param_data.data()[0] = data->gs_data;
 
                 params.push_back(gs_data_parameter);
-
-                break;
-            }
-            }
-        }
-    }
-}
-
-
-void copy_extended_exceptions_info(_Inout_ pe_image_expanded& dst_expanded_image, _In_ const pe_image_expanded& src_expanded_image) {
-
-
-    for (size_t unwind_idx = 0; unwind_idx < src_expanded_image.exceptions.get_unwind_entries().size(); unwind_idx++) {
-        auto& src_unwind_data = src_expanded_image.exceptions.get_unwind_entries()[unwind_idx];
-        auto& dst_unwind_data = dst_expanded_image.exceptions.get_unwind_entries()[unwind_idx];
-
-        dst_unwind_data.set_custom_id(src_unwind_data.get_custom_id());
-        dst_unwind_data.set_custom_parameter(0);
-
-        if (src_unwind_data.get_custom_parameter()) {
-
-            switch (src_unwind_data.get_custom_id()) {
-
-            case unknown_handler: {
-                break;
-            }
-
-            case __c_specific_handler: {
-                auto* data_ = ((c_specific_handler_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new c_specific_handler_parameters_data(*data_));
-
-                break;
-            }
-            case __delphi_specific_handler: {
-                auto* data_ = ((delphi_specific_handler_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new delphi_specific_handler_parameters_data(*data_));
-
-                break;
-            }
-            case __llvm_specific_handler: {
-                auto* data_ = ((llvm_specific_handler_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new llvm_specific_handler_parameters_data(*data_));
-
-                break;
-            }
-            case __gs_handler_check: {
-                auto* data_ = ((gs_handler_check_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new gs_handler_check_parameters_data(*data_));
-
-                break;
-            }
-            case __gs_handler_check_seh: {
-                auto* data_ = ((gs_handler_check_seh_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new gs_handler_check_seh_parameters_data(*data_));
-
-                break;
-            }
-            case __cxx_frame_handler3: {
-                auto* data_ = ((cxx_frame_handler3_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new cxx_frame_handler3_parameters_data(*data_));
-
-                break;
-            }
-            case __gs_handler_check_eh: {
-                auto* data_ = ((gs_handler_check_eh_parameters_data*)src_unwind_data.get_custom_parameter());
-                dst_unwind_data.set_custom_parameter(new gs_handler_check_eh_parameters_data(*data_));
 
                 break;
             }

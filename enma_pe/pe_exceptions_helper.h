@@ -250,6 +250,53 @@ struct gs_handler_check_eh_parameters_data {
 };
 
 
+class exceptions_handler_specific_data {
+    void * data;
+    exception_handler_type data_type;
+public:
+    exceptions_handler_specific_data();
+    exceptions_handler_specific_data(const exceptions_handler_specific_data& data);
+    ~exceptions_handler_specific_data();
+
+    exceptions_handler_specific_data& operator=(const exceptions_handler_specific_data& data);
+
+    exceptions_handler_specific_data& operator=(const c_specific_handler_parameters_data& data);
+    exceptions_handler_specific_data& operator=(const delphi_specific_handler_parameters_data& data);
+    exceptions_handler_specific_data& operator=(const llvm_specific_handler_parameters_data& data);
+    exceptions_handler_specific_data& operator=(const gs_handler_check_parameters_data& data);
+    exceptions_handler_specific_data& operator=(const gs_handler_check_seh_parameters_data& data);
+    exceptions_handler_specific_data& operator=(const cxx_frame_handler3_parameters_data& data);
+    exceptions_handler_specific_data& operator=(const gs_handler_check_eh_parameters_data& data);
+public:
+    void set_c_specific_handler_parameters_data(const  c_specific_handler_parameters_data& data);
+    void set_delphi_specific_handler_parameters_data(const  delphi_specific_handler_parameters_data& data);
+    void set_llvm_specific_handler_parameters_data(const  llvm_specific_handler_parameters_data& data);
+    void set_gs_handler_check_parameters_data(const  gs_handler_check_parameters_data& data);
+    void set_gs_handler_check_seh_parameters_data(const  gs_handler_check_seh_parameters_data& data);
+    void set_cxx_frame_handler3_parameters_data(const  cxx_frame_handler3_parameters_data& data);
+    void set_gs_handler_check_eh_parameters_data(const  gs_handler_check_eh_parameters_data& data);
+
+public:
+    const c_specific_handler_parameters_data* get_c_specific_handler_parameters_data() const;
+    const delphi_specific_handler_parameters_data* get_delphi_specific_handler_parameters_data() const;
+    const llvm_specific_handler_parameters_data* get_llvm_specific_handler_parameters_data() const;
+    const gs_handler_check_parameters_data* get_gs_handler_check_parameters_data() const;
+    const gs_handler_check_seh_parameters_data* get_gs_handler_check_seh_parameters_data() const;
+    const cxx_frame_handler3_parameters_data* get_cxx_frame_handler3_parameters_data() const;
+    const gs_handler_check_eh_parameters_data* get_gs_handler_check_eh_parameters_data() const;
+
+    c_specific_handler_parameters_data* get_c_specific_handler_parameters_data();
+    delphi_specific_handler_parameters_data* get_delphi_specific_handler_parameters_data();
+    llvm_specific_handler_parameters_data* get_llvm_specific_handler_parameters_data();
+    gs_handler_check_parameters_data* get_gs_handler_check_parameters_data();
+    gs_handler_check_seh_parameters_data* get_gs_handler_check_seh_parameters_data();
+    cxx_frame_handler3_parameters_data* get_cxx_frame_handler3_parameters_data();
+    gs_handler_check_eh_parameters_data* get_gs_handler_check_eh_parameters_data();
+
+    exception_handler_type get_data_type() const;
+};
+
+
 enum ex_exceptions_info_result {
     ex_exceptions_info_ok,
     ex_exceptions_info_has_unknown,
@@ -259,7 +306,4 @@ enum ex_exceptions_info_result {
 ex_exceptions_info_result get_extended_exception_info(_Inout_ pe_image_expanded& expanded_image);
 ex_exceptions_info_result get_extended_exception_info_placement(_In_ const pe_image_expanded& expanded_image, _Inout_ pe_directory_placement& placement);
 
-void copy_extended_exceptions_info(_Inout_ pe_image_expanded& dst_expanded_image, _In_ const pe_image_expanded& src_expanded_image);
 void build_extended_exceptions_info(_Inout_ pe_image_expanded& expanded_image);
-
-void free_extended_exception_info(_Inout_ pe_image_expanded& expanded_image);

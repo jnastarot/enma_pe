@@ -30,6 +30,11 @@ struct msvc_rtti_base_class_descriptor {
     uint32_t attributes;
 };
 
+
+#pragma warning(push)
+
+#pragma warning(disable : 4200)
+
 struct msvc_rtti_32_type_descriptor {
     uint32_t vtable_addr;
     uint32_t spare;
@@ -40,6 +45,8 @@ struct msvc_rtti_64_type_descriptor {
     uint64_t spare;
     char name[0];
 };
+
+#pragma warning(pop)
 
 #pragma pack(pop)
 

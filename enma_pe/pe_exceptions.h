@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pe_exceptions_helper.h"
+
 class exception_entry;
 
 enum unwind_parameter_type {
@@ -30,8 +32,7 @@ class exception_unwind_info {
 
     std::vector<unwind_parameter> params;
 
-    uint32_t custom_id;
-    void * custom_parameter;
+    exceptions_handler_specific_data custom_parameter;
 public:
     exception_unwind_info();
     exception_unwind_info(uint32_t unwind_info_rva, uint8_t version,
@@ -57,8 +58,7 @@ public:
 
     void set_codes(std::vector<unwind_code> &codes);
     void set_params(std::vector<unwind_parameter> &params);
-    void set_custom_parameter(void * custom_parameter);
-    void set_custom_id(uint32_t custom_id);
+    void set_custom_parameter(const exceptions_handler_specific_data& custom_parameter);
 public: 
 
     uint8_t get_version() const;
@@ -74,9 +74,8 @@ public:
     std::vector<unwind_parameter>& get_params();
     const std::vector<unwind_parameter>& get_params() const;
 
-    void * get_custom_parameter();
-    const void * get_custom_parameter() const;
-    uint32_t get_custom_id() const;
+    exceptions_handler_specific_data& get_custom_parameter();
+    const exceptions_handler_specific_data& get_custom_parameter() const;
 
     exception_entry * get_chained_entry();
     const exception_entry * get_chained_entry() const;

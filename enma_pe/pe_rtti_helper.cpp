@@ -240,7 +240,7 @@ bool check_msvc_x32_rtti(const pe_image& image, uint32_t rtti_complete_object_lo
         return false;
     }
 
-    uint32_t image_base = image.get_image_base();
+    uint32_t image_base = (uint32_t)image.get_image_base();
 
     uint32_t hi_address = image_io.seek_to_end().get_image_offset();
 
@@ -379,15 +379,15 @@ std::set<uint32_t> find_msvc_x32_rtti_complete_object_locators(const pe_image_ex
         }
 
 
-        if (result_.find((reloc_data - expanded_image.image.get_image_base())) != result_.end()) {
+        if (result_.find(uint32_t(reloc_data - expanded_image.image.get_image_base())) != result_.end()) {
             continue;
         }
 
         pe_section * section = expanded_image.image.get_section_by_va(reloc_data);
         if (!section || !section->get_size_of_raw_data()) { continue; }
 
-        if (check_msvc_x32_rtti(expanded_image.image, (reloc_data - expanded_image.image.get_image_base()) )) {
-            result_.insert((reloc_data - expanded_image.image.get_image_base()));
+        if (check_msvc_x32_rtti(expanded_image.image, uint32_t(reloc_data - expanded_image.image.get_image_base()) )) {
+            result_.insert(uint32_t(reloc_data - expanded_image.image.get_image_base()));
         }
     }
 
@@ -406,15 +406,15 @@ std::set<uint32_t> find_msvc_x64_rtti_complete_object_locators(const pe_image_ex
             continue;
         }
 
-        if (result_.find((reloc_data - expanded_image.image.get_image_base())) != result_.end()) {
+        if (result_.find(uint32_t(reloc_data - expanded_image.image.get_image_base())) != result_.end()) {
             continue;
         }
 
         pe_section * section = expanded_image.image.get_section_by_va(reloc_data);
         if (!section || !section->get_size_of_raw_data()) { continue; }
 
-        if (check_msvc_x64_rtti(expanded_image.image, (reloc_data - expanded_image.image.get_image_base()))) {
-            result_.insert((reloc_data - expanded_image.image.get_image_base()));
+        if (check_msvc_x64_rtti(expanded_image.image, uint32_t(reloc_data - expanded_image.image.get_image_base()))) {
+            result_.insert(uint32_t(reloc_data - expanded_image.image.get_image_base()));
         }
     }
 
@@ -567,7 +567,7 @@ bool msvc_parse_complete_object_locator_32(const pe_image_expanded& expanded_ima
 
     pe_image_io image_io(expanded_image.image);
 
-    uint32_t image_base = expanded_image.image.get_image_base();
+    uint32_t image_base = (uint32_t)expanded_image.image.get_image_base();
 
     msvc_rtti_complete_object_locator object_locator_;
 
@@ -634,7 +634,7 @@ bool msvc_parse_type_descriptor_64(pe_image_io& image_io, msvc_rtti_desc& msvc_r
     }
 
     if (type_.vtable_addr) {
-        type_desc.set_vtable_addr_rva(type_.vtable_addr - image_base);
+        type_desc.set_vtable_addr_rva(uint32_t(type_.vtable_addr - image_base));
     }
     else {
         type_desc.set_vtable_addr_rva(0);
@@ -645,7 +645,7 @@ bool msvc_parse_type_descriptor_64(pe_image_io& image_io, msvc_rtti_desc& msvc_r
     }
 
     if (type_.spare) {
-        type_desc.set_spare_rva(type_.spare - image_base);
+        type_desc.set_spare_rva(uint32_t(type_.spare - image_base));
     }
     else {
         type_desc.set_spare_rva(0);

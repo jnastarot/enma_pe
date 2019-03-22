@@ -11,5 +11,4 @@ void erase_directories_placement(_Inout_ pe_image &image, _Inout_ pe_directory_p
 
 #include "pe_headers_parser.h"
 #include "pe_string_extractor.h"
-#include "pe_exceptions_helper.h"
 #include "pe_rtti_helper.h"
