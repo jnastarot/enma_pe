@@ -133,11 +133,14 @@ void erase_directories_placement(pe_image &image, pe_directory_placement& placem
                 }
             }
 
-            return;
+            goto go_return;
+
         go_next_:;
         }
     }
-    
+go_return:;
+
+
     placement.clear();
 
     for (auto& place_item : placement_items) {
