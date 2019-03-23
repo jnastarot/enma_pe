@@ -258,7 +258,7 @@ exceptions_handler_specific_data::~exceptions_handler_specific_data() {
 
 exceptions_handler_specific_data& exceptions_handler_specific_data::operator=(const exceptions_handler_specific_data& data) {
 
-    switch (data_type) {
+    switch (data.data_type) {
 
     case __c_specific_handler: {
         set_c_specific_handler_parameters_data(*data.get_c_specific_handler_parameters_data());
