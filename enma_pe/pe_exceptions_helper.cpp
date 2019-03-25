@@ -908,7 +908,7 @@ bool get_placement___c_specific_handler_data(const pe_image_expanded& expanded_i
 
             uint32_t scope_entries_count = 0;
 
-            if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) == enma_io_success) {
+            if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) != enma_io_success) {
                 return false;
             }
 
@@ -1033,7 +1033,7 @@ bool get_placement__gs_handler_check_seh_data(const pe_image_expanded& expanded_
 
             uint32_t scope_entries_count = 0;
 
-            if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) == enma_io_success) {
+            if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) != enma_io_success) {
                 return false;
             }
 
