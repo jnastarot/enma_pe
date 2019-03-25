@@ -28,6 +28,7 @@ struct msvc_rtti_base_class_descriptor {
         uint32_t vdisp;             // displacement inside vbtable
     } where;
     uint32_t attributes;
+    uint32_t hierarchy_descriptor_ref;
 };
 
 
@@ -83,7 +84,7 @@ class rtti_msvc_base_class_descriptor {
     uint32_t pdisp;
     uint32_t vdisp;
     uint32_t attributes;
-
+    uint32_t hierarchy_descriptor_ref;
 
 public:
     rtti_msvc_base_class_descriptor();
@@ -98,7 +99,7 @@ public:
     void set_pdisp(uint32_t disp);
     void set_vdisp(uint32_t disp);
     void set_attributes(uint32_t attributes);
-
+    void set_hierarchy_descriptor_ref(uint32_t ref);
 public:
 
     uint32_t get_type_descriptor_addr_rva() const;
@@ -107,7 +108,7 @@ public:
     uint32_t get_pdisp() const;
     uint32_t get_vdisp() const;
     uint32_t get_attributes() const;
-
+    uint32_t get_hierarchy_descriptor_ref() const;
 };
 
 class rtti_msvc_class_hierarchy_descriptor {
@@ -142,7 +143,7 @@ public:
 
 class rtti_msvc_complete_object_locator {
     uint32_t signature;
-    uint32_t vtable_offset; 
+    uint32_t vtable_offset;
     uint32_t cd_offset;
     uint32_t type_descriptor_addr_rva;
     uint32_t class_descriptor_addr_rva;
@@ -182,4 +183,4 @@ struct msvc_rtti_desc {
     std::map<uint32_t, rtti_msvc_type_descriptor> type_descriptor_entries;
 };
 
-void get_runtime_type_information(_In_ const pe_image_expanded& expanded_image , msvc_rtti_desc& msvc_rtti);
+void get_runtime_type_information(_In_ const pe_image_expanded& expanded_image, msvc_rtti_desc& msvc_rtti);

@@ -2,8 +2,8 @@
 #include "pe_rtti_helper.h"
 
 
-rtti_msvc_type_descriptor::rtti_msvc_type_descriptor() 
- : vtable_addr_rva(0), spare_rva(0) {}
+rtti_msvc_type_descriptor::rtti_msvc_type_descriptor()
+    : vtable_addr_rva(0), spare_rva(0) {}
 
 rtti_msvc_type_descriptor::rtti_msvc_type_descriptor(const rtti_msvc_type_descriptor& type_desc) {
     this->operator=(type_desc);
@@ -12,7 +12,7 @@ rtti_msvc_type_descriptor::rtti_msvc_type_descriptor(const rtti_msvc_type_descri
 rtti_msvc_type_descriptor::~rtti_msvc_type_descriptor() {}
 
 rtti_msvc_type_descriptor& rtti_msvc_type_descriptor::operator=(const rtti_msvc_type_descriptor& type_desc) {
-    
+
     this->vtable_addr_rva = type_desc.vtable_addr_rva;
     this->spare_rva = type_desc.spare_rva;
     this->name = type_desc.name;
@@ -46,8 +46,8 @@ const std::string& rtti_msvc_type_descriptor::get_name() const {
 }
 
 
-rtti_msvc_base_class_descriptor::rtti_msvc_base_class_descriptor() 
- : type_descriptor_addr_rva(0), num_contained_bases(0), mdisp(0), pdisp(0),
+rtti_msvc_base_class_descriptor::rtti_msvc_base_class_descriptor()
+    : type_descriptor_addr_rva(0), num_contained_bases(0), mdisp(0), pdisp(0),
     vdisp(0), attributes(0) {}
 
 rtti_msvc_base_class_descriptor::rtti_msvc_base_class_descriptor(const rtti_msvc_base_class_descriptor& base_class_desc) {
@@ -85,7 +85,9 @@ void rtti_msvc_base_class_descriptor::set_vdisp(uint32_t disp) {
 void rtti_msvc_base_class_descriptor::set_attributes(uint32_t attributes) {
     this->attributes = attributes;
 }
-
+void rtti_msvc_base_class_descriptor::set_hierarchy_descriptor_ref(uint32_t ref) {
+    this->hierarchy_descriptor_ref = ref;
+}
 
 uint32_t rtti_msvc_base_class_descriptor::get_type_descriptor_addr_rva() const {
     return this->type_descriptor_addr_rva;
@@ -105,10 +107,12 @@ uint32_t rtti_msvc_base_class_descriptor::get_vdisp() const {
 uint32_t rtti_msvc_base_class_descriptor::get_attributes() const {
     return this->attributes;
 }
+uint32_t rtti_msvc_base_class_descriptor::get_hierarchy_descriptor_ref() const {
+    return this->hierarchy_descriptor_ref;
+}
 
-
-rtti_msvc_class_hierarchy_descriptor::rtti_msvc_class_hierarchy_descriptor() 
- : signature(0), attributes(0), num_base_classes(0), base_class_array_addr_rva(0) {}
+rtti_msvc_class_hierarchy_descriptor::rtti_msvc_class_hierarchy_descriptor()
+    : signature(0), attributes(0), num_base_classes(0), base_class_array_addr_rva(0) {}
 
 rtti_msvc_class_hierarchy_descriptor::rtti_msvc_class_hierarchy_descriptor(const rtti_msvc_class_hierarchy_descriptor& class_hier_desc) {
     this->operator=(class_hier_desc);
@@ -117,7 +121,7 @@ rtti_msvc_class_hierarchy_descriptor::rtti_msvc_class_hierarchy_descriptor(const
 rtti_msvc_class_hierarchy_descriptor::~rtti_msvc_class_hierarchy_descriptor() {}
 
 rtti_msvc_class_hierarchy_descriptor& rtti_msvc_class_hierarchy_descriptor::operator=(const rtti_msvc_class_hierarchy_descriptor& class_hier_desc) {
-   
+
     this->signature = class_hier_desc.signature;
     this->attributes = class_hier_desc.attributes;
     this->num_base_classes = class_hier_desc.num_base_classes;
@@ -163,7 +167,7 @@ const std::vector<uint32_t>& rtti_msvc_class_hierarchy_descriptor::get_base_clas
 }
 
 
-rtti_msvc_complete_object_locator::rtti_msvc_complete_object_locator() 
+rtti_msvc_complete_object_locator::rtti_msvc_complete_object_locator()
     :signature(0), vtable_offset(0), cd_offset(0), type_descriptor_addr_rva(0), class_descriptor_addr_rva(0), object_base_rva(0) {}
 
 rtti_msvc_complete_object_locator::rtti_msvc_complete_object_locator(const rtti_msvc_complete_object_locator& obj_loc) {
@@ -303,7 +307,7 @@ bool check_msvc_x64_rtti(const pe_image& image, uint32_t rtti_complete_object_lo
 
     if (image_io.set_image_offset(rtti_complete_object_locators_rva)
         .read(&obj_loc, sizeof(obj_loc)) != enma_io_success) {
-        
+
         return false;
     }
 
@@ -316,21 +320,21 @@ bool check_msvc_x64_rtti(const pe_image& image, uint32_t rtti_complete_object_lo
         return false;
     }
 
-    if (!obj_loc.class_descriptor_addr 
+    if (!obj_loc.class_descriptor_addr
         || obj_loc.class_descriptor_addr >= hi_address) {
-        
+
         return false;
     }
 
-    if (!obj_loc.object_base 
+    if (!obj_loc.object_base
         || obj_loc.object_base >= hi_address) {
-        
+
         return false;
     }
 
 
     std::vector<uint8_t> type_desc_raw;
-    
+
 
     if (image_io.set_image_offset(obj_loc.type_descriptor_addr)
         .read(type_desc_raw, sizeof(msvc_rtti_64_type_descriptor) + 3) != enma_io_success) {
@@ -369,7 +373,7 @@ std::set<uint32_t> find_msvc_x32_rtti_complete_object_locators(const pe_image_ex
     std::set<uint32_t> result_;
     pe_image_io image_io(expanded_image.image);
 
-    
+
 
     for (auto& rel : expanded_image.relocations.get_items()) {
         uint32_t reloc_data;
@@ -386,7 +390,7 @@ std::set<uint32_t> find_msvc_x32_rtti_complete_object_locators(const pe_image_ex
         pe_section * section = expanded_image.image.get_section_by_va(reloc_data);
         if (!section || !section->get_size_of_raw_data()) { continue; }
 
-        if (check_msvc_x32_rtti(expanded_image.image, uint32_t(reloc_data - expanded_image.image.get_image_base()) )) {
+        if (check_msvc_x32_rtti(expanded_image.image, uint32_t(reloc_data - expanded_image.image.get_image_base()))) {
             result_.insert(uint32_t(reloc_data - expanded_image.image.get_image_base()));
         }
     }
@@ -482,28 +486,28 @@ bool msvc_parse_base_class_descriptor_32(pe_image_io& image_io, msvc_rtti_desc& 
         return false;
     }
 
-    if ( (base_class_desc_.type_descriptor_addr && (base_class_desc_.type_descriptor_addr < image_base)) ||
+    if ((base_class_desc_.type_descriptor_addr && (base_class_desc_.type_descriptor_addr < image_base)) ||
         (base_class_desc_.type_descriptor_addr && !msvc_parse_type_descriptor_32(image_io, msvc_rtti,
-            base_class_desc_.type_descriptor_addr - image_base, image_base)) ) {
+            base_class_desc_.type_descriptor_addr - image_base, image_base))) {
 
         return false;
     }
 
     rtti_msvc_base_class_descriptor base_class_desc;
-    
+
     if (base_class_desc_.type_descriptor_addr) {
         base_class_desc.set_type_descriptor_addr_rva(base_class_desc_.type_descriptor_addr - image_base);
     }
     else {
         base_class_desc.set_type_descriptor_addr_rva(0);
     }
-    
+
     base_class_desc.set_num_contained_bases(base_class_desc_.num_contained_bases);
     base_class_desc.set_mdisp(base_class_desc_.where.mdisp);
     base_class_desc.set_pdisp(base_class_desc_.where.pdisp);
     base_class_desc.set_vdisp(base_class_desc_.where.vdisp);
     base_class_desc.set_attributes(base_class_desc_.attributes);
-
+    base_class_desc.set_hierarchy_descriptor_ref(base_class_desc_.hierarchy_descriptor_ref);
 
     msvc_rtti.base_class_descriptor_entries[rva] = base_class_desc;
 
@@ -526,7 +530,7 @@ bool msvc_parse_class_hierarchy_descriptor_32(pe_image_io& image_io, msvc_rtti_d
 
     if ((hierarchy_desc_.base_class_array_addr && (hierarchy_desc_.base_class_array_addr < image_base)) ||
         (hierarchy_desc_.base_class_array_addr && image_io.set_image_offset(hierarchy_desc_.base_class_array_addr - image_base)
-        .read(base_addresses.data(), hierarchy_desc_.num_base_classes * sizeof(uint32_t)) != enma_io_success)) {
+            .read(base_addresses.data(), hierarchy_desc_.num_base_classes * sizeof(uint32_t)) != enma_io_success)) {
 
         return false;
     }
@@ -542,7 +546,7 @@ bool msvc_parse_class_hierarchy_descriptor_32(pe_image_io& image_io, msvc_rtti_d
     hierarchy_desc.set_signature(hierarchy_desc_.signature);
     hierarchy_desc.set_attributes(hierarchy_desc_.attributes);
     hierarchy_desc.set_num_base_classes(hierarchy_desc_.num_base_classes);
- 
+
     if (hierarchy_desc_.base_class_array_addr) {
         hierarchy_desc.set_base_class_array_addr_rva(hierarchy_desc_.base_class_array_addr - image_base);
     }
@@ -556,7 +560,7 @@ bool msvc_parse_class_hierarchy_descriptor_32(pe_image_io& image_io, msvc_rtti_d
         }
     }
 
-    
+
 
     msvc_rtti.class_hierarchy_descriptor_entries[rva] = hierarchy_desc;
 
@@ -585,7 +589,7 @@ bool msvc_parse_complete_object_locator_32(const pe_image_expanded& expanded_ima
 
 
     if ((object_locator_.class_descriptor_addr && (object_locator_.class_descriptor_addr < image_base)) ||
-        (object_locator_.class_descriptor_addr && !msvc_parse_class_hierarchy_descriptor_32(image_io, msvc_rtti, object_locator_.class_descriptor_addr - image_base, image_base)) ) {
+        (object_locator_.class_descriptor_addr && !msvc_parse_class_hierarchy_descriptor_32(image_io, msvc_rtti, object_locator_.class_descriptor_addr - image_base, image_base))) {
 
         return false;
     }
@@ -612,7 +616,7 @@ bool msvc_parse_complete_object_locator_32(const pe_image_expanded& expanded_ima
     object_locator.set_object_base_rva(0);
 
     msvc_rtti.complete_object_locator_entries[rva] = object_locator;
- 
+
     return true;
 }
 
@@ -698,6 +702,12 @@ bool msvc_parse_base_class_descriptor_64(pe_image_io& image_io, msvc_rtti_desc& 
     base_class_desc.set_vdisp(base_class_desc_.where.vdisp);
     base_class_desc.set_attributes(base_class_desc_.attributes);
 
+    if (base_class_desc_.hierarchy_descriptor_ref) {
+        base_class_desc.set_hierarchy_descriptor_ref(base_class_desc_.hierarchy_descriptor_ref);
+    }
+    else {
+        base_class_desc.set_hierarchy_descriptor_ref(0);
+    }
 
     msvc_rtti.base_class_descriptor_entries[rva] = base_class_desc;
 
@@ -725,7 +735,7 @@ bool msvc_parse_class_hierarchy_descriptor_64(pe_image_io& image_io, msvc_rtti_d
     }
 
     for (uint32_t base_address : base_addresses) {
-        if (base_address && 
+        if (base_address &&
             !msvc_parse_base_class_descriptor_64(image_io, msvc_rtti, base_address, image_base)) {
 
             return false;
@@ -807,7 +817,7 @@ bool msvc_parse_complete_object_locator_64(const pe_image_expanded& expanded_ima
     else {
         object_locator.set_object_base_rva(0);
     }
-    
+
 
     msvc_rtti.complete_object_locator_entries[rva] = object_locator;
 
