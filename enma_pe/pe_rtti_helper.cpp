@@ -801,7 +801,13 @@ bool msvc_parse_complete_object_locator_64(const pe_image_expanded& expanded_ima
         object_locator.set_class_descriptor_addr_rva(0);
     }
 
-    object_locator.set_object_base_rva(0);
+    if (object_locator_.object_base) {
+        object_locator.set_object_base_rva(object_locator_.object_base);
+    }
+    else {
+        object_locator.set_object_base_rva(0);
+    }
+    
 
     msvc_rtti.complete_object_locator_entries[rva] = object_locator;
 
