@@ -48,7 +48,7 @@ const std::string& rtti_msvc_type_descriptor::get_name() const {
 
 rtti_msvc_base_class_descriptor::rtti_msvc_base_class_descriptor()
     : type_descriptor_addr_rva(0), num_contained_bases(0), mdisp(0), pdisp(0),
-    vdisp(0), attributes(0) {}
+    vdisp(0), attributes(0) , hierarchy_descriptor_ref(0) {}
 
 rtti_msvc_base_class_descriptor::rtti_msvc_base_class_descriptor(const rtti_msvc_base_class_descriptor& base_class_desc) {
     this->operator=(base_class_desc);
@@ -63,6 +63,7 @@ rtti_msvc_base_class_descriptor& rtti_msvc_base_class_descriptor::operator=(cons
     this->pdisp = base_class_desc.pdisp;
     this->vdisp = base_class_desc.vdisp;
     this->attributes = base_class_desc.attributes;
+    this->hierarchy_descriptor_ref = base_class_desc.hierarchy_descriptor_ref;
 
     return *this;
 }
