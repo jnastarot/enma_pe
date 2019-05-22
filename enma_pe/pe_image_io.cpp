@@ -93,8 +93,8 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
         size_t total_readed_size    = 0;
         size_t total_up_oversize    = 0;
 
-        uint32_t available_headers_size = (uint32_t)image->get_headers_data().size();
-        uint32_t view_headers_size = addressing_type == enma_io_addressing_type::enma_io_address_raw ?
+        size_t available_headers_size = image->get_headers_data().size();
+        size_t view_headers_size = addressing_type == enma_io_addressing_type::enma_io_address_raw ?
             ALIGN_UP(available_headers_size, image->get_file_align()) : ALIGN_UP(available_headers_size, image->get_section_align());
 
 
@@ -120,7 +120,7 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
                     else {
                         if (available_headers_size > real_offset) {
                             memcpy(&((uint8_t*)buffer)[header_down_oversize], &image->get_headers_data().data()[real_offset], 
-                                (header_readed_size + real_offset) - available_headers_size
+                                header_readed_size
                             );
 
                             memset(&((uint8_t*)buffer)[header_down_oversize + (header_readed_size + real_offset) - available_headers_size], 0,
