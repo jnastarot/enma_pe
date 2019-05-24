@@ -44,28 +44,43 @@ bool pe_image_io::view_image( //-> return like in view_data
     if (image->get_sections_number()) {
         switch (addressing_type) {
         case enma_io_addressing_type::enma_io_address_raw: {
-            pe_section * first_ = image->get_sections()[0];
-            pe_section * last_ = image->get_last_section();
 
+            uint32_t top_raw = image->get_headers_data().size();
+            
+            for (auto& section : image->get_sections()) {
+                uint32_t current_section_raw = section->get_pointer_to_raw() + section->get_size_of_raw_data();
+                
+                if (current_section_raw > top_raw) {
+                    top_raw = current_section_raw;
+                }
+            }
 
             return view_data(
                 required_offset, required_size,
                 real_offset, available_size, down_oversize, up_oversize,
                 0, ALIGN_UP(
-                    last_->get_pointer_to_raw() + last_->get_size_of_raw_data(),
+                    top_raw,
                     image->get_file_align())
                 + uint32_t(image->get_overlay_data().size()));
         }
 
         case enma_io_addressing_type::enma_io_address_rva: {
-            pe_section * first_ = image->get_sections()[0];
-            pe_section * last_ = image->get_last_section();
+
+            uint32_t top_rva = image->get_headers_data().size();
+
+            for (auto& section : image->get_sections()) {
+                uint32_t current_section_rva = section->get_virtual_address() + section->get_virtual_size();
+
+                if (current_section_rva > top_rva) {
+                    top_rva = current_section_rva;
+                }
+            }
 
             return view_data(
                 required_offset, required_size,
                 real_offset, available_size, down_oversize, up_oversize,
                 0, ALIGN_UP(
-                    last_->get_virtual_address() + last_->get_virtual_size(),
+                    top_rva,
                     image->get_section_align())
             );
         }
@@ -155,7 +170,7 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
             total_readed_size += sec_readed_size;
             total_up_oversize = sec_up_oversize;
 
-            if (!total_up_oversize) { break; }
+            if (total_readed_size == readed_size) { break; }
         }
 
         if (addressing_type == enma_io_addressing_type::enma_io_address_raw &&
