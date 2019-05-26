@@ -3,35 +3,35 @@
 
 
 
-resource_data_entry::resource_data_entry()
+pe_resource_data_entry::pe_resource_data_entry()
 	:codepage(0)
 {}
 
 
-resource_data_entry::resource_data_entry(const void * data, uint32_t data_size, uint32_t codepage)
+pe_resource_data_entry::pe_resource_data_entry(const void * data, uint32_t data_size, uint32_t codepage)
 	: codepage(codepage) {
 	this->data.resize(data_size);
 	memcpy(this->data.data(), data, data_size);
 }
-resource_data_entry::~resource_data_entry(){}
+pe_resource_data_entry::~pe_resource_data_entry(){}
 
 
-void resource_data_entry::set_codepage(uint32_t codepage) {
+void pe_resource_data_entry::set_codepage(uint32_t codepage) {
 	this->codepage = codepage;
 }
 
-void resource_data_entry::set_data(const void * data, uint32_t data_size) {
+void pe_resource_data_entry::set_data(const void * data, uint32_t data_size) {
 	this->data.resize(data_size);
 	memcpy(this->data.data(), data, data_size);
 }
 
-uint32_t resource_data_entry::get_codepage() const{
+uint32_t pe_resource_data_entry::get_codepage() const{
 	return this->codepage;
 }
-const std::vector<uint8_t>&	resource_data_entry::get_data() const {
+const std::vector<uint8_t>&	pe_resource_data_entry::get_data() const {
     return data;
 }
-std::vector<uint8_t>&	resource_data_entry::get_data() {
+std::vector<uint8_t>&	pe_resource_data_entry::get_data() {
 	return data;
 }
 
@@ -39,31 +39,31 @@ std::vector<uint8_t>&	resource_data_entry::get_data() {
 
 
 
-resource_directory_entry::resource_directory_entry()
+pe_resource_directory_entry::pe_resource_directory_entry()
 	: id(0), includes_data(false), named(false) {}
 
 
-resource_directory_entry::resource_directory_entry(const resource_directory_entry& other)
+pe_resource_directory_entry::pe_resource_directory_entry(const pe_resource_directory_entry& other)
 	: id(other.id), name(other.name), includes_data(other.includes_data), named(other.named){
 
 	if (other._ptr.data) {
 		if (other.includes_data) {
-			_ptr.data = new resource_data_entry(*other._ptr.data);
+			_ptr.data = new pe_resource_data_entry(*other._ptr.data);
 		}
 		else {
-			_ptr.dir = new resource_directory(*other._ptr.dir);
+			_ptr.dir = new pe_resource_directory(*other._ptr.dir);
 		}
 	}
 }
-resource_directory_entry::~resource_directory_entry() {
+pe_resource_directory_entry::~pe_resource_directory_entry() {
 	release();
 }
 
-resource_directory_entry::includes::includes()
+pe_resource_directory_entry::includes::includes()
 	:data(0) {}
 
 
-resource_directory_entry& resource_directory_entry::operator=(const resource_directory_entry& other) {
+pe_resource_directory_entry& pe_resource_directory_entry::operator=(const pe_resource_directory_entry& other) {
 
     if (&other != this) {
         release();
@@ -75,10 +75,10 @@ resource_directory_entry& resource_directory_entry::operator=(const resource_dir
 
         if (other._ptr.data) {
             if (other.includes_data) {
-                _ptr.data = new resource_data_entry(*other._ptr.data);
+                _ptr.data = new pe_resource_data_entry(*other._ptr.data);
             }
             else {
-                _ptr.dir = new resource_directory(*other._ptr.dir);
+                _ptr.dir = new pe_resource_directory(*other._ptr.dir);
             }
         }
     }
@@ -86,7 +86,7 @@ resource_directory_entry& resource_directory_entry::operator=(const resource_dir
 	return *this;
 }
 
-void resource_directory_entry::release() {
+void pe_resource_directory_entry::release() {
 
 	if (_ptr.data) {
 		if (is_includes_data()) {
@@ -101,89 +101,89 @@ void resource_directory_entry::release() {
 }
 
 
-void resource_directory_entry::set_name(const std::wstring& name) {
+void pe_resource_directory_entry::set_name(const std::wstring& name) {
 	this->name = name;
 	this->named = true;
 	this->id = 0;
 }
 
-void resource_directory_entry::set_id(uint32_t id) {
+void pe_resource_directory_entry::set_id(uint32_t id) {
 	this->id = id;
 	this->named = false;
 	this->name.clear();
 }
 
-void resource_directory_entry::add_data_entry(const resource_data_entry& entry) {
+void pe_resource_directory_entry::add_data_entry(const pe_resource_data_entry& entry) {
 	release();
-	_ptr.data = new resource_data_entry();
+	_ptr.data = new pe_resource_data_entry();
 	_ptr.data->set_codepage(entry.get_codepage());
 	_ptr.data->set_data(entry.get_data().data(), uint32_t(entry.get_data().size()));
 	includes_data = true;
 }
 
-void resource_directory_entry::add_resource_directory(const resource_directory& dir) {
+void pe_resource_directory_entry::add_resource_directory(const pe_resource_directory& dir) {
 	release();
-	_ptr.dir = new resource_directory(dir);
+	_ptr.dir = new pe_resource_directory(dir);
 	includes_data = false;
 }
 
-uint32_t resource_directory_entry::get_id() const{
+uint32_t pe_resource_directory_entry::get_id() const{
 	return this->id;
 }
 
-const std::wstring& resource_directory_entry::get_name() const {
+const std::wstring& pe_resource_directory_entry::get_name() const {
 	return this->name;
 }
 
-bool resource_directory_entry::is_named() const {
+bool pe_resource_directory_entry::is_named() const {
 	return this->named;
 }
 
-bool resource_directory_entry::is_includes_data() const {
+bool pe_resource_directory_entry::is_includes_data() const {
 	return this->includes_data;
 }
 
 
-const resource_directory&     resource_directory_entry::get_resource_directory() const {
-    return (const resource_directory&)(*this->_ptr.data);
+const pe_resource_directory&     pe_resource_directory_entry::get_resource_directory() const {
+    return (const pe_resource_directory&)(*this->_ptr.data);
 }
 
-const resource_data_entry&    resource_directory_entry::get_data_entry() const {
-    return (const resource_data_entry&)(*this->_ptr.dir);
+const pe_resource_data_entry&    pe_resource_directory_entry::get_data_entry() const {
+    return (const pe_resource_data_entry&)(*this->_ptr.dir);
 }
 
-resource_data_entry& resource_directory_entry::get_data_entry() {
+pe_resource_data_entry& pe_resource_directory_entry::get_data_entry() {
 	return *this->_ptr.data;
 }
 
-resource_directory& resource_directory_entry::get_resource_directory() {
+pe_resource_directory& pe_resource_directory_entry::get_resource_directory() {
 	return *this->_ptr.dir;
 }
 
-resource_directory::resource_directory()
+pe_resource_directory::pe_resource_directory()
 	:characteristics(0),
 	timestamp(0),
 	major_version(0), minor_version(0),
 	number_of_named_entries(0), number_of_id_entries(0)
 {}
 
-resource_directory::resource_directory(const resource_directory& resource_dir) {
+pe_resource_directory::pe_resource_directory(const pe_resource_directory& resource_dir) {
     this->operator=(resource_dir);
 }
 
-resource_directory::resource_directory(const image_resource_directory& res_dir)
+pe_resource_directory::pe_resource_directory(const image_resource_directory& res_dir)
 	: characteristics(res_dir.characteristics),
 	timestamp(res_dir.time_date_stamp),
 	major_version(res_dir.major_version), minor_version(res_dir.minor_version),
 	number_of_named_entries(res_dir.number_of_named_entries), number_of_id_entries(res_dir.number_of_id_entries) {}
 
 
-resource_directory::~resource_directory() {
+pe_resource_directory::~pe_resource_directory() {
 	this->clear_resource_directory_entry_list();
 }
 
 
-resource_directory& resource_directory::operator=(const resource_directory& resource_dir) {
+pe_resource_directory& pe_resource_directory::operator=(const pe_resource_directory& resource_dir) {
 
 	characteristics			= resource_dir.characteristics;
 	timestamp				= resource_dir.timestamp;
@@ -197,25 +197,25 @@ resource_directory& resource_directory::operator=(const resource_directory& reso
 }
 
 
-void resource_directory::set_characteristics(uint32_t characteristics) {
+void pe_resource_directory::set_characteristics(uint32_t characteristics) {
 	this->characteristics = characteristics;
 }
-void resource_directory::set_timestamp(uint32_t timestamp) {
+void pe_resource_directory::set_timestamp(uint32_t timestamp) {
 	this->timestamp = timestamp;
 }
-void resource_directory::set_number_of_named_entries(uint32_t number) {
+void pe_resource_directory::set_number_of_named_entries(uint32_t number) {
 	this->number_of_named_entries = number;
 }
-void resource_directory::set_number_of_id_entries(uint32_t number) {
+void pe_resource_directory::set_number_of_id_entries(uint32_t number) {
 	this->number_of_id_entries = number;
 }
-void resource_directory::set_major_version(uint16_t major_version) {
+void pe_resource_directory::set_major_version(uint16_t major_version) {
 	this->major_version = major_version;
 }
-void resource_directory::set_minor_version(uint16_t minor_version) {
+void pe_resource_directory::set_minor_version(uint16_t minor_version) {
 	this->minor_version = minor_version;
 }
-void resource_directory::add_resource_directory_entry(const resource_directory_entry& entry) {
+void pe_resource_directory::add_resource_directory_entry(const pe_resource_directory_entry& entry) {
 	entries.push_back(entry);
 	if (entry.is_named()) {
 		++number_of_named_entries;
@@ -224,38 +224,38 @@ void resource_directory::add_resource_directory_entry(const resource_directory_e
 		++number_of_id_entries;
 	}
 }
-void resource_directory::clear_resource_directory_entry_list() {
+void pe_resource_directory::clear_resource_directory_entry_list() {
 	entries.clear();
 	number_of_named_entries = 0;
 	number_of_id_entries	= 0;
 }
 
-uint32_t resource_directory::get_characteristics() const {
+uint32_t pe_resource_directory::get_characteristics() const {
 	return this->characteristics;
 }
-uint32_t resource_directory::get_timestamp() const {
+uint32_t pe_resource_directory::get_timestamp() const {
 	return this->timestamp;
 }
-uint16_t resource_directory::get_major_version() const {
+uint16_t pe_resource_directory::get_major_version() const {
 	return this->major_version;
 }
-uint16_t resource_directory::get_minor_version() const {
+uint16_t pe_resource_directory::get_minor_version() const {
 	return this->minor_version;
 }
-uint32_t resource_directory::get_number_of_named_entries() const {
+uint32_t pe_resource_directory::get_number_of_named_entries() const {
 	return this->number_of_named_entries;
 }
-uint32_t resource_directory::get_number_of_id_entries() const {
+uint32_t pe_resource_directory::get_number_of_id_entries() const {
 	return this->number_of_id_entries;
 }
-const std::vector<resource_directory_entry>& resource_directory::get_entry_list() const {
+const std::vector<pe_resource_directory_entry>& pe_resource_directory::get_entry_list() const {
     return this->entries;
 }
-std::vector<resource_directory_entry>& resource_directory::get_entry_list() {
+std::vector<pe_resource_directory_entry>& pe_resource_directory::get_entry_list() {
 	return this->entries;
 }
 
-bool entry_sorter::operator()(resource_directory_entry& entry1, resource_directory_entry& entry2) {
+bool entry_sorter::operator()(pe_resource_directory_entry& entry1, pe_resource_directory_entry& entry2) {
 	if (entry1.is_named() && entry2.is_named()) {
 		return entry1.get_name() < entry2.get_name();
 	}
@@ -267,12 +267,12 @@ bool entry_sorter::operator()(resource_directory_entry& entry1, resource_directo
 	}
 }
 
-bool resource_directory::entry_by_id(const resource_directory_entry * &entry, uint32_t id) {
+bool pe_resource_directory::entry_by_id(const pe_resource_directory_entry * &entry, uint32_t id) {
 
     for (auto& entry_item : entries) {
 
         if (!entry_item.is_named() && entry_item.get_id() == id) {
-            entry = (resource_directory_entry *)&(entry_item);
+            entry = (pe_resource_directory_entry *)&(entry_item);
 
             return true;
         }
@@ -280,12 +280,12 @@ bool resource_directory::entry_by_id(const resource_directory_entry * &entry, ui
 
     return false;
 }
-bool resource_directory::entry_by_name(const resource_directory_entry * &entry, const std::wstring& name) {
+bool pe_resource_directory::entry_by_name(const pe_resource_directory_entry * &entry, const std::wstring& name) {
 
     for (auto& entry_item : entries) {
 
         if (entry_item.is_named() && entry_item.get_name() == name) {
-            entry = (resource_directory_entry *)&(entry_item);
+            entry = (pe_resource_directory_entry *)&(entry_item);
 
             return true;
         }
@@ -296,7 +296,7 @@ bool resource_directory::entry_by_name(const resource_directory_entry * &entry, 
 
 
 
-void calculate_resource_data_space(const resource_directory& root,//taken from pe bless
+void calculate_resource_data_space(const pe_resource_directory& root,
     uint32_t aligned_offset_from_section_start, size_t& needed_size_for_structures, size_t& needed_size_for_strings) {
 
 	needed_size_for_structures += sizeof(image_resource_directory);
@@ -315,7 +315,7 @@ void calculate_resource_data_space(const resource_directory& root,//taken from p
 	}
 }
 
-void calculate_resource_data_space(const resource_directory& root, size_t needed_size_for_structures, //taken from pe bless
+void calculate_resource_data_space(const pe_resource_directory& root, size_t needed_size_for_structures,
     size_t needed_size_for_strings, size_t& needed_size_for_data, size_t& current_data_pos) {
 
 	for (size_t entry_idx = 0; entry_idx < root.get_entry_list().size(); entry_idx++) {
@@ -339,10 +339,10 @@ void calculate_resource_data_space(const resource_directory& root, size_t needed
 	}
 }
 
-directory_code process_resource_directory(const pe_image &image, //taken from pe bless
-	uint32_t res_rva, uint32_t offset_to_directory, std::set<uint32_t>& processed, resource_directory& rsrc_table) {
+pe_directory_code process_resource_directory(const pe_image &image,
+	uint32_t res_rva, uint32_t offset_to_directory, std::set<uint32_t>& processed, pe_resource_directory& rsrc_table) {
 
-	if (!processed.insert(offset_to_directory).second) { return directory_code::directory_code_success; }
+	if (!processed.insert(offset_to_directory).second) { return pe_directory_code::pe_directory_code_success; }
 
 
     image_resource_directory directory;
@@ -351,7 +351,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 
 	if (rsrc_io.set_image_offset(res_rva + offset_to_directory).read(&directory, sizeof(directory)) == enma_io_success) {
 
-        rsrc_table = resource_directory(directory);
+        rsrc_table = pe_resource_directory(directory);
         rsrc_table.set_number_of_id_entries(0);  //because on add_resource_directory_entry count the number
         rsrc_table.set_number_of_named_entries(0);
 
@@ -365,7 +365,7 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
             ).read(&dir_entry, sizeof(image_resource_directory_entry)) == enma_io_success) {
 
 				//Create directory entry structure
-				resource_directory_entry entry;
+				pe_resource_directory_entry entry;
 
 				//If directory is named
 				if (dir_entry.name_is_string) {
@@ -385,11 +385,11 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
                             entry.set_name(name);
                         }
                         else {
-                            return directory_code::directory_code_currupted;
+                            return pe_directory_code::pe_directory_code_currupted;
                         }
                     }
                     else {
-                        return directory_code::directory_code_currupted;
+                        return pe_directory_code::pe_directory_code_currupted;
                     }
 				}
 				else {
@@ -398,11 +398,11 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 
 				//If directory entry has another resource directory
 				if (dir_entry.data_is_directory) {
-                    resource_directory rsrc_entry;
+                    pe_resource_directory rsrc_entry;
 
-                    directory_code code = process_resource_directory(image, res_rva, dir_entry.offset_to_directory, processed, rsrc_entry);
+                    pe_directory_code code = process_resource_directory(image, res_rva, dir_entry.offset_to_directory, processed, rsrc_entry);
 
-                    if (code == directory_code::directory_code_success) {
+                    if (code == pe_directory_code::pe_directory_code_success) {
                         entry.add_resource_directory(rsrc_entry);
                     }
                     else {
@@ -419,28 +419,28 @@ directory_code process_resource_directory(const pe_image &image, //taken from pe
 
                         if (rsrc_io.set_image_offset(data_entry.offset_to_data).read(entry_data, data_entry.size) == enma_io_success) {
 
-                            entry.add_data_entry(resource_data_entry(entry_data.data(), uint32_t(entry_data.size()), data_entry.code_page));
+                            entry.add_data_entry(pe_resource_data_entry(entry_data.data(), uint32_t(entry_data.size()), data_entry.code_page));
                         }
                         else {
-                            return directory_code::directory_code_currupted;
+                            return pe_directory_code::pe_directory_code_currupted;
                         }				
                     }
                     else {
-                        return directory_code::directory_code_currupted;
+                        return pe_directory_code::pe_directory_code_currupted;
                     }
 				}
 
                 rsrc_table.add_resource_directory_entry(entry);
             }
             else {
-                return directory_code::directory_code_currupted;
+                return pe_directory_code::pe_directory_code_currupted;
             }
 		}
 	}
-	return directory_code::directory_code_success;
+	return pe_directory_code::pe_directory_code_success;
 }
 
-bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, resource_directory& root, //taken from pe bless
+bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, pe_resource_directory& root,
 	uint32_t& current_structures_pos, uint32_t& current_data_pos, uint32_t& current_strings_pos, uint32_t offset_from_section_start){
 
     pe_section_io section_io(resource_section, image,enma_io_mode_allow_expand);
@@ -555,13 +555,13 @@ bool rebuild_resource_directory(pe_image &image,pe_section& resource_section, re
     return true;
 }
 
-directory_code get_resources_table(const pe_image &image, resource_directory& resources) {
+pe_directory_code get_resources_directory(const pe_image &image, pe_resource_directory& resources) {
     resources.clear_resource_directory_entry_list();
 
 	if (!image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE) || 
         !image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE)) {
 
-		return directory_code::directory_code_not_present;
+		return pe_directory_code::pe_directory_code_not_present;
 	}
 
 	std::set<uint32_t> processed;
@@ -569,7 +569,7 @@ directory_code get_resources_table(const pe_image &image, resource_directory& re
 	return process_resource_directory(image, image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE), 0, processed, resources);
 }
 
-bool build_resources_table(pe_image &image, pe_section& section, resource_directory& resources) {//taken from pe bless
+bool build_resources_directory(pe_image &image, pe_section& section, pe_resource_directory& resources) {
 
 	if (resources.get_entry_list().empty()) {
 		image.set_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE, 0);
@@ -606,7 +606,7 @@ bool build_resources_table(pe_image &image, pe_section& section, resource_direct
 	return rebuild_resource_directory(image, section, resources, current_structures_pos, current_data_pos, current_strings_pos, aligned_offset_from_section_start);
 }
 
-directory_code get_placement_resources_table(const pe_image &image, pe_directory_placement& placement) {
+pe_directory_code get_placement_resources_directory(const pe_image &image, pe_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_RESOURCE);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_RESOURCE);
@@ -626,17 +626,17 @@ directory_code get_placement_resources_table(const pe_image &image, pe_directory
         );
 
 
-        placement[virtual_address] = directory_placement(available_size, id_pe_resources, "");
+        placement[virtual_address] = pe_placement_entry(available_size, id_pe_resources, "");
 
         if (!down_oversize && !up_oversize) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
-        return directory_code::directory_code_currupted;
+        return pe_directory_code::pe_directory_code_currupted;
     }
     else {
 
-        return directory_code::directory_code_not_present;
+        return pe_directory_code::pe_directory_code_not_present;
     }
 }
  

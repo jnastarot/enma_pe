@@ -55,7 +55,7 @@ uint32_t calculate_checksum(const std::vector<uint8_t> &pe_image) {
 }
 
 
-void erase_directories_placement(pe_image &image, pe_directory_placement& placement, relocation_table* relocs, bool delete_empty_sections) {
+void pe_erase_placement(pe_image &image, pe_placement& placement, pe_relocations_directory* relocs, bool delete_empty_sections) {
 
     struct placement_item{
         uint32_t rva;
@@ -144,6 +144,6 @@ go_return:;
     placement.clear();
 
     for (auto& place_item : placement_items) {
-        placement[place_item.rva] = directory_placement(place_item.size, id_pe_none, "");
+        placement[place_item.rva] = pe_placement_entry(place_item.size, id_pe_none, "");
     }
 }

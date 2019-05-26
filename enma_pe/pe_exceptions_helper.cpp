@@ -431,23 +431,23 @@ exception_handler_type exceptions_handler_specific_data::get_data_type() const {
         ALIGN_UP(sizeof(unwind_code) * unwind_entry.get_codes().size(), 4) +\
         sizeof(uint32_t))
 
-bool get_placement___c_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
-bool get_placement___delphi_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
-bool get_placement__llvm_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
-bool get_placement__gs_handler_check_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
-bool get_placement__gs_handler_check_seh_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
-bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
-bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva);
+bool get_placement___c_specific_handler_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
+bool get_placement___delphi_specific_handler_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
+bool get_placement__llvm_specific_handler_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
+bool get_placement__gs_handler_check_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
+bool get_placement__gs_handler_check_seh_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
+bool get_placement__gs_handler_check_eh_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
+bool get_placement__cxx_frame_handler3_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva);
 
-bool init_data___c_specific_handler_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
-bool init_data___delphi_specific_handler_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
-bool init_data__llvm_specific_handler_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
-bool init_data__gs_handler_check_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
-bool init_data__gs_handler_check_seh_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
-bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
-bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint32_t handler_rva);
+bool init_data___c_specific_handler_data(pe_image_full& image_full, uint32_t handler_rva);
+bool init_data___delphi_specific_handler_data(pe_image_full& image_full, uint32_t handler_rva);
+bool init_data__llvm_specific_handler_data(pe_image_full& image_full, uint32_t handler_rva);
+bool init_data__gs_handler_check_data(pe_image_full& image_full, uint32_t handler_rva);
+bool init_data__gs_handler_check_seh_data(pe_image_full& image_full, uint32_t handler_rva);
+bool init_data__gs_handler_check_eh_data(pe_image_full& image_full, uint32_t handler_rva);
+bool init_data__cxx_frame_handler3_data(pe_image_full& image_full, uint32_t handler_rva);
 
-exception_handler_type get_handler_params_pattern(const pe_image_expanded& expanded_image, const std::vector<uint32_t>& unwindinfo_handler_parameters_rvas) {
+exception_handler_type get_handler_params_pattern(const pe_image_full& image_full, const std::vector<uint32_t>& unwindinfo_handler_parameters_rvas) {
 
 
     std::vector<uint32_t> handler_hits;
@@ -457,7 +457,7 @@ exception_handler_type get_handler_params_pattern(const pe_image_expanded& expan
     std::map<uint32_t, size_t> unwind_info_regions;
 
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) { //get unwind info regions
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) { //get unwind info regions
 
         size_t entry_size = sizeof(unwind_info) +
             ALIGN_UP(sizeof(unwind_code) * unwind_entry.get_codes().size(), 4);
@@ -475,7 +475,7 @@ exception_handler_type get_handler_params_pattern(const pe_image_expanded& expan
     }
 
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
     for (auto param_rva : unwindinfo_handler_parameters_rvas) {
 
@@ -597,8 +597,8 @@ exception_handler_type get_handler_params_pattern(const pe_image_expanded& expan
             { //__llvm_specific_handler
 
                 if (allowed_size >= sizeof(uint64_t)) {
-                    std::vector<relocation_item> relocs;
-                    expanded_image.relocations.get_items_in_segment(relocs, param_rva, allowed_size);
+                    std::vector<pe_relocation_entry> relocs;
+                    image_full.get_relocations().get_items_in_segment(relocs, param_rva, allowed_size);
 
                     if (relocs.size()) {
                         handler_hits[__llvm_specific_handler]++;
@@ -693,9 +693,9 @@ exception_handler_type get_handler_params_pattern(const pe_image_expanded& expan
     return result_;
 }
 
-ex_exceptions_info_result get_extended_exception_info(pe_image_expanded& expanded_image) {
+ex_exceptions_info_result get_extended_exception_info(pe_image_full& image_full) {
 
-    if (expanded_image.image.is_x32_image()) { return ex_exceptions_info_ok; }
+    if (image_full.get_image().is_x32_image()) { return ex_exceptions_info_ok; }
 
     ex_exceptions_info_result result = ex_exceptions_info_ok;
 
@@ -706,7 +706,7 @@ ex_exceptions_info_result get_extended_exception_info(pe_image_expanded& expande
 
     std::map<uint32_t, exc_handler_desc> availables_handlers;
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) { //get all used handlers with unwind info
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) { //get all used handlers with unwind info
 
         if (unwind_entry.get_flags() & (UNW_FLAG_EHANDLER | UNW_FLAG_UHANDLER)) {
             auto handler_desc = availables_handlers.find(unwind_entry.get_handler_rva());
@@ -730,7 +730,7 @@ ex_exceptions_info_result get_extended_exception_info(pe_image_expanded& expande
 
 
     for (auto& handler_desc_entry : availables_handlers) { //get handler type
-        handler_desc_entry.second.type = get_handler_params_pattern(expanded_image, handler_desc_entry.second.unwindinfo_handler_parameters_rvas);
+        handler_desc_entry.second.type = get_handler_params_pattern(image_full, handler_desc_entry.second.unwindinfo_handler_parameters_rvas);
     }
 
 
@@ -742,43 +742,43 @@ ex_exceptions_info_result get_extended_exception_info(pe_image_expanded& expande
             break;
         }
         case __c_specific_handler: {
-            if (!init_data___c_specific_handler_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data___c_specific_handler_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __delphi_specific_handler: {
-            if (!init_data___delphi_specific_handler_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data___delphi_specific_handler_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __llvm_specific_handler: {
-            if (!init_data__llvm_specific_handler_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data__llvm_specific_handler_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check: {
-            if (!init_data__gs_handler_check_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data__gs_handler_check_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_seh: {
-            if (!init_data__gs_handler_check_seh_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data__gs_handler_check_seh_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __cxx_frame_handler3: {
-            if (!init_data__cxx_frame_handler3_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data__cxx_frame_handler3_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_eh: {
-            if (!init_data__gs_handler_check_eh_data(expanded_image, handler_desc_entry.first)) {
+            if (!init_data__gs_handler_check_eh_data(image_full, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
@@ -789,9 +789,9 @@ ex_exceptions_info_result get_extended_exception_info(pe_image_expanded& expande
     return result;
 }
 
-ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_expanded& expanded_image, pe_directory_placement& placement) {
+ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_full& image_full, pe_placement& placement) {
 
-    if (expanded_image.image.is_x32_image()) { return ex_exceptions_info_ok; }
+    if (image_full.get_image().is_x32_image()) { return ex_exceptions_info_ok; }
 
     ex_exceptions_info_result result = ex_exceptions_info_ok;
 
@@ -802,7 +802,7 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_e
 
     std::map<uint32_t, exc_handler_desc> availables_handlers;
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) { //get all used handlers with unwind info
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) { //get all used handlers with unwind info
 
         if (unwind_entry.get_flags() & (UNW_FLAG_EHANDLER | UNW_FLAG_UHANDLER)) {
             auto handler_desc = availables_handlers.find(unwind_entry.get_handler_rva());
@@ -832,7 +832,7 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_e
 
 
     for (auto& handler_desc_entry : availables_handlers) { //get handler type
-        handler_desc_entry.second.type = get_handler_params_pattern(expanded_image, handler_desc_entry.second.unwindinfo_handler_parameters_rvas);
+        handler_desc_entry.second.type = get_handler_params_pattern(image_full, handler_desc_entry.second.unwindinfo_handler_parameters_rvas);
     }
 
     for (auto& handler_desc_entry : availables_handlers) {
@@ -843,43 +843,43 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_e
             break;
         }
         case __c_specific_handler: {
-            if (!get_placement___c_specific_handler_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement___c_specific_handler_data(image_full, placement, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __delphi_specific_handler: {
-            if (!get_placement___delphi_specific_handler_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement___delphi_specific_handler_data(image_full, placement, handler_desc_entry.first)) {
                 return  ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __llvm_specific_handler: {
-            if (!get_placement__llvm_specific_handler_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement__llvm_specific_handler_data(image_full, placement, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check: {
-            if (!get_placement__gs_handler_check_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement__gs_handler_check_data(image_full, placement, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_seh: {
-            if (!get_placement__gs_handler_check_seh_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement__gs_handler_check_seh_data(image_full, placement, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __cxx_frame_handler3: {
-            if (!get_placement__cxx_frame_handler3_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement__cxx_frame_handler3_data(image_full, placement, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
         }
         case __gs_handler_check_eh: {
-            if (!get_placement__gs_handler_check_eh_data(expanded_image, placement, handler_desc_entry.first)) {
+            if (!get_placement__gs_handler_check_eh_data(image_full, placement, handler_desc_entry.first)) {
                 return ex_exceptions_info_result::ex_exceptions_info_has_error;
             }
             break;
@@ -891,11 +891,11 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_e
 }
 
 
-bool get_placement___c_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement___c_specific_handler_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             cxx_scope_table_entry scope_entry;
@@ -920,18 +920,18 @@ bool get_placement___c_specific_handler_data(const pe_image_expanded& expanded_i
                 }
             }
 
-            placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
         }
     }
 
     return true;
 }
 
-bool get_placement___delphi_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement___delphi_specific_handler_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             delphi_scope_table_entry scope_entry;
@@ -956,18 +956,18 @@ bool get_placement___delphi_specific_handler_data(const pe_image_expanded& expan
                 }
             }
 
-            placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
         }
     }
 
     return true;
 }
 
-bool get_placement__llvm_specific_handler_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement__llvm_specific_handler_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             image_io.set_image_offset(
@@ -982,18 +982,18 @@ bool get_placement__llvm_specific_handler_data(const pe_image_expanded& expanded
                 return false;
             }
 
-            placement[rva_start] = directory_placement(sizeof(llvm_ptr), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(sizeof(llvm_ptr), id_pe_none, "");
         }
     }
 
     return true;
 }
 
-bool get_placement__gs_handler_check_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement__gs_handler_check_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             image_io.set_image_offset(
@@ -1009,18 +1009,18 @@ bool get_placement__gs_handler_check_data(const pe_image_expanded& expanded_imag
             }
 
 
-            placement[rva_start] = directory_placement(sizeof(gs_data), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(sizeof(gs_data), id_pe_none, "");
         }
     }
 
     return true;
 }
 
-bool get_placement__gs_handler_check_seh_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement__gs_handler_check_seh_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             cxx_scope_table_entry scope_entry;
@@ -1050,18 +1050,18 @@ bool get_placement__gs_handler_check_seh_data(const pe_image_expanded& expanded_
                 return false;
             }
 
-            placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
         }
     }
 
     return true;
 }
 
-bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement__gs_handler_check_eh_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             image_io.set_image_offset(
@@ -1080,7 +1080,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                 return false;
             }
 
-            placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
 
             cxx_function_desc func_desc;
             if (image_io.set_image_offset(func_desc_rva).read(&func_desc, sizeof(func_desc)) != enma_io_success) {
@@ -1100,7 +1100,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                     }
                 }
 
-                placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
             if (func_desc.try_blocks) {
@@ -1120,7 +1120,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                     if (try_map_entry.catches) {
                         cxx_handler_type cache_handler;
 
-                        pe_image_io cth_image_io(expanded_image.image);
+                        pe_image_io cth_image_io(image_full.get_image());
                         cth_image_io.set_image_offset(try_map_entry.p_handler_array);
 
                         uint32_t cth_rva_start = cth_image_io.get_image_offset();
@@ -1132,11 +1132,11 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                             }
                         }
 
-                        placement[cth_rva_start] = directory_placement(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_none, "");
+                        placement[cth_rva_start] = pe_placement_entry(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_none, "");
                     }
                 }
 
-                placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
             if (func_desc.ip_map_entries) {
@@ -1153,7 +1153,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
                     }
                 }
 
-                placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
 
@@ -1163,11 +1163,11 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_expanded& expanded_i
     return true;
 }
 
-bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_image, pe_directory_placement& placement, uint32_t handler_rva) {
+bool get_placement__cxx_frame_handler3_data(const pe_image_full& image_full, pe_placement& placement, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             image_io.set_image_offset(
@@ -1181,7 +1181,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                 return false;
             }
 
-            placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
 
             cxx_function_desc func_desc;
             if (image_io.set_image_offset(func_desc_rva).read(&func_desc, sizeof(func_desc)) != enma_io_success) {
@@ -1201,7 +1201,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                     }
                 }
 
-                placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
             if (func_desc.try_blocks) {
@@ -1221,7 +1221,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                     if (try_map_entry.catches) {
                         cxx_handler_type cache_handler;
 
-                        pe_image_io cth_image_io(expanded_image.image);
+                        pe_image_io cth_image_io(image_full.get_image());
                         cth_image_io.set_image_offset(try_map_entry.p_handler_array);
 
                         uint32_t cth_rva_start = cth_image_io.get_image_offset();
@@ -1233,11 +1233,11 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                             }
                         }
 
-                        placement[cth_rva_start] = directory_placement(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_none, "");
+                        placement[cth_rva_start] = pe_placement_entry(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_none, "");
                     }
                 }
 
-                placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
             if (func_desc.ip_map_entries) {
@@ -1254,7 +1254,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
                     }
                 }
 
-                placement[rva_start] = directory_placement(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
             }
 
 
@@ -1264,11 +1264,11 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_expanded& expanded_im
     return true;
 }
 
-bool init_data___c_specific_handler_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data___c_specific_handler_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             c_specific_handler_parameters_data *data = new c_specific_handler_parameters_data;
@@ -1282,6 +1282,7 @@ bool init_data___c_specific_handler_data(pe_image_expanded& expanded_image, uint
             uint32_t scope_entries_count = 0;
 
             if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) != enma_io_success) {
+                delete data;
                 return false;
             }
 
@@ -1301,11 +1302,11 @@ bool init_data___c_specific_handler_data(pe_image_expanded& expanded_image, uint
     return true;
 }
 
-bool init_data___delphi_specific_handler_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data___delphi_specific_handler_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             delphi_specific_handler_parameters_data *data = new delphi_specific_handler_parameters_data;
@@ -1319,6 +1320,7 @@ bool init_data___delphi_specific_handler_data(pe_image_expanded& expanded_image,
             uint32_t scope_entries_count = 0;
 
             if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) != enma_io_success) {
+                delete data;
                 return false;
             }
 
@@ -1338,11 +1340,11 @@ bool init_data___delphi_specific_handler_data(pe_image_expanded& expanded_image,
     return true;
 }
 
-bool init_data__llvm_specific_handler_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data__llvm_specific_handler_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             llvm_specific_handler_parameters_data *data = new llvm_specific_handler_parameters_data;
@@ -1354,10 +1356,11 @@ bool init_data__llvm_specific_handler_data(pe_image_expanded& expanded_image, ui
             uint64_t llvm_ptr = 0;
 
             if (image_io.read(&llvm_ptr, sizeof(llvm_ptr)) != enma_io_success) {
+                delete data;
                 return false;
             }
 
-            data->data_rva = expanded_image.image.va_to_rva(llvm_ptr);
+            data->data_rva = image_full.get_image().va_to_rva(llvm_ptr);
 
             unwind_entry.get_custom_parameter() = *data;
         }
@@ -1366,11 +1369,11 @@ bool init_data__llvm_specific_handler_data(pe_image_expanded& expanded_image, ui
     return true;
 }
 
-bool init_data__gs_handler_check_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data__gs_handler_check_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             gs_handler_check_parameters_data *data = new gs_handler_check_parameters_data;
@@ -1382,6 +1385,7 @@ bool init_data__gs_handler_check_data(pe_image_expanded& expanded_image, uint32_
             uint32_t gs_data = 0;
 
             if (image_io.read(&gs_data, sizeof(gs_data)) != enma_io_success) {
+                delete data;
                 return false;
             }
 
@@ -1394,11 +1398,11 @@ bool init_data__gs_handler_check_data(pe_image_expanded& expanded_image, uint32_
     return true;
 }
 
-bool init_data__gs_handler_check_seh_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data__gs_handler_check_seh_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             gs_handler_check_seh_parameters_data *data = new gs_handler_check_seh_parameters_data;
@@ -1412,6 +1416,7 @@ bool init_data__gs_handler_check_seh_data(pe_image_expanded& expanded_image, uin
             uint32_t scope_entries_count = 0;
 
             if (image_io.read(&scope_entries_count, sizeof(scope_entries_count)) != enma_io_success) {
+                delete data;
                 return false;
             }
 
@@ -1435,11 +1440,11 @@ bool init_data__gs_handler_check_seh_data(pe_image_expanded& expanded_image, uin
     return true;
 }
 
-bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data__gs_handler_check_eh_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             gs_handler_check_eh_parameters_data *data = 0;
@@ -1467,6 +1472,7 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
                     cxx_unwind_map_entry map_entry;
 
                     if (image_io.read(&map_entry, sizeof(map_entry)) != enma_io_success) {
+                        delete data;
                         return false;
                     }
 
@@ -1531,11 +1537,11 @@ bool init_data__gs_handler_check_eh_data(pe_image_expanded& expanded_image, uint
     return true;
 }
 
-bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint32_t handler_rva) {
+bool init_data__cxx_frame_handler3_data(pe_image_full& image_full, uint32_t handler_rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
         if (unwind_entry.get_handler_rva() == handler_rva) {
 
             cxx_frame_handler3_parameters_data *data = 0;
@@ -1563,6 +1569,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_expanded& expanded_image, uint3
                     cxx_unwind_map_entry map_entry;
 
                     if (image_io.read(&map_entry, sizeof(map_entry)) != enma_io_success) {
+                        delete data;
                         return false;
                     }
 
@@ -1707,13 +1714,13 @@ uint32_t build_func_info(pe_image_io& func_info_io, cxx_exception_func_info& fun
 }
 
 
-void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
-    if (expanded_image.image.is_x32_image()) { return; }
+void build_extended_exceptions_info(pe_image_full& image_full) {
+    if (image_full.get_image().is_x32_image()) { return; }
 
-    pe_image_io ex_info_io(expanded_image.image, enma_io_mode_allow_expand);
+    pe_image_io ex_info_io(image_full.get_image(), enma_io_mode_allow_expand);
     ex_info_io.seek_to_end();
 
-    for (auto& unwind_entry : expanded_image.exceptions.get_unwind_entries()) {
+    for (auto& unwind_entry : image_full.get_exceptions().get_unwind_entries()) {
 
         if (unwind_entry.get_custom_parameter().get_data_type() != unknown_handler) {
             auto& params = unwind_entry.get_params(); params.clear();
@@ -1791,7 +1798,7 @@ void build_extended_exceptions_info(pe_image_expanded& expanded_image) {
                 unwind_parameter ptr_parameter;
                 ptr_parameter.type = unwind_parameter_va;
                 ptr_parameter.param_data.resize(sizeof(uint64_t));
-                *(uint64_t*)&ptr_parameter.param_data.data()[0] = data->data_rva + expanded_image.image.get_image_base();
+                *(uint64_t*)&ptr_parameter.param_data.data()[0] = data->data_rva + image_full.get_image().get_image_base();
 
                 params.push_back(ptr_parameter);
                 break;

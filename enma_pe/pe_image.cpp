@@ -22,9 +22,9 @@ pe_image::pe_image(bool _pe32) {
 	image_status = pe_image_status_ok;
 }
 
-pe_image::pe_image(const uint8_t* pe_image, uint32_t size) {
+pe_image::pe_image(const uint8_t* raw_image, uint32_t size) {
 	clear_image();
-	init_from_file(pe_image, size);
+	init_from_file(raw_image, size);
 }
 
 pe_image::pe_image(const std::string& file_path) {
@@ -180,13 +180,13 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
 			
             if (size < section_offset + sizeof(image_nt_headers32)) { this->image_status = pe_image_status_bad_format; return; };
 
-            if (init_nt_header<image_32>(*this, (void*)&image[dos_header.e_lfanew], section_offset, number_of_sections)) {
+            if (init_nt_header<pe_image_32>(*this, (void*)&image[dos_header.e_lfanew], section_offset, number_of_sections)) {
                 set_base_of_data(pimage_nt_headers32(&image[dos_header.e_lfanew])->optional_header.base_of_data);
             }
             else {
                 if (size < section_offset + sizeof(image_nt_headers64)) { this->image_status = pe_image_status_bad_format; return; };
 
-                if (!init_nt_header<image_64>(*this, (void*)&image[dos_header.e_lfanew], section_offset, number_of_sections)) {
+                if (!init_nt_header<pe_image_64>(*this, (void*)&image[dos_header.e_lfanew], section_offset, number_of_sections)) {
                     this->image_status = pe_image_status_bad_format;
                     return;
                 }
@@ -196,6 +196,8 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
 
             headers_data.resize(this->headers_size);
             memcpy(headers_data.data(), image, this->headers_size);
+
+            get_image_rich_header(this->headers_data, this->rich_header);
 
             {
                 uint32_t image_top_size = 0;
@@ -423,6 +425,9 @@ uint32_t    pe_image::raw_to_rva(uint32_t raw) const {
 }
 
 
+void  pe_image::set_rich_header(const pe_rich_header& header) {
+    this->rich_header = header;
+}
 void    pe_image::set_image_status(pe_image_status status) {
 	this->image_status = status;
 }
@@ -544,6 +549,12 @@ void    pe_image::set_directory_virtual_size(uint32_t directory_idx, uint32_t vi
 
 pe_image_status pe_image::get_image_status() const {
 	return image_status;
+}
+pe_rich_header &pe_image::get_rich_header() {
+    return this->rich_header;
+}
+const pe_rich_header &pe_image::get_rich_header() const {
+    return this->rich_header;
 }
 const std::vector<uint8_t>& pe_image::get_headers_data() const {
     return headers_data;

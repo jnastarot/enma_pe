@@ -1,17 +1,17 @@
 #pragma once
 
-class security_item {
+class pe_security_entry {
     uint16_t   revision;
     uint16_t   certificate_type;
 
     std::vector<uint8_t> certificate_data;
 public:
-    security_item();
-    security_item(uint16_t revision, uint16_t certificate_type, std::vector<uint8_t>& certificate_data);
-    security_item(const security_item& item);
-    ~security_item();
+    pe_security_entry();
+    pe_security_entry(uint16_t revision, uint16_t certificate_type, std::vector<uint8_t>& certificate_data);
+    pe_security_entry(const pe_security_entry& item);
+    ~pe_security_entry();
 
-    security_item& operator=(const security_item& item);
+    pe_security_entry& operator=(const pe_security_entry& item);
 public:
     void   set_revision(uint16_t revision);
     void   set_certificate_type(uint16_t type);
@@ -26,22 +26,22 @@ public:
 };
 
 
-class security_table {
-    std::vector<security_item> certificates;
+class pe_security_directory {
+    std::vector<pe_security_entry> certificates;
 public:
-    security_table();
-    security_table(const security_table& security);
-    ~security_table();
+    pe_security_directory();
+    pe_security_directory(const pe_security_directory& security);
+    ~pe_security_directory();
 
-    security_table& operator=(const security_table& security);
+    pe_security_directory& operator=(const pe_security_directory& security);
 public:
-    void add_certificate(const security_item& item);
+    void add_certificate(const pe_security_entry& item);
     void clear();
 public:
     size_t get_certificates_count() const;
-    const std::vector<security_item>& get_certificates() const;
-    std::vector<security_item>& get_certificates();
+    const std::vector<pe_security_entry>& get_certificates() const;
+    std::vector<pe_security_entry>& get_certificates();
 };
 
-directory_code get_security_table(_In_ const pe_image &image,_Out_ security_table& security);
-directory_code get_placement_security_table(_Inout_ const pe_image &image,_Inout_ pe_directory_placement& placement);
+pe_directory_code get_security_directory(_In_ const pe_image &image,_Out_ pe_security_directory& security);
+pe_directory_code get_placement_security_directory(_Inout_ const pe_image &image,_Inout_ pe_placement& placement);

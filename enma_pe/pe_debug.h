@@ -1,6 +1,6 @@
 #pragma once
 
-class debug_item {
+class pe_debug_entry {
     uint32_t   characteristics;
     uint32_t   timestamp;
     uint16_t   major_version;
@@ -12,15 +12,15 @@ class debug_item {
 
     std::vector<uint8_t> item_data;
 public:
-    debug_item();
-    debug_item(const debug_item& item);
-    debug_item(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
+    pe_debug_entry();
+    pe_debug_entry(const pe_debug_entry& item);
+    pe_debug_entry(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
         uint32_t   type, uint32_t   size_of_data, uint32_t   address_of_raw_data, uint32_t   pointer_to_raw_data,
      void * data);
 
-    ~debug_item();
+    ~pe_debug_entry();
 
-    debug_item& operator=(const debug_item& item);
+    pe_debug_entry& operator=(const pe_debug_entry& item);
 public:
     void  set_characteristics(uint32_t characteristics);
     void  set_timestamp(uint32_t timestamp);
@@ -44,24 +44,24 @@ public:
     std::vector<uint8_t>& get_item_data();
 };
 
-class debug_table {
+class pe_debug_directory {
 
-    std::vector<debug_item> items;
+    std::vector<pe_debug_entry> entries;
 public:
-    debug_table();
-    debug_table(const debug_table& debug);
-    ~debug_table();
+    pe_debug_directory();
+    pe_debug_directory(const pe_debug_directory& debug);
+    ~pe_debug_directory();
 
-    debug_table& operator=(const debug_table& debug);
+    pe_debug_directory& operator=(const pe_debug_directory& debug);
 public:
-    void add_item(const debug_item& item);
+    void add_entry(const pe_debug_entry& entry);
     void clear();
 public:
     size_t size() const;
 
-    const std::vector<debug_item>& get_items() const;
-    std::vector<debug_item>& get_items();
+    const std::vector<pe_debug_entry>& get_entries() const;
+    std::vector<pe_debug_entry>& get_entries();
 };
 
-directory_code get_debug_table(_In_ const pe_image &image, _Out_ debug_table& debug);
-directory_code get_placement_debug_table(_In_ const pe_image &image, _Inout_ pe_directory_placement& placement);
+pe_directory_code get_debug_directory(_In_ const pe_image &image, _Out_ pe_debug_directory& debug);
+pe_directory_code get_placement_debug_directory(_In_ const pe_image &image, _Inout_ pe_placement& placement);

@@ -45,10 +45,10 @@ bool pe_image_io::view_image( //-> return like in view_data
         switch (addressing_type) {
         case enma_io_addressing_type::enma_io_address_raw: {
 
-            uint32_t top_raw = image->get_headers_data().size();
+            size_t top_raw = image->get_headers_data().size();
             
             for (auto& section : image->get_sections()) {
-                uint32_t current_section_raw = section->get_pointer_to_raw() + section->get_size_of_raw_data();
+                size_t current_section_raw = section->get_pointer_to_raw() + section->get_size_of_raw_data();
                 
                 if (current_section_raw > top_raw) {
                     top_raw = current_section_raw;
@@ -66,10 +66,10 @@ bool pe_image_io::view_image( //-> return like in view_data
 
         case enma_io_addressing_type::enma_io_address_rva: {
 
-            uint32_t top_rva = image->get_headers_data().size();
+            size_t top_rva = image->get_headers_data().size();
 
             for (auto& section : image->get_sections()) {
-                uint32_t current_section_rva = section->get_virtual_address() + section->get_virtual_size();
+                size_t current_section_rva = section->get_virtual_address() + section->get_virtual_size();
 
                 if (current_section_rva > top_rva) {
                     top_rva = current_section_rva;

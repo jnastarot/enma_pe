@@ -1,7 +1,7 @@
 #pragma once
 
 
-class delay_imported_library {
+class pe_delay_library {
     std::string library_name;
 
     uint32_t  attributes;   
@@ -13,13 +13,13 @@ class delay_imported_library {
     uint32_t  unload_info_table_rva;
     uint32_t  timestamp;
 
-    std::vector<imported_func> imported_items;
+    std::vector<pe_import_entry> entries;
 public:
-    delay_imported_library();
-    delay_imported_library(const delay_imported_library& lib);
-    ~delay_imported_library();
+    pe_delay_library();
+    pe_delay_library(const pe_delay_library& lib);
+    ~pe_delay_library();
 
-    delay_imported_library& operator=(const delay_imported_library& lib);
+    pe_delay_library& operator=(const pe_delay_library& lib);
 public:
     void set_library_name(const std::string& library_name);
 
@@ -32,7 +32,7 @@ public:
     void set_unload_info_table_rva(uint32_t  rva);
     void set_timestamp(uint32_t  timestamp);
 
-    void add_item(const imported_func& item);
+    void add_entry(const pe_import_entry& entry);
 public:
     std::string get_library_name() const;
 
@@ -44,35 +44,35 @@ public:
     uint32_t get_bound_table_iat_rva() const;
     uint32_t get_unload_info_table_rva() const;
     uint32_t get_timestamp() const;
-    const std::vector<imported_func>& get_items() const;
+    const std::vector<pe_import_entry>& get_entries() const;
 
-    std::vector<imported_func>& get_items();
+    std::vector<pe_import_entry>& get_entries();
 
     imported_library convert_to_imported_library() const;
 };
 
-class delay_import_table {
-    std::vector<delay_imported_library> libraries;
+class pe_delay_import_directory {
+    std::vector<pe_delay_library> libraries;
 public:
-    delay_import_table();
-    delay_import_table(const delay_import_table& imports);
-    ~delay_import_table();
+    pe_delay_import_directory();
+    pe_delay_import_directory(const pe_delay_import_directory& imports);
+    ~pe_delay_import_directory();
 
-    delay_import_table& operator=(const delay_import_table& imports);
+    pe_delay_import_directory& operator=(const pe_delay_import_directory& imports);
 public:
-    void add_library(const delay_imported_library& lib);
+    void add_library(const pe_delay_library& lib);
     void clear();
 public:
     size_t size() const;
-    import_table convert_to_import_table() const;
-    const std::vector<delay_imported_library>& get_libraries() const;
+    pe_import_directory convert_to_import_table() const;
+    const std::vector<pe_delay_library>& get_libraries() const;
 
-    std::vector<delay_imported_library>& get_libraries();
+    std::vector<pe_delay_library>& get_libraries();
 };
 
 
 
-directory_code get_delay_import_table(_In_ const pe_image &image, _Out_ delay_import_table& imports, 
-    _In_ const bound_import_table& bound_imports);
-directory_code get_placement_delay_import_table(_In_ const pe_image &image, _Inout_ pe_directory_placement& placement,
-    _In_ const bound_import_table& bound_imports);
+pe_directory_code get_delay_import_directory(_In_ const pe_image &image, _Out_ pe_delay_import_directory& imports,
+    _In_ const pe_bound_import_directory& bound_imports);
+pe_directory_code get_placement_delay_import_directory(_In_ const pe_image &image, _Inout_ pe_placement& placement,
+    _In_ const pe_bound_import_directory& bound_imports);

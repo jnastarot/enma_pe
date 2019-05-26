@@ -22,9 +22,9 @@ void get_strings_from_image(const pe_image& image, string_base_table& string_tab
     pe_image current_image = image;
 
     if (find_in_clean_image) {
-        pe_directory_placement placement;
+        pe_placement placement;
         get_directories_placement(current_image, placement);
-        erase_directories_placement(current_image, placement, 0, true);
+        pe_erase_placement(current_image, placement, 0, true);
     }
 
     string_table.ansi_base.clear();

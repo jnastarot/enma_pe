@@ -1,6 +1,6 @@
 #pragma once
 
-class dotnet_table {
+class pe_dotnet_directory {
     uint16_t   major_version;
     uint16_t   minor_version;
     uint32_t   flags;
@@ -17,8 +17,8 @@ class dotnet_table {
     image_data_directory   vtable_fixups;
     image_data_directory   export_address_table_jumps;
 public:
-    dotnet_table();
-    ~dotnet_table();
+    pe_dotnet_directory();
+    ~pe_dotnet_directory();
 
 
 public:
@@ -49,4 +49,4 @@ public:
     image_data_directory get_export_address_table_jumps() const;
 };
 
-directory_code get_dotnet_table(_In_ const pe_image &image, _Out_ dotnet_table& dotnet);
+pe_directory_code get_dotnet_directory(_In_ const pe_image &image, _Out_ pe_dotnet_directory& dotnet);

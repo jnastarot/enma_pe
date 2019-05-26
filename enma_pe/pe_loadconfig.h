@@ -1,7 +1,7 @@
 #pragma once
 
 
-class load_config_table{
+class pe_load_config_directory{
     uint32_t        size;
 	uint32_t 		timestamp;
 	uint16_t 		major_version;
@@ -48,8 +48,8 @@ class load_config_table{
     std::vector<uint32_t> guard_iat_entries_rva;
     std::vector<uint32_t> guard_long_jump_targets_rva;
 public:
-	load_config_table();
-	~load_config_table();
+	pe_load_config_directory();
+	~pe_load_config_directory();
 public:
     void		set_size(uint32_t  size);
 	void		set_timestamp(uint32_t  timestamp);
@@ -154,16 +154,16 @@ enum load_config_table_build_id {
     load_config_table_build_guard_long_jump_targets = 1 << 5,
 };
 
-directory_code get_load_config_table(_In_ const pe_image &image, _Out_ load_config_table& load_config);
+pe_directory_code get_load_config_directory(_In_ const pe_image &image, _Out_ pe_load_config_directory& load_config);
 
-bool build_internal_load_config_data(_Inout_ pe_image &image, _Inout_ pe_section& section,
-    _Inout_ load_config_table& load_config, _In_ uint32_t build_items_ids/*import_table_build_id*/,
-    _Inout_ relocation_table& relocs);
+bool build_internal_load_config_directory_data(_Inout_ pe_image &image, _Inout_ pe_section& section,
+    _Inout_ pe_load_config_directory& load_config, _In_ uint32_t build_items_ids/*import_table_build_id*/,
+    _Inout_ pe_relocations_directory& relocs);
 
-bool build_load_config_table_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
-    _Inout_ load_config_table& load_config, _Inout_ relocation_table& relocs);
-bool build_load_config_table_full(_Inout_ pe_image &image, _Inout_ pe_section& section,
-    _Inout_ load_config_table& load_config, _Inout_ relocation_table& relocs);
+bool build_load_config_directory_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
+    _Inout_ pe_load_config_directory& load_config, _Inout_ pe_relocations_directory& relocs);
+bool build_load_config_directory_full(_Inout_ pe_image &image, _Inout_ pe_section& section,
+    _Inout_ pe_load_config_directory& load_config, _Inout_ pe_relocations_directory& relocs);
 
 
-directory_code get_placement_load_config_table(_Inout_ const pe_image &image, _Inout_ pe_directory_placement& placement);
+pe_directory_code get_placement_load_config_directory(_Inout_ const pe_image &image, _Inout_ pe_placement& placement);

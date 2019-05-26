@@ -303,7 +303,7 @@ enum ex_exceptions_info_result {
     ex_exceptions_info_has_error,
 };
 
-ex_exceptions_info_result get_extended_exception_info(_Inout_ pe_image_expanded& expanded_image);
-ex_exceptions_info_result get_extended_exception_info_placement(_In_ const pe_image_expanded& expanded_image, _Inout_ pe_directory_placement& placement);
+ex_exceptions_info_result get_extended_exception_info(_Inout_ pe_image_full& image_full);
+ex_exceptions_info_result get_extended_exception_info_placement(_In_ const pe_image_full& image_full, _Inout_ pe_placement& placement);
 
-void build_extended_exceptions_info(_Inout_ pe_image_expanded& expanded_image);
+void build_extended_exceptions_info(_Inout_ pe_image_full& image_full);

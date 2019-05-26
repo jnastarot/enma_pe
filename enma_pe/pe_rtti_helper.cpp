@@ -369,14 +369,14 @@ bool check_msvc_x64_rtti(const pe_image& image, uint32_t rtti_complete_object_lo
     return true;
 }
 
-std::set<uint32_t> find_msvc_x32_rtti_complete_object_locators(const pe_image_expanded& expanded_image) {
+std::set<uint32_t> find_msvc_x32_rtti_complete_object_locators(const pe_image_full& image_full) {
 
     std::set<uint32_t> result_;
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
 
 
-    for (auto& rel : expanded_image.relocations.get_items()) {
+    for (auto& rel : image_full.get_relocations().get_entries()) {
         uint32_t reloc_data;
 
         if (image_io.set_image_offset(rel.relative_virtual_address).read(&reloc_data, sizeof(reloc_data)) != enma_io_success) {
@@ -384,42 +384,42 @@ std::set<uint32_t> find_msvc_x32_rtti_complete_object_locators(const pe_image_ex
         }
 
 
-        if (result_.find(uint32_t(reloc_data - expanded_image.image.get_image_base())) != result_.end()) {
+        if (result_.find(uint32_t(reloc_data - image_full.get_image().get_image_base())) != result_.end()) {
             continue;
         }
 
-        pe_section * section = expanded_image.image.get_section_by_va(reloc_data);
+        pe_section * section = image_full.get_image().get_section_by_va(reloc_data);
         if (!section || !section->get_size_of_raw_data()) { continue; }
 
-        if (check_msvc_x32_rtti(expanded_image.image, uint32_t(reloc_data - expanded_image.image.get_image_base()))) {
-            result_.insert(uint32_t(reloc_data - expanded_image.image.get_image_base()));
+        if (check_msvc_x32_rtti(image_full.get_image(), uint32_t(reloc_data - image_full.get_image().get_image_base()))) {
+            result_.insert(uint32_t(reloc_data - image_full.get_image().get_image_base()));
         }
     }
 
     return result_;
 }
 
-std::set<uint32_t> find_msvc_x64_rtti_complete_object_locators(const pe_image_expanded& expanded_image) {
+std::set<uint32_t> find_msvc_x64_rtti_complete_object_locators(const pe_image_full& image_full) {
 
     std::set<uint32_t> result_;
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    for (auto& rel : expanded_image.relocations.get_items()) {
+    for (auto& rel : image_full.get_relocations().get_entries()) {
         uint64_t reloc_data;
 
         if (image_io.set_image_offset(rel.relative_virtual_address).read(&reloc_data, sizeof(reloc_data)) != enma_io_success) {
             continue;
         }
 
-        if (result_.find(uint32_t(reloc_data - expanded_image.image.get_image_base())) != result_.end()) {
+        if (result_.find(uint32_t(reloc_data - image_full.get_image().get_image_base())) != result_.end()) {
             continue;
         }
 
-        pe_section * section = expanded_image.image.get_section_by_va(reloc_data);
+        pe_section * section = image_full.get_image().get_section_by_va(reloc_data);
         if (!section || !section->get_size_of_raw_data()) { continue; }
 
-        if (check_msvc_x64_rtti(expanded_image.image, uint32_t(reloc_data - expanded_image.image.get_image_base()))) {
-            result_.insert(uint32_t(reloc_data - expanded_image.image.get_image_base()));
+        if (check_msvc_x64_rtti(image_full.get_image(), uint32_t(reloc_data - image_full.get_image().get_image_base()))) {
+            result_.insert(uint32_t(reloc_data - image_full.get_image().get_image_base()));
         }
     }
 
@@ -568,11 +568,11 @@ bool msvc_parse_class_hierarchy_descriptor_32(pe_image_io& image_io, msvc_rtti_d
     return true;
 }
 
-bool msvc_parse_complete_object_locator_32(const pe_image_expanded& expanded_image, msvc_rtti_desc& msvc_rtti, uint32_t rva) {
+bool msvc_parse_complete_object_locator_32(const pe_image_full& image_full, msvc_rtti_desc& msvc_rtti, uint32_t rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    uint32_t image_base = (uint32_t)expanded_image.image.get_image_base();
+    uint32_t image_base = (uint32_t)image_full.get_image().get_image_base();
 
     msvc_rtti_complete_object_locator object_locator_;
 
@@ -766,11 +766,11 @@ bool msvc_parse_class_hierarchy_descriptor_64(pe_image_io& image_io, msvc_rtti_d
     return true;
 }
 
-bool msvc_parse_complete_object_locator_64(const pe_image_expanded& expanded_image, msvc_rtti_desc& msvc_rtti, uint32_t rva) {
+bool msvc_parse_complete_object_locator_64(const pe_image_full& image_full, msvc_rtti_desc& msvc_rtti, uint32_t rva) {
 
-    pe_image_io image_io(expanded_image.image);
+    pe_image_io image_io(image_full.get_image());
 
-    uint64_t image_base = expanded_image.image.get_image_base();
+    uint64_t image_base = image_full.get_image().get_image_base();
 
     msvc_rtti_complete_object_locator object_locator_;
 
@@ -826,21 +826,21 @@ bool msvc_parse_complete_object_locator_64(const pe_image_expanded& expanded_ima
 }
 
 
-void get_runtime_type_information(_In_ const pe_image_expanded& expanded_image, msvc_rtti_desc& msvc_rtti) {
+void get_runtime_type_information(_In_ const pe_image_full& image_full, msvc_rtti_desc& msvc_rtti) {
 
     msvc_rtti.complete_object_locator_entries.clear();
     msvc_rtti.class_hierarchy_descriptor_entries.clear();
     msvc_rtti.base_class_descriptor_entries.clear();
     msvc_rtti.type_descriptor_entries.clear();
 
-    if (expanded_image.image.is_x32_image()) {
+    if (image_full.get_image().is_x32_image()) {
 
-        std::set<uint32_t> msvc_rtti_loc_rvas = find_msvc_x32_rtti_complete_object_locators(expanded_image);
+        std::set<uint32_t> msvc_rtti_loc_rvas = find_msvc_x32_rtti_complete_object_locators(image_full);
 
         for (uint32_t loc_rva : msvc_rtti_loc_rvas) {
 
             msvc_rtti_desc pre_msvc_rtti;
-            if (msvc_parse_complete_object_locator_32(expanded_image, pre_msvc_rtti, loc_rva)) {
+            if (msvc_parse_complete_object_locator_32(image_full, pre_msvc_rtti, loc_rva)) {
 
                 for (auto& entry : pre_msvc_rtti.complete_object_locator_entries) {
                     if (msvc_rtti.complete_object_locator_entries.find(entry.first) == msvc_rtti.complete_object_locator_entries.end()) {
@@ -870,12 +870,12 @@ void get_runtime_type_information(_In_ const pe_image_expanded& expanded_image, 
 
     }
     else {
-        std::set<uint32_t> msvc_rtti_loc_rvas = find_msvc_x64_rtti_complete_object_locators(expanded_image);
+        std::set<uint32_t> msvc_rtti_loc_rvas = find_msvc_x64_rtti_complete_object_locators(image_full);
 
         for (uint32_t loc_rva : msvc_rtti_loc_rvas) {
 
             msvc_rtti_desc pre_msvc_rtti;
-            if (msvc_parse_complete_object_locator_64(expanded_image, pre_msvc_rtti, loc_rva)) {
+            if (msvc_parse_complete_object_locator_64(image_full, pre_msvc_rtti, loc_rva)) {
 
                 for (auto& entry : pre_msvc_rtti.complete_object_locator_entries) {
                     if (msvc_rtti.complete_object_locator_entries.find(entry.first) == msvc_rtti.complete_object_locator_entries.end()) {

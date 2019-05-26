@@ -2,16 +2,12 @@
 
 #include "pe_section.h"
 
-enum pe_image_status {
-	pe_image_status_ok,
-	pe_image_status_bad_format,
-	pe_image_status_unknown,
-};
 
 class pe_image{
 	pe_image_status image_status;
 
     std::vector<uint8_t> headers_data;
+    pe_rich_header rich_header;
 
 	uint16_t   machine;
 	uint32_t   timestamp;
@@ -54,7 +50,7 @@ public:
 	pe_image();
     pe_image(const pe_image& image);
 	pe_image(bool _pe32);
-	pe_image(const uint8_t* pe_image,uint32_t size);
+	pe_image(const uint8_t* raw_image,uint32_t size);
 	pe_image(const std::string& file_path);
 
 	~pe_image();
@@ -88,6 +84,7 @@ public:// data/sections helpers
 	uint32_t    raw_to_rva(uint32_t raw) const;
 
 public:
+    void        set_rich_header(const pe_rich_header& header);
     void        set_image_status(pe_image_status status);
     void        set_headers_data(const std::vector<uint8_t>& headers_data);
     void        set_dos_header(const image_dos_header& header);
@@ -129,6 +126,9 @@ public:
     
 public://getter
 	pe_image_status		       get_image_status() const;
+
+    pe_rich_header &get_rich_header();
+    const pe_rich_header &get_rich_header() const;
 
     const std::vector<uint8_t>& get_headers_data() const;
     void  get_dos_header(image_dos_header &header) const;
@@ -173,3 +173,4 @@ public://getter
 public://util
 	void				clear_image();
 };
+

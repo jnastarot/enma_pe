@@ -1,6 +1,6 @@
 #pragma once
 
-class tls_table {
+class pe_tls_directory {
     uint32_t   start_address_raw_data;
     uint32_t   end_address_raw_data;
     uint32_t   address_of_index;
@@ -16,11 +16,11 @@ class tls_table {
 	std::vector<uint8_t> raw_data;
 	std::vector<tls_callback> callbacks;
 public:
-	tls_table();
-    tls_table(const tls_table& tls);
-	~tls_table();
+	pe_tls_directory();
+    pe_tls_directory(const pe_tls_directory& tls);
+	~pe_tls_directory();
 
-	tls_table& operator=(const tls_table& tls);
+	pe_tls_directory& operator=(const pe_tls_directory& tls);
 public:
 	void set_start_address_raw_data(uint32_t   start_address_raw_data);
 	void set_end_address_raw_data(uint32_t   end_address_raw_data);
@@ -51,15 +51,15 @@ enum tls_table_build_id {
 
 
 
-directory_code get_tls_table(_In_ const pe_image &image,_Out_ tls_table& tls);
+pe_directory_code get_tls_directory(_In_ const pe_image &image,_Out_ pe_tls_directory& tls);
 
 
-bool build_internal_tls_data(_In_ const pe_image &image, _Inout_ pe_section& section,
-    _Out_ tls_table& tls, _Out_ relocation_table& relocs,
+bool build_internal_tls_directory_data(_In_ const pe_image &image, _Inout_ pe_section& section,
+    _Out_ pe_tls_directory& tls, _Out_ pe_relocations_directory& relocs,
     _In_ uint32_t build_items_ids/*tls_table_build_id*/);
-bool build_tls_table_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
-	_Inout_ tls_table& tls, _Out_ relocation_table& relocs);
-bool build_tls_full(_Inout_ pe_image &image, _Inout_ pe_section& section, 
-    _Inout_ tls_table& tls, _Out_ relocation_table& relocs);
+bool build_tls_directory_only(_Inout_ pe_image &image, _Inout_ pe_section& section,
+	_Inout_ pe_tls_directory& tls, _Out_ pe_relocations_directory& relocs);
+bool build_tls_directory_full(_Inout_ pe_image &image, _Inout_ pe_section& section,
+    _Inout_ pe_tls_directory& tls, _Out_ pe_relocations_directory& relocs);
 
-directory_code get_placement_tls_table(_In_ const pe_image &image, _Inout_ pe_directory_placement& placement);
+pe_directory_code get_placement_tls_directory(_In_ const pe_image &image, _Inout_ pe_placement& placement);

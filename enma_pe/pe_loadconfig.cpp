@@ -2,7 +2,7 @@
 #include "pe_loadconfig.h"
 
 
-load_config_table::load_config_table() {
+pe_load_config_directory::pe_load_config_directory() {
     size                            = 0;
 	timestamp						= 0;
 	major_version					= 0;
@@ -43,279 +43,279 @@ load_config_table::load_config_table() {
     hot_patch_table_offset              = 0;
     enclave_configuration_pointer       = 0; // VA
 }
-load_config_table::~load_config_table() {
+pe_load_config_directory::~pe_load_config_directory() {
 
 }
-void		load_config_table::set_size(uint32_t  size) {
+void		pe_load_config_directory::set_size(uint32_t  size) {
     this->size = size;
 }
-void		load_config_table::set_timestamp(uint32_t timestamp) {
+void		pe_load_config_directory::set_timestamp(uint32_t timestamp) {
 	this->timestamp = timestamp;
 }
-void		load_config_table::set_major_version(uint16_t major_version) {
+void		pe_load_config_directory::set_major_version(uint16_t major_version) {
 	this->major_version = major_version;
 }
-void		load_config_table::set_minor_version(uint16_t minor_version) {
+void		pe_load_config_directory::set_minor_version(uint16_t minor_version) {
 	this->minor_version = minor_version;
 }
-void		load_config_table::set_global_flagsclear(uint32_t global_flagsclear) {
+void		pe_load_config_directory::set_global_flagsclear(uint32_t global_flagsclear) {
 	this->global_flagsclear = global_flagsclear;
 }
-void		load_config_table::set_global_flagsset(uint32_t global_flagsset) {
+void		pe_load_config_directory::set_global_flagsset(uint32_t global_flagsset) {
 	this->global_flagsset = global_flagsset;
 }
-void		load_config_table::set_criticalsection_default_timeout(uint32_t criticalsection_default_timeout) {
+void		pe_load_config_directory::set_criticalsection_default_timeout(uint32_t criticalsection_default_timeout) {
 	this->criticalsection_default_timeout = criticalsection_default_timeout;
 }
-void		load_config_table::set_decommit_freeblock_threshold(uint64_t  decommit_freeblock_threshold) {
+void		pe_load_config_directory::set_decommit_freeblock_threshold(uint64_t  decommit_freeblock_threshold) {
 	this->decommit_freeblock_threshold = decommit_freeblock_threshold;
 }
-void		load_config_table::set_decommit_totalfree_threshold(uint64_t  decommit_totalfree_threshold) {
+void		pe_load_config_directory::set_decommit_totalfree_threshold(uint64_t  decommit_totalfree_threshold) {
 	this->decommit_totalfree_threshold = decommit_totalfree_threshold;
 }
-void		load_config_table::set_lock_prefix_table(uint32_t lock_prefix_table) {
+void		pe_load_config_directory::set_lock_prefix_table(uint32_t lock_prefix_table) {
 	this->lock_prefix_table = lock_prefix_table;
 }
-void		load_config_table::set_maximum_allocation_size(uint64_t  maximum_allocation_size) {
+void		pe_load_config_directory::set_maximum_allocation_size(uint64_t  maximum_allocation_size) {
 	this->maximum_allocation_size = maximum_allocation_size;
 }
-void		load_config_table::set_virtual_memory_threshold(uint64_t  virtual_memory_threshold) {
+void		pe_load_config_directory::set_virtual_memory_threshold(uint64_t  virtual_memory_threshold) {
 	this->virtual_memory_threshold = virtual_memory_threshold;
 }
-void		load_config_table::set_process_heap_flags(uint32_t process_heap_flags) {
+void		pe_load_config_directory::set_process_heap_flags(uint32_t process_heap_flags) {
 	this->process_heap_flags = process_heap_flags;
 }
-void		load_config_table::set_process_affinity_mask(uint64_t  process_affinity_mask) {
+void		pe_load_config_directory::set_process_affinity_mask(uint64_t  process_affinity_mask) {
 	this->process_affinity_mask = process_affinity_mask;
 }
-void		load_config_table::set_csd_version(uint16_t csd_version) {
+void		pe_load_config_directory::set_csd_version(uint16_t csd_version) {
 	this->csd_version = csd_version;
 }
-void        load_config_table::set_dependent_load_flags(uint16_t dependent_load_flags) {
+void        pe_load_config_directory::set_dependent_load_flags(uint16_t dependent_load_flags) {
     this->dependent_load_flags = dependent_load_flags;
 }
-void		load_config_table::set_editlist(uint32_t editlist) {
+void		pe_load_config_directory::set_editlist(uint32_t editlist) {
 	this->editlist = editlist;
 }
-void		load_config_table::set_security_cookie(uint32_t security_cookie) {
+void		pe_load_config_directory::set_security_cookie(uint32_t security_cookie) {
 	this->security_cookie = security_cookie;
 }
-void		load_config_table::set_se_handler_table(uint32_t se_handler_table) {
+void		pe_load_config_directory::set_se_handler_table(uint32_t se_handler_table) {
 	this->se_handler_table = se_handler_table;
 }
-void		load_config_table::set_se_handler_count(uint32_t  se_handler_count) {
+void		pe_load_config_directory::set_se_handler_count(uint32_t  se_handler_count) {
     this->se_handler_count = se_handler_count;
 }
-void		load_config_table::set_guard_cf_check_function_pointer(uint32_t guard_cf_check_function_pointer) {
+void		pe_load_config_directory::set_guard_cf_check_function_pointer(uint32_t guard_cf_check_function_pointer) {
 	this->guard_cf_check_function_pointer = guard_cf_check_function_pointer;
 }
-void        load_config_table::set_guard_cf_dispatch_function_pointer(uint32_t  guard_cf_dispatch_function_pointer) {
+void        pe_load_config_directory::set_guard_cf_dispatch_function_pointer(uint32_t  guard_cf_dispatch_function_pointer) {
     this->guard_cf_dispatch_function_pointer = guard_cf_dispatch_function_pointer;
 }
-void		load_config_table::set_guard_cf_function_table(uint32_t guard_cf_function_table) {
+void		pe_load_config_directory::set_guard_cf_function_table(uint32_t guard_cf_function_table) {
 	this->guard_cf_function_table = guard_cf_function_table;
 }
-void		load_config_table::set_guard_cf_function_count(uint32_t  guard_cf_function_count) {
+void		pe_load_config_directory::set_guard_cf_function_count(uint32_t  guard_cf_function_count) {
     this->guard_cf_function_count = guard_cf_function_count;
 }
-void		load_config_table::set_guard_flags(uint32_t guard_flags) {
+void		pe_load_config_directory::set_guard_flags(uint32_t guard_flags) {
 	this->guard_flags = guard_flags;
 }
-void        load_config_table::set_code_integrity(image_load_config_code_integrity& code_integrity) {
+void        pe_load_config_directory::set_code_integrity(image_load_config_code_integrity& code_integrity) {
     this->code_integrity = code_integrity;
 }
-void        load_config_table::set_guard_address_taken_iat_entry_table(uint32_t guard_address_taken_iat_entry_table) {
+void        pe_load_config_directory::set_guard_address_taken_iat_entry_table(uint32_t guard_address_taken_iat_entry_table) {
     this->guard_address_taken_iat_entry_table = guard_address_taken_iat_entry_table;
 }
-void        load_config_table::set_guard_address_taken_iat_entry_count(uint32_t guard_address_taken_iat_entry_count) {
+void        pe_load_config_directory::set_guard_address_taken_iat_entry_count(uint32_t guard_address_taken_iat_entry_count) {
     this->guard_address_taken_iat_entry_count = guard_address_taken_iat_entry_count;
 }
-void        load_config_table::set_guard_long_jump_target_table(uint32_t guard_long_jump_target_table) {
+void        pe_load_config_directory::set_guard_long_jump_target_table(uint32_t guard_long_jump_target_table) {
     this->guard_long_jump_target_table = guard_long_jump_target_table;
 }
-void        load_config_table::set_guard_long_jump_target_count(uint32_t guard_long_jump_target_count) {
+void        pe_load_config_directory::set_guard_long_jump_target_count(uint32_t guard_long_jump_target_count) {
     this->guard_long_jump_target_count = guard_long_jump_target_count;
 }
-void        load_config_table::set_dynamic_value_reloc_table(uint32_t dynamic_value_reloc_table) {
+void        pe_load_config_directory::set_dynamic_value_reloc_table(uint32_t dynamic_value_reloc_table) {
     this->dynamic_value_reloc_table = dynamic_value_reloc_table;
 }
-void        load_config_table::set_chpe_meta_data_pointer(uint32_t chpe_meta_data_pointer) {
+void        pe_load_config_directory::set_chpe_meta_data_pointer(uint32_t chpe_meta_data_pointer) {
     this->chpe_meta_data_pointer = chpe_meta_data_pointer;
 }
-void        load_config_table::set_guard_rf_failure_routine(uint32_t guard_rf_failure_routine) {
+void        pe_load_config_directory::set_guard_rf_failure_routine(uint32_t guard_rf_failure_routine) {
     this->guard_rf_failure_routine = guard_rf_failure_routine;
 }
-void        load_config_table::set_guard_rf_failure_routine_function_pointer(uint32_t guard_rf_failure_routine_function_pointer) {
+void        pe_load_config_directory::set_guard_rf_failure_routine_function_pointer(uint32_t guard_rf_failure_routine_function_pointer) {
     this->guard_rf_failure_routine_function_pointer = guard_rf_failure_routine_function_pointer;
 }
-void        load_config_table::set_dynamic_value_reloc_table_offset(uint32_t dynamic_value_reloc_table_offset) {
+void        pe_load_config_directory::set_dynamic_value_reloc_table_offset(uint32_t dynamic_value_reloc_table_offset) {
     this->dynamic_value_reloc_table_offset = dynamic_value_reloc_table_offset;
 }
-void        load_config_table::set_dynamic_value_reloc_table_section(uint16_t dynamic_value_reloc_table_section) {
+void        pe_load_config_directory::set_dynamic_value_reloc_table_section(uint16_t dynamic_value_reloc_table_section) {
     this->dynamic_value_reloc_table_section = dynamic_value_reloc_table_section;
 }
-void        load_config_table::set_guard_rf_verify_stack_pointer_function_pointer(uint32_t guard_rf_verify_stack_pointer_function_pointer) {
+void        pe_load_config_directory::set_guard_rf_verify_stack_pointer_function_pointer(uint32_t guard_rf_verify_stack_pointer_function_pointer) {
     this->guard_rf_verify_stack_pointer_function_pointer = guard_rf_verify_stack_pointer_function_pointer;
 }
-void        load_config_table::set_hot_patch_table_offset(uint32_t hot_patch_table_offset) {
+void        pe_load_config_directory::set_hot_patch_table_offset(uint32_t hot_patch_table_offset) {
     this->hot_patch_table_offset = hot_patch_table_offset;
 }
-void        load_config_table::set_enclave_configuration_pointer(uint32_t enclave_configuration_pointer) {
+void        pe_load_config_directory::set_enclave_configuration_pointer(uint32_t enclave_configuration_pointer) {
     this->enclave_configuration_pointer = enclave_configuration_pointer;
 }
 
-uint32_t		load_config_table::get_size() const {
+uint32_t		pe_load_config_directory::get_size() const {
     return this->size;
 }
-uint32_t		load_config_table::get_timestamp() const {
+uint32_t		pe_load_config_directory::get_timestamp() const {
 	return this->timestamp;
 }
-uint16_t		load_config_table::get_major_version() const {
+uint16_t		pe_load_config_directory::get_major_version() const {
 	return this->major_version;
 }
-uint16_t		load_config_table::get_minor_version() const {
+uint16_t		pe_load_config_directory::get_minor_version() const {
 	return this->minor_version;
 }
-uint32_t		load_config_table::get_global_flagsclear() const {
+uint32_t		pe_load_config_directory::get_global_flagsclear() const {
 	return this->global_flagsclear;
 }
-uint32_t		load_config_table::get_global_flagsset() const {
+uint32_t		pe_load_config_directory::get_global_flagsset() const {
 	return this->global_flagsset;
 }
-uint32_t		load_config_table::get_criticalsection_default_timeout() const {
+uint32_t		pe_load_config_directory::get_criticalsection_default_timeout() const {
 	return this->criticalsection_default_timeout;
 }
-uint64_t 	load_config_table::get_decommit_freeblock_threshold() const {
+uint64_t 	pe_load_config_directory::get_decommit_freeblock_threshold() const {
 	return this->decommit_freeblock_threshold;
 }
-uint64_t 	load_config_table::get_decommit_totalfree_threshold() const {
+uint64_t 	pe_load_config_directory::get_decommit_totalfree_threshold() const {
 	return this->decommit_totalfree_threshold;
 }
-uint32_t	load_config_table::get_lock_prefix_table() const {
+uint32_t	pe_load_config_directory::get_lock_prefix_table() const {
 	return this->lock_prefix_table;
 }
-uint64_t 	load_config_table::get_maximum_allocation_size() const {
+uint64_t 	pe_load_config_directory::get_maximum_allocation_size() const {
 	return this->maximum_allocation_size;
 }
-uint64_t 	load_config_table::get_virtual_memory_threshold() const {
+uint64_t 	pe_load_config_directory::get_virtual_memory_threshold() const {
 	return this->virtual_memory_threshold;
 }
-uint32_t		load_config_table::get_process_heap_flags() const {
+uint32_t		pe_load_config_directory::get_process_heap_flags() const {
 	return this->process_heap_flags;
 }
-uint64_t 	load_config_table::get_process_affinity_mask() const {
+uint64_t 	pe_load_config_directory::get_process_affinity_mask() const {
 	return this->process_affinity_mask;
 }
-uint16_t		load_config_table::get_csd_version() const {
+uint16_t		pe_load_config_directory::get_csd_version() const {
 	return this->csd_version;
 }
-uint16_t        load_config_table::get_dependent_load_flags() const {
+uint16_t        pe_load_config_directory::get_dependent_load_flags() const {
     return this->dependent_load_flags;
 }
-uint32_t	load_config_table::get_editlist() const {
+uint32_t	pe_load_config_directory::get_editlist() const {
 	return this->editlist;
 }
-uint32_t	load_config_table::get_security_cookie() const {
+uint32_t	pe_load_config_directory::get_security_cookie() const {
 	return this->security_cookie;
 }
-uint32_t	load_config_table::get_se_handler_table() const {
+uint32_t	pe_load_config_directory::get_se_handler_table() const {
 	return this->se_handler_table;
 }
-uint32_t	load_config_table::get_se_handler_count() const {
+uint32_t	pe_load_config_directory::get_se_handler_count() const {
 	return this->se_handler_count;
 }
-uint32_t	load_config_table::get_guard_cf_check_function_pointer() const {
+uint32_t	pe_load_config_directory::get_guard_cf_check_function_pointer() const {
 	return this->guard_cf_check_function_pointer;
 }
-uint32_t        load_config_table::get_guard_cf_dispatch_function_pointer() const {
+uint32_t        pe_load_config_directory::get_guard_cf_dispatch_function_pointer() const {
     return this->guard_cf_dispatch_function_pointer;
 }
-uint32_t	load_config_table::get_guard_cf_function_table() const {
+uint32_t	pe_load_config_directory::get_guard_cf_function_table() const {
 	return this->guard_cf_function_table;
 }
-uint32_t	    load_config_table::get_guard_cf_function_count() const {
+uint32_t	    pe_load_config_directory::get_guard_cf_function_count() const {
     return this->guard_cf_function_count;
 }
-uint32_t		load_config_table::get_guard_flags() const {
+uint32_t		pe_load_config_directory::get_guard_flags() const {
 	return this->guard_flags;
 }
 
-const std::vector<uint32_t >& load_config_table::get_se_handlers() const {
+const std::vector<uint32_t >& pe_load_config_directory::get_se_handlers() const {
     return this->se_handlers;
 }
-const std::vector<uint32_t >& load_config_table::get_lock_prefixes() const {
+const std::vector<uint32_t >& pe_load_config_directory::get_lock_prefixes() const {
     return this->lock_prefixes_rva;
 }
-const std::vector<uint32_t >& load_config_table::get_guard_cf_functions() const {
+const std::vector<uint32_t >& pe_load_config_directory::get_guard_cf_functions() const {
     return this->guard_cf_functions_rva;
 }
-const std::vector<uint32_t >& load_config_table::get_guard_iat_entries() const {
+const std::vector<uint32_t >& pe_load_config_directory::get_guard_iat_entries() const {
     return this->guard_iat_entries_rva;
 }
-const std::vector<uint32_t >& load_config_table::get_guard_long_jump_targets() const {
+const std::vector<uint32_t >& pe_load_config_directory::get_guard_long_jump_targets() const {
     return this->guard_long_jump_targets_rva;
 }
 
-std::vector<uint32_t>& load_config_table::get_se_handlers() {
+std::vector<uint32_t>& pe_load_config_directory::get_se_handlers() {
 	return this->se_handlers;
 }
-std::vector<uint32_t>& load_config_table::get_lock_prefixes() {
+std::vector<uint32_t>& pe_load_config_directory::get_lock_prefixes() {
 	return this->lock_prefixes_rva;
 }
-std::vector<uint32_t>& load_config_table::get_guard_cf_functions() {
+std::vector<uint32_t>& pe_load_config_directory::get_guard_cf_functions() {
     return this->guard_cf_functions_rva;
 }
-std::vector<uint32_t >& load_config_table::get_guard_iat_entries() {
+std::vector<uint32_t >& pe_load_config_directory::get_guard_iat_entries() {
     return this->guard_iat_entries_rva;
 }
-std::vector<uint32_t >& load_config_table::get_guard_long_jump_targets() {
+std::vector<uint32_t >& pe_load_config_directory::get_guard_long_jump_targets() {
     return this->guard_long_jump_targets_rva;
 }
-image_load_config_code_integrity load_config_table::get_code_integrity() const {
+image_load_config_code_integrity pe_load_config_directory::get_code_integrity() const {
     return this->code_integrity;
 }
-uint32_t        load_config_table::get_guard_address_taken_iat_entry_table() const {
+uint32_t        pe_load_config_directory::get_guard_address_taken_iat_entry_table() const {
     return this->guard_address_taken_iat_entry_table;
 }
-uint32_t        load_config_table::get_guard_address_taken_iat_entry_count() const {
+uint32_t        pe_load_config_directory::get_guard_address_taken_iat_entry_count() const {
     return this->guard_address_taken_iat_entry_count;
 }
-uint32_t        load_config_table::get_guard_long_jump_target_table() const {
+uint32_t        pe_load_config_directory::get_guard_long_jump_target_table() const {
     return this->guard_long_jump_target_table;
 }
-uint32_t        load_config_table::get_guard_long_jump_target_count() const {
+uint32_t        pe_load_config_directory::get_guard_long_jump_target_count() const {
     return this->guard_long_jump_target_count;
 }
-uint32_t        load_config_table::get_dynamic_value_reloc_table() const {
+uint32_t        pe_load_config_directory::get_dynamic_value_reloc_table() const {
     return this->dynamic_value_reloc_table;
 }
-uint32_t        load_config_table::get_chpe_meta_data_pointer() const {
+uint32_t        pe_load_config_directory::get_chpe_meta_data_pointer() const {
     return this->chpe_meta_data_pointer;
 }
-uint32_t        load_config_table::get_guard_rf_failure_routine() const {
+uint32_t        pe_load_config_directory::get_guard_rf_failure_routine() const {
     return this->guard_rf_failure_routine;
 }
-uint32_t        load_config_table::get_guard_rf_failure_routine_function_pointer() const {
+uint32_t        pe_load_config_directory::get_guard_rf_failure_routine_function_pointer() const {
     return this->guard_rf_failure_routine_function_pointer;
 }
-uint32_t        load_config_table::get_dynamic_value_reloc_table_offset() const {
+uint32_t        pe_load_config_directory::get_dynamic_value_reloc_table_offset() const {
     return this->dynamic_value_reloc_table_offset;
 }
-uint16_t        load_config_table::get_dynamic_value_reloc_table_section() const {
+uint16_t        pe_load_config_directory::get_dynamic_value_reloc_table_section() const {
     return this->dynamic_value_reloc_table_section;
 }
-uint32_t        load_config_table::get_guard_rf_verify_stack_pointer_function_pointer() const {
+uint32_t        pe_load_config_directory::get_guard_rf_verify_stack_pointer_function_pointer() const {
     return this->guard_rf_verify_stack_pointer_function_pointer;
 }
-uint32_t        load_config_table::get_hot_patch_table_offset() const {
+uint32_t        pe_load_config_directory::get_hot_patch_table_offset() const {
     return this->hot_patch_table_offset;
 }
-uint32_t        load_config_table::get_enclave_configuration_pointer() const {
+uint32_t        pe_load_config_directory::get_enclave_configuration_pointer() const {
     return this->enclave_configuration_pointer;
 }
 
 template <typename image_format>
-directory_code _get_load_config_table(const pe_image &image, load_config_table& load_config) {
+pe_directory_code _get_load_config_directory(const pe_image &image, pe_load_config_directory& load_config) {
     load_config.set_size(0);
     load_config.set_timestamp(0);
     load_config.set_major_version(0);
@@ -367,13 +367,13 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         uint32_t desc_size;
 
         if (pe_image_io(image).set_image_offset(virtual_address).read(&desc_size,sizeof(desc_size)) != enma_io_success) {
-            return directory_code::directory_code_currupted;
+            return pe_directory_code::pe_directory_code_currupted;
         }
 
-        if (!desc_size) { return directory_code::directory_code_success; }
+        if (!desc_size) { return pe_directory_code::pe_directory_code_success; }
 
         if (pe_image_io(image).set_image_offset(virtual_address).read(&load_config_desc, desc_size) != enma_io_success) {
-            return directory_code::directory_code_currupted;
+            return pe_directory_code::pe_directory_code_currupted;
         }
 
         load_config.set_size(desc_size);
@@ -398,7 +398,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 do {
 
                     if (loadcfg_lock_prefix_io.read(&lock_prefix_va, sizeof(lock_prefix_va)) != enma_io_success) {
-                        return directory_code::directory_code_currupted;
+                        return pe_directory_code::pe_directory_code_currupted;
                     }
 
                     load_config.get_lock_prefixes().push_back(image.va_to_rva(lock_prefix_va));
@@ -422,7 +422,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         }
 
         if (offsetof(typename image_format::image_load_config_directory, se_handler_table) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
 
@@ -437,7 +437,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                     uint32_t se_handler_rva;
 
                     if (loadcfg_se_handlers_io.read(&se_handler_rva, sizeof(se_handler_rva)) != enma_io_success) {
-                        return directory_code::directory_code_currupted;
+                        return pe_directory_code::pe_directory_code_currupted;
                     }
 
                     load_config.get_se_handlers().push_back(se_handler_rva);
@@ -447,7 +447,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         load_config.set_se_handler_count(uint32_t(load_config_desc.se_handler_count));
 
         if (offsetof(typename image_format::image_load_config_directory, guard_cf_check_function_pointer) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
         if (load_config_desc.guard_cf_check_function_pointer) {
@@ -466,7 +466,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 uint32_t cf_function_va;
 
                 if (loadcfg_guard_cf_function_io.read(&cf_function_va, sizeof(cf_function_va)) != enma_io_success) {
-                    return directory_code::directory_code_currupted;
+                    return pe_directory_code::pe_directory_code_currupted;
                 }
 
                 load_config.get_guard_cf_functions().push_back(cf_function_va);
@@ -477,13 +477,13 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         load_config.set_guard_flags(load_config_desc.guard_flags);
         
         if (offsetof(typename image_format::image_load_config_directory, code_integrity) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
         load_config.set_code_integrity(load_config_desc.code_integrity);
 
         if (offsetof(typename image_format::image_load_config_directory, guard_address_taken_iat_entry_table) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
 
@@ -496,7 +496,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 uint32_t address_taken_iat;
 
                 if (loadcfg_guard_address_taken_iat_io.read(&address_taken_iat, sizeof(address_taken_iat)) != enma_io_success) {
-                    return directory_code::directory_code_currupted;
+                    return pe_directory_code::pe_directory_code_currupted;
                 }
 
                 load_config.get_guard_iat_entries().push_back(address_taken_iat);
@@ -514,7 +514,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
                 uint32_t guard_long_jump_target;
 
                 if (guard_long_jump_target_io.read(&guard_long_jump_target, sizeof(guard_long_jump_target)) != enma_io_success) {
-                    return directory_code::directory_code_currupted;
+                    return pe_directory_code::pe_directory_code_currupted;
                 }
 
                 load_config.get_guard_long_jump_targets().push_back(guard_long_jump_target);
@@ -524,7 +524,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
 
 
         if (offsetof(typename image_format::image_load_config_directory, dynamic_value_reloc_table) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
         if (load_config_desc.dynamic_value_reloc_table) {
@@ -536,7 +536,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_rf_failure_routine) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
         if (load_config_desc.guard_rf_failure_routine) {
@@ -551,7 +551,7 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         load_config.set_dynamic_value_reloc_table_section(load_config_desc.dynamic_value_reloc_table_section);
 
         if (offsetof(typename image_format::image_load_config_directory, guard_rf_verify_stack_pointer_function_pointer) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
         if (load_config_desc.guard_rf_verify_stack_pointer_function_pointer) {
@@ -561,22 +561,22 @@ directory_code _get_load_config_table(const pe_image &image, load_config_table& 
         load_config.set_hot_patch_table_offset(load_config_desc.hot_patch_table_offset);
 
         if (offsetof(typename image_format::image_load_config_directory, enclave_configuration_pointer) >= desc_size) {
-            return directory_code::directory_code_success;
+            return pe_directory_code::pe_directory_code_success;
         }
 
         if (load_config_desc.enclave_configuration_pointer) {
             load_config.set_enclave_configuration_pointer(image.va_to_rva(load_config_desc.enclave_configuration_pointer));
         }
 
-        return directory_code::directory_code_success;
+        return pe_directory_code::pe_directory_code_success;
     }
     
-    return directory_code::directory_code_not_present;
+    return pe_directory_code::pe_directory_code_not_present;
 }
 
 
 template<typename image_format>
-bool _build_load_config_table_only(pe_image &image, pe_section& section, load_config_table& load_config, relocation_table& relocs) {
+bool _build_load_config_directory_only(pe_image &image, pe_section& section, pe_load_config_directory& load_config, pe_relocations_directory& relocs) {
 
     if (load_config.get_size()) {
         pe_section_io load_config_io(section, image);
@@ -700,7 +700,7 @@ bool _build_load_config_table_only(pe_image &image, pe_section& section, load_co
 }
 
 template <typename image_format>
-directory_code _get_placement_load_config_table(const pe_image &image, pe_directory_placement& placement) {
+pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
@@ -710,16 +710,16 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
         uint32_t desc_size;
 
         if (pe_image_io(image).set_image_offset(virtual_address).read(&desc_size, sizeof(desc_size)) != enma_io_success) {
-            return directory_code::directory_code_currupted;
+            return pe_directory_code::pe_directory_code_currupted;
         }
 
-        if (!desc_size) { return directory_code::directory_code_success; }
+        if (!desc_size) { return pe_directory_code::pe_directory_code_success; }
 
         if (pe_image_io(image).set_image_offset(virtual_address).read(&load_config_desc, desc_size) != enma_io_success) {
-            return directory_code::directory_code_currupted;
+            return pe_directory_code::pe_directory_code_currupted;
         }
 
-        placement[virtual_address] = directory_placement(desc_size, id_pe_loadconfig_descriptor, "");
+        placement[virtual_address] = pe_placement_entry(desc_size, id_pe_loadconfig_descriptor, "");
 
         if (image.is_x32_image()) {
             if (offsetof(typename image_format::image_load_config_directory, se_handler_table) < desc_size &&
@@ -727,7 +727,7 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
                 load_config_desc.se_handler_table) {
 
                 placement[(uint32_t)image.va_to_rva(load_config_desc.se_handler_table)] = 
-                    directory_placement((uint32_t)(load_config_desc.se_handler_count * sizeof(uint32_t)), id_pe_loadconfig_se_table, "");
+                    pe_placement_entry((uint32_t)(load_config_desc.se_handler_count * sizeof(uint32_t)), id_pe_loadconfig_se_table, "");
             }
 
             if (offsetof(typename image_format::image_load_config_directory, lock_prefix_table) < desc_size &&
@@ -742,12 +742,12 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
 
                 for (; lock_item; lock_prefix_count++) {
                     if (lock_pref_io.read(&lock_item, sizeof(lock_item)) != enma_io_success) {
-                        return directory_code::directory_code_currupted;
+                        return pe_directory_code::pe_directory_code_currupted;
                     }
                 }
 
                 placement[image.va_to_rva(load_config_desc.lock_prefix_table)] = 
-                    directory_placement(((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_loadconfig_lock_table, "");
+                    pe_placement_entry(((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_loadconfig_lock_table, "");
             }
         }
 
@@ -756,7 +756,7 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
             load_config_desc.guard_cf_function_table) {
 
             placement[image.va_to_rva(load_config_desc.guard_cf_function_table)] =
-                directory_placement((uint32_t)(load_config_desc.guard_cf_function_count * sizeof(uint32_t)), id_pe_loadconfig_cf_table, "");
+                pe_placement_entry((uint32_t)(load_config_desc.guard_cf_function_count * sizeof(uint32_t)), id_pe_loadconfig_cf_table, "");
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_address_taken_iat_entry_table) < desc_size &&
@@ -764,7 +764,7 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
             load_config_desc.guard_address_taken_iat_entry_table) {
 
             placement[image.va_to_rva(load_config_desc.guard_address_taken_iat_entry_table)] =
-                directory_placement((uint32_t)(load_config_desc.guard_address_taken_iat_entry_count * sizeof(uint32_t)), id_pe_loadconfig_iat_table, "");
+                pe_placement_entry((uint32_t)(load_config_desc.guard_address_taken_iat_entry_count * sizeof(uint32_t)), id_pe_loadconfig_iat_table, "");
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_long_jump_target_table) < desc_size &&
@@ -772,29 +772,29 @@ directory_code _get_placement_load_config_table(const pe_image &image, pe_direct
             load_config_desc.guard_long_jump_target_table) {
 
             placement[image.va_to_rva(load_config_desc.guard_long_jump_target_table)] =
-                directory_placement((uint32_t)(load_config_desc.guard_long_jump_target_count * sizeof(uint32_t)), id_pe_loadconfig_long_jump_table, "");
+                pe_placement_entry((uint32_t)(load_config_desc.guard_long_jump_target_count * sizeof(uint32_t)), id_pe_loadconfig_long_jump_table, "");
         }
 
         
     }
 
-    return directory_code::directory_code_not_present;
+    return pe_directory_code::pe_directory_code_not_present;
 }
 
-directory_code get_load_config_table(const pe_image &image, load_config_table& load_config) {
+pe_directory_code get_load_config_directory(const pe_image &image, pe_load_config_directory& load_config) {
    
     if (image.is_x32_image()) {
-        return _get_load_config_table<image_32>(image, load_config);
+        return _get_load_config_directory<pe_image_32>(image, load_config);
     }
     else {
-        return _get_load_config_table<image_64>(image, load_config);
+        return _get_load_config_directory<pe_image_64>(image, load_config);
     }
 }
 
 
-bool build_internal_load_config_data(pe_image &image, pe_section& section,
-    load_config_table& load_config, uint32_t build_items_ids/*import_table_build_id*/,
-    relocation_table& relocs) {
+bool build_internal_load_config_directory_data(pe_image &image, pe_section& section,
+    pe_load_config_directory& load_config, uint32_t build_items_ids/*import_table_build_id*/,
+    pe_relocations_directory& relocs) {
 
     if (image.is_x32_image() &&
         (build_items_ids & load_config_table_build_se_handlers || build_items_ids & load_config_table_build_lock_prefixes)) {
@@ -912,33 +912,33 @@ bool build_internal_load_config_data(pe_image &image, pe_section& section,
     return true;
 }
 
-bool build_load_config_table_only( pe_image &image, pe_section& section,
-     load_config_table& load_config, relocation_table& relocs) {
+bool build_load_config_directory_only( pe_image &image, pe_section& section,
+     pe_load_config_directory& load_config, pe_relocations_directory& relocs) {
 
 
     if (image.is_x32_image()) {
-        return _build_load_config_table_only<image_32>(image, section, load_config, relocs);
+        return _build_load_config_directory_only<pe_image_32>(image, section, load_config, relocs);
     }
     else {
-        return _build_load_config_table_only<image_64>(image, section, load_config, relocs);
+        return _build_load_config_directory_only<pe_image_64>(image, section, load_config, relocs);
     }
 }
 
-bool build_load_config_table_full(pe_image &image, pe_section& section,
-     load_config_table& load_config, relocation_table& relocs) {
+bool build_load_config_directory_full(pe_image &image, pe_section& section,
+     pe_load_config_directory& load_config, pe_relocations_directory& relocs) {
 
-    return build_internal_load_config_data(image, section, load_config,
+    return build_internal_load_config_directory_data(image, section, load_config,
         load_config_table_build_se_handlers | load_config_table_build_lock_prefixes | load_config_table_build_guard_cf_functions |
         load_config_table_build_guard_iat_entrys | load_config_table_build_guard_long_jump_targets, relocs) && 
-        build_load_config_table_only(image, section, load_config, relocs);
+        build_load_config_directory_only(image, section, load_config, relocs);
 }
 
-directory_code get_placement_load_config_table(const pe_image &image, pe_directory_placement& placement) {
+pe_directory_code get_placement_load_config_directory(const pe_image &image, pe_placement& placement) {
 
     if (image.is_x32_image()) {
-        return _get_placement_load_config_table<image_32>(image,placement);
+        return _get_placement_load_config_directory<pe_image_32>(image,placement);
     }
     else {
-        return _get_placement_load_config_table<image_64>(image, placement);
+        return _get_placement_load_config_directory<pe_image_64>(image, placement);
     }
 }

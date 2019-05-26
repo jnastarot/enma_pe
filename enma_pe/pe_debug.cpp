@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "pe_debug.h"
 
-debug_item::debug_item() {
+pe_debug_entry::pe_debug_entry() {
     this->characteristics   = 0;
     this->timestamp         = 0;
     this->major_version     = 0;
@@ -12,11 +12,11 @@ debug_item::debug_item() {
     this->pointer_to_raw_data = 0;
 }
 
-debug_item::debug_item(const debug_item& item) {
+pe_debug_entry::pe_debug_entry(const pe_debug_entry& item) {
     this->operator=(item);
 }
 
-debug_item::debug_item(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
+pe_debug_entry::pe_debug_entry(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
     uint32_t   type, uint32_t   size_of_data, uint32_t   address_of_raw_data, uint32_t   pointer_to_raw_data,
     void * data) {
 
@@ -34,11 +34,11 @@ debug_item::debug_item(uint32_t   characteristics, uint32_t   timestamp, uint16_
 }
 
 
-debug_item::~debug_item() {
+pe_debug_entry::~pe_debug_entry() {
 
 }
   
-debug_item& debug_item::operator=(const debug_item& item) {
+pe_debug_entry& pe_debug_entry::operator=(const pe_debug_entry& item) {
     this->characteristics = item.characteristics;
     this->timestamp = item.timestamp;
     this->major_version = item.major_version;
@@ -51,101 +51,101 @@ debug_item& debug_item::operator=(const debug_item& item) {
     return *this;
 }
 
-void  debug_item::set_characteristics(uint32_t characteristics) {
+void  pe_debug_entry::set_characteristics(uint32_t characteristics) {
     this->characteristics = characteristics;
 }
-void  debug_item::set_timestamp(uint32_t timestamp) {
+void  pe_debug_entry::set_timestamp(uint32_t timestamp) {
     this->timestamp = timestamp;
 }
-void  debug_item::set_major_version(uint16_t major_version){
+void  pe_debug_entry::set_major_version(uint16_t major_version){
     this->major_version = major_version;
 }
-void  debug_item::set_minor_version(uint16_t minor_version) {
+void  pe_debug_entry::set_minor_version(uint16_t minor_version) {
     this->minor_version = minor_version;
 }
-void  debug_item::set_type(uint32_t type) {
+void  pe_debug_entry::set_type(uint32_t type) {
     this->type = type;
 }
-void  debug_item::set_size_of_data(uint32_t size_of_data) {
+void  pe_debug_entry::set_size_of_data(uint32_t size_of_data) {
     this->size_of_data = size_of_data;
 }
-void  debug_item::set_address_of_raw_data(uint32_t address_of_raw_data) {
+void  pe_debug_entry::set_address_of_raw_data(uint32_t address_of_raw_data) {
     this->address_of_raw_data = address_of_raw_data;
 }
-void  debug_item::set_pointer_to_raw_data(uint32_t pointer_to_raw_data) {
+void  pe_debug_entry::set_pointer_to_raw_data(uint32_t pointer_to_raw_data) {
     this->pointer_to_raw_data = pointer_to_raw_data;
 }
 
-uint32_t  debug_item::get_characteristics() const {
+uint32_t  pe_debug_entry::get_characteristics() const {
     return this->characteristics;
 }
-uint32_t  debug_item::get_timestamp() const {
+uint32_t  pe_debug_entry::get_timestamp() const {
     return this->timestamp;
 }
-uint16_t   debug_item::get_major_version() const{
+uint16_t   pe_debug_entry::get_major_version() const{
     return this->major_version;
 }
-uint16_t   debug_item::get_minor_version() const {
+uint16_t   pe_debug_entry::get_minor_version() const {
     return this->minor_version;
 }
-uint32_t  debug_item::get_type() const {
+uint32_t  pe_debug_entry::get_type() const {
     return this->type;
 }
-uint32_t  debug_item::get_size_of_data() const {
+uint32_t  pe_debug_entry::get_size_of_data() const {
     return this->size_of_data;
 }
-uint32_t  debug_item::get_address_of_raw_data() const {
+uint32_t  pe_debug_entry::get_address_of_raw_data() const {
     return this->address_of_raw_data;
 }
-uint32_t  debug_item::get_pointer_to_raw_data() const {
+uint32_t  pe_debug_entry::get_pointer_to_raw_data() const {
     return this->pointer_to_raw_data;
 }
-const std::vector<uint8_t>& debug_item::get_item_data() const {
+const std::vector<uint8_t>& pe_debug_entry::get_item_data() const {
     return this->item_data;
 }
-std::vector<uint8_t>& debug_item::get_item_data() {
+std::vector<uint8_t>& pe_debug_entry::get_item_data() {
     return this->item_data;
 }
 
 
-debug_table::debug_table() {
+pe_debug_directory::pe_debug_directory() {
 
 }
-debug_table::debug_table(const debug_table& debug) {
+pe_debug_directory::pe_debug_directory(const pe_debug_directory& debug) {
     this->operator=(debug);
 }
-debug_table::~debug_table() {
+pe_debug_directory::~pe_debug_directory() {
 
 }
 
-debug_table& debug_table::operator=(const debug_table& debug) {
-    this->items = debug.items;
+pe_debug_directory& pe_debug_directory::operator=(const pe_debug_directory& debug) {
+    this->entries = debug.entries;
     return *this;
 }
 
-void debug_table::add_item(const debug_item& item) {
-    items.push_back(item);
+void pe_debug_directory::add_entry(const pe_debug_entry& item) {
+    entries.push_back(item);
 }
 
-void debug_table::clear() {
-    this->items.clear();
+void pe_debug_directory::clear() {
+    this->entries.clear();
 }
 
-size_t debug_table::size() const {
-    return items.size();
+size_t pe_debug_directory::size() const {
+    return entries.size();
 }
 
-const std::vector<debug_item>& debug_table::get_items() const {
-    return items;
+const std::vector<pe_debug_entry>& pe_debug_directory::get_entries() const {
+    return entries;
 }
 
-std::vector<debug_item>& debug_table::get_items() {
-    return items;
+std::vector<pe_debug_entry>& pe_debug_directory::get_entries() {
+    return entries;
 }
 
 
-directory_code get_debug_table(const pe_image &image, debug_table& debug) {
-    debug.get_items().clear();
+pe_directory_code get_debug_directory(const pe_image &image, pe_debug_directory& debug) {
+    debug.get_entries().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
@@ -158,10 +158,10 @@ directory_code get_debug_table(const pe_image &image, debug_table& debug) {
             image_debug_directory debug_desc;
 
             if (debug_io.read(&debug_desc,sizeof(debug_desc)) != enma_io_success) {
-                return directory_code::directory_code_currupted;
+                return pe_directory_code::pe_directory_code_currupted;
             }
 
-            debug_item item;
+            pe_debug_entry item;
             item.set_characteristics(debug_desc.characteristics);
             item.set_timestamp(debug_desc.time_date_stamp);
             item.set_major_version(debug_desc.major_version);
@@ -185,25 +185,25 @@ directory_code get_debug_table(const pe_image &image, debug_table& debug) {
                 );
 
                 if (down_oversize || up_oversize) {
-                    return directory_code::directory_code_currupted;
+                    return pe_directory_code::pe_directory_code_currupted;
                 }
 
                 if (pe_image_io(image).set_image_offset(debug_desc.address_of_raw_data).read(
                     item.get_item_data(), debug_desc.size_of_data) != enma_io_success) {
-                    return directory_code::directory_code_currupted;
+                    return pe_directory_code::pe_directory_code_currupted;
                 }
             }
 
-            debug.add_item(item);
+            debug.add_entry(item);
         }
 
-        return directory_code::directory_code_success;
+        return pe_directory_code::pe_directory_code_success;
     }
 
-    return directory_code::directory_code_not_present;
+    return pe_directory_code::pe_directory_code_not_present;
 }
 
-directory_code get_placement_debug_table(const pe_image &image, pe_directory_placement& placement) {
+pe_directory_code get_placement_debug_directory(const pe_image &image, pe_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);
@@ -219,7 +219,7 @@ directory_code get_placement_debug_table(const pe_image &image, pe_directory_pla
             image_debug_directory debug_desc;
 
             if (debug_io.read(&debug_desc, sizeof(debug_desc)) != enma_io_success) {
-                return directory_code::directory_code_currupted;
+                return pe_directory_code::pe_directory_code_currupted;
             }
 
             if (debug_desc.size_of_data && debug_desc.address_of_raw_data) {
@@ -235,18 +235,18 @@ directory_code get_placement_debug_table(const pe_image &image, pe_directory_pla
                 );
 
                 if (down_oversize || up_oversize) {
-                    return directory_code::directory_code_currupted;
+                    return pe_directory_code::pe_directory_code_currupted;
                 }
 
 
-                placement[debug_desc.address_of_raw_data] = directory_placement(available_size, id_pe_debug_item_data, "");
+                placement[debug_desc.address_of_raw_data] = pe_placement_entry(available_size, id_pe_debug_item_data, "");
             }
         }
 
-        placement[virtual_address] = directory_placement(ALIGN_UP(total_desc_size, 0x10), id_pe_debug_descriptor, "");
+        placement[virtual_address] = pe_placement_entry(ALIGN_UP(total_desc_size, 0x10), id_pe_debug_descriptor, "");
 
-        return directory_code::directory_code_success;
+        return pe_directory_code::pe_directory_code_success;
     }
 
-	return directory_code::directory_code_not_present;
+	return pe_directory_code::pe_directory_code_not_present;
 }

@@ -78,6 +78,9 @@
     <Filter Include="Заголовочные файлы\pe_helpers\pe_rtti_helper">
       <UniqueIdentifier>{a4f78c24-5ebc-41cf-a34a-25bc7dec0cc9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Заголовочные файлы\pe_builder">
+      <UniqueIdentifier>{4381cbcc-1518-4dac-96ae-5ca8fa64841f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -155,6 +158,12 @@
     <ClInclude Include="pe_rtti_helper.h">
       <Filter>Заголовочные файлы\pe_helpers\pe_rtti_helper</Filter>
     </ClInclude>
+    <ClInclude Include="pe_builder.h">
+      <Filter>Заголовочные файлы\pe_builder</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_image_full.h">
+      <Filter>Заголовочные файлы\pe_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -205,9 +214,6 @@
     <ClCompile Include="pe_security.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
     </ClCompile>
-    <ClCompile Include="enma_pe.cpp">
-      <Filter>Заголовочные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="pe_image_io.cpp">
       <Filter>Заголовочные файлы\pe_io\pe_image_io</Filter>
     </ClCompile>
@@ -225,6 +231,12 @@
     </ClCompile>
     <ClCompile Include="pe_rtti_helper.cpp">
       <Filter>Заголовочные файлы\pe_helpers\pe_rtti_helper</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_builder.cpp">
+      <Filter>Заголовочные файлы\pe_builder</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_image_full.cpp">
+      <Filter>Заголовочные файлы\pe_image</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

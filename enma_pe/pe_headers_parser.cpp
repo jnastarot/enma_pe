@@ -57,93 +57,93 @@ uint32_t pe_rich_item::get_count() const {
 }
 
 
-pe_rich_data::pe_rich_data() {
+pe_rich_header::pe_rich_header() {
     rich_offset = 0;
     rich_size = 0;
     rich_xorkey = 0;
     rich_correct_xorkey = 0;
 }
 
-pe_rich_data::pe_rich_data(const pe_rich_data& data) {
+pe_rich_header::pe_rich_header(const pe_rich_header& data) {
     operator=(data);
 }
 
-pe_rich_data::~pe_rich_data() {
+pe_rich_header::~pe_rich_header() {
 
 }
 
-pe_rich_data& pe_rich_data::operator=(const pe_rich_data& data) {
+pe_rich_header& pe_rich_header::operator=(const pe_rich_header& data) {
     rich_offset = data.rich_offset;
     rich_size = data.rich_size;
     rich_xorkey = data.rich_xorkey;
     rich_correct_xorkey = data.rich_correct_xorkey;
-    items = data.items;
+    entries = data.entries;
 
     return *this;
 }
 
-void pe_rich_data::set_rich_offset(uint32_t offset) {
+void pe_rich_header::set_rich_offset(uint32_t offset) {
     rich_offset = offset;
 }
 
-void pe_rich_data::set_rich_size(uint32_t size) {
+void pe_rich_header::set_rich_size(uint32_t size) {
     rich_size = size;
 }
 
-void pe_rich_data::set_rich_xorkey(uint32_t xorkey) {
+void pe_rich_header::set_rich_xorkey(uint32_t xorkey) {
     rich_xorkey = xorkey;
 }
 
-void pe_rich_data::set_rich_correct_xorkey(uint32_t correct_xorkey) {
+void pe_rich_header::set_rich_correct_xorkey(uint32_t correct_xorkey) {
     rich_correct_xorkey = correct_xorkey;
 }
 
-uint32_t pe_rich_data::get_rich_offset() const {
+uint32_t pe_rich_header::get_rich_offset() const {
     return rich_offset;
 }
 
-uint32_t pe_rich_data::get_rich_size() const {
+uint32_t pe_rich_header::get_rich_size() const {
     return rich_size;
 }
 
-uint32_t pe_rich_data::get_rich_xorkey() const {
+uint32_t pe_rich_header::get_rich_xorkey() const {
     return rich_xorkey;
 }
 
-uint32_t pe_rich_data::get_rich_correct_xorkey() const {
+uint32_t pe_rich_header::get_rich_correct_xorkey() const {
     return rich_correct_xorkey;
 }
 
-bool     pe_rich_data::is_valid_rich() const {
+bool     pe_rich_header::is_valid_rich() const {
     return (rich_xorkey == rich_correct_xorkey);
 }
 
-bool     pe_rich_data::is_present() const {
+bool     pe_rich_header::is_present() const {
     return (rich_offset && rich_size);
 }
 
-const std::vector<pe_rich_item>& pe_rich_data::get_items() const {
-    return items;
+const std::vector<pe_rich_item>& pe_rich_header::get_entries() const {
+    return entries;
 }
 
-std::vector<pe_rich_item>& pe_rich_data::get_items() {
-    return items;
+std::vector<pe_rich_item>& pe_rich_header::get_entries() {
+    return entries;
 }
 
 
 
 
-struct rich_data_item {
+struct rich_data_entry {
     uint16_t compiler_build;
     uint16_t type;
     uint32_t count;
 };
 
-bool has_image_rich_data(const std::vector<uint8_t>& image_headers, uint32_t * rich_data_offset,
-    uint32_t * rich_data_size, uint32_t * rich_xor_key) {
+bool has_image_rich_header(const std::vector<uint8_t>& image_headers, uint32_t * rich_header_offset,
+    uint32_t * rich_header_size, uint32_t * rich_xor_key) {
 
-    if (rich_data_offset) { *rich_data_offset = 0; }
-    if (rich_data_size) { *rich_data_size = 0; }
+    if (rich_header_offset) { *rich_header_offset = 0; }
+    if (rich_header_size) { *rich_header_size = 0; }
     if (rich_xor_key) { *rich_xor_key = 0; }
 
     if (image_headers.size() < sizeof(image_dos_header)) { return false; }
@@ -163,11 +163,11 @@ bool has_image_rich_data(const std::vector<uint8_t>& image_headers, uint32_t * r
 
                 if ((*(uint32_t*)(&image_headers.data()[rich_start]) ^ xor_key) == 0x536E6144) { //'DanS'
 
-                    if (rich_data_offset) {
-                        *rich_data_offset = uint32_t(rich_start);
+                    if (rich_header_offset) {
+                        *rich_header_offset = uint32_t(rich_start);
                     }
-                    if (rich_data_size) {
-                        *rich_data_size = uint32_t(rich_end - rich_start);
+                    if (rich_header_size) {
+                        *rich_header_size = uint32_t(rich_end - rich_start);
                     }
                     if (rich_xor_key) {
                         *rich_xor_key = xor_key;
@@ -196,7 +196,7 @@ bool get_image_dos_stub(const std::vector<uint8_t>& image_headers, pe_dos_stub& 
     uint32_t dos_stub_size = 0;
     uint32_t rich_offset = 0;
 
-    if (has_image_rich_data(image_headers, &rich_offset)) {
+    if (has_image_rich_header(image_headers, &rich_offset)) {
         dos_stub_size = rich_offset;
     }
     else {
@@ -216,37 +216,37 @@ bool get_image_dos_stub(const std::vector<uint8_t>& image_headers, pe_dos_stub& 
 
 
 
-bool get_image_rich_data(const std::vector<uint8_t>& image_headers, pe_rich_data& rich_data) {
+bool get_image_rich_header(const std::vector<uint8_t>& image_headers, pe_rich_header& rich_header) {
 
-    rich_data.set_rich_offset(0);
-    rich_data.set_rich_size(0);
-    rich_data.set_rich_xorkey(0);
-    rich_data.set_rich_correct_xorkey(0);
-    rich_data.get_items().clear();
+    rich_header.set_rich_offset(0);
+    rich_header.set_rich_size(0);
+    rich_header.set_rich_xorkey(0);
+    rich_header.set_rich_correct_xorkey(0);
+    rich_header.get_entries().clear();
 
     uint32_t rich_offset = 0;
     uint32_t rich_size = 0;
     uint32_t rich_xor_key = 0;
     uint32_t rich_correct_xor_key = 0;
 
-    if (has_image_rich_data(image_headers, &rich_offset, &rich_size, &rich_xor_key)) {
+    if (has_image_rich_header(image_headers, &rich_offset, &rich_size, &rich_xor_key)) {
         checksum_rich(image_headers, &rich_correct_xor_key);
 
-        rich_data.set_rich_offset(rich_offset);
-        rich_data.set_rich_size(rich_size);
-        rich_data.set_rich_xorkey(rich_xor_key);
-        rich_data.set_rich_correct_xorkey(rich_correct_xor_key);
+        rich_header.set_rich_offset(rich_offset);
+        rich_header.set_rich_size(rich_size);
+        rich_header.set_rich_xorkey(rich_xor_key);
+        rich_header.set_rich_correct_xorkey(rich_correct_xor_key);
 
 
-        rich_data_item* rich_items = (rich_data_item*)(&image_headers.data()[rich_offset]);
+        rich_data_entry* rich_entries = (rich_data_entry*)(&image_headers.data()[rich_offset]);
 
-        for (size_t item_idx = 2; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
-            rich_data_item rich_item = rich_items[item_idx];
-            *(uint32_t*)(&rich_item) ^= rich_xor_key;
-            *(uint32_t*)((uint8_t*)&rich_item + 4) ^= rich_xor_key;
+        for (size_t item_idx = 2; item_idx < (rich_size / sizeof(rich_data_entry)); item_idx++) {
+            rich_data_entry rich_entry = rich_entries[item_idx];
+            *(uint32_t*)(&rich_entry) ^= rich_xor_key;
+            *(uint32_t*)((uint8_t*)&rich_entry + 4) ^= rich_xor_key;
 
-            rich_data.get_items().push_back(
-                pe_rich_item((e_rich_type)rich_item.type, rich_item.compiler_build, rich_item.count)
+            rich_header.get_entries().push_back(
+                pe_rich_item((e_rich_type)rich_entry.type, rich_entry.compiler_build, rich_entry.count)
             );
         }
 
@@ -264,8 +264,8 @@ bool checksum_rich(const std::vector<uint8_t>& image_headers, uint32_t * correct
     uint32_t rich_size = 0;
     uint32_t rich_xor_key = 0;
 
-    if (has_image_rich_data(image_headers, &rich_offset, &rich_size, &rich_xor_key)) {
-        rich_data_item* rich_items = (rich_data_item*)(&image_headers.data()[rich_offset]);
+    if (has_image_rich_header(image_headers, &rich_offset, &rich_size, &rich_xor_key)) {
+        rich_data_entry* rich_entries = (rich_data_entry*)(&image_headers.data()[rich_offset]);
 
         uint32_t calc_hash = rich_offset;
 
@@ -275,12 +275,12 @@ bool checksum_rich(const std::vector<uint8_t>& image_headers, uint32_t * correct
             calc_hash += GET_RICH_HASH(uint32_t(image_headers.data()[i]), i);
         }
 
-        for (size_t item_idx = 1; item_idx < (rich_size / sizeof(rich_data_item)); item_idx++) {
-            rich_data_item rich_item = rich_items[item_idx];
-            *(uint32_t*)(&rich_item) ^= rich_xor_key;
-            *(uint32_t*)((uint8_t*)&rich_item + 4) ^= rich_xor_key;
+        for (size_t entry_idx = 1; entry_idx < (rich_size / sizeof(rich_data_entry)); entry_idx++) {
+            rich_data_entry rich_entry = rich_entries[entry_idx];
+            *(uint32_t*)(&rich_entry) ^= rich_xor_key;
+            *(uint32_t*)((uint8_t*)&rich_entry + 4) ^= rich_xor_key;
 
-            calc_hash += GET_RICH_HASH(*(uint32_t*)(&rich_item), *(uint32_t*)((uint8_t*)&rich_item + 4));
+            calc_hash += GET_RICH_HASH(*(uint32_t*)(&rich_entry), *(uint32_t*)((uint8_t*)&rich_entry + 4));
         }
 
         if (correct_rich_xor_key) {

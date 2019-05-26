@@ -160,18 +160,18 @@ public:
     uint32_t get_count() const;
 };
 
-class pe_rich_data {
-    std::vector<pe_rich_item> items;
+class pe_rich_header {
+    std::vector<pe_rich_item> entries;
     uint32_t rich_offset;
     uint32_t rich_size;
     uint32_t rich_xorkey;
     uint32_t rich_correct_xorkey;
 public:
-    pe_rich_data();
-    pe_rich_data(const pe_rich_data& data);
-    ~pe_rich_data();
+    pe_rich_header();
+    pe_rich_header(const pe_rich_header& data);
+    ~pe_rich_header();
 
-    pe_rich_data& operator=(const pe_rich_data& data);
+    pe_rich_header& operator=(const pe_rich_header& data);
 public:
     void set_rich_offset(uint32_t offset);
     void set_rich_size(uint32_t size);
@@ -185,14 +185,14 @@ public:
     uint32_t get_rich_correct_xorkey() const;
     bool     is_valid_rich() const;
     bool     is_present() const;
-    const std::vector<pe_rich_item>& get_items() const;
+    const std::vector<pe_rich_item>& get_entries() const;
 
-    std::vector<pe_rich_item>& get_items();
+    std::vector<pe_rich_item>& get_entries();
 };
 
 bool get_image_dos_stub(_In_ const std::vector<uint8_t>& image_headers, _Out_ pe_dos_stub& dos_stub);
-bool get_image_rich_data(_In_ const std::vector<uint8_t>& image_headers, _Out_ pe_rich_data& rich_data);
+bool get_image_rich_header(_In_ const std::vector<uint8_t>& image_headers, _Out_ pe_rich_header& rich_header);
 
-bool has_image_rich_data(_In_ const std::vector<uint8_t>& image_headers,
-    _Out_opt_ uint32_t * rich_data_offset = 0, _Out_opt_ uint32_t * rich_data_size = 0, _Out_opt_ uint32_t * rich_xor_key = 0);
+bool has_image_rich_header(_In_ const std::vector<uint8_t>& image_headers,
+    _Out_opt_ uint32_t * rich_header_offset = 0, _Out_opt_ uint32_t * rich_header_size = 0, _Out_opt_ uint32_t * rich_xor_key = 0);
 bool checksum_rich(_In_ const std::vector<uint8_t>& image_headers, _Out_opt_ uint32_t * correct_rich_xor_key = 0);

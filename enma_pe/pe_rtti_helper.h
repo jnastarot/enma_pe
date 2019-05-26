@@ -183,4 +183,4 @@ struct msvc_rtti_desc {
     std::map<uint32_t, rtti_msvc_type_descriptor> type_descriptor_entries;
 };
 
-void get_runtime_type_information(_In_ const pe_image_expanded& expanded_image, msvc_rtti_desc& msvc_rtti);
+void get_runtime_type_information(_In_ const pe_image_full& image_full, msvc_rtti_desc& msvc_rtti);
