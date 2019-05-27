@@ -6,10 +6,10 @@ class pe_image_full {
 
     pe_export_directory        exports;
     pe_import_directory        imports;
-    pe_resource_directory  resources;
+    pe_resource_directory      resources;
     pe_exceptions_directory    exceptions;
     pe_security_directory      security;
-    pe_relocations_directory    relocations;
+    pe_relocations_directory   relocations;
     pe_debug_directory         debug;
     pe_tls_directory           tls;
     pe_load_config_directory   load_config;

@@ -2,6 +2,9 @@
 #include "pe_image_full.h"
 
 
+pe_image_full::pe_image_full()
+    :code(pe_directory_code_currupted) {}
+
 pe_image_full::pe_image_full(const pe_image& image) {
     this->operator=(image);
 }
