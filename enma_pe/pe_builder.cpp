@@ -325,6 +325,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
             }
             if (image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) { //build tls
                 build_tls_directory_full(image_full.get_image(), *edata_section, image_full.get_tls(), image_full.get_relocations());
+                edata_section->set_writeable(true);
             }
         }
     }
