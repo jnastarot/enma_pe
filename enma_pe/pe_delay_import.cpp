@@ -396,7 +396,7 @@ pe_directory_code get_delay_import_directory(const pe_image &image, pe_delay_imp
     }
 }
 
-pe_directory_code get_placement_delay_import_table(const pe_image &image, pe_placement& placement,
+pe_directory_code get_placement_delay_import_directory(const pe_image &image, pe_placement& placement,
     const pe_bound_import_directory& bound_imports) {
 
     if (image.is_x32_image()) {
