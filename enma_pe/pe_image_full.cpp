@@ -31,6 +31,8 @@ pe_image_full::pe_image_full(const uint8_t* raw_image, uint32_t size) {
     this->code |= get_debug_directory(this->image, this->debug);
     this->code |= get_tls_directory(this->image, this->tls);
     this->code |= get_load_config_directory(this->image, this->load_config);
+
+    this->code &= ~(pe_directory_code_not_present);
 }
 
 pe_image_full::pe_image_full(const std::string& file_path) {
@@ -48,6 +50,8 @@ pe_image_full::pe_image_full(const std::string& file_path) {
     this->code |= get_debug_directory(this->image, this->debug);
     this->code |= get_tls_directory(this->image, this->tls);
     this->code |= get_load_config_directory(this->image, this->load_config);
+
+    this->code &= ~(pe_directory_code_not_present);
 }
 
 pe_image_full& pe_image_full::operator=(const pe_image_full& image) {
@@ -65,6 +69,8 @@ pe_image_full& pe_image_full::operator=(const pe_image_full& image) {
     this->delay_imports = image.delay_imports;
     this->bound_imports = image.bound_imports;
     this->image = image.image;
+
+    this->code &= ~(pe_directory_code_not_present);
 
     return *this;
 }
@@ -85,6 +91,8 @@ pe_image_full& pe_image_full::operator=(const pe_image& image) {
     this->code |= get_debug_directory(this->image, this->debug);
     this->code |= get_tls_directory(this->image, this->tls);
     this->code |= get_load_config_directory(this->image, this->load_config);
+
+    this->code &= ~(pe_directory_code_not_present);
 
     return *this;
 }

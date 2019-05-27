@@ -119,9 +119,9 @@ struct pe_placement_entry {
 typedef std::map<uint32_t, pe_placement_entry> pe_placement;
 
 enum pe_directory_code {
-    pe_directory_code_success,
-    pe_directory_code_not_present,
-    pe_directory_code_currupted,
+    pe_directory_code_success       = 0 << 1,
+    pe_directory_code_not_present   = 1 << 1,
+    pe_directory_code_currupted     = 1 << 2
 };
 
 enum pe_image_status {
