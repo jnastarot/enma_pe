@@ -123,7 +123,7 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
             b_view = view_data(
                 data_offset, size,
                 real_offset, header_readed_size, header_down_oversize, header_up_oversize,
-                0, view_headers_size);
+                0, available_headers_size);
 
             if (b_view) {
                 
@@ -139,7 +139,7 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
                             );
 
                             memset(&((uint8_t*)buffer)[header_down_oversize + (header_readed_size + real_offset) - available_headers_size], 0,
-                                header_readed_size - ((header_readed_size + real_offset) - available_headers_size) );
+                                view_headers_size - ((available_headers_size + real_offset)));
                         }
                         else {
                             memset(&((uint8_t*)buffer)[header_down_oversize], 0, header_readed_size);

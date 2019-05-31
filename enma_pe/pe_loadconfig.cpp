@@ -372,6 +372,8 @@ pe_directory_code _get_load_config_directory(const pe_image &image, pe_load_conf
 
         if (!desc_size) { return pe_directory_code::pe_directory_code_success; }
 
+        desc_size = min(desc_size, sizeof(typename image_format::image_load_config_directory));
+
         if (pe_image_io(image).set_image_offset(virtual_address).read(&load_config_desc, desc_size) != enma_io_success) {
             return pe_directory_code::pe_directory_code_currupted;
         }
@@ -714,6 +716,8 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
         }
 
         if (!desc_size) { return pe_directory_code::pe_directory_code_success; }
+
+        desc_size = min(desc_size, sizeof(typename image_format::image_load_config_directory));
 
         if (pe_image_io(image).set_image_offset(virtual_address).read(&load_config_desc, desc_size) != enma_io_success) {
             return pe_directory_code::pe_directory_code_currupted;
