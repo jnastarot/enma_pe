@@ -2,6 +2,13 @@
 #include "pe_image.h"
 
 
+unsigned char th_dos_stub[64] = {
+    0x0E, 0x1F, 0xBA, 0x0E, 0x00, 0xB4, 0x09, 0xCD, 0x21, 0xB8, 0x01, 0x4C, 0xCD, 0x21, 0x54, 0x68,
+    0x69, 0x73, 0x20, 0x70, 0x72, 0x6F, 0x67, 0x72, 0x61, 0x6D, 0x20, 0x63, 0x61, 0x6E, 0x6E, 0x6F,
+    0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6E, 0x20, 0x69, 0x6E, 0x20, 0x44, 0x4F, 0x53, 0x20,
+    0x6D, 0x6F, 0x64, 0x65, 0x2E, 0x0D, 0x0D, 0x0A, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 pe_image::pe_image() {
 	clear_image();
 }
@@ -9,15 +16,70 @@ pe_image::pe_image(const pe_image& image) {
     this->operator=(image);
 }
 
-pe_image::pe_image(bool _pe32) {
+pe_image::pe_image(bool _pe32, bool init_dos_thunk) {
 	clear_image();
 
-	if (_pe32) {
-		magic = IMAGE_NT_OPTIONAL_HDR32_MAGIC;
-	}
-	else {
-		magic = IMAGE_NT_OPTIONAL_HDR64_MAGIC;
-	}
+    this->headers_data.resize(sizeof(image_dos_header) + init_dos_thunk ? sizeof(th_dos_stub) : 0);
+    memset(this->headers_data.data(), 0, this->headers_data.size());
+
+    if (init_dos_thunk) {
+        memcpy(&this->headers_data[sizeof(image_dos_header)], th_dos_stub, sizeof(th_dos_stub));
+    }
+
+    image_dos_header * dos_header = (image_dos_header*)this->headers_data.data();
+    dos_header->e_magic = IMAGE_DOS_SIGNATURE;
+    dos_header->e_cblp = 0x90;
+    dos_header->e_cp = 0x03;
+    dos_header->e_cparhdr = 0x04;
+    dos_header->e_maxalloc = 0xFFFF;
+    dos_header->e_sp = 0xB8;
+    dos_header->e_lfanew = sizeof(image_dos_header) + init_dos_thunk ? sizeof(th_dos_stub) : 0;
+
+
+    if (_pe32) {
+        machine = IMAGE_FILE_MACHINE_I386;
+        characteristics = IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE_32BIT_MACHINE;
+        magic = IMAGE_NT_OPTIONAL_HDR32_MAGIC;
+        image_base = 0x400000;
+    }
+    else {
+        machine = IMAGE_FILE_MACHINE_AMD64;
+        characteristics = IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE_LARGE_ADDRESS_AWARE;
+        magic = IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+        image_base = 0x0000000140000000;
+        
+    }
+
+    {
+        image_size = 0x1000;
+        headers_size = 0x200;
+        sub_system = IMAGE_SUBSYSTEM_WINDOWS_GUI;
+        characteristics_dll =
+            IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE | 
+            IMAGE_DLLCHARACTERISTICS_NX_COMPAT | 
+            IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE;
+    }
+
+    {
+        section_align = 0x1000;
+        file_align = 0x200;
+    }
+
+    {
+        os_ver_major = 5;
+        os_ver_minor = 1;
+
+    }
+
+    {
+        subsystem_ver_major = 5;
+        subsystem_ver_minor = 1;
+    }
+
+    stack_reserve_size = 0x00100000;
+    stack_commit_size  = 0x1000;
+    heap_reserve_size  = 0x00100000;
+    heap_commit_size   = 0x1000;
 
 	image_status = pe_image_status_ok;
 }
@@ -70,6 +132,9 @@ pe_image& pe_image::operator=(const pe_image& image) {
 	image_status        = image.image_status;
 	machine	            = image.machine;
 	timestamp           = image.timestamp;
+    pointer_to_symbol_table = image.pointer_to_symbol_table;
+    number_of_symbols   = image.number_of_symbols;
+    size_of_optional_header = image.size_of_optional_header;
 	characteristics     = image.characteristics;
 	magic               = image.magic;
 	major_linker        = image.major_linker;
@@ -89,6 +154,7 @@ pe_image& pe_image::operator=(const pe_image& image) {
 	image_ver_minor     = image.image_ver_minor;
 	subsystem_ver_major = image.subsystem_ver_major;
 	subsystem_ver_minor = image.subsystem_ver_minor;
+    win32_version_value = image.win32_version_value;
 	image_size          = image.image_size;
 	headers_size        = image.headers_size;
 	checksum            = image.checksum;
@@ -98,6 +164,7 @@ pe_image& pe_image::operator=(const pe_image& image) {
 	stack_commit_size   = image.stack_commit_size;
 	heap_reserve_size   = image.heap_reserve_size;
 	heap_commit_size    = image.heap_commit_size;
+    loader_flags        = image.loader_flags;
 
     for (size_t i = 0; i < 16; i++) {
         directories[i].virtual_address = image.directories[i].virtual_address;
@@ -123,6 +190,8 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
 
         image.set_machine(header->file_header.machine);
         image.set_timestamp(header->file_header.time_date_stamp);
+        image.set_pointer_to_symbol_table(header->file_header.pointer_to_symbol_table);
+        image.set_number_of_symbols(header->file_header.number_of_symbols);
         image.set_characteristics(header->file_header.characteristics);
         image.set_magic(header->optional_header.magic);
         image.set_major_linker(header->optional_header.major_linker_version);
@@ -141,6 +210,7 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
         image.set_image_ver_minor(header->optional_header.minor_image_version);
         image.set_subsystem_ver_major(header->optional_header.major_subsystem_version);
         image.set_subsystem_ver_minor(header->optional_header.minor_subsystem_version);
+        image.set_win32_version_value(header->optional_header.win32_version_value);
         image.set_image_size(header->optional_header.size_of_image);
         image.set_headers_size(header->optional_header.size_of_headers);
         image.set_checksum(header->optional_header.checksum);
@@ -150,6 +220,7 @@ bool init_nt_header(pe_image& image,void * nt_header,uint32_t& sections_offset,u
         image.set_stack_commit_size(header->optional_header.size_of_stack_commit);
         image.set_heap_reserve_size(header->optional_header.size_of_heap_reserve);
         image.set_heap_commit_size(header->optional_header.size_of_heap_commit);
+        image.set_loader_flags(header->optional_header.loader_flags);
 
         for (uint32_t i = 0; i < 16; i++) {
             image.set_directory_virtual_address(i, header->optional_header.data_directory[i].virtual_address);
@@ -259,6 +330,9 @@ void pe_image::clear_image() {
 	image_status = pe_image_status_unknown;
 	machine				= 0;
 	timestamp			= 0;
+    pointer_to_symbol_table = 0;
+    number_of_symbols   = 0;
+    size_of_optional_header = 0;
 	characteristics		= 0;
 	magic				= 0;
 	major_linker		= 0;
@@ -278,6 +352,7 @@ void pe_image::clear_image() {
 	image_ver_minor		= 0;
 	subsystem_ver_major = 0;
 	subsystem_ver_minor = 0;
+    win32_version_value = 0;
 	image_size			= 0;
 	headers_size		= 0;
 	checksum			= 0;
@@ -287,7 +362,7 @@ void pe_image::clear_image() {
 	stack_commit_size	= 0;
 	heap_reserve_size	= 0;
 	heap_commit_size	= 0;
-
+    loader_flags        = 0;
 
     for (size_t i = 0; i < 16; i++) {
         directories[i].virtual_address = 0;
@@ -448,6 +523,15 @@ void    pe_image::set_machine(uint16_t machine) {
 void    pe_image::set_timestamp(uint32_t timestamp) {
 	this->timestamp = timestamp;
 }
+void   pe_image::set_pointer_to_symbol_table(uint32_t pointer_to_symbol_table) {
+    this->pointer_to_symbol_table = pointer_to_symbol_table;
+}
+void   pe_image::set_number_of_symbols(uint32_t number_of_symbols) {
+    this->number_of_symbols = number_of_symbols;
+}
+void   pe_image::set_size_of_optional_header(uint32_t size_of_optional_header) {
+    this->size_of_optional_header = size_of_optional_header;
+}
 void    pe_image::set_characteristics(uint16_t characteristics) {
 	this->characteristics = characteristics;
 }
@@ -505,6 +589,9 @@ void    pe_image::set_subsystem_ver_major(uint16_t subsystem_ver_major) {
 void    pe_image::set_subsystem_ver_minor(uint16_t subsystem_ver_minor) {
 	this->subsystem_ver_minor = subsystem_ver_minor;
 }
+void    pe_image::set_win32_version_value(uint32_t win32_version_value) {
+    this->win32_version_value = win32_version_value;
+}
 void    pe_image::set_image_size(uint32_t image_size) {
 	this->image_size = image_size;
 }
@@ -531,6 +618,9 @@ void    pe_image::set_heap_reserve_size(uint64_t heap_reserve_size) {
 }
 void    pe_image::set_heap_commit_size(uint64_t heap_commit_size) {
 	this->heap_commit_size = heap_commit_size;
+}
+void    pe_image::set_loader_flags(uint32_t loader_flags) {
+    this->loader_flags = loader_flags;
 }
 void    pe_image::set_overlay_data(std::vector<uint8_t>& data) {
     this->overlay_data = data;
@@ -564,6 +654,15 @@ uint16_t    pe_image::get_machine() const {
 }
 uint32_t    pe_image::get_timestamp() const {
 	return timestamp;
+}
+uint32_t    pe_image::get_pointer_to_symbol_table() const {
+    return pointer_to_symbol_table;
+}
+uint32_t    pe_image::get_number_of_symbols() const {
+    return number_of_symbols;
+}
+uint32_t    pe_image::get_size_of_optional_header() const {
+    return size_of_optional_header;
 }
 uint16_t    pe_image::get_characteristics() const {
 	return characteristics;
@@ -649,8 +748,15 @@ uint64_t   pe_image::get_heap_reserve_size() const {
 uint64_t   pe_image::get_heap_commit_size() const {
 	return heap_commit_size;
 }
+uint32_t   pe_image::get_loader_flags() const {
+    return loader_flags;
+}
 
 std::vector<uint8_t>&   pe_image::get_overlay_data() {
+    return overlay_data;
+}
+
+const std::vector<uint8_t>&   pe_image::get_overlay_data() const {
     return overlay_data;
 }
 

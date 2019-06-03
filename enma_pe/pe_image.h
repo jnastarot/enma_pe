@@ -11,7 +11,11 @@ class pe_image{
 
 	uint16_t   machine;
 	uint32_t   timestamp;
+    uint32_t   pointer_to_symbol_table;
+    uint32_t   number_of_symbols;
+    uint32_t   size_of_optional_header;
 	uint16_t   characteristics;
+
 	uint16_t   magic;
 	uint8_t	   major_linker;
 	uint8_t    minor_linker;
@@ -30,6 +34,7 @@ class pe_image{
 	uint16_t   image_ver_minor;
 	uint16_t   subsystem_ver_major;
 	uint16_t   subsystem_ver_minor;
+    uint32_t   win32_version_value;
 	uint32_t   image_size;
 	uint32_t   headers_size;
 	uint32_t   checksum;
@@ -39,6 +44,7 @@ class pe_image{
 	uint64_t   stack_commit_size;
 	uint64_t   heap_reserve_size;
 	uint64_t   heap_commit_size;
+    uint32_t   loader_flags;
 	image_data_directory directories[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 
 	std::vector<pe_section*> sections;
@@ -49,7 +55,7 @@ class pe_image{
 public:
 	pe_image();
     pe_image(const pe_image& image);
-	pe_image(bool _pe32);
+	pe_image(bool _pe32, bool init_dos_thunk = true);
 	pe_image(const uint8_t* raw_image,uint32_t size);
 	pe_image(const std::string& file_path);
 
@@ -90,6 +96,9 @@ public:
     void        set_dos_header(const image_dos_header& header);
 	void        set_machine(uint16_t machine);
 	void        set_timestamp(uint32_t timestamp);
+    void        set_pointer_to_symbol_table(uint32_t pointer_to_symbol_table);
+    void        set_number_of_symbols(uint32_t number_of_symbols);
+    void        set_size_of_optional_header(uint32_t size_of_optional_header);
 	void        set_characteristics(uint16_t characteristics);
 	void        set_magic(uint16_t magic);
 	void        set_major_linker(uint8_t major_linker);
@@ -109,6 +118,7 @@ public:
 	void        set_image_ver_minor(uint16_t image_ver_minor);
 	void        set_subsystem_ver_major(uint16_t subsystem_ver_major);
 	void        set_subsystem_ver_minor(uint16_t subsystem_ver_minor);
+    void        set_win32_version_value(uint32_t win32_version_value);
 	void        set_image_size(uint32_t image_size);
 	void        set_headers_size(uint32_t headers_size);
 	void        set_checksum(uint32_t checksum);
@@ -118,6 +128,7 @@ public:
 	void        set_stack_commit_size(uint64_t stack_commit_size);
 	void        set_heap_reserve_size(uint64_t heap_reserve_size);
 	void        set_heap_commit_size(uint64_t heap_commit_size);
+    void        set_loader_flags(uint32_t loader_flags);
     void        set_overlay_data(std::vector<uint8_t>& data);
 	//directories
 	void		set_directory_virtual_address(uint32_t directory_idx,uint32_t virtual_address);
@@ -133,8 +144,12 @@ public://getter
     const std::vector<uint8_t>& get_headers_data() const;
     void  get_dos_header(image_dos_header &header) const;
 
+
 	uint16_t    get_machine() const;
 	uint32_t    get_timestamp() const;
+    uint32_t    get_pointer_to_symbol_table() const;
+    uint32_t    get_number_of_symbols() const;
+    uint32_t    get_size_of_optional_header() const;
 	uint16_t    get_characteristics() const;
 	uint16_t    get_magic() const;
 	uint8_t	    get_major_linker() const;
@@ -154,6 +169,7 @@ public://getter
 	uint16_t    get_image_ver_minor() const;
 	uint16_t    get_subsystem_ver_major() const;
 	uint16_t    get_subsystem_ver_minor() const;
+    uint32_t    get_win32_version_value() const;
 	uint32_t    get_image_size() const;
 	uint32_t    get_headers_size() const;
 	uint32_t    get_checksum() const;
@@ -163,7 +179,10 @@ public://getter
 	uint64_t    get_stack_commit_size() const;
 	uint64_t    get_heap_reserve_size() const;
 	uint64_t    get_heap_commit_size() const;
+    uint32_t    get_loader_flags() const;
+
     std::vector<uint8_t>&   get_overlay_data();
+    const std::vector<uint8_t>&   get_overlay_data() const;
 	//directories
 	uint32_t    get_directory_virtual_address(uint32_t directory_idx) const;
 	uint32_t    get_directory_virtual_size(uint32_t directory_idx) const;
