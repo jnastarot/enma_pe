@@ -721,6 +721,9 @@ uint16_t    pe_image::get_subsystem_ver_major() const {
 uint16_t    pe_image::get_subsystem_ver_minor() const {
 	return subsystem_ver_minor;
 }
+uint32_t    pe_image::get_win32_version_value() const {
+    return win32_version_value;
+}
 uint32_t    pe_image::get_image_size() const {
 	return image_size;
 }
