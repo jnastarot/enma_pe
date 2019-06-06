@@ -152,6 +152,9 @@ bool has_image_rich_header(const std::vector<uint8_t>& image_headers, uint32_t *
 
     if (image_headers.size() < dos_header->e_lfanew) { return false; }
 
+    if (dos_header->e_lfanew < 8) {
+        return false;
+    }
 
     for (size_t rich_end = sizeof(image_dos_header); rich_end < (dos_header->e_lfanew - 8); rich_end += 4) {//check for rich data
 

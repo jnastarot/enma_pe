@@ -363,6 +363,11 @@ pe_directory_code _get_load_config_directory(const pe_image &image, pe_load_conf
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
     if (virtual_address && virtual_size) {
+
+        if (!pe_image_io(image).is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         typename image_format::image_load_config_directory load_config_desc;
         uint32_t desc_size;
 
@@ -708,6 +713,12 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
 
     if (virtual_address && virtual_size) {
+
+        if (!pe_image_io(image).is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
+
         typename image_format::image_load_config_directory load_config_desc;
         uint32_t desc_size;
 

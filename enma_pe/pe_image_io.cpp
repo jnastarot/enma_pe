@@ -396,16 +396,37 @@ pe_image_io& pe_image_io::seek_to_end() {
     if (image->get_sections_number()) {
         switch (addressing_type) {
         case enma_io_addressing_type::enma_io_address_raw: {
+
+            size_t top_raw = image->get_headers_data().size();
+
+            for (auto& section : image->get_sections()) {
+                size_t current_section_raw = section->get_pointer_to_raw() + section->get_size_of_raw_data();
+
+                if (current_section_raw > top_raw) {
+                    top_raw = current_section_raw;
+                }
+            }
             this->image_offset = ALIGN_UP(
-                image->get_last_section()->get_pointer_to_raw() + image->get_last_section()->get_size_of_raw_data(),
+                top_raw,
                 image->get_file_align()
             );
             break;
         }
 
         case enma_io_addressing_type::enma_io_address_rva: {
+
+            size_t top_rva = image->get_headers_data().size();
+
+            for (auto& section : image->get_sections()) {
+                size_t current_section_rva = section->get_virtual_address() + section->get_virtual_size();
+
+                if (current_section_rva > top_rva) {
+                    top_rva = current_section_rva;
+                }
+            }
+
             this->image_offset = ALIGN_UP(
-                image->get_last_section()->get_virtual_address() + image->get_last_section()->get_virtual_size(),
+                top_rva,
                 image->get_section_align()
             );
             break;
@@ -461,6 +482,43 @@ bool  pe_image_io::is_readable_rva(uint32_t rva) const {
     }
 
     return false;
+}
+
+bool  pe_image_io::is_present_rva(uint32_t rva) {
+
+    uint8_t test_byte;
+
+    size_t current_offset = this->image_offset;
+    enma_io_addressing_type addressing_type = this->addressing_type;
+
+    this->addressing_type = enma_io_address_rva;
+    this->image_offset = rva;
+    
+    enma_io_code code = this->read((void*)&test_byte, 1);
+
+    this->image_offset = current_offset;
+    this->addressing_type = addressing_type;
+
+    return code == enma_io_success;
+}
+
+
+bool pe_image_io::is_present_raw(uint32_t raw) {
+
+    uint8_t test_byte;
+
+    size_t current_offset = this->image_offset;
+    enma_io_addressing_type addressing_type = this->addressing_type;
+
+    this->addressing_type = enma_io_address_raw;
+    this->image_offset = raw;
+
+    enma_io_code code = this->read((void*)&test_byte, 1);
+
+    this->image_offset = current_offset;
+    this->addressing_type = addressing_type;
+
+    return code == enma_io_success;
 }
 
 pe_image*  pe_image_io::get_image() {

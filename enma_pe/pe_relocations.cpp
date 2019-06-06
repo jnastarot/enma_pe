@@ -170,6 +170,12 @@ pe_directory_code get_relocation_directory(const pe_image &image, pe_relocations
 
 	if (virtual_address && virtual_size) {
         pe_image_io reloc_io(image);
+
+        if (!reloc_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
+
         reloc_io.set_image_offset(virtual_address);
 
 
@@ -182,7 +188,6 @@ pe_directory_code get_relocation_directory(const pe_image &image, pe_relocations
 
             uint32_t current_block_size = sizeof(image_base_relocation);
 
-            relocs.get_entries().reserve(reloc_base.size_of_block / sizeof(uint16_t)); 
             while ( (reloc_io.get_image_offset() < virtual_address + virtual_size) &&
                 (current_block_size < reloc_base.size_of_block)) {
                 uint16_t rel;
@@ -279,6 +284,11 @@ pe_directory_code get_placement_relocation_directory(const pe_image &image, pe_p
 
     if (virtual_address && virtual_size) {
         pe_image_io reloc_io(image);
+
+        if (!reloc_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         reloc_io.set_image_offset(virtual_address);
 
 

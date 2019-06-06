@@ -102,6 +102,10 @@ pe_directory_code _get_tls_directory(const pe_image &image, pe_tls_directory& tl
     if (virtual_address) {
         pe_image_io tls_io(image);
        
+        if (!tls_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         typename image_format::image_tls_directory tls_directory;
 
         if (tls_io.set_image_offset(virtual_address).read(&tls_directory, sizeof(tls_directory)) == enma_io_success) {

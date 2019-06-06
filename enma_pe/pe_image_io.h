@@ -108,6 +108,9 @@ public:
     bool                    is_writeable_rva(uint32_t rva) const;
     bool                    is_readable_rva(uint32_t rva) const;
 
+    bool                    is_present_rva(uint32_t rva);
+    bool                    is_present_raw(uint32_t raw);
+
     pe_image*               get_image();
 };
 

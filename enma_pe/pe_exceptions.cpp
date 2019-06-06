@@ -355,6 +355,11 @@ pe_directory_code get_exception_directory(const pe_image &image, pe_exceptions_d
 
     if (virtual_address && virtual_size /*req size*/) {
         pe_image_io exception_io(image);
+
+        if (!exception_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         exception_io.set_image_offset(virtual_address);
 
         while (exception_io.get_image_offset() < virtual_address + virtual_size) {
@@ -518,6 +523,11 @@ pe_directory_code get_placement_exceptions_directory(const pe_image &image, pe_p
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+
+    pe_image_io exception_io(image);
+    if (!exception_io.is_present_rva(virtual_address)) {
+        return pe_directory_code::pe_directory_code_not_present;
+    }
 
     placement[virtual_address] =
         pe_placement_entry(virtual_size, id_pe_exception_descriptors, "");

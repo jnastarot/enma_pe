@@ -2,7 +2,7 @@
 #include "pe_import.h"
 
 
-pe_import_entry::pe_import_entry() {
+pe_import_function::pe_import_function() {
 	hint				= 0;
 	ordinal				= 0;
 	b_import_by_name	= 0;
@@ -10,23 +10,23 @@ pe_import_entry::pe_import_entry() {
     iat_item            = 0;
     func_name.clear();
 }
-pe_import_entry::pe_import_entry(const pe_import_entry& func) {
+pe_import_function::pe_import_function(const pe_import_function& func) {
     this->operator=(func);
 }
 
-pe_import_entry::pe_import_entry(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item):
+pe_import_function::pe_import_function(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item):
     iat_rva(iat_rva),  hint(hint), func_name(func_name), ordinal(0), iat_item(iat_item), b_import_by_name(true){
 
 }
-pe_import_entry::pe_import_entry(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item):
+pe_import_function::pe_import_function(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item):
     iat_rva(iat_rva), hint(0), func_name(""), ordinal(ordinal), iat_item(iat_item), b_import_by_name(false){
 }
 
-pe_import_entry::~pe_import_entry() {
+pe_import_function::~pe_import_function() {
 
 }
 
-pe_import_entry& pe_import_entry::operator=(const pe_import_entry& func) {
+pe_import_function& pe_import_function::operator=(const pe_import_function& func) {
 
 	this->iat_rva = func.iat_rva;
 	this->hint = func.hint;
@@ -38,46 +38,46 @@ pe_import_entry& pe_import_entry::operator=(const pe_import_entry& func) {
     return *this;
 }
 
-void pe_import_entry::set_hint(uint16_t hint) {
+void pe_import_function::set_hint(uint16_t hint) {
 	this->hint = hint;
 }
-void pe_import_entry::set_ordinal(uint16_t ordinal) {
+void pe_import_function::set_ordinal(uint16_t ordinal) {
 	this->b_import_by_name = false;
 	this->ordinal = ordinal;
 }
-void pe_import_entry::set_func_name(const std::string& func_name) {
+void pe_import_function::set_func_name(const std::string& func_name) {
 	this->b_import_by_name = true;
 	this->func_name = func_name;
 }
-void pe_import_entry::set_import_by_name(bool b) {
+void pe_import_function::set_import_by_name(bool b) {
 	this->b_import_by_name = b;
 }
-void pe_import_entry::set_iat_rva(uint32_t rva) {
+void pe_import_function::set_iat_rva(uint32_t rva) {
 	this->iat_rva = rva;
 }
-void pe_import_entry::set_iat_item(uint64_t iat_item) {
+void pe_import_function::set_iat_item(uint64_t iat_item) {
     this->iat_item = iat_item;
 }
-uint16_t pe_import_entry::get_hint() const {
+uint16_t pe_import_function::get_hint() const {
 	return this->hint;
 }
-uint16_t pe_import_entry::get_ordinal() const {
+uint16_t pe_import_function::get_ordinal() const {
 	return this->ordinal;
 }
-std::string pe_import_entry::get_func_name() const {
+std::string pe_import_function::get_func_name() const {
 	return this->func_name;
 }
-bool  pe_import_entry::is_import_by_name() const {
+bool  pe_import_function::is_import_by_name() const {
 	return this->b_import_by_name;
 }
-uint32_t pe_import_entry::get_iat_rva() const {
+uint32_t pe_import_function::get_iat_rva() const {
 	return this->iat_rva;
 }
-uint64_t pe_import_entry::get_iat_item()const {
+uint64_t pe_import_function::get_iat_item()const {
     return this->iat_item;
 }
 
-imported_library::imported_library() {
+pe_import_library::pe_import_library() {
 	timestamp		= 0;
     iat_rva		    = 0;
     oft_rva         = 0;
@@ -85,13 +85,13 @@ imported_library::imported_library() {
     library_name.clear();
 	entries.clear();
 }
-imported_library::imported_library(const imported_library& library) {
+pe_import_library::pe_import_library(const pe_import_library& library) {
     this->operator=(library);
 }
-imported_library::~imported_library() {
+pe_import_library::~pe_import_library() {
     entries.clear();
 }
-imported_library& imported_library::operator=(const imported_library& library) {
+pe_import_library& pe_import_library::operator=(const pe_import_library& library) {
 
 	this->timestamp      = library.timestamp;
 	this->iat_rva        = library.iat_rva;
@@ -104,54 +104,54 @@ imported_library& imported_library::operator=(const imported_library& library) {
 }
 
 
-void imported_library::set_library_name(const std::string& library_name){
+void pe_import_library::set_library_name(const std::string& library_name){
 	this->library_name = library_name;
 }
-void imported_library::set_timestamp(uint32_t timestamp) {
+void pe_import_library::set_timestamp(uint32_t timestamp) {
 	this->timestamp = timestamp;
 }
-void imported_library::set_rva_iat(uint32_t rva) {
+void pe_import_library::set_rva_iat(uint32_t rva) {
 	this->iat_rva = rva;
 }
-void imported_library::set_rva_oft(uint32_t rva) {
+void pe_import_library::set_rva_oft(uint32_t rva) {
     this->oft_rva = rva;
 }
-void imported_library::set_rva_library_name(uint32_t rva) {
+void pe_import_library::set_rva_library_name(uint32_t rva) {
     this->library_name_rva = rva;
 }
 
-void imported_library::add_entry(const pe_import_entry& entry) {
+void pe_import_library::add_entry(const pe_import_function& entry) {
 	this->entries.push_back(entry);
 }
-void imported_library::clear() {
+void pe_import_library::clear() {
     this->entries.clear();
 }
 
-size_t imported_library::size() {
+size_t pe_import_library::size() {
     return this->entries.size();
 }
 
-std::string imported_library::get_library_name() const {
+std::string pe_import_library::get_library_name() const {
 	return this->library_name;
 }
-uint32_t imported_library::get_timestamp() const {
+uint32_t pe_import_library::get_timestamp() const {
 	return this->timestamp;
 }
-uint32_t imported_library::get_rva_iat() const {
+uint32_t pe_import_library::get_rva_iat() const {
 	return this->iat_rva;
 }
-uint32_t imported_library::get_rva_oft() const {
+uint32_t pe_import_library::get_rva_oft() const {
     return this->oft_rva;
 }
-uint32_t imported_library::get_rva_library_name() const {
+uint32_t pe_import_library::get_rva_library_name() const {
     return this->library_name_rva;
 }
 
-const std::vector<pe_import_entry>& imported_library::get_entries() const {
+const std::vector<pe_import_function>& pe_import_library::get_entries() const {
     return this->entries;
 }
 
-std::vector<pe_import_entry>& imported_library::get_entries() {
+std::vector<pe_import_function>& pe_import_library::get_entries() {
 	return this->entries;
 }
 
@@ -173,7 +173,7 @@ pe_import_directory& pe_import_directory::operator=(const pe_import_directory& i
     return *this;
 }
 
-void pe_import_directory::add_library(const imported_library& lib) {
+void pe_import_directory::add_library(const pe_import_library& lib) {
 	this->libraries.push_back(lib);
 }
 
@@ -185,15 +185,15 @@ size_t pe_import_directory::size() {
     return this->libraries.size();
 }
 
-std::vector<imported_library>& pe_import_directory::get_libraries() {
+std::vector<pe_import_library>& pe_import_directory::get_libraries() {
 	return this->libraries;
 }
 
-const std::vector<imported_library>& pe_import_directory::get_libraries() const {
+const std::vector<pe_import_library>& pe_import_directory::get_libraries() const {
     return this->libraries;
 }
 
-bool pe_import_directory::get_imported_lib(const std::string& lib_name, imported_library * &lib) {
+bool pe_import_directory::get_imported_lib(const std::string& lib_name, pe_import_library * &lib) {
 
     for (auto& library : libraries) {
         if (library.get_library_name() == lib_name) {
@@ -204,7 +204,7 @@ bool pe_import_directory::get_imported_lib(const std::string& lib_name, imported
 
 	return false;
 }
-bool pe_import_directory::get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, pe_import_entry * &_func) {
+bool pe_import_directory::get_imported_func(const std::string& lib_name, const std::string& func_name, pe_import_library * &lib, pe_import_function * &_func) {
 
     for (auto& library : libraries) {
         if (library.get_library_name() == lib_name) {
@@ -220,7 +220,7 @@ bool pe_import_directory::get_imported_func(const std::string& lib_name, const s
 
 	return false;
 }
-bool pe_import_directory::get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, pe_import_entry * &_func) {
+bool pe_import_directory::get_imported_func(const std::string& lib_name, uint16_t ordinal, pe_import_library * &lib, pe_import_function * &_func) {
 
     for (auto& library : libraries) {
         if (library.get_library_name() == lib_name) {
@@ -246,6 +246,11 @@ pe_directory_code _get_import_directory(const pe_image &image, pe_import_directo
 
     if (virtual_address) {
         pe_image_io import_io(image);
+
+        if (!import_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         import_io.set_image_offset(virtual_address);
 
         image_import_descriptor import_desc;
@@ -257,7 +262,7 @@ pe_directory_code _get_import_directory(const pe_image &image, pe_import_directo
         if (import_desc.first_thunk) {
 
             do {
-                imported_library library;
+                pe_import_library library;
 
                 std::string library_name;
                 if (pe_image_io(image).set_image_offset(import_desc.name).read_string(library_name) != enma_io_success) {
@@ -278,36 +283,78 @@ pe_directory_code _get_import_directory(const pe_image &image, pe_import_directo
                 iat_io.set_image_offset(import_desc.first_thunk);
                 original_iat_io.set_image_offset(import_desc.original_first_thunk);
 
+                bool original_first_thunk_present = import_io.is_present_rva(import_desc.original_first_thunk);
 
-                typename image_format::ptr_size iat_item = 0;
+                do {
+                    pe_import_function func;
 
-                if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
-                    return pe_directory_code::pe_directory_code_currupted;
-                }
+                    if (original_first_thunk_present) {
 
-                if (iat_item) {
-                    do {
-                        pe_import_entry func;
+                        typename image_format::ptr_size original_iat_item = 0;
 
-                        if (import_desc.original_first_thunk) {
-                            typename image_format::ptr_size original_iat_item = 0;
-                            if (original_iat_io.read(&original_iat_item, sizeof(original_iat_item)) != enma_io_success) {
+                        if (original_iat_io.read(&original_iat_item, sizeof(original_iat_item)) != enma_io_success) {
+                            return pe_directory_code::pe_directory_code_currupted;
+                        }
+
+                        if (!original_iat_item) {
+                            break;
+                        }
+
+                        if (original_iat_item&image_format::ordinal_flag) {
+
+                            library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
+                                uint16_t(original_iat_item^image_format::ordinal_flag), original_iat_item));
+                        }
+                        else {
+                            pe_image_io import_func_name_io(image);
+                            import_func_name_io.set_image_offset(uint32_t(original_iat_item));
+
+                            uint16_t hint;
+                            std::string func_name;
+
+                            if (import_func_name_io.read(&hint, sizeof(hint)) != enma_io_success) {
                                 return pe_directory_code::pe_directory_code_currupted;
                             }
 
-                            if (original_iat_item&image_format::ordinal_flag) {
+                            if (import_func_name_io.read_string(func_name) != enma_io_success) {
+                                return pe_directory_code::pe_directory_code_currupted;
+                            }
 
-                                library.add_entry(pe_import_entry(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
-                                    uint16_t(original_iat_item^image_format::ordinal_flag), iat_item));
+                            library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
+                                func_name, hint, original_iat_item));
+                        }
+                    }
+                    else {
+
+                        typename image_format::ptr_size iat_item = 0;
+
+                        if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
+                            return pe_directory_code::pe_directory_code_currupted;
+                        }
+
+                        if (!iat_item) {
+                            break;
+                        }
+
+
+                        if (is_bound_library) {
+                            library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size), "",
+                                0, iat_item));
+                        }
+                        else {
+
+                            if (iat_item&image_format::ordinal_flag) {
+                                library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
+                                    uint16_t(iat_item^image_format::ordinal_flag), iat_item));
                             }
                             else {
                                 pe_image_io import_func_name_io(image);
-                                import_func_name_io.set_image_offset(uint32_t(original_iat_item));
+                                import_func_name_io.set_image_offset(uint32_t(iat_item));
 
                                 uint16_t hint;
                                 std::string func_name;
 
-                                if (import_func_name_io.read(&hint,sizeof(hint)) != enma_io_success) {
+                                if (import_func_name_io.read(&hint, sizeof(hint)) != enma_io_success) {
                                     return pe_directory_code::pe_directory_code_currupted;
                                 }
 
@@ -315,48 +362,14 @@ pe_directory_code _get_import_directory(const pe_image &image, pe_import_directo
                                     return pe_directory_code::pe_directory_code_currupted;
                                 }
 
-                                library.add_entry(pe_import_entry(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
+                                library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
                                     func_name, hint, iat_item));
                             }
                         }
-                        else {
+                    }
 
-                            if (is_bound_library) {
-                                library.add_entry(pe_import_entry(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size), "",
-                                    0, iat_item));
-                            }
-                            else {
+                } while (1);
 
-                                if (iat_item&image_format::ordinal_flag) {
-                                    library.add_entry(pe_import_entry(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
-                                        uint16_t(iat_item^image_format::ordinal_flag), iat_item));
-                                }
-                                else {
-                                    pe_image_io import_func_name_io(image);
-                                    import_func_name_io.set_image_offset(uint32_t(iat_item));
-
-                                    uint16_t hint;
-                                    std::string func_name;
-
-                                    if (import_func_name_io.read(&hint, sizeof(hint)) != enma_io_success) {
-                                        return pe_directory_code::pe_directory_code_currupted;
-                                    }
-
-                                    if (import_func_name_io.read_string(func_name) != enma_io_success) {
-                                        return pe_directory_code::pe_directory_code_currupted;
-                                    }
-
-                                    library.add_entry(pe_import_entry(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
-                                        func_name, hint, iat_item));
-                                }
-                            }
-                        }
-
-                        if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
-                            return pe_directory_code::pe_directory_code_currupted;
-                        }
-                    } while (iat_item);
-                }
 
                 imports.add_library(library);
 
@@ -546,6 +559,11 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
 
     if (virtual_address) {
         pe_image_io import_io(image);
+
+        if (!import_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         import_io.set_image_offset(virtual_address);
 
         image_import_descriptor import_desc;
@@ -557,6 +575,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
 
         placement[virtual_address] =
             pe_placement_entry(import_desc_table_size, id_pe_import_descriptor, "");
+
 
         if (import_desc.first_thunk) {
 
@@ -578,65 +597,73 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
                 iat_io.set_image_offset(import_desc.first_thunk);
                 original_iat_io.set_image_offset(import_desc.original_first_thunk);
 
-              
-                typename image_format::ptr_size iat_item = 0;
-
-                if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
-                    return pe_directory_code::pe_directory_code_currupted;
-                }
-
                 uint32_t iat_table_size = sizeof(typename image_format::ptr_size);
 
-                if (iat_item) {
-                    do {
-                        pe_import_entry func;
+                bool original_first_thunk_present = import_io.is_present_rva(import_desc.original_first_thunk);
 
-                        if (import_desc.original_first_thunk) {
-                            typename image_format::ptr_size original_iat_item = 0;
-                            if (original_iat_io.read(&original_iat_item, sizeof(original_iat_item)) != enma_io_success) {
+
+                do {
+                    pe_import_function func;
+
+                    if (original_first_thunk_present) {
+
+                        typename image_format::ptr_size original_iat_item = 0;
+
+                        if (original_iat_io.read(&original_iat_item, sizeof(original_iat_item)) != enma_io_success) {
+                            return pe_directory_code::pe_directory_code_currupted;
+                        }
+
+                        if (!original_iat_item) {
+                            break;
+                        }
+
+                        if (!(original_iat_item&image_format::ordinal_flag)) {
+
+                            pe_image_io import_func_name_io(image);
+                            import_func_name_io.set_image_offset(uint32_t(original_iat_item + sizeof(uint16_t)));
+
+                            std::string func_name;
+
+                            if (import_func_name_io.read_string(func_name) != enma_io_success) {
                                 return pe_directory_code::pe_directory_code_currupted;
                             }
 
-                            if (!(original_iat_item&image_format::ordinal_flag)) {
 
-                                pe_image_io import_func_name_io(image);
-                                import_func_name_io.set_image_offset(uint32_t(original_iat_item + sizeof(uint16_t)));
-
-                                std::string func_name;
-
-                                if (import_func_name_io.read_string(func_name) != enma_io_success) {
-                                    return pe_directory_code::pe_directory_code_currupted;
-                                }
-
-
-                                placement[(uint32_t)original_iat_item] =
-                                    pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
-                            }
+                            placement[(uint32_t)original_iat_item] =
+                                pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
                         }
-                        else {
+                    }
+                    else {
 
-                            if (!is_bound_library && !(iat_item&image_format::ordinal_flag)) {
-
-                                pe_image_io import_func_name_io(image);
-                                import_func_name_io.set_image_offset(uint32_t(iat_item + sizeof(uint16_t)));
-
-                                std::string func_name;
-
-                                if (import_func_name_io.read_string(func_name) == enma_io_success) {
-
-                                    placement[(uint32_t)(iat_item + sizeof(uint16_t))] =
-                                        pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
-                                }
-                            }
-                        }
-
-                        iat_table_size += (uint32_t)sizeof(typename image_format::ptr_size);
+                        typename image_format::ptr_size iat_item = 0;
 
                         if (iat_io.read(&iat_item, sizeof(iat_item)) != enma_io_success) {
                             return pe_directory_code::pe_directory_code_currupted;
                         }
-                    } while (iat_item);
-                }
+
+                        if (!iat_item) {
+                            break;
+                        }
+
+                        if (!is_bound_library && !(iat_item&image_format::ordinal_flag)) {
+
+                            pe_image_io import_func_name_io(image);
+                            import_func_name_io.set_image_offset(uint32_t(iat_item + sizeof(uint16_t)));
+
+                            std::string func_name;
+
+                            if (import_func_name_io.read_string(func_name) == enma_io_success) {
+
+                                placement[(uint32_t)(iat_item + sizeof(uint16_t))] =
+                                    pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
+                            }
+                        }
+                    }
+
+                    iat_table_size += (uint32_t)sizeof(typename image_format::ptr_size);
+
+                } while (1);
+
 
                 if (import_desc.original_first_thunk) {
                     placement[import_desc.original_first_thunk] = pe_placement_entry(iat_table_size, id_pe_import_original_first_think, "");

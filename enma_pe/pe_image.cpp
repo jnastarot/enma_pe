@@ -243,7 +243,8 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
 
     memcpy(&dos_header, image, sizeof(image_dos_header));
 
-	if (dos_header.e_magic == IMAGE_DOS_SIGNATURE) { //check MZ sign
+	if (dos_header.e_magic == IMAGE_DOS_SIGNATURE || //check MZ sign
+        dos_header.e_magic == 'ZM') {  //check ZM sign
 
 		if (*(uint32_t*)(&image[dos_header.e_lfanew]) == IMAGE_NT_SIGNATURE) { //check PE00 sign
 			uint32_t section_offset = dos_header.e_lfanew + INT32_SIZE + (uint32_t)sizeof(image_file_header);
@@ -265,8 +266,10 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
                 set_base_of_data(0);
             }
 
-            headers_data.resize(this->headers_size);
-            memcpy(headers_data.data(), image, this->headers_size);
+            headers_data.resize(min(this->headers_size, size));
+            memset(headers_data.data(), 0, headers_data.size());
+
+            memcpy(headers_data.data(), image, min(this->headers_size, size));
 
             get_image_rich_header(this->headers_data, this->rich_header);
 
@@ -276,23 +279,38 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
                     image_section_header* section_image = (image_section_header*)(&image[section_offset]);
 
                     if (size < section_offset + sizeof(image_section_header) ||
-                        size < section_image->pointer_to_raw_data + section_image->size_of_raw_data
+                        size < section_image->pointer_to_raw_data
                         ) {
 
                         this->image_status = pe_image_status_bad_format; return;
                     };
 
                     std::vector<uint8_t> section_data;
-                    section_data.resize(section_image->size_of_raw_data);
-                    memcpy(section_data.data(), &image[section_image->pointer_to_raw_data], section_image->size_of_raw_data);
+
+                    if (section_image->pointer_to_raw_data < size) {
+
+                        section_data.resize(
+                            min(section_image->size_of_raw_data, (size - section_image->pointer_to_raw_data))
+                        );
+                    }
+                    else {
+                        this->image_status = pe_image_status_bad_format; return;
+                    }
+
+
+                    memcpy(section_data.data(), &image[section_image->pointer_to_raw_data], section_data.size());
 
                     add_section(pe_section(*section_image, section_data));
                     section_offset += (uint16_t)sizeof(image_section_header);
 
-                    image_top_size = ALIGN_UP((section_image->pointer_to_raw_data + section_image->size_of_raw_data), this->file_align);
+                    uint32_t current_size = ALIGN_UP((section_image->pointer_to_raw_data + section_data.size()), this->file_align);
+
+                    if (image_top_size < current_size) {
+                        image_top_size = current_size;
+                    }
                 }
 
-                
+
 
                 if (image_top_size < size) {
                     overlay_data.resize(size - image_top_size);

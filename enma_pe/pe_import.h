@@ -1,6 +1,6 @@
 #pragma once
 
-class pe_import_entry {
+class pe_import_function {
     uint32_t iat_rva;
 
 	uint16_t hint;
@@ -12,14 +12,14 @@ class pe_import_entry {
 
 	bool b_import_by_name;
 public:
-	pe_import_entry();
-    pe_import_entry(const pe_import_entry& func);
-    pe_import_entry(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item = 0);
-    pe_import_entry(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item = 0);
+	pe_import_function();
+    pe_import_function(const pe_import_function& func);
+    pe_import_function(uint32_t iat_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item = 0);
+    pe_import_function(uint32_t iat_rva, uint16_t ordinal, uint64_t iat_item = 0);
 
-	~pe_import_entry();
+	~pe_import_function();
 
-	pe_import_entry& operator=(const pe_import_entry& func);
+	pe_import_function& operator=(const pe_import_function& func);
 public:
     void set_func_name(const std::string& func_name);
 	void set_hint(uint16_t hint);
@@ -36,7 +36,7 @@ public:
     bool  is_import_by_name() const;
 };
 
-class imported_library {
+class pe_import_library {
 	std::string library_name;
 	
     uint32_t timestamp;
@@ -44,20 +44,20 @@ class imported_library {
     uint32_t oft_rva;
     uint32_t library_name_rva;
 
-	std::vector<pe_import_entry> entries;
+	std::vector<pe_import_function> entries;
 public:
-	imported_library();
-    imported_library(const imported_library& library);
-	~imported_library();
+	pe_import_library();
+    pe_import_library(const pe_import_library& library);
+	~pe_import_library();
 
-	imported_library& operator=(const imported_library& library);
+	pe_import_library& operator=(const pe_import_library& library);
 public:
 	void set_library_name(const std::string& library_name);
 	void set_timestamp(uint32_t timestamp);
 	void set_rva_iat(uint32_t rva);
     void set_rva_oft(uint32_t rva);
     void set_rva_library_name(uint32_t rva);
-	void add_entry(const pe_import_entry& entry);
+	void add_entry(const pe_import_function& entry);
     void clear();
 public:
     size_t size();
@@ -66,14 +66,14 @@ public:
 	uint32_t get_rva_iat() const;
     uint32_t get_rva_oft() const;
     uint32_t get_rva_library_name() const;
-    const std::vector<pe_import_entry>& get_entries() const;
+    const std::vector<pe_import_function>& get_entries() const;
 
 
-	std::vector<pe_import_entry>& get_entries();
+	std::vector<pe_import_function>& get_entries();
 };
 
 class pe_import_directory {
-	std::vector<imported_library> libraries;
+	std::vector<pe_import_library> libraries;
 public:
 	pe_import_directory();
     pe_import_directory(const pe_import_directory& imports);
@@ -81,16 +81,16 @@ public:
 
 	pe_import_directory& operator=(const pe_import_directory& imports);
 public:
-	void add_library(const imported_library& lib);
+	void add_library(const pe_import_library& lib);
     void clear();
 public:
     size_t size();
 
-	std::vector<imported_library>& get_libraries();
-    const std::vector<imported_library>& get_libraries() const;
-	bool get_imported_lib(const std::string& lib_name, imported_library * &lib);
-	bool get_imported_func(const std::string& lib_name, const std::string& func_name, imported_library * &lib, pe_import_entry * &func);
-	bool get_imported_func(const std::string& lib_name, uint16_t ordinal, imported_library * &lib, pe_import_entry * &func);
+	std::vector<pe_import_library>& get_libraries();
+    const std::vector<pe_import_library>& get_libraries() const;
+	bool get_imported_lib(const std::string& lib_name, pe_import_library * &lib);
+	bool get_imported_func(const std::string& lib_name, const std::string& func_name, pe_import_library * &lib, pe_import_function * &func);
+	bool get_imported_func(const std::string& lib_name, uint16_t ordinal, pe_import_library * &lib, pe_import_function * &func);
 };
 
 

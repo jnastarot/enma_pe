@@ -102,6 +102,10 @@ pe_directory_code get_security_directory(const pe_image &image, pe_security_dire
     if (raw_address && virtual_size) {
         pe_image_io security_io(image, enma_io_address_raw);
         
+        if (!security_io.is_present_raw(raw_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         uint32_t total_size = 0;
         security_io.set_image_offset(raw_address);
 
@@ -138,6 +142,10 @@ pe_directory_code get_placement_security_directory(const pe_image &image, pe_pla
 
     if (raw_address && virtual_size) {
         pe_image_io security_io(image, enma_io_address_raw);
+
+        if (!security_io.is_present_raw(raw_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
 
         uint32_t total_size = 0;
         security_io.set_image_offset(raw_address);

@@ -13,7 +13,7 @@ class pe_delay_library {
     uint32_t  unload_info_table_rva;
     uint32_t  timestamp;
 
-    std::vector<pe_import_entry> entries;
+    std::vector<pe_import_function> entries;
 public:
     pe_delay_library();
     pe_delay_library(const pe_delay_library& lib);
@@ -32,7 +32,7 @@ public:
     void set_unload_info_table_rva(uint32_t  rva);
     void set_timestamp(uint32_t  timestamp);
 
-    void add_entry(const pe_import_entry& entry);
+    void add_entry(const pe_import_function& entry);
 public:
     std::string get_library_name() const;
 
@@ -44,11 +44,11 @@ public:
     uint32_t get_bound_table_iat_rva() const;
     uint32_t get_unload_info_table_rva() const;
     uint32_t get_timestamp() const;
-    const std::vector<pe_import_entry>& get_entries() const;
+    const std::vector<pe_import_function>& get_entries() const;
 
-    std::vector<pe_import_entry>& get_entries();
+    std::vector<pe_import_function>& get_entries();
 
-    imported_library convert_to_imported_library() const;
+    pe_import_library convert_to_pe_import_library() const;
 };
 
 class pe_delay_import_directory {

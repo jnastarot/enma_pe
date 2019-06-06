@@ -153,6 +153,10 @@ pe_directory_code get_debug_directory(const pe_image &image, pe_debug_directory&
     if (virtual_address && virtual_size) {
         pe_image_io debug_io(image);
 
+        if (!debug_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         debug_io.set_image_offset(virtual_address);
         while (debug_io.get_image_offset() < virtual_address + virtual_size) {
             image_debug_directory debug_desc;
@@ -210,6 +214,11 @@ pe_directory_code get_placement_debug_directory(const pe_image &image, pe_placem
 
     if (virtual_address && virtual_size) {
         pe_image_io debug_io(image);
+
+        if (!debug_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         uint32_t total_desc_size = 0;
 
         debug_io.set_image_offset(virtual_address);

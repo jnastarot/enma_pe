@@ -154,6 +154,10 @@ pe_directory_code get_bound_import_directory(const pe_image &image, pe_bound_imp
         pe_image_io bnd_import_desc_io(image);
         bnd_import_desc_io.set_image_offset(virtual_address);
 
+        if (!bnd_import_desc_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         image_bound_import_descriptor bound_imp_description;
 
         if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
@@ -289,6 +293,10 @@ pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe
     if (virtual_address) {
         pe_image_io bnd_import_desc_io(image);
         bnd_import_desc_io.set_image_offset(virtual_address);
+
+        if (!bnd_import_desc_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
 
         image_bound_import_descriptor bound_imp_description;
 

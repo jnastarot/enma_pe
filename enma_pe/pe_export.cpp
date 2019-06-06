@@ -213,6 +213,10 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
     if (virtual_address) {
         pe_image_io export_io(image);
 
+        if (!export_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         image_export_directory export_desc;
 
         if (export_io.set_image_offset(virtual_address).read(&export_desc, sizeof(export_desc)) != enma_io_success) {
@@ -230,12 +234,12 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
         if (!exports.get_number_of_functions()) { return pe_directory_code::pe_directory_code_success; }
 
         if (export_desc.name) {
-            std::string lib_name;
-            if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
-                return pe_directory_code::pe_directory_code_currupted;
-            }
 
-            exports.set_library_name(lib_name);
+            std::string lib_name;
+
+            if (export_io.set_image_offset(export_desc.name).read_string(lib_name) != enma_io_success) {
+                exports.set_library_name(lib_name);
+            }          
         }
 
         for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
@@ -251,7 +255,7 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
 
             func.set_rva(func_rva);
 
-            if (!func_rva) { continue; }
+            //if (!func_rva) { continue; }
 
             func.set_ordinal(uint16_t(export_desc.base + ordinal));
 
@@ -261,7 +265,7 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
 
                 if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * INT16_SIZE).read(
                     &ordinal2, sizeof(ordinal2)) != enma_io_success) {
-                    return pe_directory_code::pe_directory_code_currupted;
+                    break;
                 }
 
 
@@ -271,13 +275,13 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
 
                     if (export_io.set_image_offset(export_desc.address_of_names + i * INT32_SIZE).read(
                         &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
-                        return pe_directory_code::pe_directory_code_currupted;
+                        break;
                     }
 
                     std::string func_name;
 
                     if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
-                        return pe_directory_code::pe_directory_code_currupted;
+                        break;
                     }
 
                     func.set_func_name(func_name);
@@ -485,6 +489,10 @@ pe_directory_code get_placement_export_directory(const pe_image &image, pe_place
 
     if (virtual_address) {
         pe_image_io export_io(image);
+
+        if (!export_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
 
         image_export_directory export_desc;
 

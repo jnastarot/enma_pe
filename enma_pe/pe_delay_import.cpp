@@ -62,7 +62,7 @@ void pe_delay_library::set_timestamp(uint32_t  timestamp) {
     this->timestamp = timestamp;
 }
 
-void pe_delay_library::add_entry(const pe_import_entry& entry) {
+void pe_delay_library::add_entry(const pe_import_function& entry) {
     entries.push_back(entry);
 }
 
@@ -94,15 +94,15 @@ uint32_t pe_delay_library::get_unload_info_table_rva() const {
 uint32_t pe_delay_library::get_timestamp() const {
     return this->timestamp;
 }
-const std::vector<pe_import_entry>& pe_delay_library::get_entries() const {
+const std::vector<pe_import_function>& pe_delay_library::get_entries() const {
     return this->entries;
 }
-std::vector<pe_import_entry>& pe_delay_library::get_entries() {
+std::vector<pe_import_function>& pe_delay_library::get_entries() {
     return this->entries;
 }
 
-imported_library pe_delay_library::convert_to_imported_library() const {
-    imported_library lib;
+pe_import_library pe_delay_library::convert_to_pe_import_library() const {
+    pe_import_library lib;
     lib.set_library_name(this->library_name);
     lib.set_timestamp(this->timestamp  ? -1 : 0);
     lib.set_rva_iat(this->iat_rva);
@@ -145,7 +145,7 @@ pe_import_directory pe_delay_import_directory::convert_to_import_table() const {
     pe_import_directory imports;
 
     for (auto& lib : libraries) {
-        imports.add_library(lib.convert_to_imported_library());
+        imports.add_library(lib.convert_to_pe_import_library());
     }
     return imports;
 }
@@ -167,6 +167,10 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
     if (virtual_address) {
         pe_image_io delay_imp_desc_io(image);
         delay_imp_desc_io.set_image_offset(virtual_address);
+
+        if (!delay_imp_desc_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
 
         image_delayload_descriptor import_desc;
 
@@ -232,7 +236,7 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
 
                     if (name_item) {
                         if (name_item&image_format::ordinal_flag) {
-                            lib.add_entry(pe_import_entry(iat_func_address, uint16_t(name_item^image_format::ordinal_flag), bound_item));
+                            lib.add_entry(pe_import_function(iat_func_address, uint16_t(name_item^image_format::ordinal_flag), bound_item));
                         }
                         else {
                             uint16_t hint;
@@ -248,7 +252,7 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
                                 return pe_directory_code::pe_directory_code_currupted;
                             }
 
-                            lib.add_entry(pe_import_entry(iat_func_address, func_name, hint , bound_item));
+                            lib.add_entry(pe_import_function(iat_func_address, func_name, hint , bound_item));
                         }
                     }
                     else {
@@ -282,6 +286,11 @@ pe_directory_code _get_placement_delay_import_directory(const pe_image &image, p
 
     if (virtual_address) {
         pe_image_io delay_import_desc_io(image);
+
+        if (!delay_import_desc_io.is_present_rva(virtual_address)) {
+            return pe_directory_code::pe_directory_code_not_present;
+        }
+
         delay_import_desc_io.set_image_offset(virtual_address);
 
         image_delayload_descriptor import_desc;
