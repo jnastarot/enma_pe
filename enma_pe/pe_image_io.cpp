@@ -406,7 +406,7 @@ pe_image_io& pe_image_io::seek_to_end() {
                     top_raw = current_section_raw;
                 }
             }
-            this->image_offset = ALIGN_UP(
+            this->image_offset = (uint32_t)ALIGN_UP(
                 top_raw,
                 image->get_file_align()
             );
@@ -425,7 +425,7 @@ pe_image_io& pe_image_io::seek_to_end() {
                 }
             }
 
-            this->image_offset = ALIGN_UP(
+            this->image_offset = (uint32_t)ALIGN_UP(
                 top_rva,
                 image->get_section_align()
             );
@@ -488,7 +488,7 @@ bool  pe_image_io::is_present_rva(uint32_t rva) {
 
     uint8_t test_byte;
 
-    size_t current_offset = this->image_offset;
+    uint32_t current_offset = this->image_offset;
     enma_io_addressing_type addressing_type = this->addressing_type;
 
     this->addressing_type = enma_io_address_rva;
@@ -507,7 +507,7 @@ bool pe_image_io::is_present_raw(uint32_t raw) {
 
     uint8_t test_byte;
 
-    size_t current_offset = this->image_offset;
+    uint32_t current_offset = this->image_offset;
     enma_io_addressing_type addressing_type = this->addressing_type;
 
     this->addressing_type = enma_io_address_raw;

@@ -274,7 +274,7 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
             get_image_rich_header(this->headers_data, this->rich_header);
 
             {
-                uint32_t image_top_size = 0;
+                size_t image_top_size = 0;
                 for (size_t i = 0; i < number_of_sections; i++) {
                     image_section_header* section_image = (image_section_header*)(&image[section_offset]);
 
@@ -303,7 +303,7 @@ void pe_image::init_from_file(const uint8_t * image, size_t size) {
                     add_section(pe_section(*section_image, section_data));
                     section_offset += (uint16_t)sizeof(image_section_header);
 
-                    uint32_t current_size = ALIGN_UP((section_image->pointer_to_raw_data + section_data.size()), this->file_align);
+                    size_t current_size = ALIGN_UP((section_image->pointer_to_raw_data + section_data.size()), this->file_align);
 
                     if (image_top_size < current_size) {
                         image_top_size = current_size;
