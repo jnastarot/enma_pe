@@ -19,7 +19,7 @@ pe_image::pe_image(const pe_image& image) {
 pe_image::pe_image(bool _pe32, bool init_dos_thunk) {
 	clear_image();
 
-    this->headers_data.resize(sizeof(image_dos_header) + init_dos_thunk ? sizeof(th_dos_stub) : 0);
+    this->headers_data.resize(sizeof(image_dos_header) + (init_dos_thunk ? sizeof(th_dos_stub) : 0));
     memset(this->headers_data.data(), 0, this->headers_data.size());
 
     if (init_dos_thunk) {
@@ -33,7 +33,7 @@ pe_image::pe_image(bool _pe32, bool init_dos_thunk) {
     dos_header->e_cparhdr = 0x04;
     dos_header->e_maxalloc = 0xFFFF;
     dos_header->e_sp = 0xB8;
-    dos_header->e_lfanew = sizeof(image_dos_header) + init_dos_thunk ? sizeof(th_dos_stub) : 0;
+    dos_header->e_lfanew = sizeof(image_dos_header) + (init_dos_thunk ? sizeof(th_dos_stub) : 0);
 
 
     if (_pe32) {
