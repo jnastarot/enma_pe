@@ -253,14 +253,14 @@ void align_sections(pe_image& image, uint32_t start_header_size) {
 void build_directories(pe_image_full& image_full, uint32_t build_flags) {
 
     if ((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
-        (image_full.get_exports().get_number_of_functions() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
+        (image_full.get_exports().get_entries().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
         ((image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) && (build_flags & PE_IMAGE_BUILD_DIR_TLS)) ||
         ((!image_full.get_image().is_x32_image() && image_full.get_exceptions().get_exception_entries().size()) && (build_flags & PE_IMAGE_BUILD_DIR_EXCEPTIONS)) ||
-        ((!image_full.get_load_config().get_size()) && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG))
+        ((image_full.get_load_config().get_size()) && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG))
         ) {
 
 
-        if (!image_full.get_load_config().get_size() && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG)) {
+        if (image_full.get_load_config().get_size() && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG)) {
             pe_section* rdata_section = 0;
 
             if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_RDATA) {
@@ -298,7 +298,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
         }
 
         if((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
-            (image_full.get_exports().get_number_of_functions() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
+            (image_full.get_exports().get_entries().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
             ((image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) && (build_flags & PE_IMAGE_BUILD_DIR_TLS))
             ) {
 
@@ -315,7 +315,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
             }
 
 
-            if (image_full.get_exports().get_number_of_functions()) {                                    //build export
+            if (image_full.get_exports().get_entries().size()) {                                    //build export
                 build_export_directory(image_full.get_image(), *edata_section, image_full.get_exports());
             }
             if (image_full.get_imports().size()) {                                                        //build import
