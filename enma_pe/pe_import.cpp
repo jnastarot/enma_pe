@@ -321,7 +321,8 @@ pe_directory_code _get_import_directory(const pe_image &image, pe_import_directo
                                 return pe_directory_code::pe_directory_code_currupted;
                             }
 
-                            library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
+                            library.add_entry(pe_import_function(
+                                iat_io.get_image_offset() + (original_iat_io.get_image_offset() - import_desc.original_first_thunk - (uint32_t)sizeof(typename image_format::ptr_size)),
                                 func_name, hint, original_iat_item));
                         }
                     }
