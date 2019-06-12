@@ -302,7 +302,8 @@ pe_directory_code _get_import_directory(const pe_image &image, pe_import_directo
 
                         if (original_iat_item&image_format::ordinal_flag) {
 
-                            library.add_entry(pe_import_function(iat_io.get_image_offset() - (uint32_t)sizeof(typename image_format::ptr_size),
+                            library.add_entry(pe_import_function(
+                                iat_io.get_image_offset() + (original_iat_io.get_image_offset() - import_desc.original_first_thunk - (uint32_t)sizeof(typename image_format::ptr_size)),
                                 uint16_t(original_iat_item^image_format::ordinal_flag), original_iat_item));
                         }
                         else {
@@ -665,7 +666,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
                 } while (1);
 
 
-                if (import_desc.original_first_thunk) {
+                if (original_first_thunk_present) {
                     placement[import_desc.original_first_thunk] = pe_placement_entry(iat_table_size, id_pe_import_original_first_think, "");
                 }
 
