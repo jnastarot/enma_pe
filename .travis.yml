@@ -1,7 +1,7 @@
 language: c
 install:
 - sudo apt-get update
-- sudo apt-get install mono-devel mono-gmcs
+- sudo apt-get install mono-devel
 
 script:
 - xbuild enma_pe.sln /verbosity:minimal
