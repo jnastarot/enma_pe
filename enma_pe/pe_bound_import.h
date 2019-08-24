@@ -2,7 +2,7 @@
 
 class pe_bound_imported_ref{
     std::string ref_name;
-    uint32_t  timestamp;
+    uint32_t timestamp;
     
 public:
     pe_bound_imported_ref();
@@ -56,10 +56,11 @@ public:
     void add_library(const pe_bound_library& lib);
     void clear();
 public:
+    size_t size() const;
+
     bool has_library(const std::string& library_name, uint32_t timestamp) const;
     bool has_library(const std::string& library_name) const;
 
-    size_t size() const;
     const std::vector<pe_bound_library>& get_libraries() const;
 
     std::vector<pe_bound_library>& get_libraries();
@@ -68,6 +69,6 @@ public:
 
 
 pe_directory_code get_bound_import_directory(_In_ const pe_image &image, _Out_ pe_bound_import_directory& imports);
-bool build_bound_import_table(_Inout_ pe_image &image, _Inout_ pe_section& section, 
+bool build_bound_import_directory(_Inout_ pe_image &image, _Inout_ pe_section& section,
     _In_ pe_bound_import_directory& imports);
 pe_directory_code get_placement_bound_import_directory(_In_ const pe_image &image, _Inout_ pe_placement& placement);

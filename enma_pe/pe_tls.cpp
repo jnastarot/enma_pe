@@ -3,14 +3,14 @@
 
 
 pe_tls_directory::pe_tls_directory() {
-	start_address_raw_data	= 0;
-	end_address_raw_data = 0;
-	address_of_index		= 0;
-	address_of_callbacks	= 0;
+    start_address_raw_data    = 0;
+    end_address_raw_data = 0;
+    address_of_index        = 0;
+    address_of_callbacks    = 0;
     size_of_zero_fill       = 0;
     characteristics         = 0;
-	raw_data.clear();
-	callbacks.clear();
+    raw_data.clear();
+    callbacks.clear();
 }
 
 pe_tls_directory::pe_tls_directory(const pe_tls_directory& tls) {
@@ -22,55 +22,55 @@ pe_tls_directory::~pe_tls_directory(){}
 
 pe_tls_directory& pe_tls_directory::operator=(const pe_tls_directory& tls) {
 
-	start_address_raw_data	= tls.start_address_raw_data;
-	end_address_raw_data    = tls.end_address_raw_data;
-	address_of_index		= tls.address_of_index;
-	address_of_callbacks	= tls.address_of_callbacks;
+    start_address_raw_data    = tls.start_address_raw_data;
+    end_address_raw_data    = tls.end_address_raw_data;
+    address_of_index        = tls.address_of_index;
+    address_of_callbacks    = tls.address_of_callbacks;
     size_of_zero_fill       = tls.size_of_zero_fill;
     characteristics         = tls.characteristics;
-	raw_data = tls.raw_data;
-	callbacks = tls.callbacks;
+    raw_data = tls.raw_data;
+    callbacks = tls.callbacks;
 
-	return *this;
+    return *this;
 }
 
 
 void pe_tls_directory::set_start_address_raw_data(uint32_t   start_address_raw_data) {
-	this->start_address_raw_data = start_address_raw_data;
+    this->start_address_raw_data = start_address_raw_data;
 }
 void pe_tls_directory::set_end_address_raw_data(uint32_t   end_address_raw_data) {
-	this->end_address_raw_data = end_address_raw_data;
+    this->end_address_raw_data = end_address_raw_data;
 }
 void pe_tls_directory::set_address_of_index(uint32_t   address_of_index) {
-	this->address_of_index = address_of_index;
+    this->address_of_index = address_of_index;
 }
 void pe_tls_directory::set_address_of_callbacks(uint32_t   address_of_callbacks){
-	this->address_of_callbacks = address_of_callbacks;
+    this->address_of_callbacks = address_of_callbacks;
 }
 void pe_tls_directory::set_size_of_zero_fill(uint32_t   size_of_zero_fill) {
     this->size_of_zero_fill = size_of_zero_fill;
 }
 void pe_tls_directory::set_characteristics(uint32_t   characteristics) {
-	this->characteristics = characteristics;
+    this->characteristics = characteristics;
 }
 
 uint32_t pe_tls_directory::get_start_address_raw_data() const {
-	return this->start_address_raw_data;
+    return this->start_address_raw_data;
 }
 uint32_t pe_tls_directory::get_end_address_raw_data() const {
-	return this->end_address_raw_data;
+    return this->end_address_raw_data;
 }
 uint32_t pe_tls_directory::get_address_of_index() const {
-	return this->address_of_index;
+    return this->address_of_index;
 }
 uint32_t pe_tls_directory::get_address_of_callbacks() const {
-	return this->address_of_callbacks;
+    return this->address_of_callbacks;
 }
 uint32_t pe_tls_directory::get_size_of_zero_fill() const {
     return this->size_of_zero_fill;
 }
 uint32_t pe_tls_directory::get_characteristics() const {
-	return this->characteristics;
+    return this->characteristics;
 }
 const std::vector<uint8_t>& pe_tls_directory::get_raw_data() const {
     return raw_data;
@@ -79,10 +79,10 @@ const std::vector<pe_tls_directory::tls_callback>& pe_tls_directory::get_callbac
     return callbacks;
 }
 std::vector<uint8_t>& pe_tls_directory::get_raw_data() {
-	return raw_data;
+    return raw_data;
 }
 std::vector<pe_tls_directory::tls_callback>& pe_tls_directory::get_callbacks() {
-	return callbacks;
+    return callbacks;
 }
 
 template<typename image_format>
@@ -205,7 +205,7 @@ bool _build_internal_tls_directory_data(const pe_image &image, pe_section& secti
 
                 if (callback_item.use_relocation) {
                     call_back_va = (typename image_format::ptr_size)image.rva_to_va(callback_item.rva_callback);
-                    relocs.add_entry(tls_io.get_section_offset(), 0);
+                    relocs.add_relocation(tls_io.get_section_offset(), 0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
                 }
 
                 if (tls_io.write(&call_back_va,sizeof(call_back_va)) != enma_io_success) {
@@ -238,18 +238,22 @@ bool _build_tls_directory_only(pe_image &image, pe_section& section, pe_tls_dire
         tls_directory.start_address_of_raw_data = typename image_format::ptr_size(image.rva_to_va(tls.get_start_address_raw_data()));
         tls_directory.end_address_of_raw_data   = typename image_format::ptr_size(image.rva_to_va(tls.get_end_address_raw_data()));
 
-        relocs.add_entry(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, start_address_of_raw_data), 0);
-        relocs.add_entry(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, end_address_of_raw_data),   0);
+        relocs.add_relocation(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, start_address_of_raw_data),
+            0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
+        relocs.add_relocation(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, end_address_of_raw_data),
+            0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
     }
 
     if (tls.get_address_of_index()) {
         tls_directory.address_of_index = typename image_format::ptr_size(image.rva_to_va(tls.get_address_of_index()));
-        relocs.add_entry(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, address_of_index), 0);
+        relocs.add_relocation(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, address_of_index),
+            0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
     }
 
     if (tls.get_address_of_callbacks()) {
         tls_directory.address_of_callbacks = typename image_format::ptr_size(image.rva_to_va(tls.get_address_of_callbacks()));
-        relocs.add_entry(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, address_of_callbacks), 0);
+        relocs.add_relocation(tls_io.get_section_offset() + (uint32_t)offsetof(typename image_format::image_tls_directory, address_of_callbacks), 
+            0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
     }
     
     tls_directory.size_of_zero_fill     = tls.get_size_of_zero_fill();

@@ -1050,6 +1050,12 @@ typedef struct image_cor20_header
 
 #pragma pack(pop)
 
+
+
+#ifndef ALIGN_DOWN
+    #define ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+#endif
+
 #ifndef ALIGN_UP
     #define ALIGN_UP(a, b) ((((a) + (b) - 1) / (b)) * (b))
 #endif

@@ -5,19 +5,19 @@
 
 struct a_string_base {
     uint32_t rva;
-	std::string str;
+    std::string str;
 };
 struct w_string_base {
     uint32_t rva;
-	std::wstring str;
+    std::wstring str;
 };
 
 typedef std::vector<a_string_base> ansi_string_base_table;
 typedef std::vector<w_string_base> wide_string_base_table;
 
 struct string_base_table {
-	ansi_string_base_table ansi_base;
-	wide_string_base_table wide_base;
+    ansi_string_base_table ansi_base;
+    wide_string_base_table wide_base;
 };
 
 void get_strings_from_image(_In_ const pe_image& image,_Out_ string_base_table& string_table,

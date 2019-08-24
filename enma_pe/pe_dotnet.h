@@ -1,21 +1,21 @@
 #pragma once
 
 class pe_dotnet_directory {
-    uint16_t   major_version;
-    uint16_t   minor_version;
-    uint32_t   flags;
+    uint16_t major_version;
+    uint16_t minor_version;
+    uint32_t flags;
 
     union {
-        uint32_t   entry_point_token;
-        uint32_t   entry_point_rva;
+        uint32_t entry_point_token;
+        uint32_t entry_point_rva;
     };
 
-    image_data_directory   meta_data;
-    image_data_directory   resources;
-    image_data_directory   strong_name_signature;
-    image_data_directory   code_manager_table;
-    image_data_directory   vtable_fixups;
-    image_data_directory   export_address_table_jumps;
+    image_data_directory meta_data;
+    image_data_directory resources;
+    image_data_directory strong_name_signature;
+    image_data_directory code_manager_table;
+    image_data_directory vtable_fixups;
+    image_data_directory export_address_table_jumps;
 public:
     pe_dotnet_directory();
     ~pe_dotnet_directory();

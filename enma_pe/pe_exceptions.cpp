@@ -382,7 +382,7 @@ pe_directory_code get_exception_directory(const pe_image &image, pe_exceptions_d
         return pe_directory_code::pe_directory_code_success;
     }
 
-	return pe_directory_code::pe_directory_code_not_present;
+    return pe_directory_code::pe_directory_code_not_present;
 }
 
 bool build_exceptions_directory(pe_image &image, pe_section& section, pe_exceptions_directory& exceptions,
@@ -443,8 +443,9 @@ bool build_exceptions_directory(pe_image &image, pe_section& section, pe_excepti
 
                     for (auto& param : item.get_params()) { //fill handler params
 
+                       
                         if (param.type == unwind_parameter_va) {
-                            relocs.add_entry(exc_section.get_section_offset(), 0);
+                            relocs.add_relocation(exc_section.get_section_offset(), 0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
                         }
 
                         if (exc_section.write(param.param_data) != enma_io_success) {

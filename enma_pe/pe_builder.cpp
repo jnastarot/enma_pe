@@ -253,7 +253,7 @@ void align_sections(pe_image& image, uint32_t start_header_size) {
 void build_directories(pe_image_full& image_full, uint32_t build_flags) {
 
     if ((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
-        (image_full.get_exports().get_entries().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
+        (image_full.get_exports().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
         ((image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) && (build_flags & PE_IMAGE_BUILD_DIR_TLS)) ||
         ((!image_full.get_image().is_x32_image() && image_full.get_exceptions().get_exception_entries().size()) && (build_flags & PE_IMAGE_BUILD_DIR_EXCEPTIONS)) ||
         ((image_full.get_load_config().get_size()) && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG))
@@ -298,7 +298,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
         }
 
         if((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
-            (image_full.get_exports().get_entries().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
+            (image_full.get_exports().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
             ((image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) && (build_flags & PE_IMAGE_BUILD_DIR_TLS))
             ) {
 
@@ -315,7 +315,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
             }
 
 
-            if (image_full.get_exports().get_entries().size()) {                                    //build export
+            if (image_full.get_exports().size()) {                                    //build export
                 build_export_directory(image_full.get_image(), *edata_section, image_full.get_exports());
             }
             if (image_full.get_imports().size()) {                                                        //build import
@@ -421,11 +421,17 @@ bool build_pe_image(pe_image& image, uint32_t build_flags, std::vector<uint8_t>&
         }
 
 
-        out_image.resize(headers_size +
-            image.get_section_by_idx(uint32_t(image.get_sections_number()) - 1)->get_pointer_to_raw() +
-            ALIGN_UP(
-                image.get_section_by_idx(uint32_t(image.get_sections_number()) - 1)->get_size_of_raw_data()
-                , image.get_file_align()));
+        if (image.get_sections().size()) {
+
+            out_image.resize(image.get_section_top_raw()->get_pointer_to_raw() +
+                (size_t)ALIGN_UP(
+                    image.get_section_top_raw()->get_size_of_raw_data()
+                    , image.get_file_align()));
+
+        }
+        else {
+            out_image.resize(headers_size);
+        }
 
         for (auto& section_ : image.get_sections()) { //write sections data
             memcpy(&out_image[section_->get_pointer_to_raw()], section_->get_section_data().data(), section_->get_size_of_raw_data());

@@ -1,16 +1,11 @@
 #include "stdafx.h"
 #include "pe_delay_import.h"
 
-pe_delay_library::pe_delay_library() {
-    attributes = 0 ;
-    dll_name_rva = 0;
-    module_handle_rva = 0;
-    iat_rva = 0;
-    names_table_rva = 0;
-    iat_bound_table_rva = 0;
-    unload_info_table_rva = 0;
-    timestamp = 0;
-}
+pe_delay_library::pe_delay_library() 
+ :attributes(0), dll_name_rva(0), module_handle_rva(0),
+    iat_rva(0), names_table_rva(0), iat_bound_table_rva(0), 
+    unload_info_table_rva(0), timestamp(0) {}
+
 pe_delay_library::pe_delay_library(const pe_delay_library& lib) {
     this->operator=(lib);
 }
@@ -28,44 +23,72 @@ pe_delay_library& pe_delay_library::operator=(const pe_delay_library& lib) {
     this->iat_bound_table_rva = lib.iat_bound_table_rva;
     this->unload_info_table_rva = lib.unload_info_table_rva;
     this->timestamp         = lib.timestamp;
-    this->entries           = lib.entries;
+    this->functions         = lib.functions;
 
     return *this;
 }
 
 
-void pe_delay_library::set_library_name(const std::string& library_name) {
+pe_delay_library& pe_delay_library::set_library_name(const std::string& library_name) {
     this->library_name = library_name;
+
+    return *this;
 }
-void pe_delay_library::set_attributes(uint32_t  attributes) {
+pe_delay_library& pe_delay_library::set_attributes(uint32_t  attributes) {
     this->attributes = attributes;
+
+    return *this;
 }
-void pe_delay_library::set_dll_name_rva(uint32_t  dll_name_rva) {
+pe_delay_library& pe_delay_library::set_dll_name_rva(uint32_t  dll_name_rva) {
     this->dll_name_rva = dll_name_rva;
+
+    return *this;
 }
-void pe_delay_library::set_module_handle_rva(uint32_t  rva) {
+pe_delay_library& pe_delay_library::set_module_handle_rva(uint32_t  rva) {
     this->module_handle_rva = rva;
+
+    return *this;
 }
-void pe_delay_library::set_iat_rva(uint32_t  rva) {
+pe_delay_library& pe_delay_library::set_iat_rva(uint32_t  rva) {
     this->iat_rva = rva;
+
+    return *this;
 }
-void pe_delay_library::set_names_table_rva(uint32_t  rva) {
+pe_delay_library& pe_delay_library::set_names_table_rva(uint32_t  rva) {
     this->names_table_rva = rva;
+
+    return *this;
 }
-void pe_delay_library::set_bound_table_iat_rva(uint32_t  rva) {
+pe_delay_library& pe_delay_library::set_bound_table_iat_rva(uint32_t  rva) {
     this->iat_bound_table_rva = rva;
+
+    return *this;
 }
-void pe_delay_library::set_unload_info_table_rva(uint32_t  rva) {
+pe_delay_library& pe_delay_library::set_unload_info_table_rva(uint32_t  rva) {
     this->unload_info_table_rva = rva;
+
+    return *this;
 }
-void pe_delay_library::set_timestamp(uint32_t  timestamp) {
+pe_delay_library& pe_delay_library::set_timestamp(uint32_t  timestamp) {
     this->timestamp = timestamp;
+
+    return *this;
+}
+pe_delay_library& pe_delay_library::set_bound_library(bool is_bound) {
+    this->is_bound = is_bound;
+
+    return *this;
 }
 
-void pe_delay_library::add_entry(const pe_import_function& entry) {
-    entries.push_back(entry);
+pe_delay_library& pe_delay_library::add_function(const pe_import_function& function) {
+    functions.push_back(function);
+
+    return *this;
 }
 
+size_t pe_delay_library::size() const {
+    return this->functions.size();
+}
 
 std::string pe_delay_library::get_library_name() const {
     return this->library_name;
@@ -94,22 +117,24 @@ uint32_t pe_delay_library::get_unload_info_table_rva() const {
 uint32_t pe_delay_library::get_timestamp() const {
     return this->timestamp;
 }
-const std::vector<pe_import_function>& pe_delay_library::get_entries() const {
-    return this->entries;
+const std::vector<pe_import_function>& pe_delay_library::get_functions() const {
+    return this->functions;
 }
-std::vector<pe_import_function>& pe_delay_library::get_entries() {
-    return this->entries;
+std::vector<pe_import_function>& pe_delay_library::get_functions() {
+    return this->functions;
 }
 
 pe_import_library pe_delay_library::convert_to_pe_import_library() const {
+
     pe_import_library lib;
     lib.set_library_name(this->library_name);
     lib.set_timestamp(this->timestamp  ? -1 : 0);
     lib.set_rva_iat(this->iat_rva);
     lib.set_rva_oft(this->unload_info_table_rva);
+    lib.set_bound_library(this->is_bound);
 
-    for (auto& entry : entries) {
-        lib.add_entry(entry);
+    for (auto& function : functions) {
+        lib.add_function(function);
     }
     
     return lib;
@@ -181,7 +206,7 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
         if (import_desc.dll_name_rva && import_desc.import_address_table_rva) {
 
             do {
-                pe_delay_library lib;
+                pe_delay_library library;
                 std::string library_name;
 
                 //only for x32 if used VA we convert it to RVA
@@ -198,15 +223,20 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
                     return pe_directory_code::pe_directory_code_currupted;
                 }
 
-                lib.set_library_name(library_name);
-                lib.set_attributes(import_desc.attributes.all_attributes);
-                lib.set_dll_name_rva(import_desc.dll_name_rva);
-                lib.set_module_handle_rva(import_desc.module_handle_rva);
-                lib.set_iat_rva(import_desc.import_address_table_rva);
-                lib.set_names_table_rva(import_desc.import_name_table_rva);
-                lib.set_bound_table_iat_rva(import_desc.bound_import_address_table_rva);
-                lib.set_unload_info_table_rva(import_desc.unload_information_table_rva);
-                lib.set_timestamp(import_desc.time_date_stamp);
+
+                bool is_used_bound_table = (import_desc.time_date_stamp &&
+                    bound_imports.has_library(library_name, import_desc.time_date_stamp));
+
+                library.set_library_name(library_name)
+                    .set_attributes(import_desc.attributes.all_attributes)
+                    .set_dll_name_rva(import_desc.dll_name_rva)
+                    .set_module_handle_rva(import_desc.module_handle_rva)
+                    .set_iat_rva(import_desc.import_address_table_rva)
+                    .set_names_table_rva(import_desc.import_name_table_rva)
+                    .set_bound_table_iat_rva(import_desc.bound_import_address_table_rva)
+                    .set_unload_info_table_rva(import_desc.unload_information_table_rva)
+                    .set_timestamp(import_desc.time_date_stamp)
+                    .set_bound_library(is_used_bound_table);
 
                 pe_image_io delay_import_names_io(image);
                 pe_image_io delay_import_bound_iat_io(image);
@@ -214,12 +244,9 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
                 delay_import_names_io.set_image_offset(import_desc.import_name_table_rva);
                 delay_import_bound_iat_io.set_image_offset(import_desc.bound_import_address_table_rva);
 
-                bool is_used_bound_table = (import_desc.time_date_stamp &&
-                    bound_imports.has_library(library_name, import_desc.time_date_stamp));
 
                 for (uint32_t iat_func_address = import_desc.import_address_table_rva;; //get funcs
                     iat_func_address += (uint32_t)sizeof(typename image_format::ptr_size)) {
-
 
                     typename image_format::ptr_size name_item = 0;
                     typename image_format::ptr_size bound_item = 0;
@@ -235,10 +262,22 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
                     }
 
                     if (name_item) {
+
+                        pe_import_function func;
+
+                        func.set_iat_rva(iat_func_address)
+                            .set_iat_item(bound_item)
+                            .set_oft_rva(-1)
+                            .set_oft_item(-1);
+
                         if (name_item&image_format::ordinal_flag) {
-                            lib.add_entry(pe_import_function(iat_func_address, uint16_t(name_item^image_format::ordinal_flag), bound_item));
+
+                            func.set_import_by_name(false)
+                                .set_ordinal(uint16_t(name_item ^ image_format::ordinal_flag));
+
                         }
                         else {
+
                             uint16_t hint;
                             std::string func_name;
 
@@ -252,8 +291,13 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
                                 return pe_directory_code::pe_directory_code_currupted;
                             }
 
-                            lib.add_entry(pe_import_function(iat_func_address, func_name, hint , bound_item));
+                            func.set_import_by_name(true)
+                                .set_hint(hint)
+                                .set_func_name(func_name);
+
                         }
+
+                        library.add_function(func);
                     }
                     else {
                         break;
@@ -261,7 +305,7 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
 
                 }
 
-                imports.add_library(lib);
+                imports.add_library(library);
 
                 if (delay_imp_desc_io.read(&import_desc, sizeof(import_desc)) != enma_io_success) {
                     return pe_directory_code::pe_directory_code_currupted;
@@ -396,7 +440,7 @@ pe_directory_code _get_placement_delay_import_directory(const pe_image &image, p
 }
 
 pe_directory_code get_delay_import_directory(const pe_image &image, pe_delay_import_directory& imports, const pe_bound_import_directory& bound_imports) {
-	
+    
     if (image.is_x32_image()) {
         return _get_delay_import_directory<pe_image_32>(image, imports, bound_imports);
     }

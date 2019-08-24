@@ -213,7 +213,7 @@ pe_directory_code get_bound_import_directory(const pe_image &image, pe_bound_imp
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-bool build_bound_import_directory(pe_image &image,pe_section& section,
+bool build_bound_import_directory(pe_image &image, pe_section& section,
     pe_bound_import_directory& imports) {
 
     if (imports.size()) { 
@@ -348,7 +348,7 @@ pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe
 
 
             placement[virtual_address] =
-                pe_placement_entry(ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address), 0x10), id_pe_bound_import_descriptor, "");
+                pe_placement_entry((size_t)ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address), 0x10), id_pe_bound_import_descriptor, "");
         }
 
         return pe_directory_code::pe_directory_code_success;

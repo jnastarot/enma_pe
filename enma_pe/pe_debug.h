@@ -1,21 +1,21 @@
 #pragma once
 
 class pe_debug_entry {
-    uint32_t   characteristics;
-    uint32_t   timestamp;
-    uint16_t   major_version;
-    uint16_t   minor_version;
-    uint32_t   type;
-    uint32_t   size_of_data;
-    uint32_t   address_of_raw_data;
-    uint32_t   pointer_to_raw_data;
+    uint32_t characteristics;
+    uint32_t timestamp;
+    uint16_t major_version;
+    uint16_t minor_version;
+    uint32_t type;
+    uint32_t size_of_data;
+    uint32_t address_of_raw_data;
+    uint32_t pointer_to_raw_data;
 
     std::vector<uint8_t> item_data;
 public:
     pe_debug_entry();
     pe_debug_entry(const pe_debug_entry& item);
-    pe_debug_entry(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
-        uint32_t   type, uint32_t   size_of_data, uint32_t   address_of_raw_data, uint32_t   pointer_to_raw_data,
+    pe_debug_entry(uint32_t characteristics, uint32_t timestamp, uint16_t major_version, uint16_t minor_version,
+        uint32_t type, uint32_t size_of_data, uint32_t address_of_raw_data, uint32_t pointer_to_raw_data,
      void * data);
 
     ~pe_debug_entry();
@@ -31,14 +31,14 @@ public:
     void  set_address_of_raw_data(uint32_t address_of_raw_data);
     void  set_pointer_to_raw_data(uint32_t pointer_to_raw_data);
 public:
-    uint32_t  get_characteristics() const;
-    uint32_t  get_timestamp() const;
-    uint16_t  get_major_version() const;
-    uint16_t  get_minor_version() const;
-    uint32_t  get_type() const;
-    uint32_t  get_size_of_data() const;
-    uint32_t  get_address_of_raw_data() const;
-    uint32_t  get_pointer_to_raw_data() const;
+    uint32_t get_characteristics() const;
+    uint32_t get_timestamp() const;
+    uint16_t get_major_version() const;
+    uint16_t get_minor_version() const;
+    uint32_t get_type() const;
+    uint32_t get_size_of_data() const;
+    uint32_t get_address_of_raw_data() const;
+    uint32_t get_pointer_to_raw_data() const;
 
     const std::vector<uint8_t>& get_item_data() const;
     std::vector<uint8_t>& get_item_data();

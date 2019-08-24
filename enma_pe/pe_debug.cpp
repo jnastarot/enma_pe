@@ -257,5 +257,5 @@ pe_directory_code get_placement_debug_directory(const pe_image &image, pe_placem
         return pe_directory_code::pe_directory_code_success;
     }
 
-	return pe_directory_code::pe_directory_code_not_present;
+    return pe_directory_code::pe_directory_code_not_present;
 }

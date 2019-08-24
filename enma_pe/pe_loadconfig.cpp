@@ -2,124 +2,124 @@
 #include "pe_loadconfig.h"
 
 
-pe_load_config_directory::pe_load_config_directory() {
-    size                            = 0;
-	timestamp						= 0;
-	major_version					= 0;
-	minor_version					= 0;
-	global_flagsclear				= 0;
-	global_flagsset					= 0;
-	criticalsection_default_timeout = 0;
-	decommit_freeblock_threshold	= 0;
-	decommit_totalfree_threshold	= 0;
-	lock_prefix_table				= 0; // VA
-	maximum_allocation_size			= 0;
-	virtual_memory_threshold		= 0;
-	process_heap_flags				= 0;
-	process_affinity_mask			= 0;
-	csd_version						= 0;
-    dependent_load_flags            = 0;
-	editlist						= 0; // VA
-	security_cookie					= 0; // VA
-	se_handler_table				= 0; // VA
-    se_handler_count                = 0;
-	guard_cf_check_function_pointer = 0; // VA
-    guard_cf_dispatch_function_pointer = 0;//VA
-	guard_cf_function_table			= 0; // VA
-    guard_cf_function_count         = 0;
-	guard_flags						= 0;
-    code_integrity                  = {0}; 
-    guard_address_taken_iat_entry_table = 0; // VA
-    guard_address_taken_iat_entry_count = 0;
-    guard_long_jump_target_table        = 0; // VA
-    guard_long_jump_target_count        = 0;
-    dynamic_value_reloc_table           = 0; // VA
-    chpe_meta_data_pointer              = 0;
-    guard_rf_failure_routine            = 0; // VA
-    guard_rf_failure_routine_function_pointer = 0; // VA
-    dynamic_value_reloc_table_offset    = 0;
-    dynamic_value_reloc_table_section   = 0;
-    guard_rf_verify_stack_pointer_function_pointer = 0; // VA
-    hot_patch_table_offset              = 0;
-    enclave_configuration_pointer       = 0; // VA
-}
+pe_load_config_directory::pe_load_config_directory() 
+    :size(0),
+        timestamp(0),
+        major_version(0),
+        minor_version(0),
+        global_flagsclear(0),
+        global_flagsset(0),
+        criticalsection_default_timeout(0),
+        decommit_freeblock_threshold(0),
+        decommit_totalfree_threshold(0),
+        lock_prefix_table(0),
+        maximum_allocation_size(0),
+        virtual_memory_threshold(0),
+        process_heap_flags(0),
+        process_affinity_mask(0),
+        csd_version(0),
+        dependent_load_flags(0),
+        editlist(0),
+        security_cookie(0),
+        se_handler_table(0),
+        se_handler_count(0),
+        guard_cf_check_function_pointer(0),
+        guard_cf_dispatch_function_pointer(0),
+        guard_cf_function_table(0),
+        guard_cf_function_count(0),
+        guard_flags(0),
+        code_integrity({ 0 }),
+        guard_address_taken_iat_entry_table(0),
+        guard_address_taken_iat_entry_count(0),
+        guard_long_jump_target_table(0),
+        guard_long_jump_target_count(0),
+        dynamic_value_reloc_table(0),
+        chpe_meta_data_pointer(0),
+        guard_rf_failure_routine(0),
+        guard_rf_failure_routine_function_pointer(0),
+        dynamic_value_reloc_table_offset(0),
+        dynamic_value_reloc_table_section(0),
+        guard_rf_verify_stack_pointer_function_pointer(0),
+        hot_patch_table_offset(0),
+        enclave_configuration_pointer(0){}
+
 pe_load_config_directory::~pe_load_config_directory() {
 
 }
-void		pe_load_config_directory::set_size(uint32_t  size) {
+void        pe_load_config_directory::set_size(uint32_t  size) {
     this->size = size;
 }
-void		pe_load_config_directory::set_timestamp(uint32_t timestamp) {
-	this->timestamp = timestamp;
+void        pe_load_config_directory::set_timestamp(uint32_t timestamp) {
+    this->timestamp = timestamp;
 }
-void		pe_load_config_directory::set_major_version(uint16_t major_version) {
-	this->major_version = major_version;
+void        pe_load_config_directory::set_major_version(uint16_t major_version) {
+    this->major_version = major_version;
 }
-void		pe_load_config_directory::set_minor_version(uint16_t minor_version) {
-	this->minor_version = minor_version;
+void        pe_load_config_directory::set_minor_version(uint16_t minor_version) {
+    this->minor_version = minor_version;
 }
-void		pe_load_config_directory::set_global_flagsclear(uint32_t global_flagsclear) {
-	this->global_flagsclear = global_flagsclear;
+void        pe_load_config_directory::set_global_flagsclear(uint32_t global_flagsclear) {
+    this->global_flagsclear = global_flagsclear;
 }
-void		pe_load_config_directory::set_global_flagsset(uint32_t global_flagsset) {
-	this->global_flagsset = global_flagsset;
+void        pe_load_config_directory::set_global_flagsset(uint32_t global_flagsset) {
+    this->global_flagsset = global_flagsset;
 }
-void		pe_load_config_directory::set_criticalsection_default_timeout(uint32_t criticalsection_default_timeout) {
-	this->criticalsection_default_timeout = criticalsection_default_timeout;
+void        pe_load_config_directory::set_criticalsection_default_timeout(uint32_t criticalsection_default_timeout) {
+    this->criticalsection_default_timeout = criticalsection_default_timeout;
 }
-void		pe_load_config_directory::set_decommit_freeblock_threshold(uint64_t  decommit_freeblock_threshold) {
-	this->decommit_freeblock_threshold = decommit_freeblock_threshold;
+void        pe_load_config_directory::set_decommit_freeblock_threshold(uint64_t  decommit_freeblock_threshold) {
+    this->decommit_freeblock_threshold = decommit_freeblock_threshold;
 }
-void		pe_load_config_directory::set_decommit_totalfree_threshold(uint64_t  decommit_totalfree_threshold) {
-	this->decommit_totalfree_threshold = decommit_totalfree_threshold;
+void        pe_load_config_directory::set_decommit_totalfree_threshold(uint64_t  decommit_totalfree_threshold) {
+    this->decommit_totalfree_threshold = decommit_totalfree_threshold;
 }
-void		pe_load_config_directory::set_lock_prefix_table(uint32_t lock_prefix_table) {
-	this->lock_prefix_table = lock_prefix_table;
+void        pe_load_config_directory::set_lock_prefix_table(uint32_t lock_prefix_table) {
+    this->lock_prefix_table = lock_prefix_table;
 }
-void		pe_load_config_directory::set_maximum_allocation_size(uint64_t  maximum_allocation_size) {
-	this->maximum_allocation_size = maximum_allocation_size;
+void        pe_load_config_directory::set_maximum_allocation_size(uint64_t  maximum_allocation_size) {
+    this->maximum_allocation_size = maximum_allocation_size;
 }
-void		pe_load_config_directory::set_virtual_memory_threshold(uint64_t  virtual_memory_threshold) {
-	this->virtual_memory_threshold = virtual_memory_threshold;
+void        pe_load_config_directory::set_virtual_memory_threshold(uint64_t  virtual_memory_threshold) {
+    this->virtual_memory_threshold = virtual_memory_threshold;
 }
-void		pe_load_config_directory::set_process_heap_flags(uint32_t process_heap_flags) {
-	this->process_heap_flags = process_heap_flags;
+void        pe_load_config_directory::set_process_heap_flags(uint32_t process_heap_flags) {
+    this->process_heap_flags = process_heap_flags;
 }
-void		pe_load_config_directory::set_process_affinity_mask(uint64_t  process_affinity_mask) {
-	this->process_affinity_mask = process_affinity_mask;
+void        pe_load_config_directory::set_process_affinity_mask(uint64_t  process_affinity_mask) {
+    this->process_affinity_mask = process_affinity_mask;
 }
-void		pe_load_config_directory::set_csd_version(uint16_t csd_version) {
-	this->csd_version = csd_version;
+void        pe_load_config_directory::set_csd_version(uint16_t csd_version) {
+    this->csd_version = csd_version;
 }
 void        pe_load_config_directory::set_dependent_load_flags(uint16_t dependent_load_flags) {
     this->dependent_load_flags = dependent_load_flags;
 }
-void		pe_load_config_directory::set_editlist(uint32_t editlist) {
-	this->editlist = editlist;
+void        pe_load_config_directory::set_editlist(uint32_t editlist) {
+    this->editlist = editlist;
 }
-void		pe_load_config_directory::set_security_cookie(uint32_t security_cookie) {
-	this->security_cookie = security_cookie;
+void        pe_load_config_directory::set_security_cookie(uint32_t security_cookie) {
+    this->security_cookie = security_cookie;
 }
-void		pe_load_config_directory::set_se_handler_table(uint32_t se_handler_table) {
-	this->se_handler_table = se_handler_table;
+void        pe_load_config_directory::set_se_handler_table(uint32_t se_handler_table) {
+    this->se_handler_table = se_handler_table;
 }
-void		pe_load_config_directory::set_se_handler_count(uint32_t  se_handler_count) {
+void        pe_load_config_directory::set_se_handler_count(uint32_t  se_handler_count) {
     this->se_handler_count = se_handler_count;
 }
-void		pe_load_config_directory::set_guard_cf_check_function_pointer(uint32_t guard_cf_check_function_pointer) {
-	this->guard_cf_check_function_pointer = guard_cf_check_function_pointer;
+void        pe_load_config_directory::set_guard_cf_check_function_pointer(uint32_t guard_cf_check_function_pointer) {
+    this->guard_cf_check_function_pointer = guard_cf_check_function_pointer;
 }
 void        pe_load_config_directory::set_guard_cf_dispatch_function_pointer(uint32_t  guard_cf_dispatch_function_pointer) {
     this->guard_cf_dispatch_function_pointer = guard_cf_dispatch_function_pointer;
 }
-void		pe_load_config_directory::set_guard_cf_function_table(uint32_t guard_cf_function_table) {
-	this->guard_cf_function_table = guard_cf_function_table;
+void        pe_load_config_directory::set_guard_cf_function_table(uint32_t guard_cf_function_table) {
+    this->guard_cf_function_table = guard_cf_function_table;
 }
-void		pe_load_config_directory::set_guard_cf_function_count(uint32_t  guard_cf_function_count) {
+void        pe_load_config_directory::set_guard_cf_function_count(uint32_t  guard_cf_function_count) {
     this->guard_cf_function_count = guard_cf_function_count;
 }
-void		pe_load_config_directory::set_guard_flags(uint32_t guard_flags) {
-	this->guard_flags = guard_flags;
+void        pe_load_config_directory::set_guard_flags(uint32_t guard_flags) {
+    this->guard_flags = guard_flags;
 }
 void        pe_load_config_directory::set_code_integrity(image_load_config_code_integrity& code_integrity) {
     this->code_integrity = code_integrity;
@@ -164,80 +164,80 @@ void        pe_load_config_directory::set_enclave_configuration_pointer(uint32_t
     this->enclave_configuration_pointer = enclave_configuration_pointer;
 }
 
-uint32_t		pe_load_config_directory::get_size() const {
+uint32_t        pe_load_config_directory::get_size() const {
     return this->size;
 }
-uint32_t		pe_load_config_directory::get_timestamp() const {
-	return this->timestamp;
+uint32_t        pe_load_config_directory::get_timestamp() const {
+    return this->timestamp;
 }
-uint16_t		pe_load_config_directory::get_major_version() const {
-	return this->major_version;
+uint16_t        pe_load_config_directory::get_major_version() const {
+    return this->major_version;
 }
-uint16_t		pe_load_config_directory::get_minor_version() const {
-	return this->minor_version;
+uint16_t        pe_load_config_directory::get_minor_version() const {
+    return this->minor_version;
 }
-uint32_t		pe_load_config_directory::get_global_flagsclear() const {
-	return this->global_flagsclear;
+uint32_t        pe_load_config_directory::get_global_flagsclear() const {
+    return this->global_flagsclear;
 }
-uint32_t		pe_load_config_directory::get_global_flagsset() const {
-	return this->global_flagsset;
+uint32_t        pe_load_config_directory::get_global_flagsset() const {
+    return this->global_flagsset;
 }
-uint32_t		pe_load_config_directory::get_criticalsection_default_timeout() const {
-	return this->criticalsection_default_timeout;
+uint32_t        pe_load_config_directory::get_criticalsection_default_timeout() const {
+    return this->criticalsection_default_timeout;
 }
-uint64_t 	pe_load_config_directory::get_decommit_freeblock_threshold() const {
-	return this->decommit_freeblock_threshold;
+uint64_t     pe_load_config_directory::get_decommit_freeblock_threshold() const {
+    return this->decommit_freeblock_threshold;
 }
-uint64_t 	pe_load_config_directory::get_decommit_totalfree_threshold() const {
-	return this->decommit_totalfree_threshold;
+uint64_t     pe_load_config_directory::get_decommit_totalfree_threshold() const {
+    return this->decommit_totalfree_threshold;
 }
-uint32_t	pe_load_config_directory::get_lock_prefix_table() const {
-	return this->lock_prefix_table;
+uint32_t    pe_load_config_directory::get_lock_prefix_table() const {
+    return this->lock_prefix_table;
 }
-uint64_t 	pe_load_config_directory::get_maximum_allocation_size() const {
-	return this->maximum_allocation_size;
+uint64_t     pe_load_config_directory::get_maximum_allocation_size() const {
+    return this->maximum_allocation_size;
 }
-uint64_t 	pe_load_config_directory::get_virtual_memory_threshold() const {
-	return this->virtual_memory_threshold;
+uint64_t     pe_load_config_directory::get_virtual_memory_threshold() const {
+    return this->virtual_memory_threshold;
 }
-uint32_t		pe_load_config_directory::get_process_heap_flags() const {
-	return this->process_heap_flags;
+uint32_t        pe_load_config_directory::get_process_heap_flags() const {
+    return this->process_heap_flags;
 }
-uint64_t 	pe_load_config_directory::get_process_affinity_mask() const {
-	return this->process_affinity_mask;
+uint64_t     pe_load_config_directory::get_process_affinity_mask() const {
+    return this->process_affinity_mask;
 }
-uint16_t		pe_load_config_directory::get_csd_version() const {
-	return this->csd_version;
+uint16_t        pe_load_config_directory::get_csd_version() const {
+    return this->csd_version;
 }
 uint16_t        pe_load_config_directory::get_dependent_load_flags() const {
     return this->dependent_load_flags;
 }
-uint32_t	pe_load_config_directory::get_editlist() const {
-	return this->editlist;
+uint32_t    pe_load_config_directory::get_editlist() const {
+    return this->editlist;
 }
-uint32_t	pe_load_config_directory::get_security_cookie() const {
-	return this->security_cookie;
+uint32_t    pe_load_config_directory::get_security_cookie() const {
+    return this->security_cookie;
 }
-uint32_t	pe_load_config_directory::get_se_handler_table() const {
-	return this->se_handler_table;
+uint32_t    pe_load_config_directory::get_se_handler_table() const {
+    return this->se_handler_table;
 }
-uint32_t	pe_load_config_directory::get_se_handler_count() const {
-	return this->se_handler_count;
+uint32_t    pe_load_config_directory::get_se_handler_count() const {
+    return this->se_handler_count;
 }
-uint32_t	pe_load_config_directory::get_guard_cf_check_function_pointer() const {
-	return this->guard_cf_check_function_pointer;
+uint32_t    pe_load_config_directory::get_guard_cf_check_function_pointer() const {
+    return this->guard_cf_check_function_pointer;
 }
 uint32_t        pe_load_config_directory::get_guard_cf_dispatch_function_pointer() const {
     return this->guard_cf_dispatch_function_pointer;
 }
-uint32_t	pe_load_config_directory::get_guard_cf_function_table() const {
-	return this->guard_cf_function_table;
+uint32_t    pe_load_config_directory::get_guard_cf_function_table() const {
+    return this->guard_cf_function_table;
 }
-uint32_t	    pe_load_config_directory::get_guard_cf_function_count() const {
+uint32_t        pe_load_config_directory::get_guard_cf_function_count() const {
     return this->guard_cf_function_count;
 }
-uint32_t		pe_load_config_directory::get_guard_flags() const {
-	return this->guard_flags;
+uint32_t        pe_load_config_directory::get_guard_flags() const {
+    return this->guard_flags;
 }
 
 const std::vector<uint32_t >& pe_load_config_directory::get_se_handlers() const {
@@ -257,10 +257,10 @@ const std::vector<uint32_t >& pe_load_config_directory::get_guard_long_jump_targ
 }
 
 std::vector<uint32_t>& pe_load_config_directory::get_se_handlers() {
-	return this->se_handlers;
+    return this->se_handlers;
 }
 std::vector<uint32_t>& pe_load_config_directory::get_lock_prefixes() {
-	return this->lock_prefixes_rva;
+    return this->lock_prefixes_rva;
 }
 std::vector<uint32_t>& pe_load_config_directory::get_guard_cf_functions() {
     return this->guard_cf_functions_rva;

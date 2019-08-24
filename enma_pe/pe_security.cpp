@@ -117,6 +117,10 @@ pe_directory_code get_security_directory(const pe_image &image, pe_security_dire
                 return pe_directory_code::pe_directory_code_currupted;
             }
             
+            if (!win_cert.length) {
+                break;
+            }
+
             if (security_io.read(data, win_cert.length - (uint32_t)sizeof(win_certificate)) != enma_io_success) {
                 return pe_directory_code::pe_directory_code_currupted;
             }

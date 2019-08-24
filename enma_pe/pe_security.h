@@ -1,8 +1,8 @@
 #pragma once
 
 class pe_security_entry {
-    uint16_t   revision;
-    uint16_t   certificate_type;
+    uint16_t revision;
+    uint16_t certificate_type;
 
     std::vector<uint8_t> certificate_data;
 public:
@@ -13,14 +13,14 @@ public:
 
     pe_security_entry& operator=(const pe_security_entry& item);
 public:
-    void   set_revision(uint16_t revision);
-    void   set_certificate_type(uint16_t type);
+    void set_revision(uint16_t revision);
+    void set_certificate_type(uint16_t type);
 
     void set_certificate_data(const std::vector<uint8_t>& data);
 
 public:
-    uint16_t   get_revision() const;
-    uint16_t   get_certificate_type() const;
+    uint16_t get_revision() const;
+    uint16_t get_certificate_type() const;
     const std::vector<uint8_t>& get_certificate_data() const;
     std::vector<uint8_t>& get_certificate_data();
 };

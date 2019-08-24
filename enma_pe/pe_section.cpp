@@ -4,40 +4,40 @@
 
 pe_section::pe_section() {
     section_name.clear();
-	virtual_size		= 0;
-	virtual_address		= 0;
-	pointer_to_raw		= 0;
-	characteristics		= 0;
+    virtual_size        = 0;
+    virtual_address        = 0;
+    pointer_to_raw        = 0;
+    characteristics        = 0;
 
-	section_data.clear();
+    section_data.clear();
 }
 pe_section::pe_section(const pe_section& section) {
     this->operator=(section);
 }
 
 pe_section::pe_section(const image_section_header& header) {
-	this->section_name.reserve(8);
-	this->section_name.resize(strlen((char*)header.name));
-	memcpy((void*)this->section_name.data(), header.name,8);
+    this->section_name.reserve(8);
+    this->section_name.resize(strlen((char*)header.name));
+    memcpy((void*)this->section_name.data(), header.name,8);
 
-	this->virtual_size		= header.virtual_size;
-	this->virtual_address	= header.virtual_address;
-	this->pointer_to_raw	= header.pointer_to_raw_data;
-	this->characteristics	= header.characteristics;
+    this->virtual_size        = header.virtual_size;
+    this->virtual_address    = header.virtual_address;
+    this->pointer_to_raw    = header.pointer_to_raw_data;
+    this->characteristics    = header.characteristics;
 
-	this->section_data.clear();
+    this->section_data.clear();
 }
 pe_section::pe_section(const image_section_header& header, const std::vector<uint8_t>& data):
     section_data(data){
 
-	this->section_name.reserve(8);
-	this->section_name.resize(strlen((char*)header.name));
-	memcpy((void*)this->section_name.data(), header.name, 8);
+    this->section_name.reserve(8);
+    this->section_name.resize(strlen((char*)header.name));
+    memcpy((void*)this->section_name.data(), header.name, 8);
 
-	this->virtual_size		= header.virtual_size;
-	this->virtual_address	= header.virtual_address;
-	this->pointer_to_raw	= header.pointer_to_raw_data;
-	this->characteristics	= header.characteristics;
+    this->virtual_size        = header.virtual_size;
+    this->virtual_address    = header.virtual_address;
+    this->pointer_to_raw    = header.pointer_to_raw_data;
+    this->characteristics    = header.characteristics;
 
 }
 pe_section::~pe_section() {
@@ -45,38 +45,38 @@ pe_section::~pe_section() {
 }
 
 pe_section& pe_section::operator=(const pe_section& section) {
-	this->section_name      = section.section_name;
-	this->virtual_size		= section.virtual_size;
-	this->virtual_address	= section.virtual_address;
-	this->pointer_to_raw	= section.pointer_to_raw;
-	this->characteristics	= section.characteristics;
-	this->section_data		= section.section_data;
-	return *this;
+    this->section_name      = section.section_name;
+    this->virtual_size        = section.virtual_size;
+    this->virtual_address    = section.virtual_address;
+    this->pointer_to_raw    = section.pointer_to_raw;
+    this->characteristics    = section.characteristics;
+    this->section_data        = section.section_data;
+    return *this;
 }
 
 pe_section& pe_section::set_section_name(const std::string& section_name) {
-	this->section_name = section_name;
-	return *this;
+    this->section_name = section_name;
+    return *this;
 }
 pe_section& pe_section::set_virtual_size(uint32_t virtual_size) {
-	this->virtual_size = virtual_size;
-	return *this;
+    this->virtual_size = virtual_size;
+    return *this;
 }
 pe_section& pe_section::set_virtual_address(uint32_t virtual_address) {
-	this->virtual_address = virtual_address;
-	return *this;
+    this->virtual_address = virtual_address;
+    return *this;
 }
 pe_section& pe_section::set_size_of_raw_data(uint32_t size_of_raw_data) {
-	section_data.resize(size_of_raw_data);
-	return *this;
+    section_data.resize(size_of_raw_data);
+    return *this;
 }
 pe_section& pe_section::set_pointer_to_raw(uint32_t pointer_to_raw) {
-	this->pointer_to_raw = pointer_to_raw;
-	return *this;
+    this->pointer_to_raw = pointer_to_raw;
+    return *this;
 }
 pe_section& pe_section::set_characteristics(uint32_t characteristics) {
-	this->characteristics = characteristics;
-	return *this;
+    this->characteristics = characteristics;
+    return *this;
 }
 
 pe_section& pe_section::set_shared(bool flag) {
@@ -89,73 +89,73 @@ pe_section& pe_section::set_shared(bool flag) {
     return *this;
 }
 pe_section& pe_section::set_readable(bool flag) {
-	if (flag) {
-		this->characteristics |= IMAGE_SCN_MEM_READ;
-	}
-	else {
-		this->characteristics &= ~IMAGE_SCN_MEM_READ;
-	}
-	return *this;
+    if (flag) {
+        this->characteristics |= IMAGE_SCN_MEM_READ;
+    }
+    else {
+        this->characteristics &= ~IMAGE_SCN_MEM_READ;
+    }
+    return *this;
 }
 pe_section& pe_section::set_writeable(bool flag) {
-	if (flag) {
-		this->characteristics |= IMAGE_SCN_MEM_WRITE;
-	}
-	else {
-		this->characteristics &= ~IMAGE_SCN_MEM_WRITE;
-	}
-	return *this;
+    if (flag) {
+        this->characteristics |= IMAGE_SCN_MEM_WRITE;
+    }
+    else {
+        this->characteristics &= ~IMAGE_SCN_MEM_WRITE;
+    }
+    return *this;
 }
 pe_section& pe_section::set_executable(bool flag) {
-	if (flag) {
-		this->characteristics |= IMAGE_SCN_MEM_EXECUTE;
-	}
-	else {
-		this->characteristics &= ~IMAGE_SCN_MEM_EXECUTE;
-	}
-	return *this;
+    if (flag) {
+        this->characteristics |= IMAGE_SCN_MEM_EXECUTE;
+    }
+    else {
+        this->characteristics &= ~IMAGE_SCN_MEM_EXECUTE;
+    }
+    return *this;
 }
 
 
 void pe_section::add_data(const uint8_t * data, size_t data_size) {
-	section_data.resize(section_data.size() + data_size);
-	memcpy(section_data.data() + section_data.size() - data_size, data, data_size);
+    section_data.resize(section_data.size() + data_size);
+    memcpy(section_data.data() + section_data.size() - data_size, data, data_size);
 }
 
 std::string pe_section::get_section_name() const {
-	return section_name;
+    return section_name;
 }
 uint32_t pe_section::get_virtual_size() const {
-	return virtual_size;
+    return virtual_size;
 }
 uint32_t pe_section::get_virtual_address() const {
-	return virtual_address;
+    return virtual_address;
 }
 uint32_t pe_section::get_size_of_raw_data() const {
-	return uint32_t(section_data.size());
+    return uint32_t(section_data.size());
 }
 uint32_t pe_section::get_pointer_to_raw() const {
-	return pointer_to_raw;
+    return pointer_to_raw;
 }
 uint32_t pe_section::get_characteristics() const {
-	return characteristics;
+    return characteristics;
 }
 
 bool pe_section::is_shared() const {
     return (characteristics&IMAGE_SCN_MEM_SHARED) != 0;
 }
 bool pe_section::is_readable() const {
-	return (characteristics&IMAGE_SCN_MEM_READ) != 0;
+    return (characteristics&IMAGE_SCN_MEM_READ) != 0;
 }
 bool pe_section::is_writeable() const {
-	return (characteristics&IMAGE_SCN_MEM_WRITE) != 0;
+    return (characteristics&IMAGE_SCN_MEM_WRITE) != 0;
 }
 bool pe_section::is_executable() const {
-	return (characteristics&IMAGE_SCN_MEM_EXECUTE) != 0;
+    return (characteristics&IMAGE_SCN_MEM_EXECUTE) != 0;
 }
 
 std::vector<uint8_t>& pe_section::get_section_data() {
-	return section_data;
+    return section_data;
 }
 
 const std::vector<uint8_t>& pe_section::get_section_data() const {

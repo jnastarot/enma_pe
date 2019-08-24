@@ -4,16 +4,18 @@
 class pe_delay_library {
     std::string library_name;
 
-    uint32_t  attributes;   
-    uint32_t  dll_name_rva;
-    uint32_t  module_handle_rva;
-    uint32_t  iat_rva;
-    uint32_t  names_table_rva;
-    uint32_t  iat_bound_table_rva;
-    uint32_t  unload_info_table_rva;
-    uint32_t  timestamp;
+    bool is_bound;
 
-    std::vector<pe_import_function> entries;
+    uint32_t attributes;   
+    uint32_t dll_name_rva;
+    uint32_t module_handle_rva;
+    uint32_t iat_rva;
+    uint32_t names_table_rva;
+    uint32_t iat_bound_table_rva;
+    uint32_t unload_info_table_rva;
+    uint32_t timestamp;
+
+    std::vector<pe_import_function> functions;
 public:
     pe_delay_library();
     pe_delay_library(const pe_delay_library& lib);
@@ -21,19 +23,22 @@ public:
 
     pe_delay_library& operator=(const pe_delay_library& lib);
 public:
-    void set_library_name(const std::string& library_name);
+    pe_delay_library& set_library_name(const std::string& library_name);
 
-    void set_attributes(uint32_t  attributes);
-    void set_dll_name_rva(uint32_t  dll_name_rva);
-    void set_module_handle_rva(uint32_t  rva);
-    void set_iat_rva(uint32_t  rva);
-    void set_names_table_rva(uint32_t  rva);
-    void set_bound_table_iat_rva(uint32_t  rva);
-    void set_unload_info_table_rva(uint32_t  rva);
-    void set_timestamp(uint32_t  timestamp);
+    pe_delay_library& set_attributes(uint32_t  attributes);
+    pe_delay_library& set_dll_name_rva(uint32_t  dll_name_rva);
+    pe_delay_library& set_module_handle_rva(uint32_t  rva);
+    pe_delay_library& set_iat_rva(uint32_t  rva);
+    pe_delay_library& set_names_table_rva(uint32_t  rva);
+    pe_delay_library& set_bound_table_iat_rva(uint32_t  rva);
+    pe_delay_library& set_unload_info_table_rva(uint32_t  rva);
+    pe_delay_library& set_timestamp(uint32_t  timestamp);
+    pe_delay_library& set_bound_library(bool is_bound);
 
-    void add_entry(const pe_import_function& entry);
+    pe_delay_library& add_function(const pe_import_function& function);
 public:
+    size_t size() const;
+
     std::string get_library_name() const;
 
     uint32_t get_attributes() const;
@@ -44,9 +49,9 @@ public:
     uint32_t get_bound_table_iat_rva() const;
     uint32_t get_unload_info_table_rva() const;
     uint32_t get_timestamp() const;
-    const std::vector<pe_import_function>& get_entries() const;
 
-    std::vector<pe_import_function>& get_entries();
+    const std::vector<pe_import_function>& get_functions() const;
+    std::vector<pe_import_function>& get_functions();
 
     pe_import_library convert_to_pe_import_library() const;
 };
@@ -64,6 +69,7 @@ public:
     void clear();
 public:
     size_t size() const;
+
     pe_import_directory convert_to_import_table() const;
     const std::vector<pe_delay_library>& get_libraries() const;
 
