@@ -1,9 +1,5 @@
 <h1 align="center">ENMA PE</h1>
----
-
-| License |  Windows x32 | Windows x64 | Linux |
-| ------- |  ----------- | ----------- | ----- |
-| [![License](https://img.shields.io/badge/license-BSD3-blue.svg)](https://github.com/jnastarot/enma_pe/blob/master/LICENSE)  [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjnastarot%2Fenma_pe?ref=badge_shield) | [![Build status](https://ci.appveyor.com/api/projects/status/ogdbdwhomqi1yoh1?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe) | [![Build status](https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy?svg=true)](https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir) | [![Build Status](https://api.travis-ci.org/jnastarot/enma_pe.svg?branch=master)](https://travis-ci.org/jnastarot/enma_pe) |
+[![Build status](https://ci.appveyor.com/api/projects/status/b6bq9w9b1b7rjaoy)](https://ci.appveyor.com/project/jnastarot/enma-pe-u6wir)[![Build Status](https://travis-ci.org/jnastarot/enma_pe.svg?branch=master)](https://travis-ci.org/jnastarot/enma_pe)[![License](https://img.shields.io/badge/license-BSD3-blue.svg)](https://github.com/jnastarot/enma_pe/blob/master/LICENSE) 
 
 
 
@@ -12,17 +8,15 @@
 --------------------------------------------------------------------------------
 Name....: enma pe
 Author..: JNA
-Date....: 2018
 e.mail..: jnastarot@yandex.ru
 --------------------------------------------------------------------------------
 ```
----
-<h2 align="center">Supported PE\PE+ formats</h2>
 
+### Supported directories
 | directory name | reading | building | getting placement |
 | :-------------- | :-------: | :-------: | :-------: |
 | `export` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| `import default ` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| `import` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `import bound ` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | `import delay` | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
 | `resources` | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -36,21 +30,20 @@ e.mail..: jnastarot@yandex.ru
 
 ---
 
-<h3 align="center">Additional features</h3>
-
+### Additional features
 | feature name | description |
-| :------: | :-----------: |
-| `rtti helper` | parsing runtime type information(msvc only) |
-| `exceptions helper` | parsing and building of extended variables for x64 exceptions |
-| `string extractor` | extracting ansi and unicode strings |
-| `rich data parser` | geting and building rich data|
-| `entropy sections calc` | calculating entropy of section |
-| `checksum calc` | calculating checksum of `pe image` |
+| :------ | :----------- |
+| `build_pe_image` | build pe_image to packed binary version |
+| `load_virtual_image` | load image in pe_image format from loaded in memory |
+| `get_runtime_type_information` | parsing runtime type information(MSVC only) |
+| `get_extended_exception_info` | parsing of extended variables for x64 exceptions |
+| `build_extended_exceptions_info` | building of extended variables for x64 exceptions |
+| `get_strings_from_image` | extracting ascii and wide strings |
+| `get_image_rich_header` | getting and building rich data |
+| `get_section_entropy` | calculating entropy of section |
+| `calculate_checksum` | calculating checksum of `pe image` |
 
-
----
-
- <h3 align="center">References</h3>
+### References
 
 [https://github.com/dishather/richprint/](https://github.com/dishather/richprint/)<br>
 [https://github.com/radare/radare2](https://github.com/radare/radare2)<br>
