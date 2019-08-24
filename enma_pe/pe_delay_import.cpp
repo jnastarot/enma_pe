@@ -2,7 +2,7 @@
 #include "pe_delay_import.h"
 
 pe_delay_library::pe_delay_library() 
- :attributes(0), dll_name_rva(0), module_handle_rva(0),
+ :attributes(0), is_bound(0), dll_name_rva(0), module_handle_rva(0),
     iat_rva(0), names_table_rva(0), iat_bound_table_rva(0), 
     unload_info_table_rva(0), timestamp(0) {}
 
@@ -130,7 +130,7 @@ pe_import_library pe_delay_library::convert_to_pe_import_library() const {
     lib.set_library_name(this->library_name);
     lib.set_timestamp(this->timestamp  ? -1 : 0);
     lib.set_rva_iat(this->iat_rva);
-    lib.set_rva_oft(this->unload_info_table_rva);
+    lib.set_rva_oft(0);
     lib.set_bound_library(this->is_bound);
 
     for (auto& function : functions) {
@@ -267,8 +267,8 @@ pe_directory_code _get_delay_import_directory(const pe_image &image, pe_delay_im
 
                         func.set_iat_rva(iat_func_address)
                             .set_iat_item(bound_item)
-                            .set_oft_rva(-1)
-                            .set_oft_item(-1);
+                            .set_oft_rva(0)
+                            .set_oft_item(0);
 
                         if (name_item&image_format::ordinal_flag) {
 

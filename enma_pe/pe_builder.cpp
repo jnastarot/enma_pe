@@ -444,7 +444,7 @@ bool build_pe_image(pe_image& image, uint32_t build_flags, std::vector<uint8_t>&
 
     if (image.get_overlay_data().size() && build_flags & PE_IMAGE_BUILD_OVERLAY) {
         size_t overlay_offset = out_image.size();
-        out_image.resize(out_image.size() + image.get_overlay_data().size());
+        out_image.resize(overlay_offset + image.get_overlay_data().size());
 
         memcpy(&out_image[overlay_offset], image.get_overlay_data().data(), image.get_overlay_data().size());
     }

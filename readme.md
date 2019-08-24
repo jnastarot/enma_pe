@@ -37,7 +37,7 @@ e.mail..: jnastarot@yandex.ru
 | feature name | description |
 | :------ | :----------- |
 | `build_pe_image` | build pe_image to packed binary version |
-| `load_virtual_image` | load image in pe_image format from loaded in memory |
+| `load_virtual_pe_image` | load image in pe_image format from loaded in memory |
 | `get_runtime_type_information` | parsing runtime type information(MSVC only) |
 | `get_extended_exception_info` | parsing of extended variables for x64 exceptions |
 | `build_extended_exceptions_info` | building of extended variables for x64 exceptions |

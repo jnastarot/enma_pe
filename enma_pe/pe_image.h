@@ -198,7 +198,7 @@ public://util
     void clear_image();
 };
 
-pe_image_status load_virtual_image(_In_ const uint8_t* hmodule, _Out_ pe_image& image, _In_ bool check_signs = true,
+pe_image_status load_virtual_pe_image(_In_ const uint8_t* hmodule, _Out_ pe_image& image, _In_ bool check_signs = true,
     _In_ bool (*readmem)(void* dst, const uint8_t* src, size_t size) = ([](void* dst, const uint8_t* src, size_t size) -> bool {
         
         try {

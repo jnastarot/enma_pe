@@ -943,7 +943,7 @@ void  pe_image::get_dos_header(image_dos_header &header) const {
 }
 
 
-pe_image_status load_virtual_image(const uint8_t* hmodule, pe_image& image, bool check_signs,
+pe_image_status load_virtual_pe_image(const uint8_t* hmodule, pe_image& image, bool check_signs,
     bool(*readmem)(void* dst, const uint8_t* src, size_t size)) {
 
     image.clear_image();
@@ -964,16 +964,23 @@ pe_image_status load_virtual_image(const uint8_t* hmodule, pe_image& image, bool
     if ( !check_signs || (dos_header.e_magic == IMAGE_DOS_SIGNATURE || //check MZ sign
         dos_header.e_magic == 'MZ')) {  //check ZM sign
 
-        if ( !check_signs  || (*(uint32_t*)(&hmodule[dos_header.e_lfanew]) == IMAGE_NT_SIGNATURE)) { //check PE00 sign
+        image_nt_headers32 nt32_header;
+        readmem(&nt32_header, &hmodule[dos_header.e_lfanew], sizeof(image_nt_headers32));
+
+        if ( !check_signs  || nt32_header.signature == IMAGE_NT_SIGNATURE) { //check PE00 sign
+
             uint32_t section_offset = dos_header.e_lfanew + INT32_SIZE + (uint32_t)sizeof(image_file_header);
             uint32_t number_of_sections = 0;
 
-            if (init_nt_header<pe_image_32>(image, (void*)& hmodule[dos_header.e_lfanew], section_offset, number_of_sections)) {
-                image.set_base_of_data(pimage_nt_headers32(&hmodule[dos_header.e_lfanew])->optional_header.base_of_data);
+            if (init_nt_header<pe_image_32>(image, (void*)& nt32_header, section_offset, number_of_sections)) {
+                image.set_base_of_data(nt32_header.optional_header.base_of_data);
             }
             else {
 
-                if (!init_nt_header<pe_image_64>(image, (void*)& hmodule[dos_header.e_lfanew], section_offset, number_of_sections)) {
+                image_nt_headers64 nt64_header;
+                readmem(&nt64_header, &hmodule[dos_header.e_lfanew], sizeof(image_nt_headers64));
+
+                if (!init_nt_header<pe_image_64>(image, (void*)&nt64_header, section_offset, number_of_sections)) {
 
                     image.set_image_status(pe_image_status_bad_format);
 
@@ -991,15 +998,17 @@ pe_image_status load_virtual_image(const uint8_t* hmodule, pe_image& image, bool
 
             {
                 for (size_t i = 0; i < number_of_sections; i++) {
-                    image_section_header* section_image = (image_section_header*)(&hmodule[section_offset]);
+
+                    image_section_header section_image;
+                    readmem(&section_image, &hmodule[section_offset], sizeof(image_section_header));
 
                     std::vector<uint8_t> section_data;
 
-                    section_data.resize(ALIGN_UP(section_image->virtual_size, image.get_section_align()));
+                    section_data.resize(ALIGN_UP(section_image.virtual_size, image.get_section_align()));
 
-                    readmem(section_data.data(), &hmodule[section_image->virtual_address], section_data.size());
+                    readmem(section_data.data(), &hmodule[section_image.virtual_address], section_data.size());
 
-                    image.add_section(pe_section(*section_image, section_data));
+                    image.add_section(pe_section(section_image, section_data));
                     section_offset += (uint16_t)sizeof(image_section_header);
                 }
             }

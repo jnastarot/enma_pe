@@ -1289,6 +1289,7 @@ bool init_data___c_specific_handler_data(pe_image_full& image_full, uint32_t han
             for (uint32_t scope_idx = 0; scope_idx < scope_entries_count; scope_idx++) {
 
                 if (image_io.read(&scope_entry, sizeof(scope_entry)) != enma_io_success) {
+                    delete data;
                     return false;
                 }
 
@@ -1296,6 +1297,8 @@ bool init_data___c_specific_handler_data(pe_image_full& image_full, uint32_t han
             }
 
             unwind_entry.get_custom_parameter() = *data;
+
+            delete data;
         }
     }
 
@@ -1327,6 +1330,7 @@ bool init_data___delphi_specific_handler_data(pe_image_full& image_full, uint32_
             for (uint32_t scope_idx = 0; scope_idx < scope_entries_count; scope_idx++) {
 
                 if (image_io.read(&scope_entry, sizeof(scope_entry)) != enma_io_success) {
+                    delete data;
                     return false;
                 }
 
@@ -1334,6 +1338,8 @@ bool init_data___delphi_specific_handler_data(pe_image_full& image_full, uint32_
             }
 
             unwind_entry.get_custom_parameter() = *data;
+
+            delete data;
         }
     }
 
@@ -1363,6 +1369,8 @@ bool init_data__llvm_specific_handler_data(pe_image_full& image_full, uint32_t h
             data->data_rva = image_full.get_image().va_to_rva(llvm_ptr);
 
             unwind_entry.get_custom_parameter() = *data;
+
+            delete data;
         }
     }
 
@@ -1392,6 +1400,8 @@ bool init_data__gs_handler_check_data(pe_image_full& image_full, uint32_t handle
             data->gs_data = gs_data;
 
             unwind_entry.get_custom_parameter() = *data;
+
+            delete data;
         }
     }
 
@@ -1423,6 +1433,7 @@ bool init_data__gs_handler_check_seh_data(pe_image_full& image_full, uint32_t ha
             for (uint32_t scope_idx = 0; scope_idx < scope_entries_count; scope_idx++) {
 
                 if (image_io.read(&scope_entry, sizeof(scope_entry)) != enma_io_success) {
+                    delete data;
                     return false;
                 }
 
@@ -1430,6 +1441,7 @@ bool init_data__gs_handler_check_seh_data(pe_image_full& image_full, uint32_t ha
             }
 
             if (image_io.read(&data->gs_data, sizeof(data->gs_data)) != enma_io_success) {
+                delete data;
                 return false;
             }
 
@@ -1585,6 +1597,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_full& image_full, uint32_t hand
 
                     if (image_io.set_image_offset(func_desc.p_try_block_map + sizeof(cxx_try_block_map_entry) * try_block_idx)
                         .read(&try_map_entry, sizeof(try_map_entry)) != enma_io_success) {
+                        delete data;
                         return false;
                     }
                     cxx_try_block_map_info try_block_info = try_map_entry;
@@ -1596,6 +1609,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_full& image_full, uint32_t hand
                         for (uint32_t cache_handler_idx = 0; cache_handler_idx < try_map_entry.catches; cache_handler_idx++) {
 
                             if (image_io.read(&cache_handler, sizeof(cache_handler)) != enma_io_success) {
+                                delete data;
                                 return false;
                             }
 
@@ -1615,6 +1629,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_full& image_full, uint32_t hand
                     cxx_ip_to_state_map_entry state_map_entry;
 
                     if (image_io.read(&state_map_entry, sizeof(state_map_entry)) != enma_io_success) {
+                        delete data;
                         return false;
                     }
 
