@@ -24,6 +24,7 @@ pe_delay_library& pe_delay_library::operator=(const pe_delay_library& lib) {
     this->unload_info_table_rva = lib.unload_info_table_rva;
     this->timestamp         = lib.timestamp;
     this->functions         = lib.functions;
+    this->is_bound          = lib.is_bound;
 
     return *this;
 }
@@ -116,6 +117,9 @@ uint32_t pe_delay_library::get_unload_info_table_rva() const {
 }
 uint32_t pe_delay_library::get_timestamp() const {
     return this->timestamp;
+}
+bool pe_delay_library::is_bound_library() const {
+    return this->is_bound;
 }
 const std::vector<pe_import_function>& pe_delay_library::get_functions() const {
     return this->functions;

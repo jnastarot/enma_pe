@@ -50,6 +50,8 @@ public:
     uint32_t get_unload_info_table_rva() const;
     uint32_t get_timestamp() const;
 
+    bool is_bound_library() const;
+
     const std::vector<pe_import_function>& get_functions() const;
     std::vector<pe_import_function>& get_functions();
 
