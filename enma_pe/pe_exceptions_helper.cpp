@@ -1572,7 +1572,7 @@ bool init_data__cxx_frame_handler3_data(pe_image_full& image_full, uint32_t hand
                 return false;
             }
 
-            data = new cxx_frame_handler3_parameters_data({ func_desc });
+            data = new cxx_frame_handler3_parameters_data(cxx_exception_func_info(func_desc));
 
             if (func_desc.max_state) {
 

@@ -8,7 +8,10 @@ pe_dos_stub::~pe_dos_stub() {}
 void pe_dos_stub::set_stub(const std::vector<uint8_t>& stub) {
     this->dos_stub = stub;
 }
-std::vector<uint8_t> pe_dos_stub::get_stub() const {
+std::vector<uint8_t>& pe_dos_stub::get_stub() {
+    return this->dos_stub;
+}
+const std::vector<uint8_t>& pe_dos_stub::get_stub() const {
     return this->dos_stub;
 }
 

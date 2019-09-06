@@ -135,7 +135,8 @@ public:
     void set_stub(const std::vector<uint8_t>& stub);
 
 public:
-    std::vector<uint8_t> get_stub() const;
+    std::vector<uint8_t>& get_stub();
+    const std::vector<uint8_t>& get_stub() const;
 };
 
 class pe_rich_item {
