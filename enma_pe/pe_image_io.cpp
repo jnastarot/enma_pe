@@ -101,6 +101,12 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
     void * buffer, size_t size,
     size_t& readed_size, size_t& down_oversize, size_t& up_oversize
 ) {
+
+    if (addressing_type == enma_io_addressing_type::enma_io_address_va) {
+
+        return enma_io_code::enma_io_type_not_supported;
+    }
+
     size_t real_offset = 0;
 
     bool b_view = view_image(data_offset, size,
@@ -225,6 +231,11 @@ enma_io_code pe_image_io::internal_write(size_t data_offset,
     const void * buffer, size_t size,
     size_t& wrote_size, size_t& down_oversize, size_t& up_oversize
 ) {
+
+    if (addressing_type == enma_io_addressing_type::enma_io_address_va) {
+
+        return enma_io_code::enma_io_type_not_supported;
+    }
 
     size_t real_offset = 0;
 
