@@ -133,7 +133,7 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
             b_view = view_data(
                 data_offset, size,
                 real_offset, header_readed_size, header_down_oversize, header_up_oversize,
-                0, available_headers_size);
+                0, view_headers_size);
 
             if (b_view) {
                 
