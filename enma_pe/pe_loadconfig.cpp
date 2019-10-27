@@ -586,7 +586,7 @@ template<typename image_format>
 bool _build_load_config_directory_only(pe_image &image, pe_section& section, pe_load_config_directory& load_config, pe_relocations_directory& relocs) {
 
     if (load_config.get_size()) {
-        pe_section_io load_config_io(section, image);
+        pe_section_io load_config_io(section, image, enma_io_mode_allow_expand);
         load_config_io.align_up(0x10).seek_to_end(); //important !!!! if it directory not aligned file is incorrect for windows loader
 
         typename image_format::image_load_config_directory load_config_desc;
