@@ -74,6 +74,7 @@ public:// data/sections helpers
     pe_section& add_section(const image_section_header& header, const std::vector<uint8_t>& data);
 
     std::vector<pe_section*>& get_sections();
+    const std::vector<pe_section*>& get_sections() const;
 
     size_t get_sections_number() const;
     pe_section* get_section_by_rva(uint32_t rva) const;/*0 - failed, else - success*/

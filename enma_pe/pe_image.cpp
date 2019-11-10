@@ -441,6 +441,10 @@ std::vector<pe_section*>& pe_image::get_sections() {
     return this->sections;
 }
 
+const std::vector<pe_section*>& pe_image::get_sections() const {
+    return this->sections;
+}
+
 size_t pe_image::get_sections_number() const {
     return this->sections.size();
 }
