@@ -545,7 +545,7 @@ pe_directory_code get_placement_export_directory(const pe_image &image, pe_place
             }
 
 
-            placement[export_desc.name] = pe_placement_entry(ALIGN_UP(lib_name.length() + 1, 0x2), id_pe_export_name, lib_name);
+            placement[export_desc.name] = pe_placement_entry(ALIGN_UP(lib_name.length() + 1, 0x2), id_pe_placement::id_pe_export_name, lib_name);
         }
 
 
@@ -586,7 +586,7 @@ pe_directory_code get_placement_export_directory(const pe_image &image, pe_place
                     }
 
                     placement[function_name_rva] =
-                        pe_placement_entry(ALIGN_UP(func_name.length() + 1, 0x2), id_pe_export_function_name, func_name);
+                        pe_placement_entry(ALIGN_UP(func_name.length() + 1, 0x2), id_pe_placement::id_pe_export_function_name, func_name);
 
                     if (func_rva >= virtual_address + sizeof(image_export_directory) &&
                         func_rva < virtual_address + virtual_size) {
@@ -599,7 +599,7 @@ pe_directory_code get_placement_export_directory(const pe_image &image, pe_place
 
 
                         placement[func_rva] =
-                            pe_placement_entry(ALIGN_UP(forwarded_func_name.length() + 1, 0x2), id_pe_export_function_forwarded_name, forwarded_func_name);
+                            pe_placement_entry(ALIGN_UP(forwarded_func_name.length() + 1, 0x2), id_pe_placement::id_pe_export_function_forwarded_name, forwarded_func_name);
                     }
 
                     break;
@@ -609,20 +609,20 @@ pe_directory_code get_placement_export_directory(const pe_image &image, pe_place
 
         if (export_desc.address_of_functions) {
             placement[export_desc.address_of_functions] =
-                pe_placement_entry(export_desc.number_of_functions * sizeof(uint32_t), id_pe_export_functions_table, "");
+                pe_placement_entry(export_desc.number_of_functions * sizeof(uint32_t), id_pe_placement::id_pe_export_functions_table, "");
         }
 
         if (export_desc.address_of_names) {
             placement[export_desc.address_of_names] =
-                pe_placement_entry(export_desc.number_of_names * sizeof(uint32_t), id_pe_export_names_table, "");
+                pe_placement_entry(export_desc.number_of_names * sizeof(uint32_t), id_pe_placement::id_pe_export_names_table, "");
         }
 
         if (export_desc.address_of_name_ordinals) {
             placement[export_desc.address_of_name_ordinals] = 
-                pe_placement_entry(export_desc.number_of_functions * sizeof(uint16_t), id_pe_export_ordinals_table, "");
+                pe_placement_entry(export_desc.number_of_functions * sizeof(uint16_t), id_pe_placement::id_pe_export_ordinals_table, "");
         }
 
-        placement[virtual_address] = pe_placement_entry(ALIGN_UP(sizeof(image_export_directory), 0x10), id_pe_export_descriptor, "");
+        placement[virtual_address] = pe_placement_entry(ALIGN_UP(sizeof(image_export_directory), 0x10), id_pe_placement::id_pe_export_descriptor, "");
         return pe_directory_code::pe_directory_code_success;
     }
 

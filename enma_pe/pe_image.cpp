@@ -81,7 +81,7 @@ pe_image::pe_image(bool _pe32, bool init_dos_thunk) {
     heap_reserve_size  = 0x00100000;
     heap_commit_size   = 0x1000;
 
-    image_status = pe_image_status_ok;
+    image_status = pe_image_status::pe_image_status_ok;
 }
 
 pe_image::pe_image(const uint8_t* raw_image, uint32_t size) {
@@ -92,8 +92,8 @@ pe_image::pe_image(const uint8_t* raw_image, uint32_t size) {
 pe_image::pe_image(const std::string& file_path) {
     clear_image();
 
-    FILE* hfile = fopen(file_path.c_str(), "rb");
-
+    FILE* hfile = 0;
+    fopen_s(&hfile, file_path.c_str(), "rb");
 
     if (hfile != nullptr) {
         fseek(hfile, 0, SEEK_END);
@@ -101,6 +101,38 @@ pe_image::pe_image(const std::string& file_path) {
         fseek(hfile, 0, SEEK_SET);
 
         uint8_t * file_buffer = new uint8_t[file_size];
+
+
+        if (fread(file_buffer, file_size, 1, hfile)) {
+
+            init_from_file(file_buffer, file_size);
+        }
+        else {
+            image_status = pe_image_status_bad_format;
+        }
+
+        delete[] file_buffer;
+
+        fclose(hfile);
+    }
+    else {
+        image_status = pe_image_status_unknown;
+    }
+}
+
+pe_image::pe_image(const std::wstring& file_path) {
+    clear_image();
+
+    FILE* hfile = 0;
+    _wfopen_s(&hfile, file_path.c_str(), L"rb");
+
+
+    if (hfile != nullptr) {
+        fseek(hfile, 0, SEEK_END);
+        size_t file_size = ftell(hfile);
+        fseek(hfile, 0, SEEK_SET);
+
+        uint8_t* file_buffer = new uint8_t[file_size];
 
 
         if (fread(file_buffer, file_size, 1, hfile)) {
@@ -1008,7 +1040,7 @@ pe_image_status load_virtual_pe_image(const uint8_t* hmodule, pe_image& image, b
 
                     std::vector<uint8_t> section_data;
 
-                    section_data.resize(ALIGN_UP(section_image.virtual_size, image.get_section_align()));
+                    section_data.resize(ALIGN_UP((size_t)section_image.virtual_size, (size_t)image.get_section_align()));
 
                     readmem(section_data.data(), &hmodule[section_image.virtual_address], section_data.size());
 

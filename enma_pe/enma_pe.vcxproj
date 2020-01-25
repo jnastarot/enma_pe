@@ -104,10 +104,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -151,7 +155,8 @@
     <ClInclude Include="pe_bound_import.h" />
     <ClInclude Include="pe_builder.h" />
     <ClInclude Include="pe_exceptions_helper.h" />
-    <ClInclude Include="pe_headers_parser.h" />
+    <ClInclude Include="pe_file_version_info.h" />
+    <ClInclude Include="pe_headers_helper.h" />
     <ClInclude Include="pe_helper.h" />
     <ClInclude Include="pe_debug.h" />
     <ClInclude Include="pe_delay_import.h" />
@@ -165,11 +170,12 @@
     <ClInclude Include="pe_loadconfig.h" />
     <ClInclude Include="pe_relocations.h" />
     <ClInclude Include="pe_resources.h" />
+    <ClInclude Include="pe_resources_helper.h" />
     <ClInclude Include="pe_rtti_helper.h" />
     <ClInclude Include="pe_section.h" />
     <ClInclude Include="pe_section_io.h" />
     <ClInclude Include="pe_security.h" />
-    <ClInclude Include="pe_string_extractor.h" />
+    <ClInclude Include="pe_string_helper.h" />
     <ClInclude Include="pe_tls.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
@@ -177,7 +183,8 @@
     <ClCompile Include="pe_bound_import.cpp" />
     <ClCompile Include="pe_builder.cpp" />
     <ClCompile Include="pe_exceptions_helper.cpp" />
-    <ClCompile Include="pe_headers_parser.cpp" />
+    <ClCompile Include="pe_file_version_info.cpp" />
+    <ClCompile Include="pe_headers_helper.cpp" />
     <ClCompile Include="pe_helper.cpp" />
     <ClCompile Include="pe_debug.cpp" />
     <ClCompile Include="pe_delay_import.cpp" />
@@ -191,11 +198,12 @@
     <ClCompile Include="pe_loadconfig.cpp" />
     <ClCompile Include="pe_relocations.cpp" />
     <ClCompile Include="pe_resources.cpp" />
+    <ClCompile Include="pe_resources_helper.cpp" />
     <ClCompile Include="pe_rtti_helper.cpp" />
     <ClCompile Include="pe_section.cpp" />
     <ClCompile Include="pe_section_io.cpp" />
     <ClCompile Include="pe_security.cpp" />
-    <ClCompile Include="pe_string_extractor.cpp" />
+    <ClCompile Include="pe_string_helper.cpp" />
     <ClCompile Include="pe_tls.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

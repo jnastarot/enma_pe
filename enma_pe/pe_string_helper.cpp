@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "pe_string_extractor.h"
+#include "pe_string_helper.h"
 
 namespace pe_string_extractor {
 
@@ -41,8 +41,8 @@ namespace pe_string_extractor {
             pe_erase_placement(current_image, placement, 0, true);
         }
 
-        string_table.ansi_base.clear();
-        string_table.wide_base.clear();
+        string_table.ansi_base = ansi_string_base_table();
+        string_table.wide_base = wide_string_base_table();
 
 
         //find ansi strings
@@ -52,7 +52,7 @@ namespace pe_string_extractor {
             ansi_string_io.seek_to_start();
 
             char image_byte;
-            uint32_t pre_string_rva;
+            uint32_t pre_string_rva = 0;
             std::string pre_string;
             while (ansi_string_io.read(&image_byte, sizeof(image_byte)) == enma_io_success) {
 
@@ -86,7 +86,7 @@ namespace pe_string_extractor {
             wide_string_io.seek_to_start();
 
             wchar_t image_byte;
-            uint32_t pre_string_rva;
+            uint32_t pre_string_rva = 0;
             std::wstring pre_string;
 
             while (wide_string_io.read(&image_byte, sizeof(image_byte)) == enma_io_success) {

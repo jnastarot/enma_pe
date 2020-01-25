@@ -14,7 +14,7 @@ pe_section_io::pe_section_io(pe_section & _section,
     uint32_t virtual_aligment) :
     section(&_section), section_offset(0),
     raw_aligment(raw_aligment), virtual_aligment(virtual_aligment),
-    last_code(enma_io_success), mode(mode), addressing_type(type){}
+    last_code(enma_io_code::enma_io_success), mode(mode), addressing_type(type){}
 
 pe_section_io::pe_section_io(
     pe_section & _section,
@@ -23,7 +23,7 @@ pe_section_io::pe_section_io(
     enma_io_addressing_type type
 ):  section(&_section), section_offset(0),
     raw_aligment(image.get_file_align()), virtual_aligment(image.get_section_align()),
-    last_code(enma_io_success), mode(mode), addressing_type(type){}
+    last_code(enma_io_code::enma_io_success), mode(mode), addressing_type(type){}
 
 
 pe_section_io::pe_section_io(const pe_section_io& io_section) {

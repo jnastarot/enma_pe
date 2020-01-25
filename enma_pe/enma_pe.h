@@ -15,10 +15,13 @@ class pe_load_config_directory;
 class pe_delay_import_directory;
 class pe_bound_import_directory;
 
+#pragma warning(push)
+#pragma warning(disable: 28251) //disable warning about not included in SAL anotations
+
 #include "enma_pe_internal.h"
 #include "enma_pe_properties.h"
 
-#include "pe_headers_parser.h"
+#include "pe_headers_helper.h"
 #include "pe_image.h"
 #include "pe_image_io.h"
 
@@ -39,3 +42,5 @@ class pe_bound_import_directory;
 #include "pe_builder.h"
 
 #include "pe_helper.h"
+
+#pragma warning(pop)

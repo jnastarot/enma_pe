@@ -4,7 +4,7 @@
 
 class pe_exception_entry;
 
-enum unwind_parameter_type {
+enum class unwind_parameter_type {
     unwind_parameter_raw,
     unwind_parameter_rva,
     unwind_parameter_va

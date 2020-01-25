@@ -308,7 +308,7 @@ pe_directory_code get_placement_relocation_directory(const pe_image &image, pe_p
             }
 
             placement[reloc_io.get_image_offset() - sizeof(image_base_relocation)]
-                = pe_placement_entry(sizeof(image_base_relocation), id_pe_relocations_descriptor, "");
+                = pe_placement_entry(sizeof(image_base_relocation), id_pe_placement::id_pe_relocations_descriptor, "");
 
 
             size_t _offset_real = 0;
@@ -324,7 +324,7 @@ pe_directory_code get_placement_relocation_directory(const pe_image &image, pe_p
 
             available_size = min(available_size, virtual_size);
 
-            placement[reloc_io.get_image_offset()] = pe_placement_entry(available_size, id_pe_relocations_block, "");
+            placement[reloc_io.get_image_offset()] = pe_placement_entry(available_size, id_pe_placement::id_pe_relocations_block, "");
         }
 
         return pe_directory_code::pe_directory_code_success;

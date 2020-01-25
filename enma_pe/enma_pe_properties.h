@@ -50,7 +50,7 @@ typedef pe_image_types <
     IMAGE_ORDINAL_FLAG64> pe_image_64;
 
 
-enum id_pe_placement {
+enum class id_pe_placement {
     id_pe_none,
 
     id_pe_export_descriptor,
@@ -111,7 +111,7 @@ struct pe_placement_entry {
     std::string name;
 
     pe_placement_entry()
-        :size(0), id(id_pe_none), name() {};
+        :size(0), id(id_pe_placement::id_pe_none), name() {};
     pe_placement_entry(size_t size, id_pe_placement id, std::string name)
         :size(size), id(id), name(name) {};
 };

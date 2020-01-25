@@ -248,11 +248,11 @@ pe_directory_code get_placement_debug_directory(const pe_image &image, pe_placem
                 }
 
 
-                placement[debug_desc.address_of_raw_data] = pe_placement_entry(available_size, id_pe_debug_item_data, "");
+                placement[debug_desc.address_of_raw_data] = pe_placement_entry(available_size, id_pe_placement::id_pe_debug_item_data, "");
             }
         }
 
-        placement[virtual_address] = pe_placement_entry(ALIGN_UP(total_desc_size, 0x10), id_pe_debug_descriptor, "");
+        placement[virtual_address] = pe_placement_entry(ALIGN_UP(total_desc_size, 0x10), id_pe_placement::id_pe_debug_descriptor, "");
 
         return pe_directory_code::pe_directory_code_success;
     }

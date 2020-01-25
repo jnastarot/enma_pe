@@ -66,12 +66,6 @@
     <Filter Include="Заголовочные файлы\pe_io\pe_image_io">
       <UniqueIdentifier>{c0009d24-c11d-4370-a4c8-5aba0e44c509}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_headers_parser">
-      <UniqueIdentifier>{dfa26933-359a-49ea-9883-097619fca73b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_string_extractor">
-      <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Заголовочные файлы\pe_helpers\pe_exceptions_helper">
       <UniqueIdentifier>{660c532b-c578-45cc-b02e-6096a76311de}</UniqueIdentifier>
     </Filter>
@@ -80,6 +74,18 @@
     </Filter>
     <Filter Include="Заголовочные файлы\pe_builder">
       <UniqueIdentifier>{4381cbcc-1518-4dac-96ae-5ca8fa64841f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_string_helper">
+      <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_headers_helper">
+      <UniqueIdentifier>{dfa26933-359a-49ea-9883-097619fca73b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_resources_helper">
+      <UniqueIdentifier>{cce27666-cdb9-4bc5-9c37-2609a08082de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_helpers\pe_resources_helper\pe_file_version_info">
+      <UniqueIdentifier>{c172ddb2-9857-4b52-908a-0a2cf83ecd0c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -146,12 +152,6 @@
     <ClInclude Include="enma_pe_properties.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="pe_headers_parser.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_headers_parser</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_string_extractor.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_string_extractor</Filter>
-    </ClInclude>
     <ClInclude Include="pe_exceptions_helper.h">
       <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
     </ClInclude>
@@ -163,6 +163,18 @@
     </ClInclude>
     <ClInclude Include="pe_image_full.h">
       <Filter>Заголовочные файлы\pe_image</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_string_helper.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_string_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_headers_helper.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_headers_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_resources_helper.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_file_version_info.h">
+      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper\pe_file_version_info</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -220,12 +232,6 @@
     <ClCompile Include="pe_section_io.cpp">
       <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
     </ClCompile>
-    <ClCompile Include="pe_headers_parser.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_headers_parser</Filter>
-    </ClCompile>
-    <ClCompile Include="pe_string_extractor.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_string_extractor</Filter>
-    </ClCompile>
     <ClCompile Include="pe_exceptions_helper.cpp">
       <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
     </ClCompile>
@@ -237,6 +243,18 @@
     </ClCompile>
     <ClCompile Include="pe_image_full.cpp">
       <Filter>Заголовочные файлы\pe_image</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_string_helper.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_string_helper</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_headers_helper.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_headers_helper</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_resources_helper.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_file_version_info.cpp">
+      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper\pe_file_version_info</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

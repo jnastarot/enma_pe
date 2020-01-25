@@ -319,7 +319,7 @@ pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe
                 }
 
                 placement[virtual_address + bound_imp_description.offset_module_name] = 
-                    pe_placement_entry(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, lib_name);
+                    pe_placement_entry(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_placement::id_pe_bound_import_library_name, lib_name);
 
                 for (size_t ref_idx = 0; ref_idx < bound_imp_description.number_of_module_forwarder_refs; ref_idx++) {
                     image_bound_forwarded_ref ref_description;
@@ -338,7 +338,7 @@ pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe
 
 
                     placement[virtual_address + bound_imp_description.offset_module_name] =
-                        pe_placement_entry(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_bound_import_library_name, ref_name);
+                        pe_placement_entry(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_placement::id_pe_bound_import_library_name, ref_name);
                 }
 
                 if (bnd_import_desc_io.read(&bound_imp_description, sizeof(bound_imp_description)) != enma_io_success) {
@@ -348,7 +348,7 @@ pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe
 
 
             placement[virtual_address] =
-                pe_placement_entry((size_t)ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address), 0x10), id_pe_bound_import_descriptor, "");
+                pe_placement_entry((size_t)ALIGN_UP((bnd_import_desc_io.get_image_offset() - virtual_address), 0x10), id_pe_placement::id_pe_bound_import_descriptor, "");
         }
 
         return pe_directory_code::pe_directory_code_success;

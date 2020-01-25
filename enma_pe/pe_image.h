@@ -58,7 +58,7 @@ public:
     pe_image(bool _pe32, bool init_dos_thunk = true);
     pe_image(const uint8_t* raw_image,uint32_t size);
     pe_image(const std::string& file_path);
-
+    pe_image(const std::wstring& file_path);
     ~pe_image();
 
     pe_image& operator=(const pe_image& image);

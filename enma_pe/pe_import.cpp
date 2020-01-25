@@ -687,7 +687,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
                 }
 
                 placement[import_desc.name] =
-                    pe_placement_entry(ALIGN_UP(library_name.length() + 1, 0x2), id_pe_import_library_name, library_name);
+                    pe_placement_entry(ALIGN_UP(library_name.length() + 1, 0x2), id_pe_placement::id_pe_import_library_name, library_name);
 
                 bool is_bound_library = (import_desc.time_date_stamp == UINT32_MAX &&
                     bound_imports.has_library(library_name));
@@ -730,7 +730,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
 
 
                             placement[(uint32_t)original_iat_item] =
-                                pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
+                                pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_placement::id_pe_import_function_name, func_name);
                         }
                     }
                     else {
@@ -755,7 +755,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
                             if (import_func_name_io.read_string(func_name) == enma_io_success) {
 
                                 placement[(uint32_t)(iat_item + sizeof(uint16_t))] =
-                                    pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_import_function_name, func_name);
+                                    pe_placement_entry(ALIGN_UP(func_name.length() + 1 + sizeof(uint16_t), 0x2), id_pe_placement::id_pe_import_function_name, func_name);
                             }
                         }
                     }
@@ -766,10 +766,10 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
 
 
                 if (original_first_thunk_present) {
-                    placement[import_desc.original_first_thunk] = pe_placement_entry(iat_table_size, id_pe_import_original_first_think, "");
+                    placement[import_desc.original_first_thunk] = pe_placement_entry(iat_table_size, id_pe_placement::id_pe_import_original_first_think, "");
                 }
 
-                placement[import_desc.first_thunk] = pe_placement_entry(iat_table_size, id_pe_import_first_think, "");
+                placement[import_desc.first_thunk] = pe_placement_entry(iat_table_size, id_pe_placement::id_pe_import_first_think, "");
 
                 import_desc_table_size += (uint32_t)sizeof(image_import_descriptor);
 
@@ -782,7 +782,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
         }
 
         placement[virtual_address] =
-            pe_placement_entry(import_desc_table_size, id_pe_import_descriptor, "");
+            pe_placement_entry(import_desc_table_size, id_pe_placement::id_pe_import_descriptor, "");
 
         return pe_directory_code::pe_directory_code_success;
     }

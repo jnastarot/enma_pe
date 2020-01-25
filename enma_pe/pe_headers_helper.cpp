@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "pe_headers_parser.h"
+#include "pe_headers_helper.h"
 
 
 pe_dos_stub::pe_dos_stub() {}

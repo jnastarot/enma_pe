@@ -368,7 +368,7 @@ pe_directory_code _get_placement_delay_import_directory(const pe_image &image, p
 
 
                 placement[import_desc.dll_name_rva] =
-                    pe_placement_entry(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_delay_import_library_name, lib_name);
+                    pe_placement_entry(ALIGN_UP((lib_name.length() + 1), 0x2), id_pe_placement::id_pe_delay_import_library_name, lib_name);
 
                 pe_image_io delay_import_names_io(image);
                 delay_import_names_io.set_image_offset(import_desc.import_name_table_rva);
@@ -401,7 +401,7 @@ pe_directory_code _get_placement_delay_import_directory(const pe_image &image, p
                             }
 
                             placement[(uint32_t)name_item] =
-                                pe_placement_entry(sizeof(uint16_t) + ALIGN_UP((func_name.length() + 1), 0x2), id_pe_delay_import_function_name, func_name);
+                                pe_placement_entry(sizeof(uint16_t) + ALIGN_UP((func_name.length() + 1), 0x2), id_pe_placement::id_pe_delay_import_function_name, func_name);
                         }
                     }
                     else {
@@ -411,19 +411,19 @@ pe_directory_code _get_placement_delay_import_directory(const pe_image &image, p
                 }
 
                 placement[delay_import_desc_io.get_image_offset() - (uint32_t)sizeof(image_delayload_descriptor)] =
-                    pe_placement_entry(sizeof(image_delayload_descriptor), id_pe_delay_import_descriptor, "");
+                    pe_placement_entry(sizeof(image_delayload_descriptor), id_pe_placement::id_pe_delay_import_descriptor, "");
 
 
                 uint32_t table_size = (delay_import_names_io.get_image_offset() - iat_func_address) + (uint32_t)sizeof(typename image_format::ptr_size);
 
                 if (import_desc.import_name_table_rva) {
-                    placement[import_desc.import_name_table_rva] = pe_placement_entry(table_size, id_pe_delay_import_name_table, "");
+                    placement[import_desc.import_name_table_rva] = pe_placement_entry(table_size, id_pe_placement::id_pe_delay_import_name_table, "");
                 }
                 if (import_desc.bound_import_address_table_rva) {
-                    placement[import_desc.import_name_table_rva] = pe_placement_entry(table_size, id_pe_delay_import_bound_table, "");
+                    placement[import_desc.import_name_table_rva] = pe_placement_entry(table_size, id_pe_placement::id_pe_delay_import_bound_table, "");
                 }
                 if (import_desc.unload_information_table_rva) {
-                    placement[import_desc.import_name_table_rva] = pe_placement_entry(table_size, id_pe_delay_import_unload_table, "");
+                    placement[import_desc.import_name_table_rva] = pe_placement_entry(table_size, id_pe_placement::id_pe_delay_import_unload_table, "");
                 }
 
                 
@@ -435,7 +435,7 @@ pe_directory_code _get_placement_delay_import_directory(const pe_image &image, p
         }
 
         placement[delay_import_desc_io.get_image_offset() - (uint32_t)sizeof(image_delayload_descriptor)] =
-            pe_placement_entry(sizeof(image_delayload_descriptor), id_pe_delay_import_descriptor, "");
+            pe_placement_entry(sizeof(image_delayload_descriptor), id_pe_placement::id_pe_delay_import_descriptor, "");
 
         return pe_directory_code::pe_directory_code_success;
     }

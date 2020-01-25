@@ -324,20 +324,28 @@ typedef struct _image_export_directory {
 // Import Format
 //
 
-#define IMAGE_ORDINAL_FLAG64 0x8000000000000000
-#define IMAGE_ORDINAL_FLAG32 0x80000000
+
+#ifndef IMAGE_ORDINAL_FLAG64
+    #define IMAGE_ORDINAL_FLAG64 0x8000000000000000
+#endif
+
+#ifndef IMAGE_ORDINAL_FLAG32
+    #define IMAGE_ORDINAL_FLAG32 0x80000000
+#endif
+
 #ifndef IMAGE_ORDINAL64
-#define IMAGE_ORDINAL64(Ordinal) ((Ordinal) & 0xffff)
+    #define IMAGE_ORDINAL64(Ordinal) (Ordinal & 0xffff)
 #endif
 #ifndef IMAGE_ORDINAL32
-#define IMAGE_ORDINAL32(Ordinal) ((Ordinal) & 0xffff)
+    #define IMAGE_ORDINAL32(Ordinal) (Ordinal & 0xffff)
 #endif
 #ifndef IMAGE_SNAP_BY_ORDINAL64
-#define IMAGE_SNAP_BY_ORDINAL64(Ordinal) (((Ordinal) & IMAGE_ORDINAL_FLAG64) != 0)
+    #define IMAGE_SNAP_BY_ORDINAL64(Ordinal) ((Ordinal & IMAGE_ORDINAL_FLAG64) != 0)
 #endif
 #ifndef IMAGE_SNAP_BY_ORDINAL32
-#define IMAGE_SNAP_BY_ORDINAL32(Ordinal) (((Ordinal) & IMAGE_ORDINAL_FLAG32) != 0)
+    #define IMAGE_SNAP_BY_ORDINAL32(Ordinal) ((Ordinal & IMAGE_ORDINAL_FLAG32) != 0)
 #endif
+
 
 typedef struct _image_import_by_name {
     uint16_t    hint;
@@ -496,9 +504,17 @@ typedef union _unwind_code {
     uint16_t frame_offset;
 } unwind_code, *punwind_code;
 
-#define UNW_FLAG_EHANDLER  0x01
-#define UNW_FLAG_UHANDLER  0x02
-#define UNW_FLAG_CHAININFO 0x04
+#ifndef UNW_FLAG_EHANDLER
+    #define UNW_FLAG_EHANDLER  0x01
+#endif
+
+#ifndef UNW_FLAG_UHANDLER
+    #define UNW_FLAG_UHANDLER  0x02
+#endif
+
+#ifndef UNW_FLAG_CHAININFO
+    #define UNW_FLAG_CHAININFO 0x04
+#endif
 
 
 typedef struct _unwind_info {
@@ -1047,6 +1063,151 @@ typedef struct image_cor20_header
     image_data_directory   managed_native_header;
 
 } image_cor20_header, *pimage_cor20_header;
+
+
+
+namespace pe_resource_irnl {
+
+#define VERSION_INFO_MAGIC L"VS_VERSION_INFO"
+#define FIXED_FILE_INFO_MAGIC 0xfeef04bd
+#define VAR_FILE_INFO_MAGIC  L"VarFileInfo"
+#define VAR_MAGIC  L"Translation"
+#define STRING_FILE_INFO_MAGIC  L"StringFileInfo"
+
+
+#define VS_FFI_STRUCVERSION     0x00010000L
+#define VS_FFI_FILEFLAGSMASK    0x0000003FL
+
+    /* ----- VS_VERSION.dwFileFlags ----- */
+#define VS_FF_DEBUG             0x00000001L
+#define VS_FF_PRERELEASE        0x00000002L
+#define VS_FF_PATCHED           0x00000004L
+#define VS_FF_PRIVATEBUILD      0x00000008L
+#define VS_FF_INFOINFERRED      0x00000010L
+#define VS_FF_SPECIALBUILD      0x00000020L
+
+/* ----- VS_VERSION.dwFileOS ----- */
+#define VOS_UNKNOWN             0x00000000L
+#define VOS_DOS                 0x00010000L
+#define VOS_OS216               0x00020000L
+#define VOS_OS232               0x00030000L
+#define VOS_NT                  0x00040000L
+#define VOS_WINCE               0x00050000L
+
+#define VOS__BASE               0x00000000L
+#define VOS__WINDOWS16          0x00000001L
+#define VOS__PM16               0x00000002L
+#define VOS__PM32               0x00000003L
+#define VOS__WINDOWS32          0x00000004L
+
+#define VOS_DOS_WINDOWS16       0x00010001L
+#define VOS_DOS_WINDOWS32       0x00010004L
+#define VOS_OS216_PM16          0x00020002L
+#define VOS_OS232_PM32          0x00030003L
+#define VOS_NT_WINDOWS32        0x00040004L
+
+/* ----- VS_VERSION.dwFileType ----- */
+#define VFT_UNKNOWN             0x00000000L
+#define VFT_APP                 0x00000001L
+#define VFT_DLL                 0x00000002L
+#define VFT_DRV                 0x00000003L
+#define VFT_FONT                0x00000004L
+#define VFT_VXD                 0x00000005L
+#define VFT_STATIC_LIB          0x00000007L
+
+/* ----- VS_VERSION.dwFileSubtype for VFT_WINDOWS_DRV ----- */
+#define VFT2_UNKNOWN            0x00000000L
+#define VFT2_DRV_PRINTER        0x00000001L
+#define VFT2_DRV_KEYBOARD       0x00000002L
+#define VFT2_DRV_LANGUAGE       0x00000003L
+#define VFT2_DRV_DISPLAY        0x00000004L
+#define VFT2_DRV_MOUSE          0x00000005L
+#define VFT2_DRV_NETWORK        0x00000006L
+#define VFT2_DRV_SYSTEM         0x00000007L
+#define VFT2_DRV_INSTALLABLE    0x00000008L
+#define VFT2_DRV_SOUND          0x00000009L
+#define VFT2_DRV_COMM           0x0000000AL
+#define VFT2_DRV_INPUTMETHOD    0x0000000BL
+#define VFT2_DRV_VERSIONED_PRINTER    0x0000000CL
+
+/* ----- VS_VERSION.dwFileSubtype for VFT_WINDOWS_FONT ----- */
+#define VFT2_FONT_RASTER        0x00000001L
+#define VFT2_FONT_VECTOR        0x00000002L
+#define VFT2_FONT_TRUETYPE      0x00000003L
+
+
+    typedef struct _vs_fixed_file_info {
+        uint32_t   signature;            /* e.g. 0xfeef04bd */
+        uint32_t   struct_version;       /* e.g. 0x00000042 = "0.42" */
+        uint32_t   file_version_ms;      /* e.g. 0x00030075 = "3.75" */
+        uint32_t   file_version_ls;      /* e.g. 0x00000031 = "0.31" */
+        uint32_t   product_version_ms;   /* e.g. 0x00030010 = "3.10" */
+        uint32_t   product_version_ls;   /* e.g. 0x00000031 = "0.31" */
+        uint32_t   file_flags_mask;      /* = 0x3F for version "0.42" */
+        uint32_t   file_flags;           /* e.g. VFF_DEBUG | VFF_PRERELEASE */
+        uint32_t   file_os;              /* e.g. VOS_DOS_WINDOWS16 */
+        uint32_t   file_type;            /* e.g. VFT_DRIVER */
+        uint32_t   file_sub_type;        /* e.g. VFT2_DRV_KEYBOARD */
+        uint32_t   file_date_ms;         /* e.g. 0 */
+        uint32_t   file_date_ls;         /* e.g. 0 */
+    } vs_fixed_file_info;
+
+    typedef struct _vs_version_info {
+        uint16_t   length;
+        uint16_t   value_length;
+        uint16_t   type;
+        wchar_t    sz_key;
+        uint16_t   padding1;
+        vs_fixed_file_info   value;
+        uint16_t   padding2;
+        uint16_t   children;
+    } vs_version_info;
+
+    typedef struct {
+        uint16_t  length;
+        uint16_t  value_length;
+        uint16_t  type;
+        wchar_t   sz_key;
+        uint16_t  padding;
+        uint16_t  value;
+    } string;
+
+    typedef struct {
+        uint16_t   length;
+        uint16_t   value_length;
+        uint16_t   type;
+        wchar_t    sz_key;
+        uint16_t   padding;
+        string     children;
+    } string_table;
+
+    typedef struct {
+        uint16_t   length;
+        uint16_t   value_length;
+        uint16_t   type;
+        wchar_t    sz_key;
+        uint16_t   padding;
+        string_table children;
+    } string_file_info;
+
+    typedef struct {
+        uint16_t   length;
+        uint16_t   value_length;
+        uint16_t   type;
+        wchar_t    sz_key;
+        uint16_t   padding;
+        uint32_t   value;
+    } var;
+
+    typedef struct {
+        uint16_t   length;
+        uint16_t   value_length;
+        uint16_t   type;
+        wchar_t    sz_key;
+        uint16_t   padding;
+        var   children;
+    } var_file_info;
+};
 
 #pragma pack(pop)
 

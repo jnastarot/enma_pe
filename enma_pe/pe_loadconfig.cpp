@@ -734,7 +734,7 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
             return pe_directory_code::pe_directory_code_currupted;
         }
 
-        placement[virtual_address] = pe_placement_entry(desc_size, id_pe_loadconfig_descriptor, "");
+        placement[virtual_address] = pe_placement_entry(desc_size, id_pe_placement::id_pe_loadconfig_descriptor, "");
 
         if (image.is_x32_image()) {
             if (offsetof(typename image_format::image_load_config_directory, se_handler_table) < desc_size &&
@@ -742,7 +742,7 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
                 load_config_desc.se_handler_table) {
 
                 placement[(uint32_t)image.va_to_rva(load_config_desc.se_handler_table)] = 
-                    pe_placement_entry((uint32_t)(load_config_desc.se_handler_count * sizeof(uint32_t)), id_pe_loadconfig_se_table, "");
+                    pe_placement_entry((uint32_t)(load_config_desc.se_handler_count * sizeof(uint32_t)), id_pe_placement::id_pe_loadconfig_se_table, "");
             }
 
             if (offsetof(typename image_format::image_load_config_directory, lock_prefix_table) < desc_size &&
@@ -762,7 +762,7 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
                 }
 
                 placement[image.va_to_rva(load_config_desc.lock_prefix_table)] = 
-                    pe_placement_entry(((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_loadconfig_lock_table, "");
+                    pe_placement_entry(((lock_prefix_count + 1) * sizeof(uint32_t)), id_pe_placement::id_pe_loadconfig_lock_table, "");
             }
         }
 
@@ -771,7 +771,7 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
             load_config_desc.guard_cf_function_table) {
 
             placement[image.va_to_rva(load_config_desc.guard_cf_function_table)] =
-                pe_placement_entry((uint32_t)(load_config_desc.guard_cf_function_count * sizeof(uint32_t)), id_pe_loadconfig_cf_table, "");
+                pe_placement_entry((uint32_t)(load_config_desc.guard_cf_function_count * sizeof(uint32_t)), id_pe_placement::id_pe_loadconfig_cf_table, "");
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_address_taken_iat_entry_table) < desc_size &&
@@ -779,7 +779,7 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
             load_config_desc.guard_address_taken_iat_entry_table) {
 
             placement[image.va_to_rva(load_config_desc.guard_address_taken_iat_entry_table)] =
-                pe_placement_entry((uint32_t)(load_config_desc.guard_address_taken_iat_entry_count * sizeof(uint32_t)), id_pe_loadconfig_iat_table, "");
+                pe_placement_entry((uint32_t)(load_config_desc.guard_address_taken_iat_entry_count * sizeof(uint32_t)), id_pe_placement::id_pe_loadconfig_iat_table, "");
         }
 
         if (offsetof(typename image_format::image_load_config_directory, guard_long_jump_target_table) < desc_size &&
@@ -787,7 +787,7 @@ pe_directory_code _get_placement_load_config_directory(const pe_image &image, pe
             load_config_desc.guard_long_jump_target_table) {
 
             placement[image.va_to_rva(load_config_desc.guard_long_jump_target_table)] =
-                pe_placement_entry((uint32_t)(load_config_desc.guard_long_jump_target_count * sizeof(uint32_t)), id_pe_loadconfig_long_jump_table, "");
+                pe_placement_entry((uint32_t)(load_config_desc.guard_long_jump_target_count * sizeof(uint32_t)), id_pe_placement::id_pe_loadconfig_long_jump_table, "");
         }
 
         

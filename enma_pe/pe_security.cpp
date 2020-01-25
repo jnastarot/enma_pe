@@ -164,7 +164,7 @@ pe_directory_code get_placement_security_directory(const pe_image &image, pe_pla
 
             placement[
                 image.raw_to_rva(security_io.get_image_offset() - (uint32_t)sizeof(win_certificate)) //TODO: FIXIT because it might not be in virtual memory
-            ] = pe_placement_entry(sizeof(win_certificate), id_pe_security_descriptor, "");
+            ] = pe_placement_entry(sizeof(win_certificate), id_pe_placement::id_pe_security_descriptor, "");
 
 
             if (security_io.read(data, win_cert.length - (uint32_t)sizeof(win_certificate)) != enma_io_success) {
@@ -173,7 +173,7 @@ pe_directory_code get_placement_security_directory(const pe_image &image, pe_pla
 
             placement[
                 image.raw_to_rva(security_io.get_image_offset() - (win_cert.length - (uint32_t)sizeof(win_certificate))) //TODO: FIXIT because it might not be in virtual memory
-            ] = pe_placement_entry(sizeof(win_certificate), id_pe_security_certificate, "");
+            ] = pe_placement_entry(sizeof(win_certificate), id_pe_placement::id_pe_security_certificate, "");
 
 
             total_size += win_cert.length;

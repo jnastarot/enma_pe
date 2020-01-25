@@ -2,7 +2,7 @@
 #include "pe_helper.h"
 
 
-double get_data_entropy(const std::vector<uint8_t> &data) {
+double get_data_entropy(_In_ const std::vector<uint8_t> &data) {
 
     uint32_t bytes_count[256];
     memset(bytes_count, 0, sizeof(bytes_count));
@@ -23,11 +23,11 @@ double get_data_entropy(const std::vector<uint8_t> &data) {
     return total_entropy;
 }
 
-double   get_section_entropy(const pe_section& section) {
+double   get_section_entropy(_In_ const pe_section& section) {
     return get_data_entropy(section.get_section_data());
 }
 
-uint32_t calculate_checksum(const std::vector<uint8_t> &pe_image) {
+uint32_t calculate_checksum(_In_ const std::vector<uint8_t> &pe_image) {
     image_dos_header* p_dos_header = (image_dos_header*)pe_image.data();
     if (p_dos_header->e_magic != IMAGE_DOS_SIGNATURE) { return 0; }
 
@@ -104,10 +104,10 @@ void pe_erase_placement(pe_image &image, pe_placement& placement, pe_relocations
 
             for (size_t zone_idx = 0; zone_idx < placement_items.size(); zone_idx++) {
                 
-                if (_section->get_virtual_address() >= placement_items[zone_idx].rva && //if it cover full section
-                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
+                if ((uint64_t)_section->get_virtual_address() >= placement_items[zone_idx].rva && //if it cover full section
+                    ((uint64_t)_section->get_virtual_address() + (uint64_t)_section->get_virtual_size()) <= ((uint64_t)placement_items[zone_idx].rva + (uint64_t)placement_items[zone_idx].size)) {
 
-                    if ((_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
+                    if (((uint64_t)_section->get_virtual_address() + (uint64_t)_section->get_virtual_size()) <= ((uint64_t)placement_items[zone_idx].rva + (uint64_t)placement_items[zone_idx].size)) {
                         placement_items.erase(placement_items.begin() + zone_idx);
                     }
                     else {
@@ -119,8 +119,8 @@ void pe_erase_placement(pe_image &image, pe_placement& placement, pe_relocations
                 }
 
                 if (_section->get_virtual_address() < placement_items[zone_idx].rva && //if it cover up part of the section
-                    (_section->get_virtual_address() + _section->get_virtual_size()) <= (placement_items[zone_idx].rva + placement_items[zone_idx].size)) {
-                    size_t minus_size = (_section->get_virtual_address() + _section->get_virtual_size()) - placement_items[zone_idx].rva;
+                    ((uint64_t)_section->get_virtual_address() + (uint64_t)_section->get_virtual_size()) <= ((uint64_t)placement_items[zone_idx].rva + (uint64_t)placement_items[zone_idx].size)) {
+                    size_t minus_size = ((uint64_t)_section->get_virtual_address() + (uint64_t)_section->get_virtual_size()) - (uint64_t)placement_items[zone_idx].rva;
                     
                     if (minus_size < placement_items[zone_idx].size) {
                         placement_items[zone_idx].size -= minus_size;
@@ -144,6 +144,6 @@ go_return:;
     placement.clear();
 
     for (auto& place_item : placement_items) {
-        placement[place_item.rva] = pe_placement_entry(place_item.size, id_pe_none, "");
+        placement[place_item.rva] = pe_placement_entry(place_item.size, id_pe_placement::id_pe_none, "");
     }
 }

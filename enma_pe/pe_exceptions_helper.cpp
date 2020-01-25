@@ -701,7 +701,7 @@ ex_exceptions_info_result get_extended_exception_info(pe_image_full& image_full)
 
     struct exc_handler_desc {
         std::vector<uint32_t> unwindinfo_handler_parameters_rvas;
-        exception_handler_type type;
+        exception_handler_type type = unknown_handler;
     };
 
     std::map<uint32_t, exc_handler_desc> availables_handlers;
@@ -797,7 +797,7 @@ ex_exceptions_info_result get_extended_exception_info_placement(const pe_image_f
 
     struct exc_handler_desc {
         std::vector<uint32_t> unwindinfo_handler_parameters_rvas;
-        exception_handler_type type;
+        exception_handler_type type = unknown_handler;
     };
 
     std::map<uint32_t, exc_handler_desc> availables_handlers;
@@ -920,7 +920,7 @@ bool get_placement___c_specific_handler_data(const pe_image_full& image_full, pe
                 }
             }
 
-            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
         }
     }
 
@@ -956,7 +956,7 @@ bool get_placement___delphi_specific_handler_data(const pe_image_full& image_ful
                 }
             }
 
-            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
         }
     }
 
@@ -982,7 +982,7 @@ bool get_placement__llvm_specific_handler_data(const pe_image_full& image_full, 
                 return false;
             }
 
-            placement[rva_start] = pe_placement_entry(sizeof(llvm_ptr), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(sizeof(llvm_ptr), id_pe_placement::id_pe_none, "");
         }
     }
 
@@ -1009,7 +1009,7 @@ bool get_placement__gs_handler_check_data(const pe_image_full& image_full, pe_pl
             }
 
 
-            placement[rva_start] = pe_placement_entry(sizeof(gs_data), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(sizeof(gs_data), id_pe_placement::id_pe_none, "");
         }
     }
 
@@ -1050,7 +1050,7 @@ bool get_placement__gs_handler_check_seh_data(const pe_image_full& image_full, p
                 return false;
             }
 
-            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
         }
     }
 
@@ -1080,7 +1080,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_full& image_full, pe
                 return false;
             }
 
-            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
 
             cxx_function_desc func_desc;
             if (image_io.set_image_offset(func_desc_rva).read(&func_desc, sizeof(func_desc)) != enma_io_success) {
@@ -1100,7 +1100,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_full& image_full, pe
                     }
                 }
 
-                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
             }
 
             if (func_desc.try_blocks) {
@@ -1132,11 +1132,11 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_full& image_full, pe
                             }
                         }
 
-                        placement[cth_rva_start] = pe_placement_entry(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_none, "");
+                        placement[cth_rva_start] = pe_placement_entry(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_placement::id_pe_none, "");
                     }
                 }
 
-                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
             }
 
             if (func_desc.ip_map_entries) {
@@ -1153,7 +1153,7 @@ bool get_placement__gs_handler_check_eh_data(const pe_image_full& image_full, pe
                     }
                 }
 
-                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
             }
 
 
@@ -1181,7 +1181,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_full& image_full, pe_
                 return false;
             }
 
-            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+            placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
 
             cxx_function_desc func_desc;
             if (image_io.set_image_offset(func_desc_rva).read(&func_desc, sizeof(func_desc)) != enma_io_success) {
@@ -1201,7 +1201,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_full& image_full, pe_
                     }
                 }
 
-                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
             }
 
             if (func_desc.try_blocks) {
@@ -1233,11 +1233,11 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_full& image_full, pe_
                             }
                         }
 
-                        placement[cth_rva_start] = pe_placement_entry(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_none, "");
+                        placement[cth_rva_start] = pe_placement_entry(ALIGN_UP(cth_image_io.get_image_offset() - cth_rva_start, 4), id_pe_placement::id_pe_none, "");
                     }
                 }
 
-                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
             }
 
             if (func_desc.ip_map_entries) {
@@ -1254,7 +1254,7 @@ bool get_placement__cxx_frame_handler3_data(const pe_image_full& image_full, pe_
                     }
                 }
 
-                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_none, "");
+                placement[rva_start] = pe_placement_entry(ALIGN_UP(image_io.get_image_offset() - rva_start, 4), id_pe_placement::id_pe_none, "");
             }
 
 
@@ -1752,7 +1752,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 {
                     unwind_parameter scope_count_parameter;
-                    scope_count_parameter.type = unwind_parameter_raw;
+                    scope_count_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     scope_count_parameter.param_data.resize(sizeof(uint32_t));
 
                     uint32_t scope_count = (uint32_t)data->table.size();
@@ -1763,7 +1763,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 for (auto& entry : data->table) {
                     unwind_parameter scope_entry_parameter;
-                    scope_entry_parameter.type = unwind_parameter_raw;
+                    scope_entry_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     scope_entry_parameter.param_data.resize(sizeof(cxx_scope_table_entry));
 
                     cxx_scope_table_entry *p_entry = (cxx_scope_table_entry*)scope_entry_parameter.param_data.data();
@@ -1782,7 +1782,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 {
                     unwind_parameter scope_count_parameter;
-                    scope_count_parameter.type = unwind_parameter_raw;
+                    scope_count_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     scope_count_parameter.param_data.resize(sizeof(uint32_t));
 
                     uint32_t scope_count = (uint32_t)data->table.size();
@@ -1793,7 +1793,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 for (auto& entry : data->table) {
                     unwind_parameter scope_entry_parameter;
-                    scope_entry_parameter.type = unwind_parameter_raw;
+                    scope_entry_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     scope_entry_parameter.param_data.resize(sizeof(delphi_scope_table_entry));
 
                     delphi_scope_table_entry *p_entry = (delphi_scope_table_entry*)scope_entry_parameter.param_data.data();
@@ -1811,7 +1811,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
                 auto* data = unwind_entry.get_custom_parameter().get_llvm_specific_handler_parameters_data();
 
                 unwind_parameter ptr_parameter;
-                ptr_parameter.type = unwind_parameter_va;
+                ptr_parameter.type = unwind_parameter_type::unwind_parameter_va;
                 ptr_parameter.param_data.resize(sizeof(uint64_t));
                 *(uint64_t*)&ptr_parameter.param_data.data()[0] = data->data_rva + image_full.get_image().get_image_base();
 
@@ -1822,7 +1822,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
                 auto* data = unwind_entry.get_custom_parameter().get_gs_handler_check_parameters_data();
 
                 unwind_parameter gs_data_parameter;
-                gs_data_parameter.type = unwind_parameter_raw;
+                gs_data_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                 gs_data_parameter.param_data.resize(sizeof(uint32_t));
                 *(uint32_t*)&gs_data_parameter.param_data.data()[0] = data->gs_data;
 
@@ -1835,7 +1835,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 {
                     unwind_parameter scope_count_parameter;
-                    scope_count_parameter.type = unwind_parameter_raw;
+                    scope_count_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     scope_count_parameter.param_data.resize(sizeof(uint32_t));
 
                     uint32_t scope_count = (uint32_t)data->table.size();
@@ -1846,7 +1846,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 for (auto& entry : data->table) {
                     unwind_parameter scope_entry_parameter;
-                    scope_entry_parameter.type = unwind_parameter_raw;
+                    scope_entry_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     scope_entry_parameter.param_data.resize(sizeof(cxx_scope_table_entry));
 
                     cxx_scope_table_entry *p_entry = (cxx_scope_table_entry*)scope_entry_parameter.param_data.data();
@@ -1859,7 +1859,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
                 }
 
                 unwind_parameter gs_data_parameter;
-                gs_data_parameter.type = unwind_parameter_raw;
+                gs_data_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                 gs_data_parameter.param_data.resize(sizeof(uint32_t));
                 *(uint32_t*)&gs_data_parameter.param_data.data()[0] = data->gs_data;
 
@@ -1871,7 +1871,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 {
                     unwind_parameter func_info_parameter;
-                    func_info_parameter.type = unwind_parameter_raw;
+                    func_info_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     func_info_parameter.param_data.resize(sizeof(uint32_t));
 
                     *(uint32_t*)&func_info_parameter.param_data.data()[0] = build_func_info(ex_info_io, data->func_info);
@@ -1886,7 +1886,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
 
                 {
                     unwind_parameter func_info_parameter;
-                    func_info_parameter.type = unwind_parameter_raw;
+                    func_info_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                     func_info_parameter.param_data.resize(sizeof(uint32_t));
 
                     *(uint32_t*)&func_info_parameter.param_data.data()[0] = build_func_info(ex_info_io, data->func_info);
@@ -1895,7 +1895,7 @@ void build_extended_exceptions_info(pe_image_full& image_full) {
                 }
 
                 unwind_parameter gs_data_parameter;
-                gs_data_parameter.type = unwind_parameter_raw;
+                gs_data_parameter.type = unwind_parameter_type::unwind_parameter_raw;
                 gs_data_parameter.param_data.resize(sizeof(uint32_t));
                 *(uint32_t*)&gs_data_parameter.param_data.data()[0] = data->gs_data;
 

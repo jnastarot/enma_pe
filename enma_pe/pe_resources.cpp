@@ -630,7 +630,7 @@ pe_directory_code get_placement_resources_directory(const pe_image &image, pe_pl
         );
 
 
-        placement[virtual_address] = pe_placement_entry(available_size, id_pe_resources, "");
+        placement[virtual_address] = pe_placement_entry(available_size, id_pe_placement::id_pe_resources, "");
 
         if (!down_oversize && !up_oversize) {
             return pe_directory_code::pe_directory_code_success;

@@ -444,7 +444,7 @@ bool build_exceptions_directory(pe_image &image, pe_section& section, pe_excepti
                     for (auto& param : item.get_params()) { //fill handler params
 
                        
-                        if (param.type == unwind_parameter_va) {
+                        if (param.type == unwind_parameter_type::unwind_parameter_va) {
                             relocs.add_relocation(exc_section.get_section_offset(), 0, (image.is_x32_image() ? IMAGE_REL_BASED_HIGHLOW : IMAGE_REL_BASED_DIR64));
                         }
 
@@ -531,7 +531,7 @@ pe_directory_code get_placement_exceptions_directory(const pe_image &image, pe_p
     }
 
     placement[virtual_address] =
-        pe_placement_entry(virtual_size, id_pe_exception_descriptors, "");
+        pe_placement_entry(virtual_size, id_pe_placement::id_pe_exception_descriptors, "");
 
     for (auto& unwind_entry : _exceptions.get_unwind_entries()) {
 
@@ -541,7 +541,7 @@ pe_directory_code get_placement_exceptions_directory(const pe_image &image, pe_p
             ((unwind_entry.get_flags() & (UNW_FLAG_EHANDLER | UNW_FLAG_UHANDLER)) ? sizeof(uint32_t) : 0) +
             ((unwind_entry.get_flags() & UNW_FLAG_CHAININFO) ? sizeof(runtime_function_entry) : 0)
             , 4),
-            id_pe_exception_unwindinfo, "");
+            id_pe_placement::id_pe_exception_unwindinfo, "");
 
             placement[unwind_entry.get_unwind_info_rva()] = dsp;
             

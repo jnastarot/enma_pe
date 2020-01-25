@@ -282,20 +282,20 @@ pe_directory_code _get_placement_tls_directory(const pe_image &image, pe_placeme
     if (code == pe_directory_code::pe_directory_code_success) {
 
         placement[image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_TLS)] = 
-            pe_placement_entry(ALIGN_UP(sizeof(typename image_format::image_tls_directory), 0x10), id_pe_tls_descriptor, "");
+            pe_placement_entry(ALIGN_UP(sizeof(typename image_format::image_tls_directory), 0x10), id_pe_placement::id_pe_tls_descriptor, "");
 
         if (tls.get_start_address_raw_data()) {
-            placement[tls.get_start_address_raw_data()] = pe_placement_entry(tls.get_raw_data().size(), id_pe_tls_raw_data, "");
+            placement[tls.get_start_address_raw_data()] = pe_placement_entry(tls.get_raw_data().size(), id_pe_placement::id_pe_tls_raw_data, "");
         }
 
         if (tls.get_address_of_index()) {
-            placement[tls.get_address_of_index()] = pe_placement_entry(sizeof(uint32_t), id_pe_tls_index, "");
+            placement[tls.get_address_of_index()] = pe_placement_entry(sizeof(uint32_t), id_pe_placement::id_pe_tls_index, "");
         }
 
         if (tls.get_address_of_callbacks()) {
 
             placement[tls.get_address_of_callbacks()] = 
-                pe_placement_entry((tls.get_callbacks().size() + 1) * sizeof(typename image_format::ptr_size), id_pe_tls_callbacks, "");
+                pe_placement_entry((tls.get_callbacks().size() + 1) * sizeof(typename image_format::ptr_size), id_pe_placement::id_pe_tls_callbacks, "");
         }
         
         return pe_directory_code::pe_directory_code_success;
