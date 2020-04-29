@@ -22,7 +22,7 @@ public:
     pe_image_full();
     pe_image_full(const pe_image& image);
     pe_image_full(const pe_image_full& image);
-    pe_image_full(bool _pe32);
+    explicit pe_image_full(bool _pe32);
     pe_image_full(const uint8_t* raw_image, uint32_t size);
     pe_image_full(const std::string& file_path);
 

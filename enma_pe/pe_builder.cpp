@@ -264,7 +264,9 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
         ) {
 
 
-        if (image_full.get_load_config().get_size() && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG)) {
+        if ((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
+            (image_full.get_load_config().get_size() && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG)) ) {
+
             pe_section* rdata_section = 0;
 
             if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_RDATA) {
@@ -278,8 +280,55 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
             }
 
 
-            build_load_config_directory_full(image_full.get_image(), *rdata_section, image_full.get_load_config(), image_full.get_relocations()); //build load config
+            if ((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT))) { //build import
+                build_import_directory_full(image_full.get_image(), *rdata_section, image_full.get_imports());
+            }
 
+            if ((image_full.get_load_config().get_size() && (build_flags & PE_IMAGE_BUILD_DIR_LOAD_CONFIG))) { //build load config
+                build_load_config_directory_full(image_full.get_image(), *rdata_section, image_full.get_load_config(), image_full.get_relocations()); 
+            }
+        }
+
+        if(image_full.get_exports().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) {
+
+            pe_section* edata_section = 0;
+
+            if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_EDATA) {
+                edata_section = &image_full.get_image().add_section();
+                edata_section->set_section_name(std::string(".edata"));
+                edata_section->set_readable(true).set_writeable(false).set_executable(false);
+            }
+            else {
+                edata_section = image_full.get_image().get_last_section();
+                edata_section->set_readable(true);
+            }
+
+
+            if ((build_flags & PE_IMAGE_BUILD_DIR_EXPORT) && image_full.get_exports().size()) { //build export
+                build_export_directory(image_full.get_image(), *edata_section, image_full.get_exports());
+            }
+        }
+
+        if ((image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) && (build_flags & PE_IMAGE_BUILD_DIR_TLS)) {
+
+            pe_section* tls_section = 0;
+
+            if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_TLS) {
+                tls_section = &image_full.get_image().add_section();
+                tls_section->set_section_name(std::string(".edata"));
+                tls_section->set_readable(true).set_writeable(false).set_executable(false);
+            }
+            else {
+                tls_section = image_full.get_image().get_last_section();
+                tls_section->set_readable(true);
+            }
+
+            if ((build_flags & PE_IMAGE_BUILD_DIR_TLS) &&   //build tls
+                image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) {
+
+                build_tls_directory_full(image_full.get_image(), *tls_section, image_full.get_tls(), image_full.get_relocations());
+                tls_section->set_writeable(true);
+            }
         }
 
         if ((!image_full.get_image().is_x32_image() && image_full.get_exceptions().size()) && (build_flags & PE_IMAGE_BUILD_DIR_EXCEPTIONS)) {
@@ -295,50 +344,19 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
                 pdata_section->set_readable(true);
             }
 
-            if ((!image_full.get_image().is_x32_image() && image_full.get_exceptions().size())) {
+            if ((!image_full.get_image().is_x32_image() && image_full.get_exceptions().size())) { //build exceptions
                 build_extended_exceptions_info(image_full);
-                build_exceptions_directory(image_full.get_image(), *pdata_section, image_full.get_exceptions(), image_full.get_relocations(), true);  //build exceptions
-            }
-        }
-
-        if((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
-            (image_full.get_exports().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
-            ((image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) && (build_flags & PE_IMAGE_BUILD_DIR_TLS))
-            ) {
-
-            pe_section* edata_section = 0;
-
-            if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_EDATA) {
-                edata_section = &image_full.get_image().add_section();
-                edata_section->set_section_name(std::string(".edata"));
-                edata_section->set_readable(true).set_writeable(false).set_executable(false);
-            }
-            else {
-                edata_section = image_full.get_image().get_last_section();
-                edata_section->set_readable(true);
-            }
-
-
-            if ((build_flags & PE_IMAGE_BUILD_DIR_EXPORT) && image_full.get_exports().size()) {                                    //build export
-                build_export_directory(image_full.get_image(), *edata_section, image_full.get_exports());
-            }
-            if ((build_flags & PE_IMAGE_BUILD_DIR_IMPORT) && image_full.get_imports().size()) { //build import
-                build_import_directory_full(image_full.get_image(), *edata_section, image_full.get_imports());
-            }
-            if ((build_flags & PE_IMAGE_BUILD_DIR_TLS) &&   //build tls
-                image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) {
-
-                build_tls_directory_full(image_full.get_image(), *edata_section, image_full.get_tls(), image_full.get_relocations());
-                edata_section->set_writeable(true);
+                build_exceptions_directory(image_full.get_image(), *pdata_section, image_full.get_exceptions(), image_full.get_relocations(), true);
             }
         }
     }
+
 
     if (image_full.get_relocations().size() && (build_flags & PE_IMAGE_BUILD_DIR_RELOCATIONS)) {     //build relocations
 
         pe_section* reloc_section = 0;
         
-        if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_RSRC) {
+        if (build_flags & PE_IMAGE_BUILD_SEP_SECTION_RELOC) {
             reloc_section = &image_full.get_image().add_section();
             reloc_section->set_section_name(std::string(".reloc"));
             reloc_section->set_readable(true).set_writeable(false).set_executable(false);
