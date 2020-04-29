@@ -246,7 +246,11 @@ void align_sections(pe_image& image, uint32_t start_header_size) {
         }
         section_->set_pointer_to_raw(current_section_raw);
 
-        current_section_raw += ALIGN_UP(section_->get_size_of_raw_data(), image.get_file_align());
+        if (section_->get_size_of_raw_data()) {
+            section_->set_size_of_raw_data(ALIGN_UP(section_->get_size_of_raw_data(), image.get_file_align()));
+        }
+
+        current_section_raw += section_->get_size_of_raw_data();
     }
 }
 
@@ -315,13 +319,15 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
             }
 
 
-            if (image_full.get_exports().size()) {                                    //build export
+            if ((build_flags & PE_IMAGE_BUILD_DIR_EXPORT) && image_full.get_exports().size()) {                                    //build export
                 build_export_directory(image_full.get_image(), *edata_section, image_full.get_exports());
             }
-            if (image_full.get_imports().size()) {                                                        //build import
+            if ((build_flags & PE_IMAGE_BUILD_DIR_IMPORT) && image_full.get_imports().size()) { //build import
                 build_import_directory_full(image_full.get_image(), *edata_section, image_full.get_imports());
             }
-            if (image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) { //build tls
+            if ((build_flags & PE_IMAGE_BUILD_DIR_TLS) &&   //build tls
+                image_full.get_tls().get_address_of_index() || image_full.get_tls().get_callbacks().size()) {
+
                 build_tls_directory_full(image_full.get_image(), *edata_section, image_full.get_tls(), image_full.get_relocations());
                 edata_section->set_writeable(true);
             }
