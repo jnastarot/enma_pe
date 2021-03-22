@@ -247,6 +247,7 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
 
 
     if (virtual_address) {
+
         pe_image_io export_io(image);
 
         if (!export_io.is_present_rva(virtual_address)) {
@@ -278,6 +279,34 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
             }          
         }
 
+        std::unordered_map<uint32_t, std::string> names_of_functions;
+
+        for (uint32_t idx = 0; idx < export_desc.number_of_names; idx++) {
+
+            uint16_t function_ordinal;
+
+            if (export_io.set_image_offset(export_desc.address_of_name_ordinals + idx * INT16_SIZE).read(
+                &function_ordinal, sizeof(function_ordinal)) != enma_io_success) {
+
+                break;
+            }
+
+            uint32_t function_name_rva;
+
+            if (export_io.set_image_offset(export_desc.address_of_names + idx * INT32_SIZE).read(
+                &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
+                break;
+            }
+
+            std::string func_name;
+
+            if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
+                break;
+            }
+
+            names_of_functions[function_ordinal] = func_name;
+        }
+
         for (uint32_t ordinal = 0; ordinal < export_desc.number_of_functions; ordinal++) {
 
             uint32_t func_rva;
@@ -289,54 +318,30 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
                 return pe_directory_code::pe_directory_code_currupted;
             }
 
+            //if (!func_rva) { continue; }
+
             func.set_rva(func_rva)
                 .set_ordinal(uint16_t(export_desc.base + ordinal));
 
-            //if (!func_rva) { continue; }
+            auto name_it = names_of_functions.find(ordinal);
 
-            for (uint32_t i = 0; i < export_desc.number_of_names; i++) {
+            if (name_it != names_of_functions.end()) {
 
-                uint16_t ordinal2;
+                func.set_func_name(name_it->second)
+                    .set_has_name(true)
+                    .set_name_ordinal(name_it->first);
 
-                if (export_io.set_image_offset(export_desc.address_of_name_ordinals + i * INT16_SIZE).read(
-                    &ordinal2, sizeof(ordinal2)) != enma_io_success) {
-                    break;
-                }
+                if (func_rva >= virtual_address + sizeof(image_export_directory) &&
+                    func_rva < virtual_address + virtual_size) {
 
+                    std::string forwarded_func_name;
 
-                if (ordinal == ordinal2) {
-
-                    uint32_t function_name_rva;
-
-                    if (export_io.set_image_offset(export_desc.address_of_names + i * INT32_SIZE).read(
-                        &function_name_rva, sizeof(function_name_rva)) != enma_io_success) {
-                        break;
+                    if (export_io.set_image_offset(func_rva).read_string(forwarded_func_name) != enma_io_success) {
+                        return pe_directory_code::pe_directory_code_currupted;
                     }
 
-                    std::string func_name;
-
-                    if (export_io.set_image_offset(function_name_rva).read_string(func_name) != enma_io_success) {
-                        break;
-                    }
-
-                    func.set_func_name(func_name)
-                        .set_has_name(true)
-                        .set_name_ordinal(ordinal2);
-
-                    if (func_rva >= virtual_address + sizeof(image_export_directory) &&
-                        func_rva < virtual_address + virtual_size) {
-
-                        std::string forwarded_func_name;
-
-                        if (export_io.set_image_offset(func_rva).read_string(forwarded_func_name) != enma_io_success) {
-                            return pe_directory_code::pe_directory_code_currupted;
-                        }
-
-                        func.set_forward_name(std::string(forwarded_func_name))
-                            .set_forward(true);
-                    }
-
-                    break;
+                    func.set_forward_name(std::string(forwarded_func_name))
+                        .set_forward(true);
                 }
             }
 
