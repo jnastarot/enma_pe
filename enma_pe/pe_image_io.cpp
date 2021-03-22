@@ -603,7 +603,7 @@ bool view_data(
             }
         }
         else {
-            real_offset = (required_offset - present_offset + present_size);
+            real_offset = (required_offset - present_offset);
             up_oversize = (required_size + required_offset) - (present_offset + present_size);
             available_size = 0;
 

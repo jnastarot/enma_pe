@@ -299,8 +299,7 @@ pe_directory_code handle_unwind_info(const pe_image &image, uint32_t rva, pe_exc
         exceptions.add_unwind_entry(_unwind_entry);
     }
 
-    auto& unwind_entry = exceptions.get_unwind_entries()[exceptions.get_unwind_entries().size() - 1];
-
+    size_t unwind_entry_idx = exceptions.get_unwind_entries().size() - 1;
 
     exception_data_io.set_image_offset(
             ALIGN_UP(exception_data_io.get_image_offset(), 4)
@@ -326,7 +325,7 @@ pe_directory_code handle_unwind_info(const pe_image &image, uint32_t rva, pe_exc
                 }
             }
 
-            unwind_entry.set_chained_entry(exception_chained_entry);
+            exceptions.get_unwind_entries()[unwind_entry_idx].set_chained_entry(exception_chained_entry);
         }
         else {
 
@@ -337,7 +336,7 @@ pe_directory_code handle_unwind_info(const pe_image &image, uint32_t rva, pe_exc
                     return pe_directory_code::pe_directory_code_currupted;
                 }
 
-                unwind_entry.set_handler_rva(handler_rva);
+                exceptions.get_unwind_entries()[unwind_entry_idx].set_handler_rva(handler_rva);
             }
         }
     }
