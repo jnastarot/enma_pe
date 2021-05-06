@@ -144,12 +144,16 @@ enma_io_code pe_image_io::internal_read(size_t data_offset,
                     }
                     else {
                         if (available_headers_size > real_offset) {
+
+                            // available_headers_size - real_offset = is available data in vector for read
+                            // header_readed_size = must be readed, includes virtual aligment
+
                             memcpy(&((uint8_t*)buffer)[header_down_oversize], &image->get_headers_data().data()[real_offset], 
-                                header_readed_size
+                                available_headers_size - real_offset
                             );
 
-                            memset(&((uint8_t*)buffer)[header_down_oversize + (header_readed_size + real_offset) - available_headers_size], 0,
-                                view_headers_size - ((available_headers_size + real_offset)));
+                            memset(&((uint8_t*)buffer)[header_down_oversize + (available_headers_size - real_offset)], 0,
+                                header_readed_size - ((available_headers_size - real_offset)));
                         }
                         else {
                             memset(&((uint8_t*)buffer)[header_down_oversize], 0, header_readed_size);
