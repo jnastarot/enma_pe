@@ -17,10 +17,13 @@ class pe_tls_directory {
     std::vector<tls_callback> callbacks;
 public:
     pe_tls_directory();
-    pe_tls_directory(const pe_tls_directory& tls);
-    ~pe_tls_directory();
+    ~pe_tls_directory() = default;
 
-    pe_tls_directory& operator=(const pe_tls_directory& tls);
+    pe_tls_directory(const pe_tls_directory&) = default;
+    pe_tls_directory& operator=(const pe_tls_directory&) = default;
+    pe_tls_directory(pe_tls_directory&&) = default;
+    pe_tls_directory& operator=(pe_tls_directory&&) = default;
+
 public:
     void set_start_address_raw_data(uint32_t start_address_raw_data);
     void set_end_address_raw_data(uint32_t end_address_raw_data);

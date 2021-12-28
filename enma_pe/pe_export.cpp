@@ -9,23 +9,6 @@ pe_export_entry::pe_export_entry() {
     b_forward = 0;
     name_ordinal = 0;
 }
-pe_export_entry::pe_export_entry(const pe_export_entry& function) {
-    this->operator=(function);
-}
-pe_export_entry::~pe_export_entry() {};
-
-pe_export_entry& pe_export_entry::operator=(const pe_export_entry& function) {
-
-    this->rva            = function.rva;
-    this->ordinal       = function.ordinal;
-    this->name_ordinal  = function.name_ordinal;
-    this->b_name        = function.b_name;
-    this->b_forward     = function.b_forward;
-    this->forward_name  = function.forward_name;
-    this->func_name     = function.func_name;
-
-    return *this;
-}
 
 bool pe_export_entry::operator==(const pe_export_entry& item) {
     if (item.b_name == this->b_name) {
@@ -107,25 +90,6 @@ pe_export_directory::pe_export_directory() {
     ordinal_base = 0;
     number_of_functions = 0;
     number_of_names = 0;
-}
-pe_export_directory::pe_export_directory(const pe_export_directory& exports) {
-    this->operator=(exports);
-}
-pe_export_directory::~pe_export_directory() {};
-
-pe_export_directory& pe_export_directory::operator=(const pe_export_directory& exports) {
-
-    this->characteristics       = exports.characteristics;
-    this->time_stamp            = exports.time_stamp;
-    this->major_version         = exports.major_version;
-    this->minor_version         = exports.minor_version;
-    this->ordinal_base          = exports.ordinal_base;
-    this->number_of_functions   = exports.number_of_functions;
-    this->number_of_names       = exports.number_of_names;
-    this->library_name          = exports.library_name;
-    this->functions = exports.functions;
-
-    return *this;
 }
 
 pe_export_directory& pe_export_directory::set_characteristics(uint32_t characteristics) {

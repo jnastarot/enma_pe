@@ -10,22 +10,6 @@ pe_security_entry::pe_security_entry() {
 pe_security_entry::pe_security_entry(uint16_t revision, uint16_t certificate_type, std::vector<uint8_t>& certificate_data)
 :revision(revision), certificate_type(certificate_type), certificate_data(certificate_data){}
 
-pe_security_entry::pe_security_entry(const pe_security_entry& item) {
-    this->operator=(item);
-}
-pe_security_entry::~pe_security_entry() {
-
-}
-
-pe_security_entry& pe_security_entry::operator=(const pe_security_entry& item) {
-
-    revision = item.revision;
-    certificate_type = item.revision;
-    certificate_data = item.certificate_data;
-
-    return *this;
-}
-
 void   pe_security_entry::set_revision(uint16_t revision) {
     this->revision = revision;
 }
@@ -52,26 +36,6 @@ const std::vector<uint8_t>& pe_security_entry::get_certificate_data() const {
 std::vector<uint8_t>& pe_security_entry::get_certificate_data() {
     return this->certificate_data;
 }
-
-pe_security_directory::pe_security_directory() {
-
-}
-
-pe_security_directory::pe_security_directory(const pe_security_directory& security) {
-    this->operator=(security);
-}
-
-pe_security_directory::~pe_security_directory() {
-
-}
-
-pe_security_directory& pe_security_directory::operator=(const pe_security_directory& security) {
-
-    this->certificates = security.certificates;
-
-    return *this;
-}
-
 
 void pe_security_directory::add_certificate(const pe_security_entry& item) {
     this->certificates.push_back(item);

@@ -10,10 +10,13 @@ class pe_export_entry {
     std::string func_name;
 public:
     pe_export_entry();
-    pe_export_entry(const pe_export_entry& item);
-    ~pe_export_entry();
+    ~pe_export_entry() = default;
 
-    pe_export_entry& operator=(const pe_export_entry& item);
+    pe_export_entry(const pe_export_entry&) = default;
+    pe_export_entry& operator=(const pe_export_entry&) = default;
+    pe_export_entry(pe_export_entry&&) = default;
+    pe_export_entry& operator=(pe_export_entry&&) = default;
+
     bool operator==(const pe_export_entry& item);
 public:
     pe_export_entry& set_rva(uint32_t rva);
@@ -47,9 +50,12 @@ class pe_export_directory {
     std::vector<pe_export_entry> functions;
 public:
     pe_export_directory();
-    pe_export_directory(const pe_export_directory& exports);
-    ~pe_export_directory();
-    pe_export_directory& operator=(const pe_export_directory& exports);
+    ~pe_export_directory() = default;
+
+    pe_export_directory(const pe_export_directory&) = default;
+    pe_export_directory& operator=(const pe_export_directory&) = default;
+    pe_export_directory(pe_export_directory&&) = default;
+    pe_export_directory& operator=(pe_export_directory&&) = default;
 public:
     pe_export_directory& set_characteristics(uint32_t characteristics);
     pe_export_directory& set_time_stamp(uint32_t time_stamp);

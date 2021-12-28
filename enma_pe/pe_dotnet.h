@@ -18,9 +18,12 @@ class pe_dotnet_directory {
     image_data_directory export_address_table_jumps;
 public:
     pe_dotnet_directory();
-    ~pe_dotnet_directory();
+    ~pe_dotnet_directory() = default;
 
-
+    pe_dotnet_directory(const pe_dotnet_directory&) = default;
+    pe_dotnet_directory& operator=(const pe_dotnet_directory&) = default;
+    pe_dotnet_directory(pe_dotnet_directory&&) = default;
+    pe_dotnet_directory& operator=(pe_dotnet_directory&&) = default;
 public:
     void set_major_version(uint16_t major_version);
     void set_minor_version(uint16_t minor_version);

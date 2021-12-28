@@ -13,27 +13,6 @@ pe_tls_directory::pe_tls_directory() {
     callbacks.clear();
 }
 
-pe_tls_directory::pe_tls_directory(const pe_tls_directory& tls) {
-    this->operator=(tls);
-}
-
-pe_tls_directory::~pe_tls_directory(){}
-
-
-pe_tls_directory& pe_tls_directory::operator=(const pe_tls_directory& tls) {
-
-    start_address_raw_data    = tls.start_address_raw_data;
-    end_address_raw_data    = tls.end_address_raw_data;
-    address_of_index        = tls.address_of_index;
-    address_of_callbacks    = tls.address_of_callbacks;
-    size_of_zero_fill       = tls.size_of_zero_fill;
-    characteristics         = tls.characteristics;
-    raw_data = tls.raw_data;
-    callbacks = tls.callbacks;
-
-    return *this;
-}
-
 
 void pe_tls_directory::set_start_address_raw_data(uint32_t   start_address_raw_data) {
     this->start_address_raw_data = start_address_raw_data;

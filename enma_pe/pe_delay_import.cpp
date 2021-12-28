@@ -6,29 +6,6 @@ pe_delay_library::pe_delay_library()
     iat_rva(0), names_table_rva(0), iat_bound_table_rva(0), 
     unload_info_table_rva(0), timestamp(0) {}
 
-pe_delay_library::pe_delay_library(const pe_delay_library& lib) {
-    this->operator=(lib);
-}
-pe_delay_library::~pe_delay_library() {
-
-}
-pe_delay_library& pe_delay_library::operator=(const pe_delay_library& lib) {
-    
-    this->library_name      = lib.library_name;
-    this->attributes        = lib.attributes;
-    this->dll_name_rva      = lib.dll_name_rva;
-    this->module_handle_rva = lib.module_handle_rva;
-    this->iat_rva           = lib.iat_rva;
-    this->names_table_rva   = lib.names_table_rva;
-    this->iat_bound_table_rva = lib.iat_bound_table_rva;
-    this->unload_info_table_rva = lib.unload_info_table_rva;
-    this->timestamp         = lib.timestamp;
-    this->functions         = lib.functions;
-    this->is_bound          = lib.is_bound;
-
-    return *this;
-}
-
 
 pe_delay_library& pe_delay_library::set_library_name(const std::string& library_name) {
     this->library_name = library_name;
@@ -144,21 +121,6 @@ pe_import_library pe_delay_library::convert_to_pe_import_library() const {
     return lib;
 }
 
-pe_delay_import_directory::pe_delay_import_directory() {
-
-}
-pe_delay_import_directory::pe_delay_import_directory(const pe_delay_import_directory& imports) {
-    this->operator=(imports);
-}
-pe_delay_import_directory::~pe_delay_import_directory(){
-
-}
-
-pe_delay_import_directory& pe_delay_import_directory::operator=(const pe_delay_import_directory& imports) {
-    this->libraries = imports.libraries;
-
-    return *this;
-}
 void pe_delay_import_directory::add_library(const pe_delay_library& lib) {
     this->libraries.push_back(lib);
 }
