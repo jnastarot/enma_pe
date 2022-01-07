@@ -13,14 +13,16 @@ class pe_debug_entry {
     std::vector<uint8_t> item_data;
 public:
     pe_debug_entry();
-    pe_debug_entry(const pe_debug_entry& item);
     pe_debug_entry(uint32_t characteristics, uint32_t timestamp, uint16_t major_version, uint16_t minor_version,
         uint32_t type, uint32_t size_of_data, uint32_t address_of_raw_data, uint32_t pointer_to_raw_data,
      void * data);
 
-    ~pe_debug_entry();
+    ~pe_debug_entry() = default;
+    pe_debug_entry(const pe_debug_entry&) = default;
+    pe_debug_entry& operator=(const pe_debug_entry&) = default;
+    pe_debug_entry(pe_debug_entry&&) = default;
+    pe_debug_entry& operator=(pe_debug_entry&&) = default;
 
-    pe_debug_entry& operator=(const pe_debug_entry& item);
 public:
     void  set_characteristics(uint32_t characteristics);
     void  set_timestamp(uint32_t timestamp);

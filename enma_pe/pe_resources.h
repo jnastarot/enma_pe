@@ -10,7 +10,13 @@ public:
 
     pe_resource_data_entry();
     pe_resource_data_entry(const void * data, uint32_t data_size, uint32_t codepage);
-    ~pe_resource_data_entry();
+    ~pe_resource_data_entry()= default;
+
+    pe_resource_data_entry(const pe_resource_data_entry&) = default;
+    pe_resource_data_entry& operator=(const pe_resource_data_entry&) = default;
+    pe_resource_data_entry(pe_resource_data_entry&&) = default;
+    pe_resource_data_entry& operator=(pe_resource_data_entry&&) = default;
+
 public:
     void set_codepage(uint32_t codepage);
     void set_data(const void * data, uint32_t data_size);

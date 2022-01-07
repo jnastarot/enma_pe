@@ -11,9 +11,6 @@ pe_section::pe_section() {
 
     section_data.clear();
 }
-pe_section::pe_section(const pe_section& section) {
-    this->operator=(section);
-}
 
 pe_section::pe_section(const image_section_header& header) {
     this->section_name.reserve(8);
@@ -39,19 +36,6 @@ pe_section::pe_section(const image_section_header& header, const std::vector<uin
     this->pointer_to_raw    = header.pointer_to_raw_data;
     this->characteristics    = header.characteristics;
 
-}
-pe_section::~pe_section() {
-
-}
-
-pe_section& pe_section::operator=(const pe_section& section) {
-    this->section_name      = section.section_name;
-    this->virtual_size        = section.virtual_size;
-    this->virtual_address    = section.virtual_address;
-    this->pointer_to_raw    = section.pointer_to_raw;
-    this->characteristics    = section.characteristics;
-    this->section_data        = section.section_data;
-    return *this;
 }
 
 pe_section& pe_section::set_section_name(const std::string& section_name) {

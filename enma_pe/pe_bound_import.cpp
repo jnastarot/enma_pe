@@ -5,22 +5,10 @@
 pe_bound_imported_ref::pe_bound_imported_ref() {
     timestamp = 0;
 }
-pe_bound_imported_ref::pe_bound_imported_ref(const pe_bound_imported_ref& ref) {
-    this->operator=(ref);
-}
+
 pe_bound_imported_ref::pe_bound_imported_ref(const std::string& ref_name, uint32_t  timestamp):
     ref_name(ref_name), timestamp(timestamp){
 
-}
-pe_bound_imported_ref::~pe_bound_imported_ref() {
-
-}
-
-pe_bound_imported_ref& pe_bound_imported_ref::operator=(const pe_bound_imported_ref& ref) {
-    this->timestamp = ref.timestamp;
-    this->ref_name = ref.ref_name;
-
-    return *this;
 }
 
 void pe_bound_imported_ref::set_ref_name(const std::string& ref_name) {
@@ -40,20 +28,6 @@ uint32_t  pe_bound_imported_ref::get_timestamp() const {
 
 pe_bound_library::pe_bound_library() {
     timestamp = 0;
-}
-pe_bound_library::pe_bound_library(const pe_bound_library& lib) {
-    this->operator=(lib);
-}
-pe_bound_library::~pe_bound_library() {
-
-}
-
-pe_bound_library& pe_bound_library::operator=(const pe_bound_library& lib) {
-    this->timestamp = lib.timestamp;
-    this->refs = lib.refs;
-    this->library_name = lib.library_name;
-
-    return *this;
 }
 
 void pe_bound_library::set_library_name(const std::string& library_name) {
@@ -83,21 +57,6 @@ std::vector<pe_bound_imported_ref>& pe_bound_library::get_refs() {
     return this->refs;
 }
 
-pe_bound_import_directory::pe_bound_import_directory() {
-
-}
-pe_bound_import_directory::pe_bound_import_directory(const pe_bound_import_directory& imports) {
-    this->operator=(imports);
-}
-pe_bound_import_directory::~pe_bound_import_directory() {
-
-}
-
-pe_bound_import_directory& pe_bound_import_directory::operator=(const pe_bound_import_directory& imports) {
-    this->libraries = imports.libraries;
-
-    return *this;
-}
 void pe_bound_import_directory::add_library(const pe_bound_library& lib) {
     libraries.push_back(lib);
 }

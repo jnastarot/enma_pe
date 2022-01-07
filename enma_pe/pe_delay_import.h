@@ -18,10 +18,13 @@ class pe_delay_library {
     std::vector<pe_import_function> functions;
 public:
     pe_delay_library();
-    pe_delay_library(const pe_delay_library& lib);
-    ~pe_delay_library();
+    ~pe_delay_library() = default;
 
-    pe_delay_library& operator=(const pe_delay_library& lib);
+    pe_delay_library(const pe_delay_library&) = default;
+    pe_delay_library& operator=(const pe_delay_library&) = default;
+    pe_delay_library(pe_delay_library&&) = default;
+    pe_delay_library& operator=(pe_delay_library&&) = default;
+
 public:
     pe_delay_library& set_library_name(const std::string& library_name);
 
@@ -61,11 +64,14 @@ public:
 class pe_delay_import_directory {
     std::vector<pe_delay_library> libraries;
 public:
-    pe_delay_import_directory();
-    pe_delay_import_directory(const pe_delay_import_directory& imports);
-    ~pe_delay_import_directory();
+    pe_delay_import_directory() = default;
+    ~pe_delay_import_directory() = default;
 
-    pe_delay_import_directory& operator=(const pe_delay_import_directory& imports);
+    pe_delay_import_directory(const pe_delay_import_directory&) = default;
+    pe_delay_import_directory& operator=(const pe_delay_import_directory&) = default;
+    pe_delay_import_directory(pe_delay_import_directory&&) = default;
+    pe_delay_import_directory& operator=(pe_delay_import_directory&&) = default;
+
 public:
     void add_library(const pe_delay_library& lib);
     void clear();

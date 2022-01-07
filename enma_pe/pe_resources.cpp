@@ -13,8 +13,6 @@ pe_resource_data_entry::pe_resource_data_entry(const void * data, uint32_t data_
     this->data.resize(data_size);
     memcpy(this->data.data(), data, data_size);
 }
-pe_resource_data_entry::~pe_resource_data_entry(){}
-
 
 void pe_resource_data_entry::set_codepage(uint32_t codepage) {
     this->codepage = codepage;

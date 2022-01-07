@@ -7,34 +7,12 @@ pe_import_function::pe_import_function()
     iat_rva(0), iat_item(0), oft_rva(0), oft_item(0) {
 }
 
-pe_import_function::pe_import_function(const pe_import_function& func) {
-    this->operator=(func);
-}
-
 pe_import_function::pe_import_function(uint32_t iat_rva, uint32_t oft_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item, uint64_t oft_item):
     iat_rva(iat_rva), oft_rva(oft_rva),  hint(hint), func_name(func_name), ordinal(0), iat_item(iat_item), oft_item(oft_item), b_import_by_name(true){
 
 }
 pe_import_function::pe_import_function(uint32_t iat_rva, uint32_t oft_rva, uint16_t ordinal, uint64_t iat_item, uint64_t oft_item):
     iat_rva(iat_rva), oft_rva(oft_rva), hint(0), func_name(""), ordinal(ordinal), iat_item(iat_item), oft_item(oft_item), b_import_by_name(false){
-}
-
-pe_import_function::~pe_import_function() {
-
-}
-
-pe_import_function& pe_import_function::operator=(const pe_import_function& func) {
-
-    this->iat_rva = func.iat_rva;
-    this->oft_rva = func.oft_rva;
-    this->hint = func.hint;
-    this->func_name = func.func_name;
-    this->ordinal = func.ordinal;
-    this->b_import_by_name = func.b_import_by_name;
-    this->iat_item = func.iat_item;
-    this->oft_item = func.oft_item;
-
-    return *this;
 }
 
 pe_import_function& pe_import_function::set_hint(uint16_t hint) {
@@ -111,27 +89,6 @@ pe_import_library::pe_import_library(const std::string& library_name)
   : timestamp(0), is_bound(0), iat_rva(-1), oft_rva(-1), library_name_rva(0), library_name(library_name){
 }
 
-pe_import_library::pe_import_library(const pe_import_library& library) {
-    this->operator=(library);
-}
-pe_import_library::~pe_import_library() {
-    functions.clear();
-}
-
-pe_import_library& pe_import_library::operator=(const pe_import_library& library) {
-
-    this->timestamp      = library.timestamp;
-    this->iat_rva        = library.iat_rva;
-    this->oft_rva        = library.oft_rva;
-    this->library_name_rva = library.library_name_rva;
-    this->library_name   = library.library_name;
-    this->is_bound      = library.is_bound;
-    this->functions     = library.functions;
-
-    return *this;
-}
-
-
 pe_import_library& pe_import_library::set_library_name(const std::string& library_name){
     this->library_name = library_name;
 
@@ -199,24 +156,6 @@ const std::vector<pe_import_function>& pe_import_library::get_functions() const 
 
 std::vector<pe_import_function>& pe_import_library::get_functions() {
     return this->functions;
-}
-
-
-pe_import_directory::pe_import_directory() {
-
-}
-pe_import_directory::pe_import_directory(const pe_import_directory& imports) {
-    this->operator=(imports);
-}
-pe_import_directory::~pe_import_directory() {
-
-}
-
-pe_import_directory& pe_import_directory::operator=(const pe_import_directory& imports) {
-
-    this->libraries = imports.libraries;
-
-    return *this;
 }
 
 void pe_import_directory::add_library(const pe_import_library& lib) {

@@ -6,11 +6,14 @@ class pe_bound_imported_ref{
     
 public:
     pe_bound_imported_ref();
-    pe_bound_imported_ref(const pe_bound_imported_ref& ref);
     pe_bound_imported_ref(const std::string& ref_name, uint32_t  timestamp);
-    ~pe_bound_imported_ref();
+    ~pe_bound_imported_ref() = default;
 
-    pe_bound_imported_ref& operator=(const pe_bound_imported_ref& ref);
+    pe_bound_imported_ref(const pe_bound_imported_ref&) = default;
+    pe_bound_imported_ref& operator=(const pe_bound_imported_ref&) = default;
+    pe_bound_imported_ref(pe_bound_imported_ref&&) = default;
+    pe_bound_imported_ref& operator=(pe_bound_imported_ref&&) = default;
+
 public:
     void set_ref_name(const std::string& ref_name);
     void set_timestamp(uint32_t  timestamp);
@@ -26,10 +29,13 @@ class pe_bound_library {
     std::vector<pe_bound_imported_ref> refs;
 public:
     pe_bound_library();
-    pe_bound_library(const pe_bound_library& lib);
-    ~pe_bound_library();
+    ~pe_bound_library() = default;
 
-    pe_bound_library& operator=(const pe_bound_library& lib);
+    pe_bound_library(const pe_bound_library&) = default;
+    pe_bound_library& operator=(const pe_bound_library&) = default;
+    pe_bound_library(pe_bound_library&&) = default;
+    pe_bound_library& operator=(pe_bound_library&&) = default;
+
 public:
     void set_library_name(const std::string& library_name);
     void set_timestamp(uint32_t  timestamp);
@@ -47,11 +53,14 @@ public:
 class pe_bound_import_directory {
     std::vector<pe_bound_library> libraries;
 public:
-    pe_bound_import_directory();
-    pe_bound_import_directory(const pe_bound_import_directory& imports);
-    ~pe_bound_import_directory();
+    pe_bound_import_directory() = default;
+    ~pe_bound_import_directory() = default;
 
-    pe_bound_import_directory& operator=(const pe_bound_import_directory& imports);
+    pe_bound_import_directory(const pe_bound_import_directory&) = default;
+    pe_bound_import_directory& operator=(const pe_bound_import_directory&) = default;
+    pe_bound_import_directory(pe_bound_import_directory&&) = default;
+    pe_bound_import_directory& operator=(pe_bound_import_directory&&) = default;
+
 public:
     void add_library(const pe_bound_library& lib);
     void clear();

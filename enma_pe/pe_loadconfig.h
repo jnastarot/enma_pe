@@ -49,7 +49,12 @@ class pe_load_config_directory{
     std::vector<uint32_t> guard_long_jump_targets_rva;
 public:
     pe_load_config_directory();
-    ~pe_load_config_directory();
+    ~pe_load_config_directory() = default;
+
+    pe_load_config_directory(const pe_load_config_directory&) = default;
+    pe_load_config_directory& operator=(const pe_load_config_directory&) = default;
+    pe_load_config_directory(pe_load_config_directory&&) = default;
+    pe_load_config_directory& operator=(pe_load_config_directory&&) = default;
 public:
     void set_size(uint32_t  size);
     void set_timestamp(uint32_t  timestamp);

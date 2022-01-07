@@ -1,21 +1,6 @@
 #include "stdafx.h"
 #include "pe_relocations.h"
 
-
-pe_relocations_directory::pe_relocations_directory() {
-
-}
-pe_relocations_directory::pe_relocations_directory(const pe_relocations_directory& relocations) {
-    this->operator=(relocations);
-}
-pe_relocations_directory::~pe_relocations_directory() {
-
-}
-pe_relocations_directory& pe_relocations_directory::operator=(const pe_relocations_directory& relocations) {
-    this->relocations = relocations.relocations;
-    return *this;
-}
-
 void pe_relocations_directory::add_relocation(uint32_t rva, uint32_t relocation_id, uint8_t type) {
     relocations.push_back({ rva , relocation_id, 0 , type });
 }

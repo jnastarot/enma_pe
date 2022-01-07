@@ -11,11 +11,13 @@ struct pe_relocation_entry {
 class pe_relocations_directory {
     std::vector<pe_relocation_entry> relocations;
 public:
-    pe_relocations_directory();
-    pe_relocations_directory(const pe_relocations_directory& relocations);
-    ~pe_relocations_directory();
+    pe_relocations_directory() = default;
+    ~pe_relocations_directory() = default;
 
-    pe_relocations_directory& operator=(const pe_relocations_directory& relocations);
+    pe_relocations_directory(const pe_relocations_directory&) = default;
+    pe_relocations_directory& operator=(const pe_relocations_directory&) = default;
+    pe_relocations_directory(pe_relocations_directory&&) = default;
+    pe_relocations_directory& operator=(pe_relocations_directory&&) = default;
 public:
     void add_relocation(uint32_t rva, uint32_t relocation_id, uint8_t type);
 

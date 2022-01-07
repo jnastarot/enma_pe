@@ -43,9 +43,6 @@ pe_load_config_directory::pe_load_config_directory()
         hot_patch_table_offset(0),
         enclave_configuration_pointer(0){}
 
-pe_load_config_directory::~pe_load_config_directory() {
-
-}
 void        pe_load_config_directory::set_size(uint32_t  size) {
     this->size = size;
 }

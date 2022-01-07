@@ -12,10 +12,6 @@ pe_debug_entry::pe_debug_entry() {
     this->pointer_to_raw_data = 0;
 }
 
-pe_debug_entry::pe_debug_entry(const pe_debug_entry& item) {
-    this->operator=(item);
-}
-
 pe_debug_entry::pe_debug_entry(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
     uint32_t   type, uint32_t   size_of_data, uint32_t   address_of_raw_data, uint32_t   pointer_to_raw_data,
     void * data) {
@@ -31,24 +27,6 @@ pe_debug_entry::pe_debug_entry(uint32_t   characteristics, uint32_t   timestamp,
 
     item_data.resize(this->size_of_data);
     memcpy(item_data.data(), data, this->size_of_data);
-}
-
-
-pe_debug_entry::~pe_debug_entry() {
-
-}
-  
-pe_debug_entry& pe_debug_entry::operator=(const pe_debug_entry& item) {
-    this->characteristics = item.characteristics;
-    this->timestamp = item.timestamp;
-    this->major_version = item.major_version;
-    this->minor_version = item.minor_version;
-    this->type = item.type;
-    this->size_of_data = item.size_of_data;
-    this->address_of_raw_data = item.address_of_raw_data;
-    this->pointer_to_raw_data = item.pointer_to_raw_data;
-    this->item_data = item.item_data;
-    return *this;
 }
 
 void  pe_debug_entry::set_characteristics(uint32_t characteristics) {

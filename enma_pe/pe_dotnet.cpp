@@ -17,9 +17,6 @@ pe_dotnet_directory::pe_dotnet_directory() {
     vtable_fixups = { 0,0 };
     export_address_table_jumps = {0,0};
 }
-pe_dotnet_directory::~pe_dotnet_directory() {
-
-}
 
 uint16_t pe_dotnet_directory::get_major_version() const {
     return major_version;

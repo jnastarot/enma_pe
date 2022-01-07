@@ -10,12 +10,14 @@ class pe_section{
     std::vector<uint8_t> section_data;
 public:
     pe_section();
-    pe_section(const pe_section& section);
     pe_section(const image_section_header& header);
     pe_section(const image_section_header& header, const std::vector<uint8_t>& data);
-    ~pe_section();
+    ~pe_section() = default;
     
-    pe_section& operator=(const pe_section& section);
+    pe_section(const pe_section&) = default;
+    pe_section& operator=(const pe_section&) = default;
+    pe_section(pe_section&&) = default;
+    pe_section& operator=(pe_section&&) = default;
 
 public:
     pe_section& set_section_name(const std::string& name);

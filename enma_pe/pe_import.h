@@ -14,13 +14,16 @@ class pe_import_function {
     bool b_import_by_name;
 public:
     pe_import_function();
-    pe_import_function(const pe_import_function& func);
     pe_import_function(uint32_t iat_rva, uint32_t oft_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item = 0, uint64_t oft_item = 0);
     pe_import_function(uint32_t iat_rva, uint32_t oft_rva, uint16_t ordinal, uint64_t iat_item = 0, uint64_t oft_item = 0);
 
-    ~pe_import_function();
+    ~pe_import_function() = default;
 
-    pe_import_function& operator=(const pe_import_function& func);
+    pe_import_function(const pe_import_function&) = default;
+    pe_import_function& operator=(const pe_import_function&) = default;
+    pe_import_function(pe_import_function&&) = default;
+    pe_import_function& operator=(pe_import_function&&) = default;
+
 public:
     pe_import_function& set_func_name(const std::string& func_name);
     pe_import_function& set_hint(uint16_t hint);
@@ -56,10 +59,13 @@ class pe_import_library {
 public:
     pe_import_library();
     pe_import_library(const std::string& library_name);
-    pe_import_library(const pe_import_library& library);
-    ~pe_import_library();
+    ~pe_import_library() = default;
 
-    pe_import_library& operator=(const pe_import_library& library);
+    pe_import_library(const pe_import_library&) = default;
+    pe_import_library& operator=(const pe_import_library&) = default;
+    pe_import_library(pe_import_library&&) = default;
+    pe_import_library& operator=(pe_import_library&&) = default;
+
 public:
     pe_import_library& set_library_name(const std::string& library_name);
     pe_import_library& set_timestamp(uint32_t timestamp);
@@ -87,11 +93,14 @@ public:
 class pe_import_directory {
     std::vector<pe_import_library> libraries;
 public:
-    pe_import_directory();
-    pe_import_directory(const pe_import_directory& imports);
-    ~pe_import_directory();
+    pe_import_directory() = default;
+    ~pe_import_directory() = default;
 
-    pe_import_directory& operator=(const pe_import_directory& imports);
+    pe_import_directory(const pe_import_directory&) = default;
+    pe_import_directory& operator=(const pe_import_directory&) = default;
+    pe_import_directory(pe_import_directory&&) = default;
+    pe_import_directory& operator=(pe_import_directory&&) = default;
+
 public:
     void add_library(const pe_import_library& lib);
     void clear();
