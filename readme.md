@@ -76,7 +76,7 @@ pe_image_io section_io(image, enma_io_addressing_type::enma_io_address_va);
 #### IO with size changing policy (allow incrase size)
 
 ```c++
-pe_image_io image_io(image, enma_io_mode::enma_io_mode_allow_expand, enma_io_addressing_type::enma_io_address_raw);
+pe_image_io image_io(image, enma_io_mode::enma_io_mode_allow_expand, enma_io_addressing_type::enma_io_address_rva);
 ```
 ```c++
 pe_image_io section_io(image, enma_io_mode::enma_io_mode_allow_expand, enma_io_addressing_type::enma_io_address_rva);
@@ -84,7 +84,7 @@ pe_image_io section_io(image, enma_io_mode::enma_io_mode_allow_expand, enma_io_a
 #### IO with size changing policy (disallow incrase size)
 
 ```c++
-pe_image_io image_io(image, enma_io_mode::enma_io_mode_default, enma_io_addressing_type::enma_io_address_raw);
+pe_image_io image_io(image, enma_io_mode::enma_io_mode_default, enma_io_addressing_type::enma_io_address_rva);
 ```
 ```c++
 pe_image_io section_io(image, enma_io_mode::enma_io_mode_default, enma_io_addressing_type::enma_io_address_rva);
@@ -118,7 +118,6 @@ int main() {
 ```
 #### Image write data
 
-Image IO using file offset (`raw`)
 ```c++
 using namespace enma;
 
@@ -126,8 +125,6 @@ int main() {
 
     pe_image image(L"C:\\Windows\\System32\\kernel32.dll");
     
-    pe_image_io image_io(image, enma_io_addressing_type::enma_io_address_rva);
-
     pe_image_io image_io(image, enma_io_addressing_type::enma_io_address_rva);
 
     std::vector<uint8_t> bytes_of_entry{0xCC};
