@@ -1,128 +1,24 @@
 #include "stdafx.h"
-#include "pe_debug.h"
 
-pe_debug_entry::pe_debug_entry() {
-    this->characteristics   = 0;
-    this->timestamp         = 0;
-    this->major_version     = 0;
-    this->minor_version     = 0;
-    this->type              = 0;
-    this->size_of_data      = 0;
-    this->address_of_raw_data = 0;
-    this->pointer_to_raw_data = 0;
-}
+using namespace enma;
 
-pe_debug_entry::pe_debug_entry(uint32_t   characteristics, uint32_t   timestamp, uint16_t    major_version, uint16_t    minor_version,
-    uint32_t   type, uint32_t   size_of_data, uint32_t   address_of_raw_data, uint32_t   pointer_to_raw_data,
-    void * data) {
+pe_debug_entry::pe_debug_entry(uint32_t characteristics, uint32_t timestamp, uint16_t major_version, uint16_t minor_version,
+    uint32_t type, uint32_t size_of_data, uint32_t address_of_raw_data, uint32_t pointer_to_raw_data,
+    void* data)
+    : _characteristics(characteristics)
+    , _timestamp(timestamp)
+    , _major_version(major_version)
+    , _minor_version(minor_version)
+    , _type(type)
+    , _size_of_data(size_of_data)
+    , _address_of_raw_data(address_of_raw_data)
+    , _pointer_to_raw_data(pointer_to_raw_data) {
 
-    this->characteristics = characteristics;
-    this->timestamp = timestamp;
-    this->major_version = major_version;
-    this->minor_version = minor_version;
-    this->type = type;
-    this->size_of_data = size_of_data;
-    this->address_of_raw_data = address_of_raw_data;
-    this->pointer_to_raw_data = pointer_to_raw_data;
-
-    item_data.resize(this->size_of_data);
-    memcpy(item_data.data(), data, this->size_of_data);
+    _item_data.resize(_size_of_data);
+    memcpy(_item_data.data(), data, _size_of_data);
 }
 
-void  pe_debug_entry::set_characteristics(uint32_t characteristics) {
-    this->characteristics = characteristics;
-}
-void  pe_debug_entry::set_timestamp(uint32_t timestamp) {
-    this->timestamp = timestamp;
-}
-void  pe_debug_entry::set_major_version(uint16_t major_version){
-    this->major_version = major_version;
-}
-void  pe_debug_entry::set_minor_version(uint16_t minor_version) {
-    this->minor_version = minor_version;
-}
-void  pe_debug_entry::set_type(uint32_t type) {
-    this->type = type;
-}
-void  pe_debug_entry::set_size_of_data(uint32_t size_of_data) {
-    this->size_of_data = size_of_data;
-}
-void  pe_debug_entry::set_address_of_raw_data(uint32_t address_of_raw_data) {
-    this->address_of_raw_data = address_of_raw_data;
-}
-void  pe_debug_entry::set_pointer_to_raw_data(uint32_t pointer_to_raw_data) {
-    this->pointer_to_raw_data = pointer_to_raw_data;
-}
-
-uint32_t  pe_debug_entry::get_characteristics() const {
-    return this->characteristics;
-}
-uint32_t  pe_debug_entry::get_timestamp() const {
-    return this->timestamp;
-}
-uint16_t   pe_debug_entry::get_major_version() const{
-    return this->major_version;
-}
-uint16_t   pe_debug_entry::get_minor_version() const {
-    return this->minor_version;
-}
-uint32_t  pe_debug_entry::get_type() const {
-    return this->type;
-}
-uint32_t  pe_debug_entry::get_size_of_data() const {
-    return this->size_of_data;
-}
-uint32_t  pe_debug_entry::get_address_of_raw_data() const {
-    return this->address_of_raw_data;
-}
-uint32_t  pe_debug_entry::get_pointer_to_raw_data() const {
-    return this->pointer_to_raw_data;
-}
-const std::vector<uint8_t>& pe_debug_entry::get_item_data() const {
-    return this->item_data;
-}
-std::vector<uint8_t>& pe_debug_entry::get_item_data() {
-    return this->item_data;
-}
-
-
-pe_debug_directory::pe_debug_directory() {
-
-}
-pe_debug_directory::pe_debug_directory(const pe_debug_directory& debug) {
-    this->operator=(debug);
-}
-pe_debug_directory::~pe_debug_directory() {
-
-}
-
-pe_debug_directory& pe_debug_directory::operator=(const pe_debug_directory& debug) {
-    this->entries = debug.entries;
-    return *this;
-}
-
-void pe_debug_directory::add_entry(const pe_debug_entry& item) {
-    entries.push_back(item);
-}
-
-void pe_debug_directory::clear() {
-    this->entries.clear();
-}
-
-size_t pe_debug_directory::size() const {
-    return entries.size();
-}
-
-const std::vector<pe_debug_entry>& pe_debug_directory::get_entries() const {
-    return entries;
-}
-
-std::vector<pe_debug_entry>& pe_debug_directory::get_entries() {
-    return entries;
-}
-
-
-pe_directory_code get_debug_directory(const pe_image &image, pe_debug_directory& debug) {
+pe_directory_code enma::get_debug_directory(const pe_image &image, pe_debug_directory& debug) {
     debug.get_entries().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
@@ -185,7 +81,7 @@ pe_directory_code get_debug_directory(const pe_image &image, pe_debug_directory&
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-pe_directory_code get_placement_debug_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_debug_directory(const pe_image &image, pe_placement& placement) {
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_DEBUG);
     uint32_t virtual_size = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_DEBUG);

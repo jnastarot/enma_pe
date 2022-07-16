@@ -1,186 +1,10 @@
 #include "stdafx.h"
-#include "pe_import.h"
 
-
-pe_import_function::pe_import_function() 
- :hint(0), ordinal(0), b_import_by_name(0), 
-    iat_rva(0), iat_item(0), oft_rva(0), oft_item(0) {
-}
-
-pe_import_function::pe_import_function(uint32_t iat_rva, uint32_t oft_rva, const std::string& func_name, uint16_t hint, uint64_t iat_item, uint64_t oft_item):
-    iat_rva(iat_rva), oft_rva(oft_rva),  hint(hint), func_name(func_name), ordinal(0), iat_item(iat_item), oft_item(oft_item), b_import_by_name(true){
-
-}
-pe_import_function::pe_import_function(uint32_t iat_rva, uint32_t oft_rva, uint16_t ordinal, uint64_t iat_item, uint64_t oft_item):
-    iat_rva(iat_rva), oft_rva(oft_rva), hint(0), func_name(""), ordinal(ordinal), iat_item(iat_item), oft_item(oft_item), b_import_by_name(false){
-}
-
-pe_import_function& pe_import_function::set_hint(uint16_t hint) {
-    this->hint = hint;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_ordinal(uint16_t ordinal) {
-    this->b_import_by_name = false;
-    this->ordinal = ordinal;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_func_name(const std::string& func_name) {
-    this->b_import_by_name = true;
-    this->func_name = func_name;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_import_by_name(bool b) {
-    this->b_import_by_name = b;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_iat_rva(uint32_t rva) {
-    this->iat_rva = rva;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_iat_item(uint64_t iat_item) {
-    this->iat_item = iat_item;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_oft_rva(uint32_t rva) {
-    this->oft_rva = rva;
-
-    return *this;
-}
-pe_import_function& pe_import_function::set_oft_item(uint64_t oft_item) {
-    this->oft_item = oft_item;
-
-    return *this;
-}
-uint16_t pe_import_function::get_hint() const {
-    return this->hint;
-}
-uint16_t pe_import_function::get_ordinal() const {
-    return this->ordinal;
-}
-std::string pe_import_function::get_func_name() const {
-    return this->func_name;
-}
-bool  pe_import_function::is_import_by_name() const {
-    return this->b_import_by_name;
-}
-uint32_t pe_import_function::get_iat_rva() const {
-    return this->iat_rva;
-}
-uint64_t pe_import_function::get_iat_item()const {
-    return this->iat_item;
-}
-uint32_t pe_import_function::get_oft_rva() const {
-    return this->oft_rva;
-}
-uint64_t pe_import_function::get_oft_item()const {
-    return this->oft_item;
-}
-pe_import_library::pe_import_library() 
- : timestamp(0), is_bound(0), iat_rva(-1), oft_rva(-1), library_name_rva(0){
-}
-
-pe_import_library::pe_import_library(const std::string& library_name) 
-  : timestamp(0), is_bound(0), iat_rva(-1), oft_rva(-1), library_name_rva(0), library_name(library_name){
-}
-
-pe_import_library& pe_import_library::set_library_name(const std::string& library_name){
-    this->library_name = library_name;
-
-    return *this;
-}
-pe_import_library& pe_import_library::set_timestamp(uint32_t timestamp) {
-    this->timestamp = timestamp;
-
-    return *this;
-}
-pe_import_library& pe_import_library::set_rva_iat(uint32_t rva) {
-    this->iat_rva = rva;
-
-    return *this;
-}
-pe_import_library& pe_import_library::set_rva_oft(uint32_t rva) {
-    this->oft_rva = rva;
-
-    return *this;
-}
-pe_import_library& pe_import_library::set_rva_library_name(uint32_t rva) {
-    this->library_name_rva = rva;
-
-    return *this;
-}
-pe_import_library& pe_import_library::set_bound_library(bool is_bound) {
-    this->is_bound = is_bound;
-
-    return *this;
-}
-pe_import_library& pe_import_library::add_function(const pe_import_function& function) {
-    this->functions.push_back(function);
-
-    return *this;
-}
-void pe_import_library::clear() {
-    this->functions.clear();
-}
-
-size_t pe_import_library::size() {
-    return this->functions.size();
-}
-
-std::string pe_import_library::get_library_name() const {
-    return this->library_name;
-}
-uint32_t pe_import_library::get_timestamp() const {
-    return this->timestamp;
-}
-uint32_t pe_import_library::get_rva_iat() const {
-    return this->iat_rva;
-}
-uint32_t pe_import_library::get_rva_oft() const {
-    return this->oft_rva;
-}
-uint32_t pe_import_library::get_rva_library_name() const {
-    return this->library_name_rva;
-}
-bool pe_import_library::is_bound_library() const {
-    return this->is_bound;
-}
-const std::vector<pe_import_function>& pe_import_library::get_functions() const {
-    return this->functions;
-}
-
-std::vector<pe_import_function>& pe_import_library::get_functions() {
-    return this->functions;
-}
-
-void pe_import_directory::add_library(const pe_import_library& lib) {
-    this->libraries.push_back(lib);
-}
-
-void pe_import_directory::clear() {
-    this->libraries.clear();
-}
-
-size_t pe_import_directory::size() {
-    return this->libraries.size();
-}
-
-std::vector<pe_import_library>& pe_import_directory::get_libraries() {
-    return this->libraries;
-}
-
-const std::vector<pe_import_library>& pe_import_directory::get_libraries() const {
-    return this->libraries;
-}
+using namespace enma;
 
 bool pe_import_directory::get_imported_lib(const std::string& lib_name, pe_import_library * &lib) {
 
-    for (auto& library : libraries) {
+    for (auto& library : _libraries) {
         if (library.get_library_name() == lib_name) {
 
             lib = &library;
@@ -190,9 +14,10 @@ bool pe_import_directory::get_imported_lib(const std::string& lib_name, pe_impor
 
     return false;
 }
+
 bool pe_import_directory::get_imported_func(const std::string& lib_name, const std::string& func_name, pe_import_library * &lib, pe_import_function * &_func) {
 
-    for (auto& library : libraries) {
+    for (auto& library : _libraries) {
         if (library.get_library_name() == lib_name) {
             for (auto& func : library.get_functions()) {
                 if (func.is_import_by_name() && func.get_func_name() == func_name) {
@@ -208,9 +33,10 @@ bool pe_import_directory::get_imported_func(const std::string& lib_name, const s
 
     return false;
 }
+
 bool pe_import_directory::get_imported_func(const std::string& lib_name, uint16_t ordinal, pe_import_library * &lib, pe_import_function * &_func) {
 
-    for (auto& library : libraries) {
+    for (auto& library : _libraries) {
         if (library.get_library_name() == lib_name) {
             for (auto& func : library.get_functions()) {
                 if (!func.is_import_by_name() && func.get_ordinal() == ordinal) {
@@ -592,7 +418,6 @@ bool _build_internal_import_directory_data(pe_image &image, pe_section& section,
     return true;
 }
 
-
 template<typename image_format>
 pe_directory_code _get_placement_import_directory(const pe_image &image, pe_placement& placement,
     const pe_bound_import_directory& bound_imports) {
@@ -730,8 +555,7 @@ pe_directory_code _get_placement_import_directory(const pe_image &image, pe_plac
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-
-pe_directory_code get_import_directory(const pe_image &image, pe_import_directory& imports, const pe_bound_import_directory& bound_imports) {
+pe_directory_code enma::get_import_directory(const pe_image &image, pe_import_directory& imports, const pe_bound_import_directory& bound_imports) {
 
     if (image.is_x32_image()) {
         return _get_import_directory<pe_image_32>(image, imports, bound_imports);
@@ -741,8 +565,7 @@ pe_directory_code get_import_directory(const pe_image &image, pe_import_director
     }
 }
 
-
-bool build_internal_import_directory_data(pe_image &image, pe_section& section, pe_import_directory& imports,
+bool enma::build_internal_import_directory_data(pe_image &image, pe_section& section, pe_import_directory& imports,
      uint32_t build_items_ids/*import_table_build_id*/, 
     uint32_t iat_rva, uint32_t oft_rva, uint32_t names_rva,
 
@@ -760,8 +583,7 @@ bool build_internal_import_directory_data(pe_image &image, pe_section& section, 
     }
 }
 
-
-bool build_import_directory_only(pe_image &image, pe_section& section, pe_import_directory& imports,
+bool enma::build_import_directory_only(pe_image &image, pe_section& section, pe_import_directory& imports,
     uint32_t desc_rva) {
 
     if (imports.size()) {
@@ -805,7 +627,7 @@ bool build_import_directory_only(pe_image &image, pe_section& section, pe_import
     return true;
 }
 
-bool build_import_directory_full(pe_image &image,
+bool enma::build_import_directory_full(pe_image &image,
     pe_section& section, pe_import_directory& imports,
     uint32_t iat_rva, uint32_t oft_rva, uint32_t names_rva, uint32_t desc_rva,
     const pe_bound_import_directory* bound_imports) {
@@ -816,7 +638,7 @@ bool build_import_directory_full(pe_image &image,
         build_import_directory_only(image,section,imports, desc_rva);
 }
 
-pe_directory_code get_placement_import_directory(const pe_image &image, pe_placement& placement,
+pe_directory_code enma::get_placement_import_directory(const pe_image &image, pe_placement& placement,
     const pe_bound_import_directory& bound_imports) {
 
     if (image.is_x32_image()) {

@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "pe_builder.h"
 
+using namespace enma;
 
-std::vector<uint8_t> get_dos_headers(pe_image& image, uint32_t build_flags, size_t& headers_size) {
+static std::vector<uint8_t> get_dos_headers(pe_image& image, uint32_t build_flags, size_t& headers_size) {
 #define GET_RICH_HASH(x,i) (((x) << (i)) | ((x) >> (32 - (i))))
 
     std::vector<uint8_t> image_start;
@@ -168,7 +168,7 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     memcpy(header.data(), &nt_header, sizeof(nt_header));
 }
 
-void get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>& header) {
+static void get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>& header) {
 
     if (image.is_x32_image()) {
         _get_nt_header<pe_image_32>(image, header_size, header);
@@ -178,7 +178,7 @@ void get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>& 
     }
 }
 
-size_t calculate_headers_size(pe_image& image, size_t dos_headers_size, uint32_t new_sections) {
+static size_t calculate_headers_size(pe_image& image, size_t dos_headers_size, uint32_t new_sections) {
 
     uint32_t total_sections = (uint32_t)image.get_sections_number() + new_sections;
 
@@ -191,7 +191,7 @@ size_t calculate_headers_size(pe_image& image, size_t dos_headers_size, uint32_t
     );
 }
 
-uint32_t get_new_sections_count(pe_image_full& image_full, uint32_t build_flags) {
+static uint32_t get_new_sections_count(pe_image_full& image_full, uint32_t build_flags) {
 
     uint32_t new_sections = 0;
 
@@ -236,7 +236,7 @@ uint32_t get_new_sections_count(pe_image_full& image_full, uint32_t build_flags)
     return new_sections;
 }
 
-void align_sections(pe_image& image, uint32_t start_header_size) {
+static void align_sections(pe_image& image, uint32_t start_header_size) {
 
     uint32_t current_section_raw = start_header_size;
 
@@ -254,7 +254,7 @@ void align_sections(pe_image& image, uint32_t start_header_size) {
     }
 }
 
-void build_directories(pe_image_full& image_full, uint32_t build_flags) {
+static void build_directories(pe_image_full& image_full, uint32_t build_flags) {
 
     if ((image_full.get_imports().size() && (build_flags & PE_IMAGE_BUILD_DIR_IMPORT)) ||
         (image_full.get_exports().size() && (build_flags & PE_IMAGE_BUILD_DIR_EXPORT)) ||
@@ -345,7 +345,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
             }
 
             if ((!image_full.get_image().is_x32_image() && image_full.get_exceptions().size())) { //build exceptions
-                build_extended_exceptions_info(image_full);
+                hl::build_extended_exceptions_info(image_full);
                 build_exceptions_directory(image_full.get_image(), *pdata_section, image_full.get_exceptions(), image_full.get_relocations(), true);
             }
         }
@@ -389,7 +389,7 @@ void build_directories(pe_image_full& image_full, uint32_t build_flags) {
     }
 }
 
-bool build_pe_image(pe_image& image, uint32_t build_flags, std::vector<uint8_t>& out_image) {
+bool enma::build_pe_image(pe_image& image, uint32_t build_flags, std::vector<uint8_t>& out_image) {
 
     out_image.clear();
 
@@ -463,7 +463,7 @@ bool build_pe_image(pe_image& image, uint32_t build_flags, std::vector<uint8_t>&
     }
 
     if (build_flags & PE_IMAGE_BUILD_UPD_CHECKSUM) {
-        *(uint32_t*)&out_image[dos_headers_size + offsetof(image_nt_headers32, optional_header.checksum)] = calculate_checksum(out_image);
+        *(uint32_t*)&out_image[dos_headers_size + offsetof(image_nt_headers32, optional_header.checksum)] = hl::calculate_checksum(out_image);
     }
 
     if (image.get_overlay_data().size() && build_flags & PE_IMAGE_BUILD_OVERLAY) {
@@ -476,7 +476,7 @@ bool build_pe_image(pe_image& image, uint32_t build_flags, std::vector<uint8_t>&
     return true;
 }
 
-bool build_pe_image_full(pe_image_full& image_full, uint32_t build_flags, std::vector<uint8_t>& out_image) {
+bool enma::build_pe_image_full(pe_image_full& image_full, uint32_t build_flags, std::vector<uint8_t>& out_image) {
 
     size_t dos_headers_size;
     size_t nt_headers_size;

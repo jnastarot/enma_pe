@@ -1,63 +1,8 @@
 #include "stdafx.h"
-#include "pe_security.h"
 
+using namespace enma;
 
-pe_security_entry::pe_security_entry() {
-    revision = 0;
-    certificate_type = 0;
-}
-
-pe_security_entry::pe_security_entry(uint16_t revision, uint16_t certificate_type, std::vector<uint8_t>& certificate_data)
-:revision(revision), certificate_type(certificate_type), certificate_data(certificate_data){}
-
-void   pe_security_entry::set_revision(uint16_t revision) {
-    this->revision = revision;
-}
-void   pe_security_entry::set_certificate_type(uint16_t type) {
-    this->certificate_type = type;
-}
-
-void pe_security_entry::set_certificate_data(const std::vector<uint8_t>& data) {
-    this->certificate_data = data;
-}
-
-uint16_t   pe_security_entry::get_revision() const {
-    return this->revision;
-}
-
-uint16_t   pe_security_entry::get_certificate_type() const {
-    return this->certificate_type;
-}
-
-const std::vector<uint8_t>& pe_security_entry::get_certificate_data() const {
-    return this->certificate_data;
-}
-
-std::vector<uint8_t>& pe_security_entry::get_certificate_data() {
-    return this->certificate_data;
-}
-
-void pe_security_directory::add_certificate(const pe_security_entry& item) {
-    this->certificates.push_back(item);
-}
-
-void pe_security_directory::clear() {
-    this->certificates.clear();
-}
-
-size_t pe_security_directory::get_certificates_count() const {
-    return this->certificates.size();
-}
-
-const std::vector<pe_security_entry>& pe_security_directory::get_certificates() const {
-    return this->certificates;
-}
-
-std::vector<pe_security_entry>& pe_security_directory::get_certificates() {
-    return this->certificates;
-}
-
-pe_directory_code get_security_directory(const pe_image &image, pe_security_directory& security) {
+pe_directory_code enma::get_security_directory(const pe_image &image, pe_security_directory& security) {
     security.clear();
 
     uint32_t raw_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_SECURITY);
@@ -101,8 +46,7 @@ pe_directory_code get_security_directory(const pe_image &image, pe_security_dire
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-
-pe_directory_code get_placement_security_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_security_directory(const pe_image &image, pe_placement& placement) {
 
 
     uint32_t raw_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_SECURITY);

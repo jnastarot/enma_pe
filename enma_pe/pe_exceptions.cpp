@@ -1,271 +1,47 @@
-
 #include "stdafx.h"
-#include "pe_exceptions.h"
 
-
-pe_exception_unwind_info::pe_exception_unwind_info() 
-    :unwind_info_rva(0), version(0), flags(0), size_of_prolog(0),
-    count_of_codes(0), frame_register(0), frame_offset(0),
-    handler_rva(0), chained_entry(0) {}
-
-pe_exception_unwind_info::pe_exception_unwind_info(uint32_t unwind_info_rva, uint8_t version,
-    uint8_t flags, uint8_t size_of_prolog, uint8_t count_of_codes, uint8_t frame_register, uint8_t frame_offset) 
-    :unwind_info_rva(unwind_info_rva), version(version), flags(flags), size_of_prolog(size_of_prolog), 
-    count_of_codes(count_of_codes), frame_register(frame_register), frame_offset(frame_offset), 
-    handler_rva(0), chained_entry(0) {}
+using namespace enma;
+using namespace hl;
 
 pe_exception_unwind_info::pe_exception_unwind_info(const pe_exception_unwind_info& item) {
-    this->operator=(item);
+    operator=(item);
 }
 
 pe_exception_unwind_info::~pe_exception_unwind_info() {
-    if (chained_entry) {
-        delete chained_entry;
-        chained_entry = 0;
+    
+    if (_chained_entry) {
+        delete _chained_entry;
+        _chained_entry = 0;
     }
 }
 
 pe_exception_unwind_info& pe_exception_unwind_info::operator=(const pe_exception_unwind_info& item) {
-    this->unwind_info_rva = item.unwind_info_rva;
-    this->version = item.version;
-    this->flags = item.flags;
-    this->size_of_prolog = item.size_of_prolog;
-    this->count_of_codes = item.count_of_codes;
-    this->frame_register = item.frame_register;
-    this->frame_offset = item.frame_offset;
-    this->handler_rva = item.handler_rva;
+    
+    _unwind_info_rva = item._unwind_info_rva;
+    _version = item._version;
+    _flags = item._flags;
+    _size_of_prolog = item._size_of_prolog;
+    _count_of_codes = item._count_of_codes;
+    _frame_register = item._frame_register;
+    _frame_offset = item._frame_offset;
+    _handler_rva = item._handler_rva;
 
-    if (item.chained_entry) {
-        this->chained_entry = new pe_exception_entry(*item.chained_entry);
+    if (item._chained_entry) {
+        _chained_entry = new pe_exception_entry(*item._chained_entry);
     }
     else {
-        this->chained_entry = 0;
+        _chained_entry = 0;
     }
     
-    this->codes = item.codes;
-    this->params = item.params;
+    _codes = item._codes;
+    _params = item._params;
 
-    this->custom_parameter = item.custom_parameter;
-
-    return *this;
-}
-
-
-void pe_exception_unwind_info::add_unwind_code(const unwind_code& code) {
-    codes.push_back(code);
-}
-
-void pe_exception_unwind_info::set_version(uint8_t version) {
-    this->version = version;
-}
-
-void pe_exception_unwind_info::set_flags(uint8_t flags) {
-    this->flags = flags;
-}
-
-void pe_exception_unwind_info::set_size_of_prolog(uint8_t size_of_prolog) {
-    this->size_of_prolog = size_of_prolog;
-}
-
-void pe_exception_unwind_info::set_count_of_codes(uint8_t count_of_codes) {
-    this->count_of_codes = count_of_codes;
-}
-
-void pe_exception_unwind_info::set_frame_register(uint8_t frame_register) {
-    this->frame_register = frame_register;
-}
-
-void pe_exception_unwind_info::set_frame_offset(uint8_t frame_offset) {
-    this->frame_offset = frame_offset;
-}
-
-void pe_exception_unwind_info::set_chained_entry(pe_exception_entry * chained_entry) {
-    this->chained_entry = chained_entry;
-}
-
-void pe_exception_unwind_info::set_unwind_info_rva(uint32_t rva) {
-    this->unwind_info_rva = rva;
-}
-
-void pe_exception_unwind_info::set_codes(std::vector<unwind_code> &codes) {
-    this->codes = codes;
-}
-
-void pe_exception_unwind_info::set_params(std::vector<unwind_parameter> &params) {
-    this->params = params;
-}
-
-void pe_exception_unwind_info::set_custom_parameter(const exceptions_handler_specific_data& custom_parameter) {
-    this->custom_parameter = custom_parameter;
-}
-
-void pe_exception_unwind_info::set_handler_rva(uint32_t rva) {
-    this->handler_rva = rva;
-}
-
-uint8_t pe_exception_unwind_info::get_version() const {
-    return this->version;
-}
-
-uint8_t pe_exception_unwind_info::get_flags() const {
-    return this->flags;
-}
-
-uint8_t pe_exception_unwind_info::get_size_of_prolog() const {
-    return this->size_of_prolog;
-}
-
-uint8_t pe_exception_unwind_info::get_count_of_codes() const {
-    return this->count_of_codes;
-}
-
-uint8_t pe_exception_unwind_info::get_frame_register() const {
-    return this->frame_register;
-}
-uint8_t pe_exception_unwind_info::get_frame_offset() const {
-    return this->frame_offset;
-}
-
-std::vector<unwind_code>& pe_exception_unwind_info::get_codes() {
-    return this->codes;
-}
-
-const std::vector<unwind_code>& pe_exception_unwind_info::get_codes() const {
-    return this->codes;
-}
-
-std::vector<unwind_parameter>& pe_exception_unwind_info::get_params() {
-    return this->params;
-}
-
-const std::vector<unwind_parameter>& pe_exception_unwind_info::get_params() const {
-    return this->params;
-}
-
-exceptions_handler_specific_data& pe_exception_unwind_info::get_custom_parameter() {
-    return this->custom_parameter;
-}
-
-const exceptions_handler_specific_data& pe_exception_unwind_info::get_custom_parameter() const {
-    return this->custom_parameter;
-}
-
-const pe_exception_entry * pe_exception_unwind_info::get_chained_entry() const {
-    return this->chained_entry;
-}
-
-pe_exception_entry * pe_exception_unwind_info::get_chained_entry() {
-    return this->chained_entry;
-}
-
-uint32_t pe_exception_unwind_info::get_handler_rva() const {
-    return this->handler_rva;
-}
-
-uint32_t pe_exception_unwind_info::get_unwind_info_rva() const {
-    return this->unwind_info_rva;
-}
-
-pe_exception_entry::pe_exception_entry() :
-    address_begin(0), address_end(0), address_unwind_data(0) {}
-
-pe_exception_entry::pe_exception_entry(const pe_exception_entry& entry) {
-    this->operator=(entry);
-}
-pe_exception_entry::pe_exception_entry(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data):
-    address_begin(address_begin), address_end(address_end), address_unwind_data(address_unwind_data){}
-
-pe_exception_entry::~pe_exception_entry() {}
-
-pe_exception_entry& pe_exception_entry::operator=(const pe_exception_entry& entry) {
-
-    this->address_begin = entry.address_begin;
-    this->address_end = entry.address_end;
-    this->address_unwind_data = entry.address_unwind_data;
+    _custom_parameter = item._custom_parameter;
 
     return *this;
 }
 
-void pe_exception_entry::set_begin_address(uint32_t rva_address) {
-    this->address_begin = rva_address;
-}
-void pe_exception_entry::set_end_address(uint32_t rva_address) {
-    this->address_end = rva_address;
-}
-void pe_exception_entry::set_unwind_data_address(uint32_t rva_address) {
-    this->address_unwind_data = rva_address;
-}
-
-uint32_t pe_exception_entry::get_begin_address() const {
-    return address_begin;
-}
-uint32_t pe_exception_entry::get_end_address() const {
-    return address_end;
-}
-uint32_t pe_exception_entry::get_unwind_data_address() const {
-    return address_unwind_data;
-}
-
-
-
-pe_exceptions_directory::pe_exceptions_directory() {
-
-}
-pe_exceptions_directory::pe_exceptions_directory(const pe_exceptions_directory& exceptions) {
-    this->operator=(exceptions);
-}
-pe_exceptions_directory::~pe_exceptions_directory() {
-
-}
-
-pe_exceptions_directory& pe_exceptions_directory::operator=(const pe_exceptions_directory& exceptions) {
-    this->exception_entries = exceptions.exception_entries;
-    this->unwind_entries = exceptions.unwind_entries;
-
-    return *this;
-}
-
-void pe_exceptions_directory::add_exception_entry(uint32_t address_begin, uint32_t address_end, uint32_t address_unwind_data) {
-    exception_entries.push_back(pe_exception_entry(address_begin, address_end, address_unwind_data));
-}
-void pe_exceptions_directory::add_exception_entry(const pe_exception_entry& entry) {
-    exception_entries.push_back(entry);
-}
-
-void pe_exceptions_directory::add_unwind_entry(const pe_exception_unwind_info& entry) {
-    this->unwind_entries.push_back(entry);
-}
-
-void pe_exceptions_directory::add_item(const runtime_function_entry& exc_entry) {
-    exception_entries.push_back(pe_exception_entry(exc_entry.begin_address, exc_entry.end_address, exc_entry.unwind_info_address));
-}
-void pe_exceptions_directory::clear() {
-    this->exception_entries.clear();
-}
-
-size_t pe_exceptions_directory::size() const {
-    return exception_entries.size();
-}
-
-const std::vector<pe_exception_unwind_info>& pe_exceptions_directory::get_unwind_entries() const {
-    return this->unwind_entries;
-}
-
-std::vector<pe_exception_unwind_info>& pe_exceptions_directory::get_unwind_entries() {
-    return this->unwind_entries;
-}
-
-const std::vector<pe_exception_entry>& pe_exceptions_directory::get_exception_entries() const {
-    return exception_entries;
-}
-
-std::vector<pe_exception_entry>& pe_exceptions_directory::get_exception_entries() {
-    return exception_entries;
-}
-
-
-
-pe_directory_code handle_unwind_info(const pe_image &image, uint32_t rva, pe_exceptions_directory& exceptions) {
+static pe_directory_code handle_unwind_info(const pe_image &image, uint32_t rva, pe_exceptions_directory& exceptions) {
    
     for (auto& entry : exceptions.get_unwind_entries()) {
         if (entry.get_unwind_info_rva() == rva) { 
@@ -346,7 +122,7 @@ pe_directory_code handle_unwind_info(const pe_image &image, uint32_t rva, pe_exc
 }
 
 
-pe_directory_code get_exception_directory(const pe_image &image, pe_exceptions_directory& exceptions) {
+pe_directory_code enma::get_exception_directory(const pe_image &image, pe_exceptions_directory& exceptions) {
     exceptions.get_exception_entries().clear();
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXCEPTION);
@@ -384,7 +160,7 @@ pe_directory_code get_exception_directory(const pe_image &image, pe_exceptions_d
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-bool build_exceptions_directory(pe_image &image, pe_section& section, pe_exceptions_directory& exceptions,
+bool enma::build_exceptions_directory(pe_image &image, pe_section& section, pe_exceptions_directory& exceptions,
         pe_relocations_directory& relocs, bool build_unwindinfo) {
 
 
@@ -512,7 +288,7 @@ bool build_exceptions_directory(pe_image &image, pe_section& section, pe_excepti
 }
 
 
-pe_directory_code get_placement_exceptions_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_exceptions_directory(const pe_image &image, pe_placement& placement) {
 
     pe_exceptions_directory _exceptions;
     pe_directory_code code = get_exception_directory(image, _exceptions);

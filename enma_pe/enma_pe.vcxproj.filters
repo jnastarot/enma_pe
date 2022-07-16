@@ -12,9 +12,6 @@
     <Filter Include="Заголовочные файлы\pe_image">
       <UniqueIdentifier>{296bbd16-b401-4556-ae7b-5caa30643b3f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers">
-      <UniqueIdentifier>{e3f2cd7a-58ec-41b0-bedb-1e09e933aade}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Заголовочные файлы\pe_image\pe_section">
       <UniqueIdentifier>{d33f4dd3-cf26-486f-aa10-bcc8eef25b19}</UniqueIdentifier>
     </Filter>
@@ -66,115 +63,145 @@
     <Filter Include="Заголовочные файлы\pe_io\pe_image_io">
       <UniqueIdentifier>{c0009d24-c11d-4370-a4c8-5aba0e44c509}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_exceptions_helper">
-      <UniqueIdentifier>{660c532b-c578-45cc-b02e-6096a76311de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_rtti_helper">
-      <UniqueIdentifier>{a4f78c24-5ebc-41cf-a34a-25bc7dec0cc9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Заголовочные файлы\pe_builder">
       <UniqueIdentifier>{4381cbcc-1518-4dac-96ae-5ca8fa64841f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_string_helper">
-      <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_headers_helper">
+    <Filter Include="Заголовочные файлы\pe_image\pe_headers">
       <UniqueIdentifier>{dfa26933-359a-49ea-9883-097619fca73b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_resources_helper">
+    <Filter Include="Заголовочные файлы\pe_highlevel">
+      <UniqueIdentifier>{e3f2cd7a-58ec-41b0-bedb-1e09e933aade}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_rtti">
+      <UniqueIdentifier>{a4f78c24-5ebc-41cf-a34a-25bc7dec0cc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_strings">
+      <UniqueIdentifier>{8190a6f5-70fa-470f-95c3-77a901d3d7be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_exceptions">
+      <UniqueIdentifier>{660c532b-c578-45cc-b02e-6096a76311de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_resources">
       <UniqueIdentifier>{cce27666-cdb9-4bc5-9c37-2609a08082de}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\pe_helpers\pe_resources_helper\pe_file_version_info">
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_resources\version_info">
       <UniqueIdentifier>{c172ddb2-9857-4b52-908a-0a2cf83ecd0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_resources\icon_groups">
+      <UniqueIdentifier>{93e3bac8-a733-4d7d-955d-46987ef159b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_utility">
+      <UniqueIdentifier>{296bd27b-7f1f-41cc-a387-c520a0143db9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_resources\preview">
+      <UniqueIdentifier>{30eb675a-eff6-4f2b-a8d0-44b367367c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_resources\preview\preview_icon">
+      <UniqueIdentifier>{e54fae85-382c-434b-9a2b-9e1e9c7a0b73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\pe_highlevel\image_resources\preview\preview_version">
+      <UniqueIdentifier>{936bfd10-2e06-437b-9fae-4355e44d7407}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="pe_section.h">
-      <Filter>Заголовочные файлы\pe_image\pe_section</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_image.h">
-      <Filter>Заголовочные файлы\pe_image</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_relocations.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_relocations</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_export.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_export</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_import.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_resources.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_resources</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_exceptions.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_debug.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_debug</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_loadconfig.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_loadconfig</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_delay_import.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_delayimport</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_tls.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_tls</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_dotnet.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_dotnet</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_bound_import.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_helper.h">
-      <Filter>Заголовочные файлы\pe_helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="enma_pe.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_security.h">
-      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
-    </ClInclude>
-    <ClInclude Include="enma_pe_internal.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_image_io.h">
-      <Filter>Заголовочные файлы\pe_io\pe_image_io</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_section_io.h">
-      <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
-    </ClInclude>
-    <ClInclude Include="enma_pe_properties.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_exceptions_helper.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_rtti_helper.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_rtti_helper</Filter>
-    </ClInclude>
-    <ClInclude Include="pe_builder.h">
+    <ClInclude Include="..\include\pe_builder.h">
       <Filter>Заголовочные файлы\pe_builder</Filter>
     </ClInclude>
-    <ClInclude Include="pe_image_full.h">
+    <ClInclude Include="..\include\enma_pe.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\enma_pe_internal.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\enma_pe_properties.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_tls.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_tls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_security.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_section_io.h">
+      <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_section.h">
+      <Filter>Заголовочные файлы\pe_image\pe_section</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_resources.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_relocations.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_relocations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_preview_icon.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\preview\preview_icon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_loadconfig.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_loadconfig</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_import.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_version_info.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\version_info</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_utility.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_rtti.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_rtti</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_strings.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_strings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_resources_hl.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_io.h">
+      <Filter>Заголовочные файлы\pe_io\pe_image_io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_icon_groups.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\icon_groups</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_image_full.h">
       <Filter>Заголовочные файлы\pe_image</Filter>
     </ClInclude>
-    <ClInclude Include="pe_string_helper.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_string_helper</Filter>
+    <ClInclude Include="..\include\pe_image_exceptions_hl.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_exceptions</Filter>
     </ClInclude>
-    <ClInclude Include="pe_headers_helper.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_headers_helper</Filter>
+    <ClInclude Include="..\include\pe_image.h">
+      <Filter>Заголовочные файлы\pe_image</Filter>
     </ClInclude>
-    <ClInclude Include="pe_resources_helper.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper</Filter>
+    <ClInclude Include="..\include\pe_highlevel.h">
+      <Filter>Заголовочные файлы\pe_highlevel</Filter>
     </ClInclude>
-    <ClInclude Include="pe_file_version_info.h">
-      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper\pe_file_version_info</Filter>
+    <ClInclude Include="..\include\pe_headers.h">
+      <Filter>Заголовочные файлы\pe_image\pe_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_export.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_exceptions.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_dotnet.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_delay_import.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_delayimport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_debug.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_bound_import.h">
+      <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pe_preview_version.h">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\preview\preview_version</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -220,9 +247,6 @@
     <ClCompile Include="pe_bound_import.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_import\pe_boundimport</Filter>
     </ClCompile>
-    <ClCompile Include="pe_helper.cpp">
-      <Filter>Заголовочные файлы\pe_helpers</Filter>
-    </ClCompile>
     <ClCompile Include="pe_security.cpp">
       <Filter>Заголовочные файлы\pe_image\pe_directories\pe_security</Filter>
     </ClCompile>
@@ -232,11 +256,11 @@
     <ClCompile Include="pe_section_io.cpp">
       <Filter>Заголовочные файлы\pe_io\pe_section_io</Filter>
     </ClCompile>
-    <ClCompile Include="pe_exceptions_helper.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_exceptions_helper</Filter>
+    <ClCompile Include="pe_image_exceptions_hl.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_exceptions</Filter>
     </ClCompile>
-    <ClCompile Include="pe_rtti_helper.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_rtti_helper</Filter>
+    <ClCompile Include="pe_image_rtti.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_rtti</Filter>
     </ClCompile>
     <ClCompile Include="pe_builder.cpp">
       <Filter>Заголовочные файлы\pe_builder</Filter>
@@ -244,17 +268,29 @@
     <ClCompile Include="pe_image_full.cpp">
       <Filter>Заголовочные файлы\pe_image</Filter>
     </ClCompile>
-    <ClCompile Include="pe_string_helper.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_string_helper</Filter>
+    <ClCompile Include="pe_image_strings.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_strings</Filter>
     </ClCompile>
-    <ClCompile Include="pe_headers_helper.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_headers_helper</Filter>
+    <ClCompile Include="pe_headers.cpp">
+      <Filter>Заголовочные файлы\pe_image\pe_headers</Filter>
     </ClCompile>
-    <ClCompile Include="pe_resources_helper.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper</Filter>
+    <ClCompile Include="pe_image_version_info.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\version_info</Filter>
     </ClCompile>
-    <ClCompile Include="pe_file_version_info.cpp">
-      <Filter>Заголовочные файлы\pe_helpers\pe_resources_helper\pe_file_version_info</Filter>
+    <ClCompile Include="pe_image_icon_groups.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\icon_groups</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_image_utility.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_utility</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_image_resources_hl.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_preview_icon.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\preview\preview_icon</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_preview_version.cpp">
+      <Filter>Заголовочные файлы\pe_highlevel\image_resources\preview\preview_version</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

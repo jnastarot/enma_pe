@@ -1,68 +1,6 @@
 #include "stdafx.h"
-#include "pe_tls.h"
 
-
-pe_tls_directory::pe_tls_directory() {
-    start_address_raw_data    = 0;
-    end_address_raw_data = 0;
-    address_of_index        = 0;
-    address_of_callbacks    = 0;
-    size_of_zero_fill       = 0;
-    characteristics         = 0;
-    raw_data.clear();
-    callbacks.clear();
-}
-
-
-void pe_tls_directory::set_start_address_raw_data(uint32_t   start_address_raw_data) {
-    this->start_address_raw_data = start_address_raw_data;
-}
-void pe_tls_directory::set_end_address_raw_data(uint32_t   end_address_raw_data) {
-    this->end_address_raw_data = end_address_raw_data;
-}
-void pe_tls_directory::set_address_of_index(uint32_t   address_of_index) {
-    this->address_of_index = address_of_index;
-}
-void pe_tls_directory::set_address_of_callbacks(uint32_t   address_of_callbacks){
-    this->address_of_callbacks = address_of_callbacks;
-}
-void pe_tls_directory::set_size_of_zero_fill(uint32_t   size_of_zero_fill) {
-    this->size_of_zero_fill = size_of_zero_fill;
-}
-void pe_tls_directory::set_characteristics(uint32_t   characteristics) {
-    this->characteristics = characteristics;
-}
-
-uint32_t pe_tls_directory::get_start_address_raw_data() const {
-    return this->start_address_raw_data;
-}
-uint32_t pe_tls_directory::get_end_address_raw_data() const {
-    return this->end_address_raw_data;
-}
-uint32_t pe_tls_directory::get_address_of_index() const {
-    return this->address_of_index;
-}
-uint32_t pe_tls_directory::get_address_of_callbacks() const {
-    return this->address_of_callbacks;
-}
-uint32_t pe_tls_directory::get_size_of_zero_fill() const {
-    return this->size_of_zero_fill;
-}
-uint32_t pe_tls_directory::get_characteristics() const {
-    return this->characteristics;
-}
-const std::vector<uint8_t>& pe_tls_directory::get_raw_data() const {
-    return raw_data;
-}
-const std::vector<pe_tls_directory::tls_callback>& pe_tls_directory::get_callbacks() const {
-    return callbacks;
-}
-std::vector<uint8_t>& pe_tls_directory::get_raw_data() {
-    return raw_data;
-}
-std::vector<pe_tls_directory::tls_callback>& pe_tls_directory::get_callbacks() {
-    return callbacks;
-}
+using namespace enma;
 
 template<typename image_format>
 pe_directory_code _get_tls_directory(const pe_image &image, pe_tls_directory& tls) {
@@ -283,7 +221,7 @@ pe_directory_code _get_placement_tls_directory(const pe_image &image, pe_placeme
     return code;
 }
 
-pe_directory_code get_tls_directory(const pe_image &image, pe_tls_directory& tls) {
+pe_directory_code enma::get_tls_directory(const pe_image &image, pe_tls_directory& tls) {
 
     if (image.is_x32_image()) {
         return _get_tls_directory<pe_image_32>(image, tls);
@@ -293,7 +231,7 @@ pe_directory_code get_tls_directory(const pe_image &image, pe_tls_directory& tls
     }
 }
 
-bool build_internal_tls_directory_data(const pe_image &image,pe_section& section,
+bool enma::build_internal_tls_directory_data(const pe_image &image,pe_section& section,
     pe_tls_directory& tls, pe_relocations_directory& relocs, uint32_t build_items_ids/*tls_table_build_id*/) {
 
     if (image.is_x32_image()) {
@@ -304,7 +242,7 @@ bool build_internal_tls_directory_data(const pe_image &image,pe_section& section
     }
 }
 
-bool build_tls_directory_only(pe_image &image, pe_section& section, pe_tls_directory& tls, pe_relocations_directory& relocs) {
+bool enma::build_tls_directory_only(pe_image &image, pe_section& section, pe_tls_directory& tls, pe_relocations_directory& relocs) {
     if (image.is_x32_image()) {
         return _build_tls_directory_only<pe_image_32>(image, section, tls, relocs);
     }
@@ -313,7 +251,7 @@ bool build_tls_directory_only(pe_image &image, pe_section& section, pe_tls_direc
     }
 }
 
-bool build_tls_directory_full(pe_image &image,pe_section& section,
+bool enma::build_tls_directory_full(pe_image &image,pe_section& section,
     pe_tls_directory& tls,pe_relocations_directory& relocs) {
 
     return build_internal_tls_directory_data(image, section, tls, relocs,
@@ -322,7 +260,7 @@ bool build_tls_directory_full(pe_image &image,pe_section& section,
 }
 
 
-pe_directory_code get_placement_tls_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_tls_directory(const pe_image &image, pe_placement& placement) {
 
     if (image.is_x32_image()) {
         return _get_placement_tls_directory<pe_image_32>(image, placement);

@@ -1,181 +1,31 @@
 #include "stdafx.h"
-#include "pe_export.h"
 
-
-pe_export_entry::pe_export_entry() {
-    ordinal = 0;
-    rva = 0;
-    b_name = 0;
-    b_forward = 0;
-    name_ordinal = 0;
-}
+using namespace enma;
 
 bool pe_export_entry::operator==(const pe_export_entry& item) {
-    if (item.b_name == this->b_name) {
-        if (item.b_name) {
-            if (item.func_name == this->func_name) { return true; }
+
+    if (item._b_name == _b_name) {
+        
+        if (item._b_name) {
+
+            if (item._func_name == _func_name) { 
+                return true; 
+            }
         }
         else {
-            if (item.name_ordinal == this->name_ordinal) { return true; }
+            
+            if (item._name_ordinal == _name_ordinal) { 
+                return true; 
+            }
         }
     }
 
     return false;
 }
 
-pe_export_entry& pe_export_entry::set_rva(uint32_t _rva) {
-    this->rva = _rva;
-
-    return *this;
-}
-pe_export_entry& pe_export_entry::set_ordinal(uint16_t _ordinal) {
-    this->ordinal = _ordinal;
-
-    return *this;
-}
-pe_export_entry& pe_export_entry::set_name_ordinal(uint16_t _ordinal) {
-    this->name_ordinal = _ordinal;
-
-    return *this;
-}
-pe_export_entry& pe_export_entry::set_has_name(bool b) {
-    this->b_name = b;
-
-    return *this;
-}
-pe_export_entry& pe_export_entry::set_forward(bool b) {
-    this->b_forward = b;
-
-    return *this;
-}
-pe_export_entry& pe_export_entry::set_forward_name(const std::string& forward_name) {
-    this->b_forward = true;
-    this->forward_name = forward_name;
-
-    return *this;
-}
-pe_export_entry& pe_export_entry::set_func_name(const std::string& func_name) {
-    this->b_name = true;
-    this->func_name = func_name;
-
-    return *this;
-}
-uint32_t pe_export_entry::get_rva() const {
-    return rva;
-}
-uint16_t  pe_export_entry::get_ordinal() const {
-    return ordinal;
-}
-uint16_t  pe_export_entry::get_name_ordinal() const {
-    return name_ordinal;
-}
-bool  pe_export_entry::has_name() const {
-    return b_name;
-}
-bool  pe_export_entry::is_forward() const {
-    return b_forward;
-}
-std::string  pe_export_entry::get_forward_name() const {
-    return forward_name;
-}
-std::string  pe_export_entry::get_func_name() const {
-    return func_name;
-}
-
-pe_export_directory::pe_export_directory() {
-    characteristics = 0;
-    time_stamp = 0;
-    major_version = 0;
-    minor_version = 0;
-    ordinal_base = 0;
-    number_of_functions = 0;
-    number_of_names = 0;
-}
-
-pe_export_directory& pe_export_directory::set_characteristics(uint32_t characteristics) {
-    this->characteristics = characteristics;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_time_stamp(uint32_t time_stamp) {
-    this->time_stamp = time_stamp;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_major_version(uint16_t major_version) {
-    this->major_version = major_version;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_minor_version(uint16_t minor_version) {
-    this->minor_version = minor_version;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_ordinal_base(uint32_t  ordinal_base) {
-    this->ordinal_base = ordinal_base;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_number_of_functions(uint32_t  number_of_functions){
-    this->number_of_functions = number_of_functions;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_number_of_names(uint32_t  number_of_names) {
-    this->number_of_names = number_of_names;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::set_library_name(const std::string& library_name) {
-    this->library_name = library_name;
-
-    return *this;
-}
-pe_export_directory& pe_export_directory::add_function(const pe_export_entry& function) {
-    functions.push_back(function);
-
-    return *this;
-}
-
-size_t pe_export_directory::size() const {
-    return this->functions.size();
-}
-
-uint32_t            pe_export_directory::get_characteristics() const {
-    return this->characteristics;
-}
-uint32_t            pe_export_directory::get_time_stamp() const {
-    return this->time_stamp;
-}
-uint16_t            pe_export_directory::get_major_version() const {
-    return this->major_version;
-}
-uint16_t            pe_export_directory::get_minor_version() const {
-    return this->minor_version;
-}
-uint32_t    pe_export_directory::get_ordinal_base() const {
-    return this->ordinal_base;
-}
-uint32_t    pe_export_directory::get_number_of_functions() const {
-    return this->number_of_functions;
-}
-uint32_t    pe_export_directory::get_number_of_names() const {
-    return this->number_of_names;
-}
-std::string        pe_export_directory::get_library_name() const {
-    return this->library_name;
-}
-const std::vector<pe_export_entry>& pe_export_directory::get_functions() const {
-    return this->functions;
-}
-std::vector<pe_export_entry>& pe_export_directory::get_functions() {
-    return this->functions;
-}
-
 bool pe_export_directory::get_exported_function(const std::string& func_name, pe_export_entry * &_function) {
 
-    for (auto &function : functions) {
+    for (auto &function : _functions) {
         if (function.has_name() && function.get_func_name() == func_name) {
             _function = &function;
             return true;
@@ -183,9 +33,10 @@ bool pe_export_directory::get_exported_function(const std::string& func_name, pe
     }
     return false;
 }
+
 bool pe_export_directory::get_exported_function(uint16_t ordinal, pe_export_entry * &_function) {
 
-    for (auto & function : functions) {
+    for (auto & function : _functions) {
         if (!function.has_name() && function.get_ordinal() == ordinal) {
             _function = &function;
             return true;
@@ -194,7 +45,7 @@ bool pe_export_directory::get_exported_function(uint16_t ordinal, pe_export_entr
     return false;
 }
 
-pe_directory_code get_export_directory(const pe_image &image, pe_export_directory& exports) {
+pe_directory_code enma::get_export_directory(const pe_image &image, pe_export_directory& exports) {
     exports.set_characteristics(0);
     exports.set_time_stamp(0);
     exports.set_major_version(0);
@@ -318,7 +169,7 @@ pe_directory_code get_export_directory(const pe_image &image, pe_export_director
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-bool build_export_directory(pe_image &image, pe_section& section, const pe_export_directory& exports) {
+bool enma::build_export_directory(pe_image &image, pe_section& section, const pe_export_directory& exports) {
 
     if (!exports.get_functions().size()) { return true; }
 
@@ -485,11 +336,10 @@ bool build_export_directory(pe_image &image, pe_section& section, const pe_expor
     return true;
 }
 
-pe_directory_code get_placement_export_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_export_directory(const pe_image &image, pe_placement& placement) {
    
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_EXPORT);
     uint32_t virtual_size    = image.get_directory_virtual_size(IMAGE_DIRECTORY_ENTRY_EXPORT);
-
 
     if (virtual_address) {
         pe_image_io export_io(image);

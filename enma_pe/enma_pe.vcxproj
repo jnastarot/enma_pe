@@ -89,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <BrowseInformation>true</BrowseInformation>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -105,6 +106,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <BrowseInformation>true</BrowseInformation>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,6 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <EnablePREfast>false</EnablePREfast>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +144,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,43 +153,49 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="enma_pe_internal.h" />
-    <ClInclude Include="enma_pe.h" />
-    <ClInclude Include="enma_pe_properties.h" />
-    <ClInclude Include="pe_bound_import.h" />
-    <ClInclude Include="pe_builder.h" />
-    <ClInclude Include="pe_exceptions_helper.h" />
-    <ClInclude Include="pe_file_version_info.h" />
-    <ClInclude Include="pe_headers_helper.h" />
-    <ClInclude Include="pe_helper.h" />
-    <ClInclude Include="pe_debug.h" />
-    <ClInclude Include="pe_delay_import.h" />
-    <ClInclude Include="pe_dotnet.h" />
-    <ClInclude Include="pe_exceptions.h" />
-    <ClInclude Include="pe_export.h" />
-    <ClInclude Include="pe_image.h" />
-    <ClInclude Include="pe_image_full.h" />
-    <ClInclude Include="pe_image_io.h" />
-    <ClInclude Include="pe_import.h" />
-    <ClInclude Include="pe_loadconfig.h" />
-    <ClInclude Include="pe_relocations.h" />
-    <ClInclude Include="pe_resources.h" />
-    <ClInclude Include="pe_resources_helper.h" />
-    <ClInclude Include="pe_rtti_helper.h" />
-    <ClInclude Include="pe_section.h" />
-    <ClInclude Include="pe_section_io.h" />
-    <ClInclude Include="pe_security.h" />
-    <ClInclude Include="pe_string_helper.h" />
-    <ClInclude Include="pe_tls.h" />
+    <ClInclude Include="..\include\enma_pe.h" />
+    <ClInclude Include="..\include\enma_pe_internal.h" />
+    <ClInclude Include="..\include\enma_pe_properties.h" />
+    <ClInclude Include="..\include\pe_bound_import.h" />
+    <ClInclude Include="..\include\pe_builder.h" />
+    <ClInclude Include="..\include\pe_debug.h" />
+    <ClInclude Include="..\include\pe_delay_import.h" />
+    <ClInclude Include="..\include\pe_dotnet.h" />
+    <ClInclude Include="..\include\pe_exceptions.h" />
+    <ClInclude Include="..\include\pe_export.h" />
+    <ClInclude Include="..\include\pe_headers.h" />
+    <ClInclude Include="..\include\pe_highlevel.h" />
+    <ClInclude Include="..\include\pe_image.h" />
+    <ClInclude Include="..\include\pe_image_exceptions_hl.h" />
+    <ClInclude Include="..\include\pe_image_full.h" />
+    <ClInclude Include="..\include\pe_image_icon_groups.h" />
+    <ClInclude Include="..\include\pe_image_io.h" />
+    <ClInclude Include="..\include\pe_image_resources_hl.h" />
+    <ClInclude Include="..\include\pe_image_rtti.h" />
+    <ClInclude Include="..\include\pe_image_strings.h" />
+    <ClInclude Include="..\include\pe_image_utility.h" />
+    <ClInclude Include="..\include\pe_image_version_info.h" />
+    <ClInclude Include="..\include\pe_import.h" />
+    <ClInclude Include="..\include\pe_loadconfig.h" />
+    <ClInclude Include="..\include\pe_preview_icon.h" />
+    <ClInclude Include="..\include\pe_preview_version.h" />
+    <ClInclude Include="..\include\pe_relocations.h" />
+    <ClInclude Include="..\include\pe_resources.h" />
+    <ClInclude Include="..\include\pe_section.h" />
+    <ClInclude Include="..\include\pe_section_io.h" />
+    <ClInclude Include="..\include\pe_security.h" />
+    <ClInclude Include="..\include\pe_tls.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pe_bound_import.cpp" />
     <ClCompile Include="pe_builder.cpp" />
-    <ClCompile Include="pe_exceptions_helper.cpp" />
-    <ClCompile Include="pe_file_version_info.cpp" />
-    <ClCompile Include="pe_headers_helper.cpp" />
-    <ClCompile Include="pe_helper.cpp" />
+    <ClCompile Include="pe_image_exceptions_hl.cpp" />
+    <ClCompile Include="pe_image_icon_groups.cpp" />
+    <ClCompile Include="pe_image_resources_hl.cpp" />
+    <ClCompile Include="pe_image_utility.cpp" />
+    <ClCompile Include="pe_image_version_info.cpp" />
+    <ClCompile Include="pe_headers.cpp" />
     <ClCompile Include="pe_debug.cpp" />
     <ClCompile Include="pe_delay_import.cpp" />
     <ClCompile Include="pe_dotnet.cpp" />
@@ -196,14 +206,15 @@
     <ClCompile Include="pe_image_io.cpp" />
     <ClCompile Include="pe_import.cpp" />
     <ClCompile Include="pe_loadconfig.cpp" />
+    <ClCompile Include="pe_preview_icon.cpp" />
+    <ClCompile Include="pe_preview_version.cpp" />
     <ClCompile Include="pe_relocations.cpp" />
     <ClCompile Include="pe_resources.cpp" />
-    <ClCompile Include="pe_resources_helper.cpp" />
-    <ClCompile Include="pe_rtti_helper.cpp" />
+    <ClCompile Include="pe_image_rtti.cpp" />
     <ClCompile Include="pe_section.cpp" />
     <ClCompile Include="pe_section_io.cpp" />
     <ClCompile Include="pe_security.cpp" />
-    <ClCompile Include="pe_string_helper.cpp" />
+    <ClCompile Include="pe_image_strings.cpp" />
     <ClCompile Include="pe_tls.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

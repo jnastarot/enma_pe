@@ -1,76 +1,10 @@
 #include "stdafx.h"
-#include "pe_bound_import.h"
 
-
-pe_bound_imported_ref::pe_bound_imported_ref() {
-    timestamp = 0;
-}
-
-pe_bound_imported_ref::pe_bound_imported_ref(const std::string& ref_name, uint32_t  timestamp):
-    ref_name(ref_name), timestamp(timestamp){
-
-}
-
-void pe_bound_imported_ref::set_ref_name(const std::string& ref_name) {
-    this->ref_name = ref_name;
-}
-void pe_bound_imported_ref::set_timestamp(uint32_t  timestamp) {
-    this->timestamp = timestamp;
-}
-
-std::string pe_bound_imported_ref::get_ref_name() const {
-    return this->ref_name;
-}
-uint32_t  pe_bound_imported_ref::get_timestamp() const {
-    return this->timestamp;
-}
-
-
-pe_bound_library::pe_bound_library() {
-    timestamp = 0;
-}
-
-void pe_bound_library::set_library_name(const std::string& library_name) {
-    this->library_name = library_name;
-}
-void pe_bound_library::set_timestamp(uint32_t  timestamp) {
-    this->timestamp = timestamp;
-}
-
-void pe_bound_library::add_ref(const pe_bound_imported_ref& ref) {
-    this->refs.push_back(ref);
-}
-
-std::string pe_bound_library::get_library_name() const{
-    return this->library_name;
-}
-uint32_t  pe_bound_library::get_timestamp() const {
-    return this->timestamp;
-}
-size_t pe_bound_library::get_number_of_forwarder_refs() const {
-    return this->refs.size();
-}
-const std::vector<pe_bound_imported_ref>& pe_bound_library::get_refs() const {
-    return this->refs;
-}
-std::vector<pe_bound_imported_ref>& pe_bound_library::get_refs() {
-    return this->refs;
-}
-
-void pe_bound_import_directory::add_library(const pe_bound_library& lib) {
-    libraries.push_back(lib);
-}
-void pe_bound_import_directory::clear() {
-    this->libraries.clear();
-}
-
-size_t pe_bound_import_directory::size() const {
-    return this->libraries.size();
-}
+using namespace enma;
 
 bool pe_bound_import_directory::has_library(const std::string& library_name, uint32_t timestamp) const {
 
-    for (auto& library : this->libraries) {
+    for (auto& library : _libraries) {
         if (library.get_library_name() == library_name &&
             library.get_timestamp() == timestamp) {
 
@@ -83,7 +17,7 @@ bool pe_bound_import_directory::has_library(const std::string& library_name, uin
 
 bool pe_bound_import_directory::has_library(const std::string& library_name) const {
 
-    for (auto& library : this->libraries) {
+    for (auto& library : _libraries) {
         if (library.get_library_name() == library_name) {
 
             return true;
@@ -93,17 +27,19 @@ bool pe_bound_import_directory::has_library(const std::string& library_name) con
     return false;
 }
 
-const std::vector<pe_bound_library>& pe_bound_import_directory::get_libraries() const {
-    return libraries;
+const pe_bound_library* pe_bound_import_directory::get_library(const std::string& library_name) const {
+
+    for (auto& library : _libraries) {
+        if (library.get_library_name() == library_name) {
+
+            return &library;
+        }
+    }
+
+    return nullptr;
 }
 
-
-std::vector<pe_bound_library>& pe_bound_import_directory::get_libraries() {
-    return libraries;
-}
-
-
-pe_directory_code get_bound_import_directory(const pe_image &image, pe_bound_import_directory& imports) {
+pe_directory_code enma::get_bound_import_directory(const pe_image &image, pe_bound_import_directory& imports) {
 
     imports.clear();
 
@@ -168,11 +104,10 @@ pe_directory_code get_bound_import_directory(const pe_image &image, pe_bound_imp
         return pe_directory_code::pe_directory_code_success;
     }
 
-
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-bool build_bound_import_directory(pe_image &image, pe_section& section,
+bool enma::build_bound_import_directory(pe_image &image, pe_section& section,
     pe_bound_import_directory& imports) {
 
     if (imports.size()) { 
@@ -244,8 +179,7 @@ bool build_bound_import_directory(pe_image &image, pe_section& section,
     }
 }
 
-
-pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_bound_import_directory(const pe_image &image, pe_placement& placement) {
 
     uint32_t  virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 
@@ -312,7 +246,6 @@ pe_directory_code get_placement_bound_import_directory(const pe_image &image, pe
 
         return pe_directory_code::pe_directory_code_success;
     }
-
 
     return pe_directory_code::pe_directory_code_not_present;
 }

@@ -1,16 +1,13 @@
 #include "stdafx.h"
-#include "pe_relocations.h"
 
-void pe_relocations_directory::add_relocation(uint32_t rva, uint32_t relocation_id, uint8_t type) {
-    relocations.push_back({ rva , relocation_id, 0 , type });
-}
+using namespace enma;
 
 bool pe_relocations_directory::erase_item(uint32_t rva) {
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
         
-        if (relocations[item_idx].relative_virtual_address == rva) {
-            relocations.erase(relocations.begin() + item_idx);
+        if (_relocations[item_idx].relative_virtual_address == rva) {
+            _relocations.erase(_relocations.begin() + item_idx);
             return true;
         }
     }
@@ -20,10 +17,10 @@ bool pe_relocations_directory::erase_item(uint32_t rva) {
 
 bool pe_relocations_directory::erase_first_item_by_id(uint32_t relocation_id) {
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
 
-        if (relocations[item_idx].relocation_id == relocation_id) {
-            relocations.erase(relocations.begin() + item_idx);
+        if (_relocations[item_idx].relocation_id == relocation_id) {
+            _relocations.erase(_relocations.begin() + item_idx);
             return true;
         }
     }
@@ -35,10 +32,10 @@ bool pe_relocations_directory::erase_all_items_by_id(uint32_t relocation_id) {
 
     bool ret = false;
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
 
-        if (relocations[item_idx].relocation_id == relocation_id) {
-            relocations.erase(relocations.begin() + item_idx);
+        if (_relocations[item_idx].relocation_id == relocation_id) {
+            _relocations.erase(_relocations.begin() + item_idx);
             item_idx--;
             ret = true;
         }
@@ -51,13 +48,13 @@ bool pe_relocations_directory::erase_items_in_segment(uint32_t segment_rva, size
 
     bool ret = false;
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
-        auto& relitem = relocations[item_idx];
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
+        auto& relitem = _relocations[item_idx];
 
         if (relitem.relative_virtual_address >= segment_rva &&
             relitem.relative_virtual_address < segment_rva + segment_size) {
 
-            relocations.erase(relocations.begin() + item_idx);
+            _relocations.erase(_relocations.begin() + item_idx);
             item_idx--;
             ret = true;
         }
@@ -66,14 +63,13 @@ bool pe_relocations_directory::erase_items_in_segment(uint32_t segment_rva, size
     return ret;
 }
 
-
 void pe_relocations_directory::get_items_by_relocation_id(std::vector<pe_relocation_entry*>& found_relocs, uint32_t relocation_id) {
 
     found_relocs.clear();
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
-        if (relocations[item_idx].relocation_id == relocation_id) {
-            found_relocs.push_back(&relocations[item_idx]);
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
+        if (_relocations[item_idx].relocation_id == relocation_id) {
+            found_relocs.push_back(&_relocations[item_idx]);
         }
     }
 }
@@ -82,7 +78,7 @@ void pe_relocations_directory::get_items_in_segment(std::vector<pe_relocation_en
 
     relocs.clear();
 
-    for (auto& item : relocations) {
+    for (auto& item : _relocations) {
         if (item.relative_virtual_address >= segment_rva &&
             item.relative_virtual_address < segment_rva + segment_size) {
             relocs.push_back(item);
@@ -90,23 +86,17 @@ void pe_relocations_directory::get_items_in_segment(std::vector<pe_relocation_en
     }
 }
 
-void pe_relocations_directory::clear() {
-    relocations.clear();
-}
 void pe_relocations_directory::sort() {
-    std::sort(relocations.begin(), relocations.end(), [](pe_relocation_entry& lhs, pe_relocation_entry& rhs) {
+    std::sort(_relocations.begin(), _relocations.end(), [](pe_relocation_entry& lhs, pe_relocation_entry& rhs) {
         return lhs.relative_virtual_address < rhs.relative_virtual_address;
     });
-}
-size_t pe_relocations_directory::size() const {
-    return relocations.size();
 }
 
 bool pe_relocations_directory::has_item(uint32_t rva) const {
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
 
-        if (relocations[item_idx].relative_virtual_address == rva) {
+        if (_relocations[item_idx].relative_virtual_address == rva) {
             return true;
         }
     }
@@ -116,9 +106,9 @@ bool pe_relocations_directory::has_item(uint32_t rva) const {
 
 bool pe_relocations_directory::has_item_id(uint32_t relocation_id) const {
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
 
-        if (relocations[item_idx].relocation_id == relocation_id) {
+        if (_relocations[item_idx].relocation_id == relocation_id) {
             return true;
         }
     }
@@ -128,26 +118,17 @@ bool pe_relocations_directory::has_item_id(uint32_t relocation_id) const {
 
 bool pe_relocations_directory::get_item_id(uint32_t rva, uint32_t& relocation_id) const {
 
-    for (size_t item_idx = 0; item_idx < relocations.size(); item_idx++) {
+    for (size_t item_idx = 0; item_idx < _relocations.size(); item_idx++) {
 
-        if (relocations[item_idx].relative_virtual_address == rva) {
-            relocation_id = relocations[item_idx].relocation_id;
+        if (_relocations[item_idx].relative_virtual_address == rva) {
+            relocation_id = _relocations[item_idx].relocation_id;
             return true;
         }
     }
     return false;
 }
 
-const std::vector<pe_relocation_entry>& pe_relocations_directory::get_entries() const {
-    return relocations;
-}
-
-std::vector<pe_relocation_entry>& pe_relocations_directory::get_entries() {
-    return relocations;
-}
-
-
-pe_directory_code get_relocation_directory(const pe_image &image, 
+pe_directory_code enma::get_relocation_directory(const pe_image &image,
     pe_relocations_directory& relocs, bool ignore_absolute) {
 
     relocs.clear();
@@ -201,7 +182,7 @@ pe_directory_code get_relocation_directory(const pe_image &image,
     return pe_directory_code::pe_directory_code_not_present;
 }
 
-bool build_relocation_directory(pe_image &image, pe_section& section, const pe_relocations_directory& relocs) {
+bool enma::build_relocation_directory(pe_image &image, pe_section& section, const pe_relocations_directory& relocs) {
 
     auto reloc_items = relocs.get_entries();
 
@@ -268,8 +249,7 @@ bool build_relocation_directory(pe_image &image, pe_section& section, const pe_r
     return true;
 }
 
-
-pe_directory_code get_placement_relocation_directory(const pe_image &image, pe_placement& placement) {
+pe_directory_code enma::get_placement_relocation_directory(const pe_image &image, pe_placement& placement) {
 
 
     uint32_t virtual_address = image.get_directory_virtual_address(IMAGE_DIRECTORY_ENTRY_BASERELOC);
