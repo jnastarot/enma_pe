@@ -73,7 +73,7 @@ bool pe_image_icon_group::get_icon(pe_resource_directory& _resources, uint16_t u
         idx = 0;
         idx < _entries.size(); idx++, header_offset += sizeof(group_icon_entry)) {
 
-        auto& dir_entry = _entries.begin();
+        auto dir_entry = _entries.begin();
         std::advance(dir_entry, idx);
 
         group_icon_entry icon_entry;
