@@ -62,7 +62,7 @@ pe_section_io section_io(section, enma_io_addressing_type::enma_io_address_raw);
 pe_image_io image_io(image, enma_io_addressing_type::enma_io_address_rva);
 ```
 ```c++
-pe_image_io section_io(image, enma_io_addressing_type::enma_io_address_rva);
+pe_image_io section_io(section, enma_io_addressing_type::enma_io_address_rva);
 ```
 
 #### IO using virtual address (`va`)
@@ -70,7 +70,7 @@ pe_image_io section_io(image, enma_io_addressing_type::enma_io_address_rva);
 pe_image_io image_io(image, enma_io_addressing_type::enma_io_address_va);
 ```
 ```c++
-pe_image_io section_io(image, enma_io_addressing_type::enma_io_address_va);
+pe_image_io section_io(section, enma_io_addressing_type::enma_io_address_va);
 ```
 
 #### IO with size changing policy (allow incrase size)
@@ -87,7 +87,7 @@ pe_image_io section_io(image, enma_io_mode::enma_io_mode_allow_expand, enma_io_a
 pe_image_io image_io(image, enma_io_mode::enma_io_mode_default, enma_io_addressing_type::enma_io_address_rva);
 ```
 ```c++
-pe_image_io section_io(image, enma_io_mode::enma_io_mode_default, enma_io_addressing_type::enma_io_address_rva);
+pe_image_io section_io(section, enma_io_mode::enma_io_mode_default, enma_io_addressing_type::enma_io_address_rva);
 ```
 
 #### Image read data

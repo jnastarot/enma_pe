@@ -77,7 +77,7 @@ namespace enma {
 
         template<typename T>
         enma_io_code write(T& data) {
-            return read(&data, sizeof(data));
+            return write(&data, sizeof(data));
         }
 
         inline enma_io_code write(const void* data, size_t size) {
